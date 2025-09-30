@@ -25,41 +25,45 @@ def colocar_piezas_multi(piezas, ancho, alto):
 
     for pieza_ancho, pieza_alto, cantidad in piezas:
         for _ in range(cantidad):
-            # Si no cabe en la fila actual, saltar a la siguiente
-            if x + pieza_ancho > ancho:
+            if x + pieza_ancho > ancho:  # saltar a nueva fila
                 x = 0
                 y += fila_alto
                 fila_alto = 0
 
-            # Si no cabe en el tablero actual, guardar y abrir otro
-            if y + pieza_alto > alto:
+            if y + pieza_alto > alto:  # no cabe en tablero actual → guardar y abrir otro
                 tableros.append(posiciones)
                 posiciones = []
                 x, y, fila_alto = 0, 0, 0
 
-            # Guardar pieza en el tablero actual
             posiciones.append((x, y, pieza_ancho, pieza_alto))
             x += pieza_ancho
             fila_alto = max(fila_alto, pieza_alto)
 
-    # Guardar el último tablero en uso
-    if posiciones:
+    if posiciones:  # guardar el último tablero
         tableros.append(posiciones)
 
     return tableros
 
 
-# Ejecutar el algoritmo
+# --- Ejecutar el algoritmo ---
 tableros = colocar_piezas_multi(piezas, TABLERO_ANCHO, TABLERO_ALTO)
+AREA_TABLERO = TABLERO_ANCHO * TABLERO_ALTO
 
-# Dibujar cada tablero
+# --- Dibujar cada tablero ---
 for i, posiciones in enumerate(tableros, start=1):
     fig, ax = plt.subplots()
     ax.set_xlim(0, TABLERO_ANCHO)
     ax.set_ylim(0, TABLERO_ALTO)
     ax.set_aspect('equal')
-    ax.set_title(f"Plan de corte - Tablero {i}")
 
+    # Calcular área usada en este tablero
+    area_usada = sum(w * h for (_, _, w, h) in posiciones)
+    aprovechamiento = (area_usada / AREA_TABLERO) * 100
+    desperdicio = 100 - aprovechamiento
+
+    ax.set_title(f"Tablero {i} - Aprovechamiento: {aprovechamiento:.2f}% | Desperdicio: {desperdicio:.2f}%")
+
+    # Dibujar piezas
     for (x, y, w, h) in posiciones:
         rect = plt.Rectangle((x, y), w, h, edgecolor='blue', facecolor='lightblue')
         ax.add_patch(rect)
