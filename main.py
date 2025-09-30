@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import math
 
 print("🔹 OPTIMIZADOR DE CORTE PARA CARPINTERÍA 🔹")
 
@@ -49,9 +50,24 @@ def colocar_piezas_multi(piezas, ancho, alto):
 tableros = colocar_piezas_multi(piezas, TABLERO_ANCHO, TABLERO_ALTO)
 AREA_TABLERO = TABLERO_ANCHO * TABLERO_ALTO
 
-# --- Dibujar cada tablero ---
+# --- Mostrar todos los tableros en una sola ventana ---
+n = len(tableros)
+cols = 2  # cantidad de tableros por fila (ajústalo según prefieras)
+rows = math.ceil(n / cols)
+
+fig, axs = plt.subplots(rows, cols, figsize=(12, 6*rows))
+
+# Normalizar axs para que siempre sea iterable en 2D
+if rows == 1 and cols == 1:
+    axs = [[axs]]
+elif rows == 1:
+    axs = [axs]
+elif cols == 1:
+    axs = [[ax] for ax in axs]
+
 for i, posiciones in enumerate(tableros, start=1):
-    fig, ax = plt.subplots()
+    r, c = divmod(i-1, cols)
+    ax = axs[r][c]
     ax.set_xlim(0, TABLERO_ANCHO)
     ax.set_ylim(0, TABLERO_ALTO)
     ax.set_aspect('equal')
@@ -61,7 +77,7 @@ for i, posiciones in enumerate(tableros, start=1):
     aprovechamiento = (area_usada / AREA_TABLERO) * 100
     desperdicio = 100 - aprovechamiento
 
-    ax.set_title(f"Tablero {i} - Aprovechamiento: {aprovechamiento:.2f}% | Desperdicio: {desperdicio:.2f}%")
+    ax.set_title(f"Tablero {i}\nAprovechamiento: {aprovechamiento:.2f}% | Desperdicio: {desperdicio:.2f}%")
 
     # Dibujar piezas
     for (x, y, w, h) in posiciones:
@@ -69,4 +85,10 @@ for i, posiciones in enumerate(tableros, start=1):
         ax.add_patch(rect)
         ax.text(x + w/2, y + h/2, f"{w}x{h}", ha="center", va="center", fontsize=8)
 
-    plt.show()
+# Ocultar subplots vacíos si sobran
+for j in range(n, rows*cols):
+    r, c = divmod(j, cols)
+    axs[r][c].axis("off")
+
+plt.tight_layout()
+plt.show()
