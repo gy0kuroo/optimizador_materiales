@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'opticut',
+    'usuarios',
 ]
 
 MIDDLEWARE = [
@@ -121,3 +122,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#redireccionamiento del login, cambiar de ser necesario
+LOGIN_REDIRECT_URL = '/opticut/'
+LOGOUT_REDIRECT_URL = '/usuarios/login/'
+LOGIN_URL = '/usuarios/login/'

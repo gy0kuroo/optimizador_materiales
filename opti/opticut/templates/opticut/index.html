@@ -1,10 +1,22 @@
 {% extends 'opticut/base.html' %}
 {% block content %}
 <div class="container mt-4">
-  <h2>Optimizador de Corte para Carpintería</h2>
+  <h2>OptiCut — Optimizador de Corte</h2>
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    <h4>Dimensiones del Tablero</h4>
+    {{ tablero_form.as_p }}
+
+    <h4 class="mt-4">Piezas a cortar</h4>
+    {{ pieza_formset.management_form }}
+    <div class="row">
+      {% for form in pieza_formset %}
+        <div class="col-md-4 border p-2 rounded mb-3">
+          {{ form.as_p }}
+        </div>
+      {% endfor %}
+    </div>
+
     <button type="submit" class="btn btn-primary">Optimizar</button>
   </form>
 </div>

@@ -20,6 +20,8 @@ from django.urls import include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('opticut.urls')),
+    path('usuarios/', include('usuarios.urls')),
+    path('opticut/', include('opticut.urls')),
+
 
 ]
