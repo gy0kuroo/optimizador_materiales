@@ -1,0 +1,7 @@
+-------------------------------------
+          logica de uso
+------------------------------------
+en el primer prototipo de prueba, se busca ingresar el tablon a cotizar
+con sus medidas, consecuente pedira cuantos tipos de piezas se buscan,
+y con sus medidas y la cantidad, la app mostrara el orden de estos en el tablero del inicio
+si llegan a faltar mas lo avisará.
