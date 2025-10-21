@@ -128,3 +128,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/opticut/'
 LOGOUT_REDIRECT_URL = '/usuarios/login/'
 LOGIN_URL = '/usuarios/login/'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'   # o str(BASE_DIR / 'media') según tu configuración

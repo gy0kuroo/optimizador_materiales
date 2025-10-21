@@ -2,8 +2,10 @@
 {% block content %}
 <div class="container mt-4 text-center">
   <h2>Resultado del Plan de Corte</h2>
+  <p>Aprovechamiento total: {{ optimizacion.aprovechamiento_total|floatformat:2 }}%</p>
   <img src="data:image/png;base64,{{ imagen }}" alt="Resultado" class="img-fluid mt-3">
   <br>
-  <a href="" class="btn btn-secondary mt-3">Volver</a>
+  <a href="{{ optimizacion.imagen.url }}" class="btn btn-success mt-3" download>Descargar imagen</a>
+  <a href="{% url 'opticut:index' %}" class="btn btn-secondary mt-3">Volver</a>
 </div>
 {% endblock %}

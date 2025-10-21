@@ -1,71 +1,64 @@
 import matplotlib.pyplot as plt
-import math
-import io
-import base64
+import matplotlib.patches as patches
+import io, base64
 
-def colocar_piezas_multi(piezas, ancho, alto):
+def generar_grafico(piezas, ancho_tablero, alto_tablero):
+    """
+    Genera uno o más tableros según las piezas ingresadas.
+    Devuelve una imagen combinada y el aprovechamiento total.
+    """
+    AREA_TABLERO = ancho_tablero * alto_tablero
     tableros = []
-    x, y = 0, 0
-    fila_alto = 0
-    posiciones = []
+    actual = []
+    x, y, max_row_height = 0, 0, 0
+    area_usada = 0
 
-    for pieza_ancho, pieza_alto, cantidad in piezas:
-        for _ in range(cantidad):
-            if x + pieza_ancho > ancho:
-                x = 0
-                y += fila_alto
-                fila_alto = 0
-            if y + pieza_alto > alto:
-                tableros.append(posiciones)
-                posiciones = []
-                x, y, fila_alto = 0, 0, 0
-            posiciones.append((x, y, pieza_ancho, pieza_alto))
-            x += pieza_ancho
-            fila_alto = max(fila_alto, pieza_alto)
-    if posiciones:
-        tableros.append(posiciones)
-    return tableros
+    # Copia las piezas como lista expandida (cada pieza repetida según cantidad)
+    piezas_expandidas = []
+    for w, h, c in piezas:
+        piezas_expandidas.extend([(w, h)] * c)
 
+    for w, h in piezas_expandidas:
+        if x + w > ancho_tablero:
+            x = 0
+            y += max_row_height
+            max_row_height = 0
+        if y + h > alto_tablero:
+            tableros.append(actual)
+            actual = []
+            x = y = max_row_height = 0
+        actual.append((x, y, w, h))
+        x += w
+        max_row_height = max(max_row_height, h)
+        area_usada += w * h
+    if actual:
+        tableros.append(actual)
 
-def generar_grafico(piezas, ancho, alto):
-    tableros = colocar_piezas_multi(piezas, ancho, alto)
-    AREA_TABLERO = ancho * alto
-    n = len(tableros)
-    cols = 2
-    rows = math.ceil(n / cols)
+    aprovechamiento_total = round((area_usada / (len(tableros) * AREA_TABLERO)) * 100, 2)
 
-    fig, axs = plt.subplots(rows, cols, figsize=(12, 6*rows))
-    if rows == 1 and cols == 1:
-        axs = [[axs]]
-    elif rows == 1:
-        axs = [axs]
-    elif cols == 1:
-        axs = [[ax] for ax in axs]
+    # Crear figura combinada
+    filas = len(tableros)
+    fig, axes = plt.subplots(filas, 1, figsize=(6, 6 * filas))
+    if filas == 1:
+        axes = [axes]
 
-    for i, posiciones in enumerate(tableros, start=1):
-        r, c = divmod(i-1, cols)
-        ax = axs[r][c]
-        ax.set_xlim(0, ancho)
-        ax.set_ylim(0, alto)
-        ax.set_aspect('equal')
-        area_usada = sum(w * h for (_, _, w, h) in posiciones)
-        aprovechamiento = (area_usada / AREA_TABLERO) * 100
-        desperdicio = 100 - aprovechamiento
-        ax.set_title(f"Tablero {i}\nAprovechamiento: {aprovechamiento:.2f}% | Desperdicio: {desperdicio:.2f}%")
+    for i, (ax, posiciones) in enumerate(zip(axes, tableros), start=1):
+        ax.set_xlim(0, ancho_tablero)
+        ax.set_ylim(0, alto_tablero)
+        ax.invert_yaxis()
+        ax.set_title(f"Tablero {i}")
+        ax.set_xlabel("Ancho (cm)")
+        ax.set_ylabel("Alto (cm)")
+
         for (x, y, w, h) in posiciones:
-            rect = plt.Rectangle((x, y), w, h, edgecolor='blue', facecolor='lightblue')
+            rect = patches.Rectangle((x, y), w, h, linewidth=1.5,
+                                     edgecolor="blue", facecolor="cyan", alpha=0.5)
             ax.add_patch(rect)
-            ax.text(x + w/2, y + h/2, f"{w}x{h}", ha="center", va="center", fontsize=8)
-    for j in range(n, rows*cols):
-        r, c = divmod(j, cols)
-        axs[r][c].axis("off")
 
-    plt.tight_layout()
-
-    # guardar imagen en base64
     buf = io.BytesIO()
-    plt.savefig(buf, format="png")
+    fig.savefig(buf, format="png")
     plt.close(fig)
     buf.seek(0)
     image_base64 = base64.b64encode(buf.read()).decode("utf-8")
-    return image_base64
+
+    return image_base64, aprovechamiento_total
