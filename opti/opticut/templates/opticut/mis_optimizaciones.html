@@ -1,0 +1,47 @@
+{% extends 'opticut/base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="text-center mb-4">Mis optimizaciones guardadas</h2>
+
+<form method="POST" action="{% url 'opticut:borrar_historial' %}" class="text-end mb-3">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-danger" onclick="return confirm('¿Seguro que deseas borrar todo tu historial? Esta acción no se puede deshacer.')">
+    <i class="bi bi-trash"></i> Borrar historial
+  </button>
+</form>
+
+  {% if optimizaciones %}
+    <div class="row">
+      {% for opt in optimizaciones %}
+        <div class="col-md-4 mb-4">
+          <div class="card shadow-sm">
+            {% if opt.imagen %}
+              <img src="{{ opt.imagen.url }}" class="card-img-top" alt="Optimización">
+            {% endif %}
+            <div class="card-body">
+<form method="POST" action="{% url 'opticut:borrar_optimizacion' opt.pk %}" class="d-inline">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-sm btn-outline-danger"
+          onclick="return confirm('¿Seguro que deseas eliminar esta optimización?')">
+    <i class="bi bi-trash"></i> Eliminar
+  </button>
+</form>
+              <h5 class="card-title">Optimización #{{ forloop.counter }}</h5>
+              <p class="card-text">
+                Fecha: {{ opt.fecha|date:"d/m/Y H:i" }}<br>
+                Aprovechamiento: {{ opt.aprovechamiento_total|floatformat:2 }}%
+              </p>
+              <a href="{{ opt.imagen.url }}" class="btn btn-sm btn-success" download>Descargar Imagen</a>
+              <a href="{% url 'opticut:descargar_pdf' opt.pk %}" class="btn btn-sm btn-outline-primary">
+  📄 Descargar PDF
+</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center text-muted">Aún no tienes optimizaciones guardadas.</p>
+  {% endif %}
+</div>
+{% endblock %}

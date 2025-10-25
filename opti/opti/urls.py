@@ -19,12 +19,21 @@ from django.urls import path
 from django.urls import include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
+
+def root_redirect(request):
+    if request.user.is_authenticated:
+        return redirect('opticut:index')  # o 'opticut_index' según tu namespace
+    else:
+        return redirect('login')
 
 urlpatterns = [
+    path('', root_redirect, name='root_redirect'),
     path('admin/', admin.site.urls),
     path('usuarios/', include('usuarios.urls')),
     path('opticut/', include('opticut.urls')),
-
 
 ]
 

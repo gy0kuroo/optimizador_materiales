@@ -42,6 +42,8 @@
     
     <div class="container">
         {% block content %}
+        
+
         <!-- Aquí va el contenido de las páginas hijas -->
         {% endblock %}
     </div>
@@ -52,6 +54,7 @@
     <div class="d-flex">
       {% if user.is_authenticated %}
         <span class="me-3">Hola, {{ user.username }}</span>
+        <a href="{% url 'opticut:mis_optimizaciones' %}">Mis optimizaciones</a>
         <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">Cerrar sesión</a>
       {% else %}
         <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm me-2">Iniciar sesión</a>
