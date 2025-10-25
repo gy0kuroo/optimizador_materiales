@@ -34,14 +34,13 @@ def index(request):
                         form.cleaned_data["cantidad"]
                     ))
 
-            # Generar la imagen y el aprovechamiento
-            imagen_base64, aprovechamiento = generar_grafico(piezas, ancho, alto)
+            # Generar TODAS las imágenes y el aprovechamiento
+            imagenes_base64, aprovechamiento = generar_grafico(piezas, ancho, alto)
+            
+            # Usar la primera imagen para vista previa
+            imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
 
-            # Guardar imagen como archivo
-            image_data = base64.b64decode(imagen_base64)
-            file = ContentFile(image_data, name=f"optimizacion_{request.user.username}.png")
-
-            # Guardar en BD (primero los datos, luego la imagen)
+            # Guardar en BD
             piezas_texto = "\n".join([f"{w},{h},{c}" for w, h, c in piezas])
             optimizacion = Optimizacion.objects.create(
                 usuario=request.user,
@@ -51,12 +50,21 @@ def index(request):
                 aprovechamiento_total=aprovechamiento
             )
 
-            # Guardar archivo físico en el FileField
-            optimizacion.imagen.save(f"optimizacion_{request.user.username}.png", file)
-
+            # Guardar la primera imagen en el FileField
+            if imagen_principal:
+                image_data = base64.b64decode(imagen_principal)
+                file = ContentFile(image_data, name=f"optimizacion_{request.user.username}_{optimizacion.id}.png")
+                optimizacion.imagen.save(f"optimizacion_{request.user.username}_{optimizacion.id}.png", file)
+            
+            # Generar UN SOLO PDF con todos los tableros
+            pdf_path = generar_pdf(optimizacion, imagenes_base64)
+            
             return render(request, "opticut/resultado.html", {
-                "imagen": imagen_base64,
+                "imagen": imagen_principal,
+                "imagenes": imagenes_base64,  # Lista con todas las imágenes
                 "optimizacion": optimizacion,
+                "pdf_path": pdf_path,  # Una sola ruta de PDF
+                "num_tableros": len(imagenes_base64)
             })
 
     else:
@@ -67,7 +75,6 @@ def index(request):
         "tablero_form": tablero_form,
         "pieza_formset": pieza_formset
     })
-
 
 
 @login_required
@@ -107,11 +114,19 @@ def borrar_optimizacion(request, pk):
 def descargar_pdf(request, pk):
     try:
         optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
-        imagen_base64 = ""
-        if optimizacion.imagen:
-            with open(optimizacion.imagen.path, "rb") as f:
-                imagen_base64 = base64.b64encode(f.read()).decode("utf-8")
-        pdf_path = generar_pdf(optimizacion, imagen_base64)
+        
+        # Regenerar las imágenes desde los datos guardados
+        piezas = []
+        for linea in optimizacion.piezas.splitlines():
+            w, h, c = map(int, linea.split(","))
+            piezas.append((w, h, c))
+        
+        # Generar TODAS las imágenes nuevamente
+        imagenes_base64, _ = generar_grafico(piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero)
+        
+        # Generar UN SOLO PDF con todas las imágenes
+        pdf_path = generar_pdf(optimizacion, imagenes_base64)
+        
         full_path = os.path.join(settings.MEDIA_ROOT, pdf_path)
         return FileResponse(open(full_path, "rb"), as_attachment=True, filename=os.path.basename(full_path))
     except Exception as e:
@@ -129,8 +144,9 @@ def resultado_view(request):
             w, h, c = map(int, linea.split(","))
             piezas.append((w, h, c))
 
+        # Generar TODAS las imágenes
         imagenes_base64, aprovechamiento = generar_grafico(piezas, ancho, alto)
-        imagen_principal = imagenes_base64[0]
+        imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
 
         optimizacion = Optimizacion.objects.create(
             usuario=request.user,
@@ -141,16 +157,20 @@ def resultado_view(request):
         )
 
         # Guardar la primera imagen en el modelo
-        image_data = base64.b64decode(imagen_principal)
-        file = ContentFile(image_data)
-        optimizacion.imagen.save(f"optimizacion_{request.user.username}.png", file)
+        if imagen_principal:
+            image_data = base64.b64decode(imagen_principal)
+            file = ContentFile(image_data)
+            optimizacion.imagen.save(f"optimizacion_{request.user.username}_{optimizacion.id}.png", file)
 
-        # Generar PDF completo con todas las imágenes
-        pdf_rel_path = generar_pdf(optimizacion, imagenes_base64)
-        optimizacion.pdf = pdf_rel_path
+        # Generar UN SOLO PDF con todas las imágenes
+        pdf_path = generar_pdf(optimizacion, imagenes_base64)
+        optimizacion.pdf = pdf_path
         optimizacion.save()
 
         return render(request, "opticut/resultado.html", {
             "optimizacion": optimizacion,
-            "imagen": imagen_principal
-        })
+            "imagen": imagen_principal,
+            "imagenes": imagenes_base64,
+            "pdf_path": pdf_path,  # Una sola ruta
+            "num_tableros": len(imagenes_base64)
+        })cl

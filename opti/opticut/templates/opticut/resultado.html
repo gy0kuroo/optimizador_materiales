@@ -1,11 +1,50 @@
 {% extends 'opticut/base.html' %}
 {% block content %}
-<div class="container mt-4 text-center">
-  <h2>Resultado del Plan de Corte</h2>
-  <p>Aprovechamiento total: {{ optimizacion.aprovechamiento_total|floatformat:2 }}%</p>
-  <img src="data:image/png;base64,{{ imagen }}" alt="Resultado" class="img-fluid mt-3">
-  <br>
-  <a href="{{ optimizacion.imagen.url }}" class="btn btn-success mt-3" download>Descargar imagen</a>
-  <a href="{% url 'opticut:index' %}" class="btn btn-secondary mt-3">Volver</a>
+<div class="container mt-4">
+  <h2 class="text-center">Resultado del Plan de Corte</h2>
+  <p class="text-center">Aprovechamiento total: {{ optimizacion.aprovechamiento_total|floatformat:2 }}%</p>
+  <p class="text-center">Total de tableros generados: <strong>{{ num_tableros }}</strong></p>
+  
+  <hr>
+  
+  <!-- Mostrar TODOS los tableros -->
+  <div class="row">
+    {% for img in imagenes %}
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header text-center bg-primary text-white">
+          <h5>Tablero {{ forloop.counter }} de {{ num_tableros }}</h5>
+        </div>
+        <div class="card-body text-center">
+          <img src="data:image/png;base64,{{ img }}" alt="Tablero {{ forloop.counter }}" class="img-fluid">
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  
+  <hr>
+  
+  <!-- UN SOLO BOTÓN para descargar TODO el PDF -->
+  <div class="text-center mt-4">
+    <a href="/media/{{ pdf_path }}" class="btn btn-success btn-lg" download>
+      📄 Descargar PDF Completo ({{ num_tableros }} tableros)
+    </a>
+  </div>
+  
+  <hr>
+  
+  <!-- Botón para volver -->
+  <div class="text-center mt-4 mb-5">
+    <a href="{% url 'opticut:index' %}" class="btn btn-secondary btn-lg">
+      ← Volver al Optimizador
+    </a>
+  </div>
 </div>
+
+<style>
+  .card {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+</style>
 {% endblock %}
