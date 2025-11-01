@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')  # Usar backend no-GUI ANTES de importar pyplot
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import io, base64
@@ -54,21 +56,22 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero):
     # Generar imágenes para cada tablero
     imagenes_base64 = []
     for i, posiciones in enumerate(tableros, start=1):
-        fig, ax = plt.subplots(figsize=(6, 6))
+        fig, ax = plt.subplots(figsize=(8, 8))
         ax.set_xlim(0, ancho_tablero)
         ax.set_ylim(0, alto_tablero)
         ax.invert_yaxis()
-        ax.set_title(f"Tablero {i} de {len(tableros)}")
-        ax.set_xlabel("Ancho (cm)")
-        ax.set_ylabel("Alto (cm)")
+        ax.set_title(f"Tablero {i} de {len(tableros)}", fontsize=14, fontweight='bold')
+        ax.set_xlabel("Ancho (cm)", fontsize=12)
+        ax.set_ylabel("Alto (cm)", fontsize=12)
+        ax.grid(True, alpha=0.3)
 
         for (x, y, w, h) in posiciones:
             rect = patches.Rectangle((x, y), w, h, linewidth=1.5,
                                      edgecolor="blue", facecolor="cyan", alpha=0.5)
             ax.add_patch(rect)
-            # Agregar etiqueta con dimensiones en el centro de cada pieza
+            # Agregar etiqueta con dimensiones
             ax.text(x + w/2, y + h/2, f'{w}x{h}', 
-                   ha='center', va='center', fontsize=8, fontweight='bold')
+                   ha='center', va='center', fontsize=9, fontweight='bold')
 
         buf = io.BytesIO()
         fig.savefig(buf, format="png", dpi=100, bbox_inches='tight')
@@ -79,16 +82,16 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero):
     return imagenes_base64, aprovechamiento_total
 
 
-
 def generar_pdf(optimizacion, imagenes_base64):
     """
     Genera UN SOLO PDF con todos los tableros, cada uno en su propia página.
     """
-    # Convertir imagenes_base64 a lista si es string
     if isinstance(imagenes_base64, str):
         imagenes_base64 = [imagenes_base64] if imagenes_base64 else []
     
-    # Nombre del PDF único
+    if not imagenes_base64:
+        return None
+    
     filename = f"optimizacion_{optimizacion.usuario.username}_{optimizacion.id}.pdf"
     filepath = os.path.join(settings.MEDIA_ROOT, "pdfs", filename)
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
@@ -112,14 +115,25 @@ def generar_pdf(optimizacion, imagenes_base64):
     c.drawString(2*cm, height - 210, "Piezas utilizadas:")
     c.setFont("Helvetica", 11)
 
-    y = height - 230
+    y_pos = height - 230
     for linea in optimizacion.piezas.splitlines():
-        if y < 100:
+        if y_pos < 100:
             c.showPage()
-            y = height - 100
-        ancho, alto, cantidad = linea.split(',')
-        c.drawString(3*cm, y, f"- {cantidad} piezas de {ancho} x {alto} cm")
-        y -= 15
+            y_pos = height - 100
+        
+        try:
+            partes = linea.split(',')
+            if len(partes) == 4:  # Con nombre
+                nombre, ancho, alto, cantidad = partes
+                texto = f"- {cantidad}x {nombre.strip()} ({ancho.strip()} x {alto.strip()} cm)"
+            else:  # Sin nombre (formato antiguo)
+                ancho, alto, cantidad = partes
+                texto = f"- {cantidad.strip()} piezas de {ancho.strip()} x {alto.strip()} cm"
+            c.drawString(3*cm, y_pos, texto)
+        except:
+            c.drawString(3*cm, y_pos, f"- {linea}")
+        
+        y_pos -= 15
 
     # === PÁGINAS SIGUIENTES: Un tablero por página ===
     for i, img_base64 in enumerate(imagenes_base64, start=1):
@@ -127,20 +141,16 @@ def generar_pdf(optimizacion, imagenes_base64):
             continue
 
         try:
-            # Nueva página para cada tablero
             c.showPage()
             
-            # Título de la página
             c.setFont("Helvetica-Bold", 14)
             c.drawCentredString(width / 2, height - 40, f"Tablero {i} de {len(imagenes_base64)}")
 
-            # Decodificar y guardar imagen temporal
             image_data = base64.b64decode(img_base64)
             img_temp = os.path.join(settings.MEDIA_ROOT, f"temp_img_{optimizacion.id}_{i}.png")
             with open(img_temp, "wb") as f:
                 f.write(image_data)
 
-            # Obtener dimensiones y calcular escala
             with Image.open(img_temp) as im:
                 img_width, img_height = im.size
                 max_width = 18 * cm
@@ -149,18 +159,15 @@ def generar_pdf(optimizacion, imagenes_base64):
                 final_width = img_width * ratio
                 final_height = img_height * ratio
 
-            # Centrar imagen en la página
             x_pos = (width - final_width) / 2
             y_pos = (height - final_height) / 2
             
             c.drawImage(img_temp, x_pos, y_pos, width=final_width, height=final_height, 
                        preserveAspectRatio=True, mask='auto')
 
-            # Pie de página
             c.setFont("Helvetica-Oblique", 9)
             c.drawCentredString(width / 2, 2*cm, f"Página {i+1} de {len(imagenes_base64)+1}")
 
-            # Eliminar imagen temporal
             try:
                 os.remove(img_temp)
             except Exception:
@@ -168,9 +175,8 @@ def generar_pdf(optimizacion, imagenes_base64):
 
         except Exception as e:
             c.setFont("Helvetica-Oblique", 10)
-            c.drawString(2*cm, height / 2, f"Error al cargar imagen del tablero {i}: {e}")
+            c.drawString(2*cm, height / 2, f"Error al cargar imagen del tablero {i}: {str(e)}")
 
-    # Última página: Pie de documento
     c.setStrokeColorRGB(0.5, 0.5, 0.5)
     c.line(2*cm, 1.5*cm, width - 2*cm, 1.5*cm)
     c.setFont("Helvetica", 9)
@@ -178,5 +184,4 @@ def generar_pdf(optimizacion, imagenes_base64):
     
     c.save()
     
-    # Retornar la ruta relativa del PDF único
     return os.path.join("pdfs", filename)

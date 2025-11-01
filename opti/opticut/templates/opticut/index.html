@@ -1,23 +1,185 @@
 {% extends 'opticut/base.html' %}
+{% load static %}
+
 {% block content %}
 <div class="container mt-4">
-  <h2>OptiCut — Optimizador de Corte</h2>
-  <form method="post">
-    {% csrf_token %}
-    <h4>Dimensiones del Tablero</h4>
-    {{ tablero_form.as_p }}
+  <h2 class="text-center mb-4">Optimizador de Cortes - Carpintería</h2>
+  
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
 
-    <h4 class="mt-4">Piezas a cortar</h4>
-    {{ pieza_formset.management_form }}
-    <div class="row">
-      {% for form in pieza_formset %}
-        <div class="col-md-4 border p-2 rounded mb-3">
-          {{ form.as_p }}
+  <form method="post" id="optimizacion-form">
+    {% csrf_token %}
+    
+    <!-- Sección: Dimensiones del Tablero -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">📐 Dimensiones del Tablero</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            {{ tablero_form.ancho.label_tag }}
+            {{ tablero_form.ancho }}
+            <small class="form-text text-muted">{{ tablero_form.ancho.help_text }}</small>
+            {% if tablero_form.ancho.errors %}
+              <div class="text-danger">{{ tablero_form.ancho.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6 mb-3">
+            {{ tablero_form.alto.label_tag }}
+            {{ tablero_form.alto }}
+            <small class="form-text text-muted">{{ tablero_form.alto.help_text }}</small>
+            {% if tablero_form.alto.errors %}
+              <div class="text-danger">{{ tablero_form.alto.errors }}</div>
+            {% endif %}
+          </div>
         </div>
-      {% endfor %}
+      </div>
     </div>
 
-    <button type="submit" class="btn btn-primary">Optimizar</button>
+    <!-- Sección: Piezas a Cortar -->
+    <div class="card mb-4">
+      <div class="card-header bg-success text-white">
+        <h4 class="mb-0">✂️ Piezas a Cortar</h4>
+      </div>
+      <div class="card-body">
+        {{ pieza_formset.management_form }}
+        
+        <div id="pieza-container">
+          {% for form in pieza_formset %}
+          <div class="pieza-form border rounded p-3 mb-3 bg-light">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0">Pieza #<span class="pieza-numero">{{ forloop.counter }}</span></h5>
+              <button type="button" class="btn btn-danger btn-sm remove-pieza" {% if forloop.counter <= 1 %}style="display:none;"{% endif %}>
+                🗑️ Eliminar
+              </button>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                {{ form.nombre.label_tag }}
+                {{ form.nombre }}
+                <small class="form-text text-muted">{{ form.nombre.help_text }}</small>
+              </div>
+              <div class="col-md-2 mb-2">
+                {{ form.ancho.label_tag }}
+                {{ form.ancho }}
+              </div>
+              <div class="col-md-2 mb-2">
+                {{ form.alto.label_tag }}
+                {{ form.alto }}
+              </div>
+              <div class="col-md-2 mb-2">
+                {{ form.cantidad.label_tag }}
+                {{ form.cantidad }}
+              </div>
+            </div>
+            
+            {% if form.errors %}
+              <div class="alert alert-danger mt-2">{{ form.errors }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+
+        <button type="button" id="add-pieza" class="btn btn-outline-success">
+          ➕ Agregar otra pieza
+        </button>
+      </div>
+    </div>
+
+    <!-- Botón de envío -->
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary btn-lg">
+        🚀 Calcular Optimización
+      </button>
+      <a href="{% url 'opticut:mis_optimizaciones' %}" class="btn btn-secondary btn-lg">
+        📋 Ver Historial
+      </a>
+    </div>
   </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('pieza-container');
+    const addButton = document.getElementById('add-pieza');
+    const totalFormsInput = document.querySelector('input[name$="-TOTAL_FORMS"]');
+    
+    let formCount = parseInt(totalFormsInput.value);
+
+    // Función para actualizar números de piezas
+    function actualizarNumeros() {
+        document.querySelectorAll('.pieza-numero').forEach((elem, index) => {
+            elem.textContent = index + 1;
+        });
+        
+        // Mostrar/ocultar botones de eliminar
+        const removeBtns = document.querySelectorAll('.remove-pieza');
+        removeBtns.forEach((btn, index) => {
+            btn.style.display = document.querySelectorAll('.pieza-form').length > 1 ? 'block' : 'none';
+        });
+    }
+
+    // Agregar nueva pieza
+    addButton.addEventListener('click', function() {
+        if (formCount >= 20) {
+            alert('Máximo 20 piezas permitidas');
+            return;
+        }
+
+        const template = container.children[0].cloneNode(true);
+        
+        // Limpiar valores
+        template.querySelectorAll('input, select, textarea').forEach(input => {
+            const name = input.name.replace(/-\d+-/, `-${formCount}-`);
+            const id = input.id.replace(/-\d+-/, `-${formCount}-`);
+            input.name = name;
+            input.id = id;
+            
+            if (input.type !== 'hidden') {
+                input.value = '';
+                if (input.name.includes('cantidad')) {
+                    input.value = '1';
+                }
+            }
+        });
+
+        container.appendChild(template);
+        formCount++;
+        totalFormsInput.value = formCount;
+        actualizarNumeros();
+    });
+
+    // Eliminar pieza
+    container.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-pieza') || e.target.closest('.remove-pieza')) {
+            if (document.querySelectorAll('.pieza-form').length > 1) {
+                e.target.closest('.pieza-form').remove();
+                formCount--;
+                totalFormsInput.value = formCount;
+                actualizarNumeros();
+            }
+        }
+    });
+
+    actualizarNumeros();
+});
+</script>
+
+<style>
+.pieza-form {
+    transition: all 0.3s ease;
+}
+.pieza-form:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+</style>
 {% endblock %}
