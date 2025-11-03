@@ -14,7 +14,7 @@
     {% endfor %}
   {% endif %}
 
-  <form method="post" id="optimizacion-form">
+  <form method="post" action="{% url 'opticut:index' %}" id="optimizacion-form">
     {% csrf_token %}
     
     <!-- Sección: Dimensiones del Tablero -->

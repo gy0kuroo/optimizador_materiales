@@ -13,30 +13,13 @@ from opti import settings
 
 @login_required
 def index(request):
-    PiezaFormSet = formset_factory(PiezaForm, extra=3, max_num=20, validate_max=True)
     # Limpiar mensajes antiguos al cargar el formulario por primera vez
     if request.method == "GET":
-            print("=" * 50)
-    print("POST DATA:", request.POST)
-    print("=" * 50)
-    
-    tablero_form = TableroForm(request.POST)
-    pieza_formset = PiezaFormSet(request.POST)
-    
-    print("Tablero form válido:", tablero_form.is_valid())
-    print("Pieza formset válido:", pieza_formset.is_valid())
-    
-    if pieza_formset.is_valid():
-        print("Número de formularios:", len(pieza_formset))
-        for i, form in enumerate(pieza_formset):
-            print(f"Form {i}: {form.cleaned_data}")
-    else:
-        print("Errores del formset:", pieza_formset.errors)
         storage = messages.get_messages(request)
         storage.used = True
     
-    
-    
+    PiezaFormSet = formset_factory(PiezaForm, extra=3, max_num=20, validate_max=True)
+
     if request.method == "POST":
         tablero_form = TableroForm(request.POST)
         pieza_formset = PiezaFormSet(request.POST)
@@ -49,7 +32,7 @@ def index(request):
             piezas_con_nombre = []
             
             for form in pieza_formset:
-    # Verificar si el formulario tiene datos COMPLETOS
+                # Verificar si el formulario tiene datos COMPLETOS
                 if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
                     # Obtener los valores
                     pieza_ancho = form.cleaned_data.get("ancho")
@@ -57,7 +40,7 @@ def index(request):
                     cantidad = form.cleaned_data.get("cantidad")
                     nombre = form.cleaned_data.get("nombre", "").strip()
                     
-                    # IMPORTANTE: Solo procesar si tiene ancho Y alto (no solo cleaned_data)
+                    # IMPORTANTE: Solo procesar si tiene ancho Y alto
                     if pieza_ancho and pieza_alto and cantidad:
                         # Si no hay nombre, asignar uno por defecto
                         if not nombre:
@@ -81,7 +64,7 @@ def index(request):
                             'alto': pieza_alto,
                             'cantidad': cantidad
                         })
-                        
+            
             # Validar que haya al menos una pieza
             if not piezas:
                 messages.error(request, "❌ Debes agregar al menos una pieza con dimensiones válidas.")
@@ -90,8 +73,8 @@ def index(request):
                     "pieza_formset": pieza_formset
                 })
 
-            # Generar TODAS las imágenes y el aprovechamiento
-            imagenes_base64, aprovechamiento = generar_grafico(piezas, ancho, alto)
+            # Generar TODAS las imágenes, aprovechamiento Y desperdicio
+            imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(piezas, ancho, alto)
             
             # Usar la primera imagen para vista previa
             imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
@@ -131,7 +114,8 @@ def index(request):
                 "optimizacion": optimizacion,
                 "pdf_path": pdf_path,
                 "num_tableros": len(imagenes_base64),
-                "piezas_con_nombre": piezas_con_nombre
+                "piezas_con_nombre": piezas_con_nombre,
+                "info_desperdicio": info_desperdicio  # AGREGADO
             })
         else:
             # Mostrar errores de validación
@@ -139,10 +123,6 @@ def index(request):
                 messages.error(request, "❌ Error en las dimensiones del tablero.")
             if not pieza_formset.is_valid():
                 messages.error(request, "❌ Error en los datos de las piezas.")
-                # Mostrar errores específicos del formset
-                for i, form in enumerate(pieza_formset):
-                    if form.errors:
-                        messages.error(request, f"Pieza #{i+1}: {form.errors}")
 
     else:
         tablero_form = TableroForm()
@@ -153,12 +133,14 @@ def index(request):
         "pieza_formset": pieza_formset
     })
 
+
 @login_required
 def mis_optimizaciones(request):
     optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
     return render(request, 'opticut/mis_optimizaciones.html', {
         'optimizaciones': optimizaciones
     })
+
 
 @login_required
 def borrar_historial(request):
@@ -171,6 +153,7 @@ def borrar_historial(request):
     else:
         messages.error(request, "Operación no permitida.")
         return redirect('opticut:mis_optimizaciones')
+
 
 @login_required
 def borrar_optimizacion(request, pk):
@@ -203,8 +186,8 @@ def descargar_pdf(request, pk):
                 w, h, c = partes
                 piezas.append((int(w), int(h), int(c)))
         
-        # Generar TODAS las imágenes nuevamente
-        imagenes_base64, _ = generar_grafico(piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero)
+        # Generar TODAS las imágenes nuevamente (con info de desperdicio)
+        imagenes_base64, _, info_desperdicio = generar_grafico(piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero)
         
         # Generar UN SOLO PDF con todas las imágenes
         pdf_path = generar_pdf(optimizacion, imagenes_base64)
@@ -214,6 +197,7 @@ def descargar_pdf(request, pk):
     except Exception as e:
         messages.error(request, f"Error generando PDF: {e}")
         return redirect('opticut:mis_optimizaciones')
+
 
 @login_required
 def resultado_view(request):
@@ -232,8 +216,8 @@ def resultado_view(request):
                 w, h, c = partes
                 piezas.append((int(w), int(h), int(c)))
 
-        # Generar TODAS las imágenes
-        imagenes_base64, aprovechamiento = generar_grafico(piezas, ancho, alto)
+        # Generar TODAS las imágenes con info de desperdicio
+        imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(piezas, ancho, alto)
         imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
 
         optimizacion = Optimizacion.objects.create(
@@ -260,5 +244,60 @@ def resultado_view(request):
             "imagen": imagen_principal,
             "imagenes": imagenes_base64,
             "pdf_path": pdf_path,
-            "num_tableros": len(imagenes_base64)
+            "num_tableros": len(imagenes_base64),
+            "info_desperdicio": info_desperdicio
         })
+
+
+@login_required
+def duplicar_optimizacion(request, pk):
+    """
+    Duplica una optimización existente y carga sus datos en el formulario.
+    """
+    try:
+        optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
+        
+        # Parsear las piezas guardadas
+        piezas_data = []
+        for linea in optimizacion.piezas.splitlines():
+            partes = linea.split(',')
+            if len(partes) == 4:  # Con nombre
+                nombre, ancho, alto, cantidad = partes
+                piezas_data.append({
+                    'nombre': nombre.strip(),
+                    'ancho': int(ancho.strip()),
+                    'alto': int(alto.strip()),
+                    'cantidad': int(cantidad.strip())
+                })
+            else:  # Sin nombre (formato antiguo)
+                ancho, alto, cantidad = partes
+                piezas_data.append({
+                    'nombre': '',
+                    'ancho': int(ancho.strip()),
+                    'alto': int(alto.strip()),
+                    'cantidad': int(cantidad.strip())
+                })
+        
+        # Crear formset con los datos de la optimización
+        PiezaFormSet = formset_factory(PiezaForm, extra=0, max_num=20)
+        
+        # Crear formularios con datos prellenados
+        tablero_form = TableroForm(initial={
+            'ancho': optimizacion.ancho_tablero,
+            'alto': optimizacion.alto_tablero
+        })
+        
+        pieza_formset = PiezaFormSet(initial=piezas_data)
+        
+        messages.info(request, f"📋 Cargando datos de la optimización #{pk}. Puedes modificarlos antes de calcular.")
+        
+        return render(request, "opticut/index.html", {
+            "tablero_form": tablero_form,
+            "pieza_formset": pieza_formset,
+            "duplicando": True,
+            "optimizacion_original": optimizacion
+        })
+        
+    except Optimizacion.DoesNotExist:
+        messages.error(request, "No se encontró la optimización.")
+        return redirect('opticut:mis_optimizaciones')

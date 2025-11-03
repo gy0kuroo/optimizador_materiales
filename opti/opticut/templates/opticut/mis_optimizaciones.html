@@ -18,6 +18,41 @@
             {% if opt.imagen %}
               <img src="{{ opt.imagen.url }}" class="card-img-top" alt="Optimización">
             {% endif %}
+            <!-- En tu template mis_optimizaciones.html -->
+{% for optimizacion in optimizaciones %}
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">Optimización #{{ optimizacion.id }}</h5>
+        <p class="card-text">
+            <strong>Fecha:</strong> {{ optimizacion.fecha|date:"d/m/Y H:i" }}<br>
+            <strong>Tablero:</strong> {{ optimizacion.ancho_tablero }} × {{ optimizacion.alto_tablero }} cm<br>
+            <strong>Aprovechamiento:</strong> {{ optimizacion.aprovechamiento_total|floatformat:2 }}%
+        </p>
+        
+        <div class="btn-group" role="group">
+            <!-- Botón NUEVO de duplicar -->
+            <a href="{% url 'opticut:duplicar_optimizacion' optimizacion.id %}" 
+               class="btn btn-info btn-sm">
+                📋 Duplicar
+            </a>
+            
+            <a href="{% url 'opticut:descargar_pdf' optimizacion.id %}" 
+               class="btn btn-success btn-sm">
+                📄 Descargar PDF
+            </a>
+            
+            <form method="post" action="{% url 'opticut:borrar_optimizacion' optimizacion.id %}" 
+                  style="display:inline;" 
+                  onsubmit="return confirm('¿Eliminar esta optimización?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">
+                    🗑️ Eliminar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
             <div class="card-body">
 <form method="POST" action="{% url 'opticut:borrar_optimizacion' opt.pk %}" class="d-inline">
   {% csrf_token %}
