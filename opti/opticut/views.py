@@ -99,9 +99,25 @@ def index(request):
                 file = ContentFile(image_data, name=f"optimizacion_{request.user.username}_{optimizacion.id}.png")
                 optimizacion.imagen.save(f"optimizacion_{request.user.username}_{optimizacion.id}.png", file)
             
-            # Generar UN SOLO PDF con todos los tableros
+            # Calcular el número de lista para el PDF (basado en orden por fecha descendente por defecto)
+            # Obtener todas las optimizaciones ordenadas por fecha descendente (igual que en mis_optimizaciones)
+            todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
+            total_optimizaciones = todas_optimizaciones.count()
+            
+            # Encontrar la posición real de esta optimización en la lista ordenada
+            # Para orden descendente: primera = número más alto (total_optimizaciones)
+            for idx, opt in enumerate(todas_optimizaciones, start=1):
+                if opt.id == optimizacion.id:
+                    # Para orden descendente: numero = total - idx + 1
+                    numero_lista = total_optimizaciones - idx + 1
+                    break
+            else:
+                # Si no se encuentra (no debería pasar), usar el total como fallback
+                numero_lista = total_optimizaciones
+            
+            # Generar UN SOLO PDF con todos los tableros usando el número de lista correcto
             try:
-                pdf_path = generar_pdf(optimizacion, imagenes_base64)
+                pdf_path = generar_pdf(optimizacion, imagenes_base64, numero_lista=numero_lista)
             except Exception as e:
                 messages.warning(request, f"⚠️ PDF no generado: {str(e)}")
                 pdf_path = None
@@ -164,14 +180,36 @@ def mis_optimizaciones(request):
         except ValueError:
             pass
     
-    # Ordenar por fecha descendente (más recientes primero)
-    optimizaciones = optimizaciones.order_by('-fecha')
+    # Ordenamiento
+    ordenar_por = request.GET.get('ordenar_por', 'fecha_desc')
+    
+    if ordenar_por == 'fecha_desc':
+        optimizaciones = optimizaciones.order_by('-fecha')
+    elif ordenar_por == 'fecha_asc':
+        optimizaciones = optimizaciones.order_by('fecha')
+    elif ordenar_por == 'aprovechamiento_desc':
+        optimizaciones = optimizaciones.order_by('-aprovechamiento_total')
+    elif ordenar_por == 'aprovechamiento_asc':
+        optimizaciones = optimizaciones.order_by('aprovechamiento_total')
+    else:
+        # Por defecto: fecha descendente
+        optimizaciones = optimizaciones.order_by('-fecha')
+    
     total_optimizaciones = optimizaciones.count()
+    
+    # Determinar si el ordenamiento es descendente o ascendente
+    es_descendente = ordenar_por in ['fecha_desc', 'aprovechamiento_desc']
     
     # Procesar piezas para cada optimización
     optimizaciones_con_piezas = []
     for idx, opt in enumerate(optimizaciones, start=1):
-        numero_mostrado = total_optimizaciones - idx + 1
+        # Calcular número de lista según el ordenamiento
+        if es_descendente:
+            # Para orden descendente: primera = número más alto
+            numero_mostrado = total_optimizaciones - idx + 1
+        else:
+            # Para orden ascendente: primera = número 1
+            numero_mostrado = idx
         piezas_procesadas = []
         for linea in opt.piezas.splitlines():
             if linea.strip():
@@ -202,6 +240,7 @@ def mis_optimizaciones(request):
         'nombre_pieza': nombre_pieza,
         'fecha_desde': fecha_desde,
         'fecha_hasta': fecha_hasta,
+        'ordenar_por': ordenar_por,
     })
 
 
@@ -240,14 +279,36 @@ def descargar_pdf(request, pk):
     try:
         optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
         
-        # Calcular el número de lista (mismo método que en mis_optimizaciones)
-        todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
+        # Obtener el ordenamiento actual desde los parámetros GET (si existe)
+        ordenar_por = request.GET.get('ordenar_por', 'fecha_desc')
+        
+        # Aplicar el mismo ordenamiento que se usa en mis_optimizaciones
+        todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user)
+        
+        if ordenar_por == 'fecha_desc':
+            todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
+        elif ordenar_por == 'fecha_asc':
+            todas_optimizaciones = todas_optimizaciones.order_by('fecha')
+        elif ordenar_por == 'aprovechamiento_desc':
+            todas_optimizaciones = todas_optimizaciones.order_by('-aprovechamiento_total')
+        elif ordenar_por == 'aprovechamiento_asc':
+            todas_optimizaciones = todas_optimizaciones.order_by('aprovechamiento_total')
+        else:
+            todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
+        
         total_optimizaciones = todas_optimizaciones.count()
+        
+        # Determinar si el ordenamiento es descendente o ascendente
+        es_descendente = ordenar_por in ['fecha_desc', 'aprovechamiento_desc']
         
         # Encontrar la posición de esta optimización en la lista
         for idx, opt in enumerate(todas_optimizaciones, start=1):
             if opt.id == optimizacion.id:
-                numero_lista = total_optimizaciones - idx + 1
+                # Calcular número de lista según el ordenamiento
+                if es_descendente:
+                    numero_lista = total_optimizaciones - idx + 1
+                else:
+                    numero_lista = idx
                 break
         else:
             numero_lista = None  # Si no se encuentra, usar ID por defecto

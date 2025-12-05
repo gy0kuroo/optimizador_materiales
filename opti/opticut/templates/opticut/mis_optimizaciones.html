@@ -10,7 +10,7 @@
     <h5 class="mb-3">🔍 Buscar y Filtrar</h5>
     <form method="GET" action="{% url 'opticut:mis_optimizaciones' %}" id="filtros-form">
       <div class="row">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
           <label for="nombre_pieza" class="form-label">Nombre de Pieza</label>
           <input type="text" 
                  class="form-control" 
@@ -19,7 +19,7 @@
                  placeholder="Ej: Puerta, Cajón, Estante..."
                  value="{{ nombre_pieza }}">
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-2 mb-3">
           <label for="fecha_desde" class="form-label">Fecha Desde</label>
           <input type="date" 
                  class="form-control" 
@@ -27,7 +27,7 @@
                  name="fecha_desde" 
                  value="{{ fecha_desde }}">
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-2 mb-3">
           <label for="fecha_hasta" class="form-label">Fecha Hasta</label>
           <input type="date" 
                  class="form-control" 
@@ -35,13 +35,22 @@
                  name="fecha_hasta" 
                  value="{{ fecha_hasta }}">
         </div>
+        <div class="col-md-3 mb-3">
+          <label for="ordenar_por" class="form-label">Ordenar por</label>
+          <select class="form-control" id="ordenar_por" name="ordenar_por">
+            <option value="fecha_desc" {% if ordenar_por == 'fecha_desc' %}selected{% endif %}>Fecha (Más recientes )</option>
+            <option value="fecha_asc" {% if ordenar_por == 'fecha_asc' %}selected{% endif %}>Fecha (Más antiguas )</option>
+            <option value="aprovechamiento_desc" {% if ordenar_por == 'aprovechamiento_desc' %}selected{% endif %}>Aprovechamiento (Mayor a menor)</option>
+            <option value="aprovechamiento_asc" {% if ordenar_por == 'aprovechamiento_asc' %}selected{% endif %}>Aprovechamiento (Menor a mayor)</option>
+          </select>
+        </div>
         <div class="col-md-2 mb-3 d-flex align-items-end">
           <button type="submit" class="btn btn-primary w-100">🔍 Buscar</button>
         </div>
       </div>
       {% if nombre_pieza or fecha_desde or fecha_hasta %}
       <div class="mt-2">
-        <a href="{% url 'opticut:mis_optimizaciones' %}" class="btn btn-sm btn-outline-secondary">
+        <a href="{% url 'opticut:mis_optimizaciones' %}?ordenar_por={{ ordenar_por }}" class="btn btn-sm btn-outline-secondary">
           🗑️ Limpiar Filtros
         </a>
         {% if nombre_pieza %}
@@ -113,7 +122,7 @@
                    title="Duplicar esta optimización">
                   <span class="icon"></span> Duplicar
                 </a>
-                <a href="{% url 'opticut:descargar_pdf' optimizacion.id %}" 
+                <a href="{% url 'opticut:descargar_pdf' optimizacion.id %}?ordenar_por={{ ordenar_por }}" 
                    class="btn-action btn-pdf"
                    title="Descargar PDF">
                   <span class="icon"></span> PDF
