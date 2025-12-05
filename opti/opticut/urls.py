@@ -10,5 +10,4 @@ urlpatterns = [
     path('borrar/<int:pk>/', views.borrar_optimizacion, name='borrar_optimizacion'),
     path('descargar-pdf/<int:pk>/', views.descargar_pdf, name='descargar_pdf'),
     path('duplicar/<int:pk>/', views.duplicar_optimizacion, name='duplicar_optimizacion'),
-
 ]

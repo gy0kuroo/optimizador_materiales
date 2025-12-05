@@ -136,10 +136,75 @@ def index(request):
 
 @login_required
 def mis_optimizaciones(request):
-    optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
+    optimizaciones = Optimizacion.objects.filter(usuario=request.user)
+    
+    # Filtro por nombre de pieza
+    nombre_pieza = request.GET.get('nombre_pieza', '').strip()
+    if nombre_pieza:
+        # Buscar en el campo piezas que contiene el nombre
+        optimizaciones = optimizaciones.filter(piezas__icontains=nombre_pieza)
+    
+    # Filtro por fecha
+    fecha_desde = request.GET.get('fecha_desde', '').strip()
+    fecha_hasta = request.GET.get('fecha_hasta', '').strip()
+    
+    if fecha_desde:
+        try:
+            from datetime import datetime
+            fecha_desde_obj = datetime.strptime(fecha_desde, '%Y-%m-%d')
+            optimizaciones = optimizaciones.filter(fecha__gte=fecha_desde_obj)
+        except ValueError:
+            pass
+    
+    if fecha_hasta:
+        try:
+            from datetime import datetime, timedelta
+            fecha_hasta_obj = datetime.strptime(fecha_hasta, '%Y-%m-%d') + timedelta(days=1)
+            optimizaciones = optimizaciones.filter(fecha__lt=fecha_hasta_obj)
+        except ValueError:
+            pass
+    
+    # Ordenar por fecha descendente (más recientes primero)
+    optimizaciones = optimizaciones.order_by('-fecha')
+    total_optimizaciones = optimizaciones.count()
+    
+    # Procesar piezas para cada optimización
+    optimizaciones_con_piezas = []
+    for idx, opt in enumerate(optimizaciones, start=1):
+        numero_mostrado = total_optimizaciones - idx + 1
+        piezas_procesadas = []
+        for linea in opt.piezas.splitlines():
+            if linea.strip():
+                partes = linea.split(',')
+                if len(partes) == 4:  # Formato: nombre,ancho,alto,cantidad
+                    piezas_procesadas.append({
+                        'nombre': partes[0].strip(),
+                        'ancho': partes[1].strip(),
+                        'alto': partes[2].strip(),
+                        'cantidad': partes[3].strip()
+                    })
+                elif len(partes) == 3:  # Formato antiguo: ancho,alto,cantidad
+                    piezas_procesadas.append({
+                        'nombre': 'Pieza',
+                        'ancho': partes[0].strip(),
+                        'alto': partes[1].strip(),
+                        'cantidad': partes[2].strip()
+                    })
+        
+        optimizaciones_con_piezas.append({
+            'optimizacion': opt,
+            'piezas': piezas_procesadas,
+            'numero': numero_mostrado
+        })
+    
     return render(request, 'opticut/mis_optimizaciones.html', {
-        'optimizaciones': optimizaciones
+        'optimizaciones_con_piezas': optimizaciones_con_piezas,
+        'nombre_pieza': nombre_pieza,
+        'fecha_desde': fecha_desde,
+        'fecha_hasta': fecha_hasta,
     })
+
+
 
 
 @login_required
@@ -175,6 +240,18 @@ def descargar_pdf(request, pk):
     try:
         optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
         
+        # Calcular el número de lista (mismo método que en mis_optimizaciones)
+        todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
+        total_optimizaciones = todas_optimizaciones.count()
+        
+        # Encontrar la posición de esta optimización en la lista
+        for idx, opt in enumerate(todas_optimizaciones, start=1):
+            if opt.id == optimizacion.id:
+                numero_lista = total_optimizaciones - idx + 1
+                break
+        else:
+            numero_lista = None  # Si no se encuentra, usar ID por defecto
+        
         # Regenerar las imágenes desde los datos guardados
         piezas = []
         for linea in optimizacion.piezas.splitlines():
@@ -189,8 +266,8 @@ def descargar_pdf(request, pk):
         # Generar TODAS las imágenes nuevamente (con info de desperdicio)
         imagenes_base64, _, info_desperdicio = generar_grafico(piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero)
         
-        # Generar UN SOLO PDF con todas las imágenes
-        pdf_path = generar_pdf(optimizacion, imagenes_base64)
+        # Generar UN SOLO PDF con todas las imágenes (usando número de lista)
+        pdf_path = generar_pdf(optimizacion, imagenes_base64, numero_lista=numero_lista)
         
         full_path = os.path.join(settings.MEDIA_ROOT, pdf_path)
         return FileResponse(open(full_path, "rb"), as_attachment=True, filename=os.path.basename(full_path))

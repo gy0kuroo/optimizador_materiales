@@ -27,7 +27,7 @@ def root_redirect(request):
     if request.user.is_authenticated:
         return redirect('opticut:index')  # o 'opticut_index' según tu namespace
     else:
-        return redirect('login')
+        return redirect('usuarios:login')
 
 urlpatterns = [
     path('', root_redirect, name='root_redirect'),

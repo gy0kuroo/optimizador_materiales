@@ -178,9 +178,15 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero):
         'area_total_disponible': num_tableros * AREA_TABLERO if num_tableros > 0 else 0
     }
 
-def generar_pdf(optimizacion, imagenes_base64):
+def generar_pdf(optimizacion, imagenes_base64, numero_lista=None):
     """
     Genera UN SOLO PDF con todos los tableros, cada uno en su propia página.
+    
+    Args:
+        optimizacion: Objeto Optimizacion
+        imagenes_base64: Lista de imágenes en base64
+        numero_lista: Número de la lista en el historial (opcional). Si se proporciona,
+                     se usará en el nombre del archivo en lugar del ID.
     """
     if isinstance(imagenes_base64, str):
         imagenes_base64 = [imagenes_base64] if imagenes_base64 else []
@@ -188,7 +194,11 @@ def generar_pdf(optimizacion, imagenes_base64):
     if not imagenes_base64:
         return None
     
-    filename = f"optimizacion_{optimizacion.usuario.username}_{optimizacion.id}.pdf"
+    # Usar número de lista si está disponible, sino usar el ID
+    if numero_lista is not None:
+        filename = f"optimizacion_{optimizacion.usuario.username}_{numero_lista}.pdf"
+    else:
+        filename = f"optimizacion_{optimizacion.usuario.username}_{optimizacion.id}.pdf"
     filepath = os.path.join(settings.MEDIA_ROOT, "pdfs", filename)
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
 

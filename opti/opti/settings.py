@@ -104,9 +104,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-cl'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Santiago'
 
 USE_I18N = True
 
@@ -117,6 +117,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -127,7 +131,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #redireccionamiento del login, cambiar de ser necesario
 LOGIN_REDIRECT_URL = '/opticut/'
 LOGOUT_REDIRECT_URL = '/usuarios/login/'
-LOGIN_URL = '/usuarios/login/'
+LOGIN_URL = 'usuarios:login'
+
+# Configuración de sesiones para mayor seguridad
+# La sesión expira cuando se cierra el navegador (si el navegador lo soporta)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+# Tiempo de expiración de la sesión en segundos (30 minutos = 1800 segundos por defecto)
+# Los usuarios pueden personalizar esto desde su perfil
+SESSION_COOKIE_AGE = 1800  # 30 minutos
+# Prevenir acceso a cookies de sesión desde JavaScript (protección XSS)
+SESSION_COOKIE_HTTPONLY = True
+# Solo enviar cookies de sesión sobre HTTPS en producción (descomentar en producción)
+# SESSION_COOKIE_SECURE = True
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'   # o str(BASE_DIR / 'media') según tu configuración

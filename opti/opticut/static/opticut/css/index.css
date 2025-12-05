@@ -1,0 +1,26 @@
+/* Estilos para la página principal de optimización */
+
+.pieza-form {
+    transition: all 0.3s ease;
+}
+
+.pieza-form:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Mejorar legibilidad del texto de ayuda en modo oscuro */
+.form-text.text-muted {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+[data-theme="dark"] .form-text.text-muted {
+    color: #adb5bd !important;
+    opacity: 0.9;
+}
+
+/* Asegurar que las etiquetas sean legibles en modo oscuro */
+[data-theme="dark"] label {
+    color: var(--text-primary) !important;
+}
+

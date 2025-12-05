@@ -1,82 +1,178 @@
 {% extends 'opticut/base.html' %}
+{% load static %}
+
 {% block content %}
 <div class="container mt-4">
-  <h2 class="text-center mb-4">Mis optimizaciones guardadas</h2>
+  <h2 class="text-center mb-4 fade-in">📋 Mis Optimizaciones Guardadas</h2>
 
-<form method="POST" action="{% url 'opticut:borrar_historial' %}" class="text-end mb-3">
-  {% csrf_token %}
-  <button type="submit" class="btn btn-danger" onclick="return confirm('¿Seguro que deseas borrar todo tu historial? Esta acción no se puede deshacer.')">
-    <i class="bi bi-trash"></i> Borrar historial
-  </button>
-</form>
-
-  {% if optimizaciones %}
-    <div class="row">
-      {% for opt in optimizaciones %}
-        <div class="col-md-4 mb-4">
-          <div class="card shadow-sm">
-            {% if opt.imagen %}
-              <img src="{{ opt.imagen.url }}" class="card-img-top" alt="Optimización">
-            {% endif %}
-            <!-- En tu template mis_optimizaciones.html -->
-{% for optimizacion in optimizaciones %}
-<div class="card mb-3">
-    <div class="card-body">
-        <h5 class="card-title">Optimización #{{ optimizacion.id }}</h5>
-        <p class="card-text">
-            <strong>Fecha:</strong> {{ optimizacion.fecha|date:"d/m/Y H:i" }}<br>
-            <strong>Tablero:</strong> {{ optimizacion.ancho_tablero }} × {{ optimizacion.alto_tablero }} cm<br>
-            <strong>Aprovechamiento:</strong> {{ optimizacion.aprovechamiento_total|floatformat:2 }}%
-        </p>
-        
-        <div class="btn-group" role="group">
-            <!-- Botón NUEVO de duplicar -->
-            <a href="{% url 'opticut:duplicar_optimizacion' optimizacion.id %}" 
-               class="btn btn-info btn-sm">
-                📋 Duplicar
-            </a>
-            
-            <a href="{% url 'opticut:descargar_pdf' optimizacion.id %}" 
-               class="btn btn-success btn-sm">
-                📄 Descargar PDF
-            </a>
-            
-            <form method="post" action="{% url 'opticut:borrar_optimizacion' optimizacion.id %}" 
-                  style="display:inline;" 
-                  onsubmit="return confirm('¿Eliminar esta optimización?');">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm">
-                    🗑️ Eliminar
-                </button>
-            </form>
+  <!-- Filtros y Búsqueda -->
+  <div class="search-filters fade-in">
+    <h5 class="mb-3">🔍 Buscar y Filtrar</h5>
+    <form method="GET" action="{% url 'opticut:mis_optimizaciones' %}" id="filtros-form">
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label for="nombre_pieza" class="form-label">Nombre de Pieza</label>
+          <input type="text" 
+                 class="form-control" 
+                 id="nombre_pieza" 
+                 name="nombre_pieza" 
+                 placeholder="Ej: Puerta, Cajón, Estante..."
+                 value="{{ nombre_pieza }}">
         </div>
-    </div>
-</div>
-{% endfor %}
+        <div class="col-md-3 mb-3">
+          <label for="fecha_desde" class="form-label">Fecha Desde</label>
+          <input type="date" 
+                 class="form-control" 
+                 id="fecha_desde" 
+                 name="fecha_desde" 
+                 value="{{ fecha_desde }}">
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="fecha_hasta" class="form-label">Fecha Hasta</label>
+          <input type="date" 
+                 class="form-control" 
+                 id="fecha_hasta" 
+                 name="fecha_hasta" 
+                 value="{{ fecha_hasta }}">
+        </div>
+        <div class="col-md-2 mb-3 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary w-100">🔍 Buscar</button>
+        </div>
+      </div>
+      {% if nombre_pieza or fecha_desde or fecha_hasta %}
+      <div class="mt-2">
+        <a href="{% url 'opticut:mis_optimizaciones' %}" class="btn btn-sm btn-outline-secondary">
+          🗑️ Limpiar Filtros
+        </a>
+        {% if nombre_pieza %}
+          <span class="filter-badge">Pieza: {{ nombre_pieza }}</span>
+        {% endif %}
+        {% if fecha_desde %}
+          <span class="filter-badge">Desde: {{ fecha_desde }}</span>
+        {% endif %}
+        {% if fecha_hasta %}
+          <span class="filter-badge">Hasta: {{ fecha_hasta }}</span>
+        {% endif %}
+      </div>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Botón Borrar Historial -->
+  <div class="text-end mb-3 fade-in">
+    <form method="POST" action="{% url 'opticut:borrar_historial' %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" 
+              class="btn btn-danger" 
+              onclick="return confirm('¿Seguro que deseas borrar todo tu historial? Esta acción no se puede deshacer.')">
+        🗑️ Borrar Todo el Historial
+      </button>
+    </form>
+  </div>
+
+  <!-- Lista de Optimizaciones -->
+  {% if optimizaciones_con_piezas %}
+    <div class="row">
+      {% for item in optimizaciones_con_piezas %}
+        {% with optimizacion=item.optimizacion piezas=item.piezas %}
+        <div class="col-md-6 col-lg-4 mb-4 fade-in">
+          <div class="optimizacion-card">
+            {% if optimizacion.imagen %}
+              <img src="{{ optimizacion.imagen.url }}" 
+                   class="card-img-top" 
+                   alt="Optimización #{{ optimizacion.id }}"
+                   style="max-height: 200px; object-fit: cover;">
+            {% endif %}
             <div class="card-body">
-<form method="POST" action="{% url 'opticut:borrar_optimizacion' opt.pk %}" class="d-inline">
-  {% csrf_token %}
-  <button type="submit" class="btn btn-sm btn-outline-danger"
-          onclick="return confirm('¿Seguro que deseas eliminar esta optimización?')">
-    <i class="bi bi-trash"></i> Eliminar
-  </button>
-</form>
-              <h5 class="card-title">Optimización #{{ forloop.counter }}</h5>
+              <h5 class="card-title">Optimización #{{ item.numero }}</h5>
               <p class="card-text">
-                Fecha: {{ opt.fecha|date:"d/m/Y H:i" }}<br>
-                Aprovechamiento: {{ opt.aprovechamiento_total|floatformat:2 }}%
+                <strong>📅 Fecha:</strong> {{ optimizacion.fecha|date:"d/m/Y" }}<br>
+                <strong>🕐 Hora:</strong> {{ optimizacion.fecha|date:"H:i" }} (Chile)<br>
+                <strong>📐 Tablero:</strong> {{ optimizacion.ancho_tablero }} × {{ optimizacion.alto_tablero }} cm<br>
+                <strong>📊 Aprovechamiento:</strong> 
+                <span class="badge bg-success">{{ optimizacion.aprovechamiento_total|floatformat:2 }}%</span>
               </p>
-              <a href="{{ opt.imagen.url }}" class="btn btn-sm btn-success" download>Descargar Imagen</a>
-              <a href="{% url 'opticut:descargar_pdf' opt.pk %}" class="btn btn-sm btn-outline-primary">
-  📄 Descargar PDF
-</a>
+              
+              <!-- Lista de piezas -->
+              {% if piezas %}
+              <details class="mb-2">
+                <summary style="cursor: pointer; color: var(--accent-primary); font-weight: 600;">
+                  📦 Ver Piezas ({{ piezas|length }})
+                </summary>
+                <div class="mt-2" style="font-size: 0.9rem;">
+                  {% for pieza in piezas %}
+                    <div>• <strong>{{ pieza.nombre }}</strong>: {{ pieza.ancho }}×{{ pieza.alto }}cm (x{{ pieza.cantidad }})</div>
+                  {% endfor %}
+                </div>
+              </details>
+              {% endif %}
+              
+              <div class="action-buttons mt-3">
+                <a href="{% url 'opticut:duplicar_optimizacion' optimizacion.id %}" 
+                   class="btn-action btn-duplicar" 
+                   title="Duplicar esta optimización">
+                  <span class="icon"></span> Duplicar
+                </a>
+                <a href="{% url 'opticut:descargar_pdf' optimizacion.id %}" 
+                   class="btn-action btn-pdf"
+                   title="Descargar PDF">
+                  <span class="icon"></span> PDF
+                </a>
+                <form method="post" 
+                      action="{% url 'opticut:borrar_optimizacion' optimizacion.id %}" 
+                      style="display:inline;" 
+                      onsubmit="return confirm('¿Eliminar esta optimización?');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn-action btn-eliminar" title="Eliminar">
+                    <span class="icon"></span> Borrar
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
+        {% endwith %}
       {% endfor %}
     </div>
+    
+    <!-- Contador de resultados -->
+    <div class="text-center mt-4 mb-4">
+      <p class="text-muted">
+        Mostrando <strong>{{ optimizaciones_con_piezas|length }}</strong> optimización{{ optimizaciones_con_piezas|length|pluralize:"es" }}
+      </p>
+    </div>
   {% else %}
-    <p class="text-center text-muted">Aún no tienes optimizaciones guardadas.</p>
+    <div class="card fade-in text-center" style="padding: 3rem;">
+      <h4 class="text-muted mb-3">📭 No hay optimizaciones</h4>
+      <p class="text-muted mb-4">
+        {% if nombre_pieza or fecha_desde or fecha_hasta %}
+          No se encontraron optimizaciones con los filtros aplicados.
+          <a href="{% url 'opticut:mis_optimizaciones' %}">Ver todas las optimizaciones</a>
+        {% else %}
+          Aún no tienes optimizaciones guardadas.
+        {% endif %}
+      </p>
+      <a href="{% url 'opticut:index' %}" class="btn btn-primary">
+        ➕ Crear Nueva Optimización
+      </a>
+    </div>
   {% endif %}
 </div>
+
+<style>
+.badge {
+    padding: 0.35em 0.65em;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+details summary {
+    user-select: none;
+}
+
+details summary::-webkit-details-marker {
+    display: none;
+}
+</style>
+
 {% endblock %}
