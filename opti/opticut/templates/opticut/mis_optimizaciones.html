@@ -87,17 +87,23 @@
         <div class="col-md-6 col-lg-4 mb-4 fade-in">
           <div class="optimizacion-card">
             {% if optimizacion.imagen %}
-              <img src="{{ optimizacion.imagen.url }}" 
-                   class="card-img-top" 
-                   alt="Optimización #{{ optimizacion.id }}"
-                   style="max-height: 200px; object-fit: cover;">
+              <div class="chart-container" style="position: relative; cursor: pointer;" 
+                   onclick="abrirModalImagen('{{ optimizacion.imagen.url }}', {{ optimizacion.id }})">
+                <img src="{{ optimizacion.imagen.url }}" 
+                     class="card-img-top chart-thumbnail" 
+                     alt="Optimización #{{ optimizacion.id }}"
+                     style="max-height: 200px; object-fit: cover;">
+                <div class="chart-overlay">
+                  <span class="chart-hint">🔍 Click para ver en pantalla completa</span>
+                </div>
+              </div>
             {% endif %}
             <div class="card-body">
               <h5 class="card-title">Optimización #{{ item.numero }}</h5>
               <p class="card-text">
                 <strong>📅 Fecha:</strong> {{ optimizacion.fecha|date:"d/m/Y" }}<br>
                 <strong>🕐 Hora:</strong> {{ optimizacion.fecha|date:"H:i" }} (Chile)<br>
-                <strong>📐 Tablero:</strong> {{ optimizacion.ancho_tablero }} × {{ optimizacion.alto_tablero }} cm<br>
+                <strong>📐 Tablero:</strong> {{ item.ancho_mostrar }} × {{ item.alto_mostrar }} {{ item.unidad_medida }}<br>
                 <strong>📊 Aprovechamiento:</strong> 
                 <span class="badge bg-success">{{ optimizacion.aprovechamiento_total|floatformat:2 }}%</span>
               </p>
@@ -168,6 +174,43 @@
   {% endif %}
 </div>
 
+    <!-- Modal para imágenes en pantalla completa -->
+    <div class="modal fade" id="modalImagen" tabindex="-1" aria-labelledby="modalImagenLabel" aria-hidden="true">
+      <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title" id="modalImagenLabel">Tablero en Pantalla Completa</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center modal-grafico-body">
+            <div class="row h-100">
+              <div class="col-10">
+                <div id="modalImagenContenido" class="modal-grafico-contenido">
+                  <!-- La imagen se cargará aquí -->
+                </div>
+              </div>
+              <div class="col-2 d-flex flex-column justify-content-center align-items-center zoom-controls">
+                <label for="zoomSliderImagen" class="text-white mb-2" style="writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.9rem;">Zoom</label>
+                <input type="range" 
+                       class="form-range" 
+                       id="zoomSliderImagen" 
+                       min="50" 
+                       max="300" 
+                       value="100" 
+                       step="5"
+                       style="width: 200px; transform: rotate(-90deg); margin: 50px 0;">
+                <span id="zoomValueImagen" class="text-white mt-2" style="font-size: 0.85rem;">100%</span>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer bg-dark text-white">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="button" class="btn btn-primary" onclick="resetearZoomImagen()">🔍 Resetear Zoom</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 <style>
 .badge {
     padding: 0.35em 0.65em;
@@ -182,6 +225,328 @@ details summary {
 details summary::-webkit-details-marker {
     display: none;
 }
+
+/* Estilos para gráficos clicables */
+.chart-container {
+    position: relative;
+    transition: transform 0.2s;
+}
+
+.chart-container:hover {
+    transform: scale(1.02);
+}
+
+.chart-thumbnail {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.chart-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.chart-container:hover .chart-overlay {
+    opacity: 1;
+}
+
+.chart-hint {
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+/* Estilos para modal de imagen */
+.modal-grafico-body {
+    background-color: #f8f9fa;
+    overflow: hidden;
+    padding: 0;
+    min-height: calc(100vh - 120px);
+}
+
+.modal-grafico-body .row {
+    height: 100%;
+    margin: 0;
+}
+
+.modal-grafico-body .col-10 {
+    overflow: auto;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zoom-controls {
+    background: linear-gradient(180deg, rgba(33, 37, 41, 0.95) 0%, rgba(52, 58, 64, 0.95) 100%);
+    padding: 1rem 0.5rem;
+    border-left: 2px solid rgba(0, 123, 255, 0.5);
+    min-width: 100px;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.zoom-controls input[type="range"] {
+    cursor: pointer;
+    width: 300px;
+    height: 8px;
+    margin: 80px 0;
+}
+
+.zoom-controls label {
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.zoom-controls #zoomValueImagen {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-top: 1rem;
+}
+
+.modal-grafico-contenido {
+    display: inline-block;
+    max-width: 100%;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: visible;
+}
+
+#modalImagenContenido {
+    width: 100%;
+    text-align: center;
+    position: relative;
+}
+
+#modalImagenContenido img {
+    max-width: 100%;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+    cursor: grab;
+    transition: transform 0.2s ease-out;
+    display: block;
+    margin: 0 auto;
+    user-select: none;
+    -webkit-user-drag: none;
+    touch-action: none;
+    object-fit: contain;
+}
+
+#modalImagenContenido img:active {
+    cursor: grabbing;
+}
 </style>
+
+<script>
+function abrirModalImagen(urlImagen, optimizacionId) {
+    const modal = new bootstrap.Modal(document.getElementById('modalImagen'));
+    const contenido = document.getElementById('modalImagenContenido');
+    const titulo = document.getElementById('modalImagenLabel');
+    
+    // Limpiar contenido anterior
+    contenido.innerHTML = '';
+    
+    // Establecer título
+    titulo.textContent = `Tablero - Optimización #${optimizacionId} - Pantalla Completa`;
+    
+    // Crear contenedor para la imagen con capacidad de arrastre
+    const contenedorImagen = document.createElement('div');
+    contenedorImagen.style.position = 'relative';
+    contenedorImagen.style.overflow = 'hidden';
+    contenedorImagen.style.width = '100%';
+    contenedorImagen.style.height = '100%';
+    contenedorImagen.style.cursor = 'grab';
+    
+    // Crear imagen
+    const img = document.createElement('img');
+    img.src = urlImagen;
+    img.alt = `Optimización #${optimizacionId}`;
+    img.className = 'img-fluid';
+    // Ajustar tamaño inicial para que se vea completo sin zoom excesivo
+    // La imagen se ajustará automáticamente al contenedor
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '90vh';
+    img.style.width = 'auto';
+    img.style.height = 'auto';
+    img.style.display = 'block';
+    img.style.margin = '0 auto';
+    img.style.transition = 'transform 0.1s ease-out';
+    img.style.userSelect = 'none';
+    img.draggable = false;
+    img.style.objectFit = 'contain';
+    // Asegurar que no haya transformación inicial
+    img.style.transform = 'scale(1) translate(0px, 0px)';
+    
+    // Variables para zoom y arrastre
+    let zoomLevel = 1; // Valor del zoom (1.0 = 100%)
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let translateX = 0;
+    let translateY = 0;
+    let currentTranslateX = 0;
+    let currentTranslateY = 0;
+    
+    // Esperar a que la imagen cargue para inicializar correctamente
+    img.onload = function() {
+        // Resetear transformación inicial
+        img.style.transform = 'scale(1) translate(0px, 0px)';
+        translateX = 0;
+        translateY = 0;
+        currentTranslateX = 0;
+        currentTranslateY = 0;
+    };
+    
+    // Función para actualizar el zoom basado en el slider
+    const actualizarZoom = (zoomPercent) => {
+        zoomLevel = zoomPercent / 100; // Convertir porcentaje a escala (50% = 0.5, 100% = 1.0, 300% = 3.0)
+        img.style.transform = `scale(${zoomLevel}) translate(${translateX}px, ${translateY}px)`;
+        img.style.transformOrigin = 'center center';
+        
+        // Actualizar cursor según el zoom
+        if (zoomLevel > 1) {
+            img.style.cursor = 'grab';
+            contenedorImagen.style.cursor = 'grab';
+        } else {
+            img.style.cursor = 'default';
+            contenedorImagen.style.cursor = 'default';
+        }
+        
+        // Actualizar el valor mostrado
+        document.getElementById('zoomValueImagen').textContent = zoomPercent + '%';
+    };
+    
+    // Configurar el slider de zoom
+    const zoomSlider = document.getElementById('zoomSliderImagen');
+    zoomSlider.addEventListener('input', function(e) {
+        const zoomPercent = parseInt(e.target.value);
+        actualizarZoom(zoomPercent);
+    });
+    
+    // Funcionalidad de arrastre cuando está en zoom
+    img.addEventListener('mousedown', function(e) {
+        if (zoomLevel > 1) {
+            // Cuando está en zoom, permitir arrastre
+            e.preventDefault();
+            isDragging = true;
+            startX = e.clientX - currentTranslateX;
+            startY = e.clientY - currentTranslateY;
+            this.style.cursor = 'grabbing';
+            contenedorImagen.style.cursor = 'grabbing';
+        }
+    });
+    
+    img.addEventListener('mousemove', function(e) {
+        if (isDragging && zoomLevel > 1) {
+            e.preventDefault();
+            currentTranslateX = e.clientX - startX;
+            currentTranslateY = e.clientY - startY;
+            translateX = currentTranslateX;
+            translateY = currentTranslateY;
+            this.style.transform = `scale(${zoomLevel}) translate(${translateX}px, ${translateY}px)`;
+        }
+    });
+    
+    img.addEventListener('mouseup', function(e) {
+        if (isDragging) {
+            isDragging = false;
+            if (zoomLevel > 1) {
+                this.style.cursor = 'grab';
+                contenedorImagen.style.cursor = 'grab';
+            } else {
+                this.style.cursor = 'default';
+                contenedorImagen.style.cursor = 'default';
+            }
+        }
+    });
+    
+    img.addEventListener('mouseleave', function(e) {
+        if (isDragging) {
+            isDragging = false;
+            if (zoomLevel > 1) {
+                this.style.cursor = 'grab';
+                contenedorImagen.style.cursor = 'grab';
+            }
+        }
+    });
+    
+    // Prevenir menú contextual al hacer click derecho cuando está en zoom
+    img.addEventListener('contextmenu', function(e) {
+        if (zoomLevel > 1) {
+            e.preventDefault();
+        }
+    });
+    
+    // Soporte para touch (móviles)
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchCurrentX = 0;
+    let touchCurrentY = 0;
+    let isTouchDragging = false;
+    
+    img.addEventListener('touchstart', function(e) {
+        if (zoomLevel > 1) {
+            e.preventDefault();
+            isTouchDragging = true;
+            touchStartX = e.touches[0].clientX - currentTranslateX;
+            touchStartY = e.touches[0].clientY - currentTranslateY;
+        }
+    });
+    
+    img.addEventListener('touchmove', function(e) {
+        if (isTouchDragging && zoomLevel > 1) {
+            e.preventDefault();
+            touchCurrentX = e.touches[0].clientX - touchStartX;
+            touchCurrentY = e.touches[0].clientY - touchStartY;
+            translateX = touchCurrentX;
+            translateY = touchCurrentY;
+            currentTranslateX = touchCurrentX;
+            currentTranslateY = touchCurrentY;
+            this.style.transform = `scale(${zoomLevel}) translate(${translateX}px, ${translateY}px)`;
+        }
+    });
+    
+    img.addEventListener('touchend', function(e) {
+        isTouchDragging = false;
+    });
+    
+    contenedorImagen.appendChild(img);
+    contenido.appendChild(contenedorImagen);
+    modal.show();
+}
+
+function resetearZoomImagen() {
+    const img = document.querySelector('#modalImagenContenido img');
+    const zoomSlider = document.getElementById('zoomSliderImagen');
+    if (img && zoomSlider) {
+        // Resetear slider a 100%
+        zoomSlider.value = 100;
+        // Resetear transformación visual
+        img.style.transform = 'scale(1) translate(0px, 0px)';
+        img.style.cursor = 'default';
+        // Actualizar el valor mostrado
+        document.getElementById('zoomValueImagen').textContent = '100%';
+        // Resetear variables de arrastre si están definidas
+        if (window.currentTranslateX !== undefined) {
+            window.currentTranslateX = 0;
+            window.currentTranslateY = 0;
+        }
+    }
+}
+</script>
 
 {% endblock %}

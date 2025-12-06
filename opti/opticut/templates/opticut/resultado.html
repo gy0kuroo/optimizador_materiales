@@ -17,7 +17,7 @@
       <div class="card text-center bg-info text-white">
         <div class="card-body">
           <h5 class="card-title">Área Utilizada</h5>
-          <h2>{{ info_desperdicio.area_usada_total }} cm²</h2>
+          <h2>{{ info_desperdicio.area_usada_total }} {{ simbolo_area|default:"cm²" }}</h2>
         </div>
       </div>
     </div>
@@ -25,7 +25,7 @@
       <div class="card text-center bg-warning text-white">
         <div class="card-body">
           <h5 class="card-title">Desperdicio Total</h5>
-          <h2>{{ info_desperdicio.desperdicio_total }} cm²</h2>
+          <h2>{{ info_desperdicio.desperdicio_total }} {{ simbolo_area|default:"cm²" }}</h2>
         </div>
       </div>
     </div>
@@ -53,8 +53,8 @@
       <tr>
         <td><strong>Tablero {{ info.numero }}</strong></td>
         <td>{{ info.num_piezas }}</td>
-        <td>{{ info.area_usada }} cm²</td>
-        <td>{{ info.desperdicio }} cm²</td>
+        <td>{{ info.area_usada }} {{ simbolo_area|default:"cm²" }}</td>
+        <td>{{ info.desperdicio }} {{ simbolo_area|default:"cm²" }}</td>
         <td>
           <div class="progress">
             <div class="progress-bar bg-success" role="progressbar" 

@@ -4,7 +4,7 @@ from django.forms import formset_factory
 from django.core.files.base import ContentFile
 from .forms import TableroForm, PiezaForm
 from .models import Optimizacion
-from .utils import generar_grafico, generar_pdf, generar_grafico_aprovechamiento, generar_grafico_desperdicio
+from .utils import generar_grafico, generar_pdf, generar_grafico_aprovechamiento, generar_grafico_desperdicio, convertir_a_cm, convertir_desde_cm, obtener_simbolo_unidad, obtener_simbolo_area
 import base64
 from django.contrib import messages
 from django.http import FileResponse
@@ -28,8 +28,16 @@ def index(request):
         pieza_formset = PiezaFormSet(request.POST)
 
         if tablero_form.is_valid() and pieza_formset.is_valid():
-            ancho = tablero_form.cleaned_data["ancho"]
-            alto = tablero_form.cleaned_data["alto"]
+            # Obtener unidad seleccionada
+            unidad = tablero_form.cleaned_data.get("unidad_medida", "cm")
+            
+            # Obtener valores en la unidad del usuario
+            ancho_usuario = tablero_form.cleaned_data["ancho"]
+            alto_usuario = tablero_form.cleaned_data["alto"]
+            
+            # Convertir a cm para cálculos internos (mantener decimales)
+            ancho = convertir_a_cm(ancho_usuario, unidad)
+            alto = convertir_a_cm(alto_usuario, unidad)
 
             piezas = []
             piezas_con_nombre = []
@@ -49,22 +57,28 @@ def index(request):
                         if not nombre:
                             nombre = f"Pieza {len(piezas_con_nombre) + 1}"
                         
-                        # Validar que la pieza no sea más grande que el tablero
-                        if pieza_ancho > ancho or pieza_alto > alto:
+                        # Convertir piezas a cm para validación y cálculos (mantener decimales)
+                        pieza_ancho_cm = convertir_a_cm(pieza_ancho, unidad)
+                        pieza_alto_cm = convertir_a_cm(pieza_alto, unidad)
+                        
+                        # Validar que la pieza no sea más grande que el tablero (en cm)
+                        if pieza_ancho_cm > ancho or pieza_alto_cm > alto:
+                            simbolo = obtener_simbolo_unidad(unidad)
                             messages.error(
                                 request, 
-                                f"❌ La pieza '{nombre}' ({pieza_ancho}x{pieza_alto} cm) NO CABE en el tablero ({ancho}x{alto} cm)."
+                                f"❌ La pieza '{nombre}' ({pieza_ancho}x{pieza_alto} {simbolo}) NO CABE en el tablero ({ancho_usuario}x{alto_usuario} {simbolo})."
                             )
                             return render(request, "opticut/index.html", {
                                 "tablero_form": tablero_form,
                                 "pieza_formset": pieza_formset
                             })
                         
-                        piezas.append((pieza_ancho, pieza_alto, cantidad))
+                        # Guardar piezas en cm para cálculos
+                        piezas.append((pieza_ancho_cm, pieza_alto_cm, cantidad))
                         piezas_con_nombre.append({
                             'nombre': nombre,
-                            'ancho': pieza_ancho,
-                            'alto': pieza_alto,
+                            'ancho': pieza_ancho,  # Guardar valor original para mostrar
+                            'alto': pieza_alto,  # Guardar valor original para mostrar
                             'cantidad': cantidad
                         })
             
@@ -77,7 +91,7 @@ def index(request):
                 })
 
             # Generar TODAS las imágenes, aprovechamiento Y desperdicio
-            imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(piezas, ancho, alto)
+            imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(piezas, ancho, alto, unidad)
             
             # Usar la primera imagen para vista previa
             imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
@@ -90,8 +104,9 @@ def index(request):
             
             optimizacion = Optimizacion.objects.create(
                 usuario=request.user,
-                ancho_tablero=ancho,
-                alto_tablero=alto,
+                ancho_tablero=ancho,  # Guardado en cm
+                alto_tablero=alto,  # Guardado en cm
+                unidad_medida=unidad,  # Guardar unidad original
                 piezas=piezas_texto,
                 aprovechamiento_total=aprovechamiento
             )
@@ -127,6 +142,39 @@ def index(request):
             
             messages.success(request, f"✅ Optimización creada exitosamente. Aprovechamiento: {aprovechamiento:.2f}%")
             
+            # Obtener unidad de la optimización
+            unidad = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
+            
+            # Convertir áreas de cm² a la unidad del usuario para mostrar
+            # Para áreas: si 1 cm = X unidades, entonces 1 cm² = X² unidades²
+            from .utils import convertir_desde_cm, obtener_simbolo_area
+            simbolo_area = obtener_simbolo_area(unidad)
+            
+            # Factor de conversión para áreas (factor lineal al cuadrado)
+            factor_lineal = convertir_desde_cm(1, unidad)  # Cuántas unidades hay en 1 cm
+            factor_area = factor_lineal ** 2  # Factor para áreas
+            
+            area_usada_mostrar = round(info_desperdicio['area_usada_total'] * factor_area, 2)
+            desperdicio_mostrar = round(info_desperdicio['desperdicio_total'] * factor_area, 2)
+            
+            # Convertir info de tableros
+            info_tableros_convertida = []
+            for info in info_desperdicio['info_tableros']:
+                area_usada_tab = round(info['area_usada'] * factor_area, 2)
+                desperdicio_tab = round(info['desperdicio'] * factor_area, 2)
+                info_tableros_convertida.append({
+                    **info,
+                    'area_usada': area_usada_tab,
+                    'desperdicio': desperdicio_tab,
+                })
+            
+            info_desperdicio_mostrar = {
+                **info_desperdicio,
+                'area_usada_total': area_usada_mostrar,
+                'desperdicio_total': desperdicio_mostrar,
+                'info_tableros': info_tableros_convertida,
+            }
+            
             return render(request, "opticut/resultado.html", {
                 "imagen": imagen_principal,
                 "imagenes": imagenes_base64,
@@ -134,7 +182,9 @@ def index(request):
                 "pdf_path": pdf_path,
                 "num_tableros": len(imagenes_base64),
                 "piezas_con_nombre": piezas_con_nombre,
-                "info_desperdicio": info_desperdicio  # AGREGADO
+                "info_desperdicio": info_desperdicio_mostrar,
+                "unidad_medida": unidad,
+                "simbolo_area": simbolo_area,
             })
         else:
             # Mostrar errores de validación
@@ -232,10 +282,18 @@ def mis_optimizaciones(request):
                         'cantidad': partes[2].strip()
                     })
         
+        # Obtener unidad y convertir dimensiones para mostrar
+        unidad_opt = getattr(opt, 'unidad_medida', 'cm') or 'cm'
+        ancho_mostrar = round(convertir_desde_cm(opt.ancho_tablero, unidad_opt), 2)
+        alto_mostrar = round(convertir_desde_cm(opt.alto_tablero, unidad_opt), 2)
+        
         optimizaciones_con_piezas.append({
             'optimizacion': opt,
             'piezas': piezas_procesadas,
-            'numero': numero_mostrado
+            'numero': numero_mostrado,
+            'ancho_mostrar': ancho_mostrar,
+            'alto_mostrar': alto_mostrar,
+            'unidad_medida': unidad_opt,
         })
     
     return render(request, 'opticut/mis_optimizaciones.html', {
@@ -317,18 +375,29 @@ def descargar_pdf(request, pk):
             numero_lista = None  # Si no se encuentra, usar ID por defecto
         
         # Regenerar las imágenes desde los datos guardados
+        # Obtener unidad de la optimización
+        unidad_opt = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
+        
+        # Las piezas se guardaron en la unidad original, necesitamos convertirlas a cm
         piezas = []
         for linea in optimizacion.piezas.splitlines():
             partes = linea.split(",")
             if len(partes) == 4:  # Con nombre
                 nombre, w, h, c = partes
-                piezas.append((int(w), int(h), int(c)))
+                # Convertir de unidad original a cm
+                w_cm = convertir_a_cm(float(w), unidad_opt)
+                h_cm = convertir_a_cm(float(h), unidad_opt)
+                piezas.append((w_cm, h_cm, int(c)))
             else:  # Sin nombre (formato antiguo)
                 w, h, c = partes
-                piezas.append((int(w), int(h), int(c)))
+                # Convertir de unidad original a cm
+                w_cm = convertir_a_cm(float(w), unidad_opt)
+                h_cm = convertir_a_cm(float(h), unidad_opt)
+                piezas.append((w_cm, h_cm, int(c)))
         
         # Generar TODAS las imágenes nuevamente (con info de desperdicio)
-        imagenes_base64, _, info_desperdicio = generar_grafico(piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero)
+        # Nota: ancho_tablero y alto_tablero ya están en cm en la BD
+        imagenes_base64, _, info_desperdicio = generar_grafico(piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero, unidad_opt)
         
         # Generar UN SOLO PDF con todas las imágenes (usando número de lista)
         pdf_path = generar_pdf(optimizacion, imagenes_base64, numero_lista=numero_lista)
@@ -343,8 +412,8 @@ def descargar_pdf(request, pk):
 @login_required
 def resultado_view(request):
     if request.method == "POST":
-        ancho = int(request.POST.get("ancho_tablero"))
-        alto = int(request.POST.get("alto_tablero"))
+        ancho = float(request.POST.get("ancho_tablero"))
+        alto = float(request.POST.get("alto_tablero"))
         piezas_texto = request.POST.get("piezas")
 
         piezas = []
@@ -352,19 +421,25 @@ def resultado_view(request):
             partes = linea.split(",")
             if len(partes) == 4:  # Con nombre
                 nombre, w, h, c = partes
-                piezas.append((int(w), int(h), int(c)))
+                piezas.append((float(w), float(h), int(c)))
             else:  # Sin nombre
                 w, h, c = partes
-                piezas.append((int(w), int(h), int(c)))
+                piezas.append((float(w), float(h), int(c)))
 
+        # Obtener unidad (asumir cm para datos antiguos o del POST)
+        unidad_resultado = request.POST.get('unidad_medida', 'cm')
+        if not unidad_resultado:
+            unidad_resultado = 'cm'
+        
         # Generar TODAS las imágenes con info de desperdicio
-        imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(piezas, ancho, alto)
+        imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(piezas, ancho, alto, unidad_resultado)
         imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
 
         optimizacion = Optimizacion.objects.create(
             usuario=request.user,
             ancho_tablero=ancho,
             alto_tablero=alto,
+            unidad_medida=unidad_resultado,
             piezas=piezas_texto,
             aprovechamiento_total=aprovechamiento
         )
@@ -380,13 +455,44 @@ def resultado_view(request):
         optimizacion.pdf = pdf_path
         optimizacion.save()
 
+        # Obtener unidad de la optimización
+        unidad = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
+        
+        # Convertir áreas de cm² a la unidad del usuario para mostrar
+        from .utils import convertir_desde_cm, obtener_simbolo_area
+        simbolo_area = obtener_simbolo_area(unidad)
+        factor_lineal = convertir_desde_cm(1, unidad)
+        factor_area = factor_lineal ** 2
+        
+        area_usada_mostrar = round(info_desperdicio['area_usada_total'] * factor_area, 2)
+        desperdicio_mostrar = round(info_desperdicio['desperdicio_total'] * factor_area, 2)
+        
+        info_tableros_convertida = []
+        for info in info_desperdicio['info_tableros']:
+            area_usada_tab = round(info['area_usada'] * factor_area, 2)
+            desperdicio_tab = round(info['desperdicio'] * factor_area, 2)
+            info_tableros_convertida.append({
+                **info,
+                'area_usada': area_usada_tab,
+                'desperdicio': desperdicio_tab,
+            })
+        
+        info_desperdicio_mostrar = {
+            **info_desperdicio,
+            'area_usada_total': area_usada_mostrar,
+            'desperdicio_total': desperdicio_mostrar,
+            'info_tableros': info_tableros_convertida,
+        }
+        
         return render(request, "opticut/resultado.html", {
             "optimizacion": optimizacion,
             "imagen": imagen_principal,
             "imagenes": imagenes_base64,
             "pdf_path": pdf_path,
             "num_tableros": len(imagenes_base64),
-            "info_desperdicio": info_desperdicio
+            "info_desperdicio": info_desperdicio_mostrar,
+            "unidad_medida": unidad,
+            "simbolo_area": simbolo_area,
         })
 
 
@@ -422,10 +528,23 @@ def duplicar_optimizacion(request, pk):
         # Crear formset con los datos de la optimización
         PiezaFormSet = formset_factory(PiezaForm, extra=0, max_num=20)
         
+        # Obtener unidad de la optimización (o 'cm' por defecto para datos antiguos)
+        unidad_original = getattr(optimizacion, 'unidad_medida', 'cm')
+        
+        # Convertir dimensiones de cm a la unidad original para mostrar
+        ancho_mostrar = convertir_desde_cm(optimizacion.ancho_tablero, unidad_original)
+        alto_mostrar = convertir_desde_cm(optimizacion.alto_tablero, unidad_original)
+        
+        # Convertir piezas de cm a la unidad original
+        for pieza in piezas_data:
+            pieza['ancho'] = round(convertir_desde_cm(float(pieza['ancho']), unidad_original), 2)
+            pieza['alto'] = round(convertir_desde_cm(float(pieza['alto']), unidad_original), 2)
+        
         # Crear formularios con datos prellenados
         tablero_form = TableroForm(initial={
-            'ancho': optimizacion.ancho_tablero,
-            'alto': optimizacion.alto_tablero
+            'ancho': ancho_mostrar,
+            'alto': alto_mostrar,
+            'unidad_medida': unidad_original
         })
         
         pieza_formset = PiezaFormSet(initial=piezas_data)
@@ -541,10 +660,18 @@ def estadisticas(request):
                         'cantidad': partes[2].strip()
                     })
         
+        # Obtener unidad y convertir dimensiones para mostrar
+        unidad_opt = getattr(opt, 'unidad_medida', 'cm') or 'cm'
+        ancho_mostrar = round(convertir_desde_cm(opt.ancho_tablero, unidad_opt), 2)
+        alto_mostrar = round(convertir_desde_cm(opt.alto_tablero, unidad_opt), 2)
+        
         top_optimizaciones_list.append({
             'optimizacion': opt,
             'posicion': idx,
-            'piezas': piezas_procesadas
+            'piezas': piezas_procesadas,
+            'ancho_mostrar': ancho_mostrar,
+            'alto_mostrar': alto_mostrar,
+            'unidad_medida': unidad_opt,
         })
     
     return render(request, 'opticut/estadisticas.html', {

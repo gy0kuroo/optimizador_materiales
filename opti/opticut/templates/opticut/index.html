@@ -32,9 +32,23 @@
       </div>
       <div class="card-body">
         <div id="medidas-pred-container"></div>
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <div class="d-flex align-items-end gap-3">
+              <div class="flex-grow-1">
+                {{ tablero_form.unidad_medida.label_tag }}
+                {{ tablero_form.unidad_medida }}
+                <small class="form-text text-muted">{{ tablero_form.unidad_medida.help_text }}</small>
+                {% if tablero_form.unidad_medida.errors %}
+                  <div class="text-danger">{{ tablero_form.unidad_medida.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="row">
           <div class="col-md-6 mb-3">
-            {{ tablero_form.ancho.label_tag }}
+            <label for="ancho_tablero" id="label_ancho">Ancho del tablero <span id="unidad_ancho">(cm)</span></label>
             {{ tablero_form.ancho }}
             <small class="form-text text-muted">{{ tablero_form.ancho.help_text }}</small>
             {% if tablero_form.ancho.errors %}
@@ -42,7 +56,7 @@
             {% endif %}
           </div>
           <div class="col-md-6 mb-3">
-            {{ tablero_form.alto.label_tag }}
+            <label for="alto_tablero" id="label_alto">Alto del tablero <span id="unidad_alto">(cm)</span></label>
             {{ tablero_form.alto }}
             <small class="form-text text-muted">{{ tablero_form.alto.help_text }}</small>
             {% if tablero_form.alto.errors %}
@@ -78,11 +92,11 @@
                 <small class="form-text text-muted">{{ form.nombre.help_text }}</small>
               </div>
               <div class="col-md-2 mb-2">
-                {{ form.ancho.label_tag }}
+                <label for="{{ form.ancho.id_for_label }}">Ancho <span class="unidad-pieza">(cm)</span></label>
                 {{ form.ancho }}
               </div>
               <div class="col-md-2 mb-2">
-                {{ form.alto.label_tag }}
+                <label for="{{ form.alto.id_for_label }}">Alto <span class="unidad-pieza">(cm)</span></label>
                 {{ form.alto }}
               </div>
               <div class="col-md-2 mb-2">
@@ -180,6 +194,49 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     actualizarNumeros();
+});
+
+// Función para actualizar labels según la unidad seleccionada
+function actualizarLabelsUnidad() {
+    const selector = document.getElementById('unidad_medida_selector');
+    const unidad = selector.value;
+    const unidadSpan = document.getElementById('unidad_ancho');
+    const unidadAltoSpan = document.getElementById('unidad_alto');
+    const unidadesPiezas = document.querySelectorAll('.unidad-pieza');
+    
+    const simbolos = {
+        'cm': 'cm',
+        'm': 'm',
+        'in': 'in',
+        'ft': 'ft'
+    };
+    
+    const simbolo = simbolos[unidad] || 'cm';
+    unidadSpan.textContent = `(${simbolo})`;
+    unidadAltoSpan.textContent = `(${simbolo})`;
+    
+    // Actualizar unidades de piezas también
+    unidadesPiezas.forEach(span => {
+        span.textContent = `(${simbolo})`;
+    });
+}
+
+// Ejecutar al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarLabelsUnidad();
+    const selector = document.getElementById('unidad_medida_selector');
+    if (selector) {
+        selector.addEventListener('change', actualizarLabelsUnidad);
+    }
+    
+    // Actualizar unidades cuando se agregan nuevas piezas
+    const addButton = document.getElementById('add-pieza');
+    if (addButton) {
+        const originalAddHandler = addButton.onclick;
+        addButton.addEventListener('click', function() {
+            setTimeout(actualizarLabelsUnidad, 100);
+        });
+    }
 });
 </script>
 {% endblock %}

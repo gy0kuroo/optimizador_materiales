@@ -12,7 +12,78 @@ import os
 from PIL import Image
 
 
-def generar_grafico(piezas, ancho_tablero, alto_tablero):
+# ===== FUNCIONES DE CONVERSIÓN DE UNIDADES =====
+# Todas las conversiones son a centímetros (unidad base)
+
+def convertir_a_cm(valor, unidad):
+    """
+    Convierte un valor de cualquier unidad a centímetros.
+    
+    Args:
+        valor: Valor numérico a convertir
+        unidad: Unidad de origen ('cm', 'm', 'in', 'ft')
+    
+    Returns:
+        Valor convertido a centímetros
+    """
+    conversiones = {
+        'cm': 1.0,           # 1 cm = 1 cm
+        'm': 100.0,          # 1 m = 100 cm
+        'in': 2.54,          # 1 pulgada = 2.54 cm
+        'ft': 30.48,         # 1 pie = 30.48 cm
+    }
+    factor = conversiones.get(unidad, 1.0)
+    return round(valor * factor, 2)
+
+
+def convertir_desde_cm(valor_cm, unidad_destino):
+    """
+    Convierte un valor en centímetros a otra unidad.
+    
+    Args:
+        valor_cm: Valor en centímetros
+        unidad_destino: Unidad de destino ('cm', 'm', 'in', 'ft')
+    
+    Returns:
+        Valor convertido a la unidad destino
+    """
+    conversiones = {
+        'cm': 1.0,           # 1 cm = 1 cm
+        'm': 0.01,           # 1 cm = 0.01 m
+        'in': 1/2.54,        # 1 cm = 1/2.54 pulgadas
+        'ft': 1/30.48,       # 1 cm = 1/30.48 pies
+    }
+    factor = conversiones.get(unidad_destino, 1.0)
+    return round(valor_cm * factor, 2)
+
+
+def obtener_simbolo_unidad(unidad):
+    """
+    Retorna el símbolo de la unidad para mostrar.
+    """
+    simbolos = {
+        'cm': 'cm',
+        'm': 'm',
+        'in': 'in',
+        'ft': 'ft',
+    }
+    return simbolos.get(unidad, 'cm')
+
+
+def obtener_simbolo_area(unidad):
+    """
+    Retorna el símbolo de unidad al cuadrado para áreas.
+    """
+    simbolos = {
+        'cm': 'cm²',
+        'm': 'm²',
+        'in': 'in²',
+        'ft': 'ft²',
+    }
+    return simbolos.get(unidad, 'cm²')
+
+
+def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm'):
     """
     Algoritmo First Fit Decreasing (FFD) mejorado para optimización de cortes.
     Ahora también calcula desperdicio por tablero.
@@ -127,12 +198,19 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero):
         ax.invert_yaxis()
         ax.set_aspect('equal')
         
+        # Convertir desperdicio para mostrar
+        simbolo = obtener_simbolo_unidad(unidad)
+        simbolo_area = obtener_simbolo_area(unidad)
+        factor_lineal = convertir_desde_cm(1, unidad)
+        factor_area = factor_lineal ** 2
+        desperdicio_mostrar = round(info['desperdicio'] * factor_area, 2)
+        
         # Título con información de desperdicio
         ax.set_title(f"Tablero {i} de {num_tableros} - FFD\n"
-                    f"Uso: {info['porcentaje_uso']}% | Desperdicio: {info['desperdicio']} cm²",
+                    f"Uso: {info['porcentaje_uso']}% | Desperdicio: {desperdicio_mostrar} {simbolo_area}",
                     fontsize=13, fontweight='bold', pad=20)
-        ax.set_xlabel("Ancho (cm)", fontsize=11)
-        ax.set_ylabel("Alto (cm)", fontsize=11)
+        ax.set_xlabel(f"Ancho ({simbolo})", fontsize=11)
+        ax.set_ylabel(f"Alto ({simbolo})", fontsize=11)
         
         ax.grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
         ax.set_axisbelow(True)
@@ -151,15 +229,20 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero):
                                      edgecolor='darkblue', facecolor=color, alpha=0.7)
             ax.add_patch(rect)
             
-            ax.text(x + w/2, y + h/2, f'{w}×{h}',
+            # Convertir dimensiones de pieza para mostrar
+            w_mostrar = round(convertir_desde_cm(w, unidad), 1)
+            h_mostrar = round(convertir_desde_cm(h, unidad), 1)
+            
+            ax.text(x + w/2, y + h/2, f'{w_mostrar}×{h_mostrar}',
                    ha='center', va='center', fontsize=10, 
                    fontweight='bold', color='white',
                    bbox=dict(boxstyle='round,pad=0.3', facecolor='black', alpha=0.7))
         
-        # Información detallada
+        # Información detallada (convertir áreas)
+        area_usada_mostrar = round(info['area_usada'] * factor_area, 2)
         info_text = (f"Piezas: {info['num_piezas']}\n"
-                    f"Área usada: {info['area_usada']} cm²\n"
-                    f"Desperdicio: {info['desperdicio']} cm²")
+                    f"Área usada: {area_usada_mostrar} {simbolo_area}\n"
+                    f"Desperdicio: {desperdicio_mostrar} {simbolo_area}")
         ax.text(ancho_tablero * 0.02, alto_tablero * 0.98, info_text,
                fontsize=9, verticalalignment='top',
                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.9))
@@ -217,7 +300,13 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None):
     c.setFont("Helvetica", 11)
     c.drawString(2.5*cm, height - 130, f"• Usuario: {optimizacion.usuario.username}")
     c.drawString(2.5*cm, height - 145, f"• Fecha: {optimizacion.fecha.strftime('%d/%m/%Y %H:%M')}")
-    c.drawString(2.5*cm, height - 160, f"• Dimensiones del tablero: {optimizacion.ancho_tablero} × {optimizacion.alto_tablero} cm")
+    # Obtener unidad y convertir dimensiones para mostrar
+    unidad = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
+    ancho_mostrar = convertir_desde_cm(optimizacion.ancho_tablero, unidad)
+    alto_mostrar = convertir_desde_cm(optimizacion.alto_tablero, unidad)
+    simbolo = obtener_simbolo_unidad(unidad)
+    
+    c.drawString(2.5*cm, height - 160, f"• Dimensiones del tablero: {ancho_mostrar} × {alto_mostrar} {simbolo}")
     c.drawString(2.5*cm, height - 175, f"• Tableros generados: {len(imagenes_base64)}")
     
     c.setFont("Helvetica-Bold", 12)
