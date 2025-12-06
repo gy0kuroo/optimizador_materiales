@@ -2,6 +2,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import matplotlib.dates as mdates
 import io, base64
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -300,3 +301,157 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None):
     c.save()
     
     return os.path.join("pdfs", filename)
+
+
+def generar_grafico_aprovechamiento(optimizaciones, periodo='todos', alta_resolucion=False):
+    """
+    Genera un gráfico de línea mostrando la tendencia de aprovechamiento.
+    
+    Args:
+        optimizaciones: QuerySet de optimizaciones ordenadas por fecha
+        periodo: 'semanal', 'mensual', 'anual', 'todos'
+        alta_resolucion: Si es True, genera una versión en alta resolución para zoom
+    
+    Returns:
+        String base64 de la imagen del gráfico
+    """
+    if not optimizaciones.exists():
+        return None
+    
+    # Ajustar tamaño y DPI según resolución
+    if alta_resolucion:
+        fig, ax = plt.subplots(figsize=(16, 9))
+        dpi = 200
+        fontsize_title = 18
+        fontsize_labels = 14
+        fontsize_legend = 12
+        linewidth = 3
+        markersize = 8
+    else:
+        fig, ax = plt.subplots(figsize=(12, 6))
+        dpi = 100
+        fontsize_title = 14
+        fontsize_labels = 11
+        fontsize_legend = 10
+        linewidth = 2
+        markersize = 6
+    
+    # Preparar datos
+    fechas = [opt.fecha for opt in optimizaciones]
+    aprovechamientos = [opt.aprovechamiento_total for opt in optimizaciones]
+    
+    # Calcular promedio
+    promedio = sum(aprovechamientos) / len(aprovechamientos) if aprovechamientos else 0
+    
+    # Gráfico de línea
+    ax.plot(fechas, aprovechamientos, marker='o', linewidth=linewidth, markersize=markersize, 
+            color='#4ECDC4', label='Aprovechamiento')
+    
+    # Línea de promedio
+    ax.axhline(y=promedio, color='#FF6B6B', linestyle='--', linewidth=linewidth, 
+               label=f'Promedio: {promedio:.2f}%')
+    
+    # Formatear fechas según período
+    if periodo == 'semanal':
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m'))
+    elif periodo == 'mensual':
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
+    elif periodo == 'anual':
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+    else:
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m/%Y'))
+    
+    plt.xticks(rotation=45, ha='right')
+    ax.set_xlabel('Fecha', fontsize=fontsize_labels, fontweight='bold')
+    ax.set_ylabel('Aprovechamiento (%)', fontsize=fontsize_labels, fontweight='bold')
+    ax.set_title('📊 Tendencia de Aprovechamiento', fontsize=fontsize_title, fontweight='bold', pad=20)
+    ax.grid(True, alpha=0.3, linestyle='--')
+    ax.legend(loc='best', fontsize=fontsize_legend)
+    ax.set_ylim(0, 100)
+    
+    plt.tight_layout()
+    
+    # Convertir a base64
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png', dpi=dpi, bbox_inches='tight', facecolor='white')
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode('utf-8')
+
+
+def generar_grafico_desperdicio(optimizaciones, periodo='todos', alta_resolucion=False):
+    """
+    Genera un gráfico de línea mostrando la tendencia de desperdicio.
+    Calcula el desperdicio basado en el aprovechamiento.
+    
+    Args:
+        optimizaciones: QuerySet de optimizaciones ordenadas por fecha
+        periodo: 'semanal', 'mensual', 'anual', 'todos'
+        alta_resolucion: Si es True, genera una versión en alta resolución para zoom
+    
+    Returns:
+        String base64 de la imagen del gráfico
+    """
+    if not optimizaciones.exists():
+        return None
+    
+    # Ajustar tamaño y DPI según resolución
+    if alta_resolucion:
+        fig, ax = plt.subplots(figsize=(16, 9))
+        dpi = 200
+        fontsize_title = 18
+        fontsize_labels = 14
+        fontsize_legend = 12
+        linewidth = 3
+        markersize = 8
+    else:
+        fig, ax = plt.subplots(figsize=(12, 6))
+        dpi = 100
+        fontsize_title = 14
+        fontsize_labels = 11
+        fontsize_legend = 10
+        linewidth = 2
+        markersize = 6
+    
+    # Preparar datos
+    fechas = [opt.fecha for opt in optimizaciones]
+    # Calcular desperdicio: 100 - aprovechamiento
+    desperdicios = [100 - opt.aprovechamiento_total for opt in optimizaciones]
+    
+    # Calcular promedio
+    promedio = sum(desperdicios) / len(desperdicios) if desperdicios else 0
+    
+    # Gráfico de línea
+    ax.plot(fechas, desperdicios, marker='s', linewidth=linewidth, markersize=markersize, 
+            color='#FF6B6B', label='Desperdicio')
+    
+    # Línea de promedio
+    ax.axhline(y=promedio, color='#4ECDC4', linestyle='--', linewidth=linewidth, 
+               label=f'Promedio: {promedio:.2f}%')
+    
+    # Formatear fechas según período
+    if periodo == 'semanal':
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m'))
+    elif periodo == 'mensual':
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
+    elif periodo == 'anual':
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+    else:
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m/%Y'))
+    
+    plt.xticks(rotation=45, ha='right')
+    ax.set_xlabel('Fecha', fontsize=fontsize_labels, fontweight='bold')
+    ax.set_ylabel('Desperdicio (%)', fontsize=fontsize_labels, fontweight='bold')
+    ax.set_title('📉 Tendencia de Desperdicio', fontsize=fontsize_title, fontweight='bold', pad=20)
+    ax.grid(True, alpha=0.3, linestyle='--')
+    ax.legend(loc='best', fontsize=fontsize_legend)
+    ax.set_ylim(0, 100)
+    
+    plt.tight_layout()
+    
+    # Convertir a base64
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png', dpi=dpi, bbox_inches='tight', facecolor='white')
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode('utf-8')

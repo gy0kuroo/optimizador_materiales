@@ -5,10 +5,10 @@ class TableroForm(forms.Form):
         label="Ancho del tablero (cm)",
         min_value=50,
         max_value=300,
-        initial=244,
+        required=False,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Ej: 244'
+            'placeholder': 'Ej: 122cm'
         }),
         help_text="Valor entre 50 y 300 cm"
     )
@@ -16,13 +16,32 @@ class TableroForm(forms.Form):
         label="Alto del tablero (cm)",
         min_value=50,
         max_value=300,
-        initial=122,
+        required=False,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Ej: 122'
+            'placeholder': 'Ej: 244cm'
         }),
         help_text="Valor entre 50 y 300 cm"
     )
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        ancho = cleaned_data.get('ancho')
+        alto = cleaned_data.get('alto')
+        
+        # Validar que ambos campos estén presentes
+        if not ancho:
+            raise forms.ValidationError("El ancho del tablero es requerido.")
+        if not alto:
+            raise forms.ValidationError("El alto del tablero es requerido.")
+        
+        # Validar rangos
+        if ancho < 50 or ancho > 300:
+            raise forms.ValidationError("El ancho debe estar entre 50 y 300 cm.")
+        if alto < 50 or alto > 300:
+            raise forms.ValidationError("El alto debe estar entre 50 y 300 cm.")
+        
+        return cleaned_data
 
 class PiezaForm(forms.Form):
     nombre = forms.CharField(

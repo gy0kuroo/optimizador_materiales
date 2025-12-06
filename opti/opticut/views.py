@@ -4,10 +4,13 @@ from django.forms import formset_factory
 from django.core.files.base import ContentFile
 from .forms import TableroForm, PiezaForm
 from .models import Optimizacion
-from .utils import generar_grafico, generar_pdf
+from .utils import generar_grafico, generar_pdf, generar_grafico_aprovechamiento, generar_grafico_desperdicio
 import base64
 from django.contrib import messages
 from django.http import FileResponse
+from django.db.models import Avg, Count, Sum, Max, Min
+from django.utils import timezone
+from datetime import timedelta
 import os
 from opti import settings
 
@@ -439,3 +442,121 @@ def duplicar_optimizacion(request, pk):
     except Optimizacion.DoesNotExist:
         messages.error(request, "No se encontró la optimización.")
         return redirect('opticut:mis_optimizaciones')
+
+
+@login_required
+def estadisticas(request):
+    """
+    Vista para mostrar estadísticas, gráficos y top de optimizaciones.
+    
+    IMPORTANTE: Todos los datos están filtrados por usuario (request.user).
+    Cada usuario solo ve sus propias optimizaciones y estadísticas.
+    """
+    # Obtener todas las optimizaciones del usuario actual (filtrado por seguridad)
+    todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('fecha')
+    
+    # Obtener período seleccionado
+    periodo = request.GET.get('periodo', 'todos')
+    
+    # Filtrar por período
+    ahora = timezone.now()
+    optimizaciones_filtradas = todas_optimizaciones
+    
+    if periodo == 'semanal':
+        fecha_limite = ahora - timedelta(days=7)
+        optimizaciones_filtradas = todas_optimizaciones.filter(fecha__gte=fecha_limite)
+    elif periodo == 'mensual':
+        fecha_limite = ahora - timedelta(days=30)
+        optimizaciones_filtradas = todas_optimizaciones.filter(fecha__gte=fecha_limite)
+    elif periodo == 'anual':
+        fecha_limite = ahora - timedelta(days=365)
+        optimizaciones_filtradas = todas_optimizaciones.filter(fecha__gte=fecha_limite)
+    # 'todos' no necesita filtro
+    
+    # Calcular estadísticas generales
+    total_optimizaciones = optimizaciones_filtradas.count()
+    
+    if total_optimizaciones > 0:
+        # Estadísticas de aprovechamiento
+        promedio_aprovechamiento = optimizaciones_filtradas.aggregate(
+            avg=Avg('aprovechamiento_total')
+        )['avg'] or 0
+        
+        max_aprovechamiento = optimizaciones_filtradas.order_by('-aprovechamiento_total').first()
+        max_aprovech_val = max_aprovechamiento.aprovechamiento_total if max_aprovechamiento else 0
+        
+        min_aprovechamiento = optimizaciones_filtradas.order_by('aprovechamiento_total').first()
+        min_aprovech_val = min_aprovechamiento.aprovechamiento_total if min_aprovechamiento else 0
+        
+        # Estadísticas de desperdicio (calculado)
+        promedio_desperdicio = 100 - promedio_aprovechamiento
+        
+        # Top 10 optimizaciones (mayor aprovechamiento)
+        top_optimizaciones = optimizaciones_filtradas.order_by('-aprovechamiento_total')[:10]
+        
+        # Generar gráficos (versión normal y alta resolución)
+        grafico_aprovechamiento = generar_grafico_aprovechamiento(
+            optimizaciones_filtradas.order_by('fecha'), periodo, alta_resolucion=False
+        )
+        grafico_aprovechamiento_hd = generar_grafico_aprovechamiento(
+            optimizaciones_filtradas.order_by('fecha'), periodo, alta_resolucion=True
+        )
+        grafico_desperdicio = generar_grafico_desperdicio(
+            optimizaciones_filtradas.order_by('fecha'), periodo, alta_resolucion=False
+        )
+        grafico_desperdicio_hd = generar_grafico_desperdicio(
+            optimizaciones_filtradas.order_by('fecha'), periodo, alta_resolucion=True
+        )
+    else:
+        promedio_aprovechamiento = 0
+        max_aprovech_val = 0
+        min_aprovech_val = 0
+        promedio_desperdicio = 0
+        top_optimizaciones = []
+        grafico_aprovechamiento = None
+        grafico_aprovechamiento_hd = None
+        grafico_desperdicio = None
+        grafico_desperdicio_hd = None
+    
+    # Procesar top optimizaciones para el template
+    top_optimizaciones_list = []
+    for idx, opt in enumerate(top_optimizaciones, start=1):
+        # Parsear piezas
+        piezas_procesadas = []
+        for linea in opt.piezas.splitlines():
+            if linea.strip():
+                partes = linea.split(',')
+                if len(partes) == 4:
+                    piezas_procesadas.append({
+                        'nombre': partes[0].strip(),
+                        'ancho': partes[1].strip(),
+                        'alto': partes[2].strip(),
+                        'cantidad': partes[3].strip()
+                    })
+                elif len(partes) == 3:
+                    piezas_procesadas.append({
+                        'nombre': 'Pieza',
+                        'ancho': partes[0].strip(),
+                        'alto': partes[1].strip(),
+                        'cantidad': partes[2].strip()
+                    })
+        
+        top_optimizaciones_list.append({
+            'optimizacion': opt,
+            'posicion': idx,
+            'piezas': piezas_procesadas
+        })
+    
+    return render(request, 'opticut/estadisticas.html', {
+        'total_optimizaciones': total_optimizaciones,
+        'promedio_aprovechamiento': round(promedio_aprovechamiento, 2),
+        'max_aprovechamiento': round(max_aprovech_val, 2),
+        'min_aprovechamiento': round(min_aprovech_val, 2),
+        'promedio_desperdicio': round(promedio_desperdicio, 2),
+        'top_optimizaciones': top_optimizaciones_list,
+        'grafico_aprovechamiento': grafico_aprovechamiento,
+        'grafico_aprovechamiento_hd': grafico_aprovechamiento_hd,
+        'grafico_desperdicio': grafico_desperdicio,
+        'grafico_desperdicio_hd': grafico_desperdicio_hd,
+        'periodo': periodo,
+    })

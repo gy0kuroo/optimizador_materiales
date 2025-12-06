@@ -6,6 +6,7 @@ app_name = "opticut"
 urlpatterns = [
     path("", views.index, name="index"),
     path('mis-optimizaciones/', views.mis_optimizaciones, name='mis_optimizaciones'),
+    path('estadisticas/', views.estadisticas, name='estadisticas'),
     path('borrar-historial/', views.borrar_historial, name='borrar_historial'),
     path('borrar/<int:pk>/', views.borrar_optimizacion, name='borrar_optimizacion'),
     path('descargar-pdf/<int:pk>/', views.descargar_pdf, name='descargar_pdf'),
