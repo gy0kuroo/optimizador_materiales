@@ -1,0 +1,844 @@
+Informe de Desarrollo
+Asignatura: Proyecto de Integración
+
+Sección: TIHI63/D-IEI-N6-P1-C
+
+Nombre del académico: Andrés Paiva Maulen
+
+Nombre de los integrantes del grupo: Juan José Bossa, Ricardo Labra, Felipe San Juan
+
+Fecha de entrega: 05 /1 1 /
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+I. Introducción Contenido
+II. Objetivos
+III. Desarrollo
+Especificación de Arquitectura.
+a) Diseño de la Topología de comunicación.
+b) Diseño de la infraestructura.
+c) Diseño de la arquitectura.
+Descripción de las tecnologías.
+a) Análisis comparativo cualitativo/cuantitativo.
+b) Selección de las herramientas.
+Integración de las tecnologías.
+a) Selección de los proveedores de tecnología.
+b) Descripción de la seguridad y calidad.
+Implementación de la solución.
+a) Selección de plataformas.
+Entorno de desarrollo (local)
+Formulario del prototipo
+Aplicación de métodos, estándares y buenas prácticas.
+a) Cumplimiento en los criterios de aceptación
+b) Cumplimiento de estándares normativos
+c) Cumplimiento de buenas prácticas
+d) Cumplimiento de rendimiento y eficiencia
+e) Cumplimiento de Seguridad
+IV. Conclusiones
+Ingeniería en Informática
+
+Proyecto de Integración -TIHI
+I. Introducción
+
+El presente informe correspondió a la segunda etapa del proyecto “Opticut”, desarrollado en el
+marco de la asignatura Proyecto de Integración. En esta fase se abordaron aspectos técnicos y
+metodológicos que permitieron avanzar desde el diseño conceptual hacia una propuesta de
+implementación concreta, orientada a materializar un prototipo funcional de la solución.
+
+Durante esta etapa se definieron la arquitectura del sistema, la topología de comunicación entre
+los componentes y la infraestructura tecnológica necesaria para el desarrollo y futura puesta en
+marcha del software. Asimismo, se realizó un análisis comparativo de diferentes tecnologías,
+lenguajes de programación, herramientas y recursos de hardware, considerando tanto sus
+ventajas cualitativas como cuantitativas. Dicho análisis permitió justificar la selección de aquellas
+alternativas que mejor respondieron a los requerimientos de rendimiento, usabilidad,
+compatibilidad y escalabilidad identificados en la primera parte del proyecto.
+
+De igual manera, se establecieron los proveedores de tecnología más adecuados para el
+desarrollo y soporte de la solución, y se describió la forma en que la integración de los distintos
+componentes asegura criterios de seguridad, calidad y eficiencia. Además, se proyectó la
+posibilidad de evolucionar el prototipo hacia entornos más robustos, como aplicaciones web con
+acceso multiusuario, de acuerdo con las necesidades futuras del negocio.
+
+En síntesis, este informe expuso los elementos técnicos que fundamentaron la implementación
+del prototipo, entregando una base sólida para garantizar su factibilidad, pertinencia y alineación
+con los objetivos estratégicos del proyecto y con las características propias de los talleres de
+carpintería a los cuales está dirigido.
+
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+II. Objetivos
+
+El propósito de este documento es presentar en detalle la segunda etapa del proyecto "Opticut".
+En términos sencillos, este informe es la "receta" técnica de cómo estamos construyendo nuestro
+programa para optimizar cortes de madera.
+
+En las siguientes secciones, explicaremos las decisiones que tomamos para pasar de la idea a
+un prototipo funcional. Comenzaremos describiendo las herramientas y "materiales" tecnológicos
+que elegimos (como Django y MySQL) y por qué fueron los más adecuados para este trabajo.
+
+Luego, mostraremos los "planos" del sistema: cómo se conectan sus distintas partes (la
+arquitectura y topología) y dónde podría "vivir" en el futuro (la infraestructura en la nube).
+
+También describiremos el "cerebro" de Opticut, explicando cómo implementamos la lógica para
+que el programa calcule de forma inteligente los mejores patrones de corte y así reducir el
+desperdicio de material.
+
+Finalmente, este informe detalla cómo nos aseguramos de que el prototipo funcione bien, sea
+seguro para los usuarios y cumpla con los estándares de calidad, presentando las pruebas de
+rendimiento y usabilidad que realizamos para validarlo.
+
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+III. Desarrollo
+
+Especificación de Arquitectura.
+a) Diseño de la Topología de comunicación.
+El diagrama muestra la topología de comunicación del sistema “OptiCut”, centrado en un
+servidor local en Django que gestiona las solicitudes de la interfaz, ejecuta el algoritmo de
+optimización y administra la base de datos. Los resultados se envían al generador gráfico,
+que crea los patrones de corte y permite exportarlos en PDF, asegurando un flujo de datos
+ágil e integrado.
+b) Diseño de la infraestructura.
+Este diseño muestra la estructura de comunicación del sistema “OptiCut”, detallando cómo
+interactúan sus componentes principales.
+El objetivo es asegurar una conectividad eficiente, segura y continua entre los elementos,
+garantizando una entrega rápida de resultados, protección de los datos y un
+funcionamiento sin interrupciones del sistema.
+La topología evidencia un flujo centralizado en el servidor local, que procesa las solicitudes
+del usuario, ejecuta los cálculos, administra la información en la base de datos y gestiona
+la exportación.
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+c) Diseño de la arquitectura.
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+Descripción de las tecnologías.
+a) Análisis comparativo cualitativo/cuantitativo.
+Para el desarrollo del prototipo del Opticut, se analizaron diferentes tecnologías
+considerando criterios como facilidad de uso, compatibilidad con el entorno del negocio,
+curva de aprendizaje, rendimiento, escalabilidad y costos asociados. A continuación, se
+presenta un análisis comparativo cualitativo y cuantitativo de las principales alternativas.
+Tecnología Ventajas Desventajas Criterios
+Evaluados
+Evaluación (1-
+10)
+Python + Tkinter
+(escritorio)
+Incluido en
+Python, fácil de
+usar, curva de
+aprendizaje baja,
+permite
+prototipos
+rápidos.
+Interfaz básica y
+menos atractiva
+visualmente.
+Usabilidad: 7,
+Rendimiento: 8,
+Facilidad: 9,
+Escalabilidad: 6.
+7.
+Python + PyQt
+(escritorio)
+Interfaz moderna
+y profesional,
+multiplataforma,
+comunidad
+activa.
+Curva de
+aprendizaje
+mayor, requiere
+instalación
+adicional.
+Usabilidad: 9,
+Rendimiento: 8,
+Facilidad: 7,
+Escalabilidad: 7.
+7.
+Python + Django
+(web)
+Permite acceso
+desde
+navegador,
+multiusuario,
+fácil integración
+con BD e
+inventarios,
+escalabilidad
+alta.
+Requiere
+servidor local o
+nube, mayor
+complejidad de
+implementación.
+Usabilidad: 8,
+Rendimiento: 7,
+Escalabilidad: 9,
+Facilidad: 6.
+7.
+C# .NET
+(Windows
+Forms/WPF)
+Integración
+nativa en
+Windows,
+interfaces
+profesionales,
+buen
+rendimiento
+gráfico.
+Menos librerías
+de optimización
+matemática,
+curva de
+aprendizaje
+media.
+Usabilidad: 8,
+Rendimiento: 9,
+Escalabilidad: 7,
+Facilidad: 6.
+7.
+Java + JavaFX
+(escritorio)
+Multiplataforma,
+comunidad
+grande, buen
+soporte gráfico.
+Más pesado que
+Python, tiempo
+de desarrollo
+mayor.
+Usabilidad: 7,
+Rendimiento: 8,
+Escalabilidad: 7,
+Facilidad: 6.
+7.
+SQLite (SGBD) Ligero, sin
+necesidad de
+servidor, ideal
+para prototipos y
+entornos locales.
+No
+recomendado
+para múltiples
+usuarios
+concurrentes ni
+grandes
+Estabilidad: 8,
+Rendimiento: 7,
+Escalabilidad: 5,
+Facilidad: 9.
+7.
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+volúmenes de
+datos.
+MySQL (SGBD) Estable, robusto,
+gratuito,
+compatible con
+Django,
+ampliamente
+usado en
+entornos
+empresariales.
+Requiere
+instalación y
+configuración
+inicial, uso de
+servidor.
+Estabilidad: 9,
+Rendimiento: 9,
+Escalabilidad: 8,
+Facilidad: 7.
+8.
+PostgreSQL
+(SGBD)
+Altamente
+robusto y
+seguro,
+excelente
+manejo de
+grandes
+volúmenes de
+datos.
+Configuración
+más compleja y
+consumo de
+recursos mayor
+que MySQL.
+Estabilidad: 10,
+Rendimiento: 8,
+Escalabilidad: 9,
+Facilidad: 6.
+8.
+b) Selección de las herramientas.
+Tras el análisis comparativo realizado, el equipo decidió utilizar Django como framework
+principal de desarrollo. Esta elección se fundamentó en la necesidad de contar con una
+solución escalable, multiusuario y accesible desde cualquier navegador, lo cual otorga
+mayor flexibilidad y proyección futura en comparación con un prototipo de escritorio.
+ Lenguaje de programación: se seleccionó Python 3.x, debido a su facilidad de
+aprendizaje, amplia comunidad y disponibilidad de librerías para cálculos
+matemáticos y optimización (ej. NumPy, PuLP) que permiten implementar de manera
+eficiente los algoritmos de corte.
+ Framework de desarrollo: se optó por Django, dado que ofrece una estructura
+organizada basada en el patrón Modelo-Vista-Controlador (MVC), lo que facilita la
+separación de responsabilidades en el sistema. Además, incluye un ORM para la
+gestión de bases de datos, un sistema de autenticación integrado y compatibilidad
+con múltiples motores de base de datos.
+ Frontend: para la interfaz gráfica se utilizará el motor de plantillas de Django (Django
+Templates) complementado con HTML5, CSS3 y JavaScript, lo que permitirá diseñar
+formularios intuitivos para la entrada de datos y páginas dinámicas para la
+visualización de los patrones de corte.
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+ Base de datos: se seleccionó MySQL como sistema gestor de base de datos
+relacional, ya que ofrece robustez, estabilidad y amplia adopción en entornos
+empresariales. Además, garantiza compatibilidad con Django a través de conectores
+oficiales, permite gestionar de manera eficiente relaciones complejas entre entidades
+(usuarios, proyectos, tableros, piezas, patrones de corte, resultados) y es de uso
+gratuito bajo licencia GPL, lo que reduce costos de implementación.
+ Entorno de desarrollo: el proyecto se gestionará con Visual Studio Code como editor
+principal, el cual ofrece integración con GitHub y soporte para Python/Django
+mediante extensiones.
+ Control de versiones: se empleará GitHub como plataforma para la gestión
+colaborativa del código fuente, lo que permitirá mantener un repositorio centralizado,
+privado y seguro.
+ Servicios de despliegue (proyección futura): se considerarán alternativas como
+Heroku, AWS Elastic Beanstalk o Azure App Service, lo que posibilitará migrar el
+sistema a un entorno productivo en la nube con acceso remoto para múltiples
+usuarios.
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+Integración de las tecnologías.
+Selección de los proveedores de tecnología.
+
+ Lenguaje de programación (Python 3.x): provisto y mantenido por la Python Software
+Foundation (PSF), organización sin fines de lucro que garantiza actualizaciones
+constantes, documentación oficial y una amplia comunidad de desarrolladores.
+ Framework de desarrollo (Django): desarrollado y mantenido por la Django Software
+Foundation (DSF), con soporte activo de la comunidad internacional. Este respaldo
+asegura un ciclo de vida prolongado, corrección de vulnerabilidades y mejoras periódicas.
+ Base de datos (MySQL): gestionada por Oracle Corporation, que garantiza estabilidad
+empresarial, compatibilidad con entornos de producción y disponibilidad de conectores
+oficiales para frameworks como Django.
+ Frontend (HTML5, CSS3, JavaScript): estándares mantenidos por el World Wide Web
+Consortium (W3C), lo que garantiza compatibilidad multiplataforma y soporte universal en
+navegadores modernos.
+ Entorno de desarrollo (Visual Studio Code): distribuido y mantenido por Microsoft, con
+actualizaciones frecuentes y una amplia oferta de extensiones que facilitan el trabajo
+colaborativo en Python y Django.
+ Control de versiones (GitHub): también propiedad de Microsoft, plataforma que asegura
+repositorios privados gratuitos para estudiantes, integración con flujos ágiles y
+herramientas de colaboración en equipo.
+ Servicios de despliegue (proyección futura): se consideran proveedores líderes como
+Heroku (Salesforce), Amazon Web Services (AWS), Microsoft Azure y Google Cloud
+Platform (GCP), que ofrecen entornos seguros y escalables para el despliegue de
+aplicaciones Django con MySQL gestionado.
+a) Descripción de la seguridad y calidad.
+Seguridad
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+ Control de acceso: Django provee un sistema de autenticación integrado que permite
+la gestión de usuarios y contraseñas de forma segura, asegurando que solo personal
+autorizado pueda acceder a los proyectos y resultados de optimización.
+ Gestión de datos: la base de datos MySQL soporta políticas de integridad referencial
+y privilegios por usuario, lo que evita accesos indebidos o modificaciones no
+autorizadas.
+ Comunicación segura: en un eventual despliegue en producción, se recomienda la
+habilitación de HTTPS mediante certificados SSL, protegiendo la transmisión de
+datos entre clientes y servidor.
+ Código fuente: el proyecto se gestiona en repositorios privados de GitHub, lo que
+restringe el acceso y garantiza la trazabilidad de cambios realizados por el equipo de
+desarrollo.
+Calidad
+ Buenas prácticas de desarrollo: se aplican convenciones de codificación de Python
+(PEP8), lo que facilita la legibilidad y mantenibilidad del código.
+ Metodología ágil: el trabajo se organiza mediante Scrum, con entregas iterativas que
+permiten validar avances de forma temprana y reducir riesgos de desviaciones.
+ Pruebas de software: Django incorpora herramientas para la realización de pruebas
+unitarias y de integración, que serán aplicadas a los módulos críticos como el
+ingreso de piezas, la generación de patrones y el cálculo de métricas de
+aprovechamiento.
+ Usabilidad: la interfaz, desarrollada con HTML5, CSS3 y JavaScript sobre el sistema
+de plantillas de Django, fue diseñada para ser clara y accesible a usuarios con bajo
+nivel tecnológico, característica fundamental en el contexto de talleres de carpintería.
+ Rendimiento: el uso de algoritmos heurísticos como First Fit y Best Fit asegura
+tiempos de respuesta adecuados incluso con conjuntos medianos de datos (hasta 50
+piezas por tablero), lo que permite cumplir con el requisito de respuesta en menos de
+cinco segundos.
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+Implementación de la solución.
+a) Selección de plataformas.
+Entorno de desarrollo (local)
+
+Durante la fase de desarrollo esto será en un entorno local, utilizando equipos personales con las
+
+siguientes características recomendadas:
+
+ Procesador: Intel Core i5 o AMD Ryzen 5 (mínimo 2.5 GHz).
+ Memoria RAM: 8 GB o superior.
+ Almacenamiento: 256 GB SSD o superior.
+ Sistema operativo: Windows 10/
+Software adicional:
+ Python 3.12+ (lenguaje principal).
+ Django 5.x (framework web).
+ MySQL Community Server 8.0 (gestor de base de datos).
+ Visual Studio Code (entorno de desarrollo integrado).
+ Git y GitHub Desktop (control de versiones).
+ Google Chrome / Mozilla Firefox (para pruebas del frontend).
+Entorno de producción (proyección futura)
+
+Las plataformas candidatas consideradas para el despliegue en la nube son:
+
+ Amazon Web Services (AWS): ofrece instancias EC2 para alojar el servidor Django y el
+servicio RDS MySQL para la base de datos, con copias automáticas de seguridad y alta
+disponibilidad.
+ Microsoft Azure App Service: permite desplegar aplicaciones Django con integración
+directa a Azure Database for MySQL, gestionando la infraestructura sin intervención
+manual.
+ Google Cloud Platform (GCP): ofrece máquinas virtuales escalables con Compute Engine
+y almacenamiento persistente para bases de datos MySQL.
+ Heroku (Salesforce): alternativa simple para entornos pequeños, ideal para un prototipo
+funcional, con despliegue automatizado desde GitHub y soporte nativo para Django.
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+La elección final dependerá de la disponibilidad de recursos y el tamaño del negocio. Sin
+embargo, AWS se perfila como la mejor opción a futuro, debido a su estabilidad, flexibilidad en
+
+costos y la posibilidad de configurar escalabilidad horizontal para soportar múltiples usuarios
+concurrentes.
+
+Formulario del prototipo
+
+# Nombre del
+Formulario
+Descripción En
+Prototipo
+1 Login Inicio de sesión de usuarios X
+2 Registro de
+usuario
+Crear cuenta nueva X
+3 Cerrar sesión Salir del sistema X
+4 Recuperar
+contraseña
+Solicitar reseteo de contraseña
+5 Cambiar
+contraseña
+Modificar contraseña actual
+6 Perfil de usuario Ver y editar datos personales X
+7 Crear
+optimización
+Ingresar tablero y piezas X
+8 Resultado de
+optimización
+Mostrar tableros generados con desperdicio X
+9 Vista detallada
+de tablero
+Ver un tablero específico ampliado X
+10 Duplicar
+optimización
+Copiar y modificar optimización existente X
+11 Editar
+optimización
+Modificar optimización guardada
+12 Comparar 2
+optimizaciones
+Ver lado a lado dos resultados
+13 Ajustar margen
+de corte
+Configurar espacio entre piezas
+14 Configurar
+rotación
+Permitir rotación automática de piezas
+15 Historial de
+optimizaciones
+Lista de todas las optimizaciones X
+16 Búsqueda en
+historial
+Buscar por fecha, nombre, dimensiones X
+17 Filtrar por rango
+de fechas
+Filtrar optimizaciones por período X
+18 Ordenar
+historial
+Por fecha, aprovechamiento, etc. X
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+19 Eliminar
+optimización
+individual
+Borrar una optimización específica X
+20 Limpiar historial
+completo
+Borrar todas las optimizaciones X
+21 Descargar PDF
+completo
+Generar reporte PDF con todos los tableros X
+22 Descargar
+imagen PNG
+Exportar tablero como imagen
+23 Exportar a
+Excel/CSV
+Exportar lista de piezas y cortes
+24 Exportar
+resumen de
+desperdicio
+Reporte de eficiencia en Excel
+25 Imprimir plan de
+corte
+Vista optimizada para impresión
+26 Crear plantilla Guardar configuración reutilizable X
+27 Mis plantillas Lista de plantillas guardadas X
+28 Cargar plantilla Usar plantilla predefinida X
+29 Editar plantilla Modificar plantilla existente
+30 Eliminar
+plantilla
+Borrar plantilla X
+31 Plantillas
+predefinidas
+Biblioteca de plantillas comunes
+32 Configurar
+precio de
+tablero
+Definir costo por tablero
+33 Calcular costo
+total
+Mostrar costo de la optimización
+34 Agregar mano
+de obra
+Incluir costo de trabajo
+35 Generar
+presupuesto
+Crear cotización para cliente
+36 Historial de
+costos
+Ver costos históricos
+37 Dashboard
+personal
+Resumen con gráficos y métricas X
+38 Gráfico de
+aprovechamient
+o
+Ver tendencia de eficiencia
+39 Gráfico de
+desperdicio
+Ver tendencia de desperdicio
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+40 Estadísticas por
+período
+Mensual, semanal, anual
+41 Top
+optimizaciones
+Las más eficientes
+42 Biblioteca de
+tableros
+Catálogo de tipos de tableros estándar
+43 Agregar tipo de
+tablero
+Crear nuevo material
+44 Editar material Modificar propiedades
+45 Eliminar
+material
+Borrar de catálogo
+46 Configurar
+dimensiones
+estándar
+244×122, 183×244, etc.
+47 Crear proyecto Agrupar múltiples optimizaciones
+48 Lista de
+proyectos
+Ver todos los proyectos
+49 Ver detalles de
+proyecto
+Resumen de optimizaciones del proyecto
+50 Editar proyecto Cambiar nombre/descripción
+51 Eliminar
+proyecto
+Borrar proyecto completo
+52 Lista de clientes Gestionar base de datos de clientes
+53 Agregar cliente Crear nuevo cliente
+54 Ver historial de
+cliente
+Trabajos realizados para un cliente
+55 Editar datos de
+cliente
+Modificar información
+56 Configuración
+general
+Ajustes del sistema
+57 Cambiar
+unidades
+cm, mm, pulgadas
+58 Seleccionar
+algoritmo
+FFD, Best Fit, First Fit
+59 Configurar
+notificaciones
+Email, alertas en pantalla
+60 Tutorial/Ayuda Guía de uso del sistema
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+Aplicación de métodos, estándares y buenas prácticas.
+Cumplimiento en los criterios de aceptación
+
+ Rendimiento: El sistema debe generar un patrón de corte óptimo para conjuntos de
+hasta 50 piezas por tablero en un tiempo de respuesta inferior a 5 segundos.
+ Usabilidad: La interfaz de usuario debe ser intuitiva y comprensible para usuarios con
+bajo nivel tecnológico, acorde al contexto de talleres de carpintería.
+ Seguridad: El acceso al sistema debe estar restringido únicamente a usuarios
+autenticados mediante el módulo de Django.
+ Escalabilidad: La arquitectura basada en Django y MySQL debe permitir la expansión
+futura del sistema.
+ Integridad de los datos: Las relaciones entre entidades en MySQL deben evitar
+inconsistencias o duplicaciones.
+ Compatibilidad: El sistema debe ser accesible desde cualquier navegador moderno sin
+necesidad de instalación local.
+Cumplimiento de estándares normativos
+
+ ISO/IEC 25010 (Calidad): El sistema se diseña considerando los atributos de
+funcionalidad, eficiencia, usabilidad y mantenibilidad definidos en esta norma.
+ ISO/IEC 27001 (Seguridad): La información se gestiona bajo los principios de
+confidencialidad, integridad y disponibilidad.
+ PEP8 (Codificación): Se aplican las convenciones de codificación de Python (PEP8)
+para asegurar la legibilidad y mantenibilidad del código.
+ Protección de Datos (GDPR / Ley Chilena): Se respetan las prácticas de privacidad y
+almacenamiento seguro de datos de usuario.
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+Cumplimiento de buenas prácticas
+
+ Metodología Ágil (Scrum): El trabajo se organiza en iteraciones cortas, fomentando la
+colaboración, la revisión constante y la mejora continua.
+ Control de versiones (GitHub): Se utiliza un repositorio privado para la trazabilidad de los
+cambios y el trabajo colaborativo del equipo.
+ Arquitectura MVC: Se emplea el patrón Modelo–Vista–Controlador de Django para
+separar la lógica de negocio, la presentación y el acceso a datos.
+
+ Validación continua: Se aplican pruebas unitarias con las herramientas nativas de
+Django para garantizar que las funciones críticas (ingreso de piezas, optimización)
+operen correctamente.
+Cumplimiento de rendimiento y eficiencia
+
+ Algoritmos de optimización heurísticos: Se implementan métodos como First Fit y Best
+Fit, que generan soluciones eficientes en menor tiempo, manteniendo un equilibrio entre
+precisión y velocidad.
+ Optimización de base de datos: La estructura de MySQL utiliza índices en campos clave
+y relaciones bien definidas para mejorar los tiempos de lectura y escritura.
+ Procesamiento en el servidor (backend): La lógica de negocio y los cálculos se ejecutan
+en el entorno de Django, reduciendo la carga en el navegador del usuario.
+ Uso de caché: El framework Django permite almacenar temporalmente datos en
+memoria para evitar la repetición innecesaria de operaciones complejas.
+Cumplimiento de Seguridad
+
+ Autenticación y control de acceso: Se utiliza el módulo de autenticación de Django, que
+incluye cifrado de contraseñas (hash), gestión de sesiones seguras y control de
+permisos.
+ Integridad de la información: La base de datos MySQL implementa restricciones de
+integridad referencial para asegurar la consistencia de los datos.
+ Transmisión segura de datos: En el despliegue a producción, se habilitará el protocolo
+HTTPS (SSL/TLS) para proteger la comunicación entre el cliente y el servidor.
+ Gestión de código fuente: Los repositorios del proyecto se alojan en GitHub bajo
+modalidad privada, restringiendo el acceso al equipo de desarrollo.
+ Respaldo y recuperación: Se planifican copias de seguridad automáticas de la base de
+datos para permitir una rápida recuperación ante fallos.
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+Cronograma actualizado.
+
+Actividad Se
+m.
+1
+Se
+m.
+2
+Se
+m.
+3
+Se
+m.
+4
+Se
+m.
+5
+Se
+m.
+6
+Se
+m.
+7
+Se
+m.
+8
+Se
+m.
+9
+Se
+m.
+10
+Se
+m.
+1
+Sem
+. 12
+
+Se
+m.
+13
+Planificación inicial █
+Levantamiento de
+requerimientos
+█
+Objetivos +
+Arquitectura
+█
+Diagramas de
+análisis
+█
+Diseño de interfaz +
+Backlog SCRUM
+█
+Desarrollo módulo
+usuarios
+(registro/login)
+█
+Desarrollo módulo de
+optimización (fase 1)
+█
+Desarrollo módulo de
+optimización (fase 2
++ visualización PDF)
+█
+Validaciones +
+historial + descargas
+█
+Mejora de PDF +
+visualización tableros
+múltiples
+█
+Mejora de interfaz
+(frontend final)
+█
+Pruebas,
+documentación e
+integración
+█
+Presentación final █
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+IV. Conclusiones
+
+El desarrollo de la segunda unidad del proyecto "Opticut" marca la transición fundamental desde
+la fase de formulación conceptual hacia la materialización de una solución de software robusta y
+técnicamente fundamentada. Las conclusiones preliminares de esta etapa se centran en la
+validación de las decisiones de arquitectura, la viabilidad de la implementación tecnológica y el
+establecimiento de un marco de trabajo que asegura la calidad, seguridad y escalabilidad del
+prototipo.
+
+El principal aporte del trabajo desarrollado en este informe es la definición de una arquitectura de
+software estratégica y escalable. La decisión de migrar la idea inicial de un prototipo de escritorio
+a una aplicación web basada en Django y MySQL no es una elección trivial. Esta arquitectura
+(Modelo-Vista-Controlador) es en sí misma un aporte, ya que dota al proyecto de ventajas clave:
+accesibilidad universal desde cualquier navegador, capacidad multiusuario y, fundamentalmente,
+una ruta clara hacia el despliegue en entornos de nube productivos como AWS o Azure. Esto
+alinea el proyecto no solo con la solución de un problema inmediato (desperdicio de material),
+sino con las necesidades futuras de crecimiento del negocio.
+
+Desde una perspectiva técnica, esta etapa ha permitido validar el stack tecnológico seleccionado.
+El análisis comparativo (Sección 2.a) demostró que la combinación de Python 3.x, Django 5.x y
+MySQL 8.0 ofrece el mejor equilibrio entre rendimiento, robustez y disponibilidad de librerías para
+cálculos de optimización. La implementación de la lógica de optimización, basada en algoritmos
+heurísticos como First Fit y Best Fit, se confirma como un enfoque eficiente para cumplir con los
+criterios de aceptación de rendimiento, equilibrando la velocidad de cálculo con la calidad de la
+solución.
+
+Otro aporte significativo es la incorporación nativa de la seguridad y la calidad en el diseño del
+sistema, en lugar de tratarlos como un añadido posterior. Al seleccionar Django, el proyecto
+hereda un sistema de autenticación y gestión de usuarios robusto y probado, lo que blinda al
+prototipo contra accesos no autorizados y asegura la integridad de los datos de los proyectos de
+corte. Asimismo, la adhesión a estándares como PEP8 y la aplicación de una metodología ágil
+como Scrum garantizan que el código fuente sea legible, mantenible y que el desarrollo avance
+de forma iterativa y validada, reduciendo riesgos.
+
+Las reflexiones surgidas durante esta etapa también permiten identificar propuestas de
+profundización que no fueron abordadas, tal como lo solicita la guía del informe. Si bien los
+algoritmos heurísticos actuales son efectivos, una futura línea de investigación sería la
+implementación de técnicas metaheurísticas (como algoritmos genéticos o simulated annealing).
+Estas técnicas, aunque computacionalmente más costosas, podrían descubrir patrones de corte
+aún óptimos, llevando el ahorro de material a un nuevo nivel.
+
+Una segunda propuesta de profundización es la expansión del modelo de datos y la lógica de
+negocio para manejar cortes complejos. Actualmente, el prototipo se centra en piezas
+rectangulares. Un avance significativo sería adaptar el sistema para procesar formas irregulares
+(cortes en 'L', circulares o en ángulo), un requerimiento común en la carpintería de diseño que
+representa un desafío geométrico y computacional considerable.
+
+En conclusión, el trabajo desarrollado en este informe ha sido exitoso en traducir los
+requerimientos del negocio en una arquitectura de software sólida y ejecutable. Se ha definido un
+
+Ingeniería en Informática
+Proyecto de Integración -TIHI
+
+prototipo que no solo es funcional, sino también seguro, eficiente y, sobre todo, escalable. Las
+decisiones técnicas tomadas proporcionan una base firme para la construcción del prototipo
+(Sección 4.b) y las pruebas de validación (Sección 5), mientras que las líneas de trabajo futuro
+identificadas demuestran el potencial de "Opticut" para evolucionar de un prototipo a una solución
+integral y estratégica para la industria de la carpintería.
+
+Ingeniería en Informática
+Proyecto de Integración -TIHI63
+
+V. Referencias bibliográficas
+
+Villadeza, V. J. (2014). Propuesta de mejora para la optimización del proceso de corte en
+serrería [PDF]. Repositorio Académico UPC.
+https://repositorioacademico.upc.edu.pe/bitstream/handle/10757/624942/Villadeza%20_
+VJ.pdf?sequence=1&isAllowed=y
+
+Stewart, J. (s.f.). Cálculo de una variable (8.ª ed.). Cengage Learning.
+https://eva.interior.udelar.edu.uy/pluginfile.php/96366/mod_resource/content/1/Stewart.
+%20C%C3%A1lculo%20de%20una%20variable..pdf
+
+Dyckhoff, H. (1990). A typology of cutting and packing problems. European Journal of
+Operational Research, 44(2), 145–159. https://doi.org/10.1016/0377-2217(90)90350-K
+
+Python Software Foundation. (s.f.). The Python language reference (Release 3.x).
+https://docs.python.org/3/reference/index.html
+
+Harris, C. R., Millman, K. J., van der Walt, S. J., Gommers, R., Virtanen, P., Cournapeau,
+D., ... & Oliphant, T. E. (2020). Array programming with NumPy. Nature, 585(7825), 357–
+
+https://www.nature.com/articles/s41586- 020 - 2649 - 2
+Khan Academy. (s.f.). Optimization problems. https://es.khanacademy.org/math/ap-
+calculus-ab/ab-diff-analytical-applications-new/ab- 5 - 11/e/optimization
+
+Wikipedia contributors. (s.f.). Cutting stock problem. In Wikipedia.
+https://en.wikipedia.org/wiki/Cutting_stock_problem
+
+Toledo, F., & Wäscher, G. (2013). Heuristics for two-dimensional knapsack and cutting
+stock problems with items of irregular shape. ResearchGate.
+https://www.researchgate.net/publication/257404289_Heuristics_for_two-
+dimensional_knapsack_and_cutting_stock_problems_with_items_of_irregular_shape
+
+Moreno, J. A. (2024). Optimizing manufacturing processes and production through the
+strategic use of additional cutting tools in injection molding machines. ResearchGate.
+https://www.researchgate.net/publication/389856039_Optimizing_Manufacturing_Proces
+ses_and_Production_through_the_Strategic_Use_of_additional_Cutting_Tools_in_Inject
+ion_Molding_Machine

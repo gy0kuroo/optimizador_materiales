@@ -1,0 +1,195 @@
+{% extends 'opticut/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <div class="card fade-in">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">⏱️ Calculadora de Tiempo Estimado de Corte</h3>
+        </div>
+        <div class="card-body">
+          <div class="mb-4">
+            <h5>📋 Información de la Optimización</h5>
+            <p class="mb-1"><strong>Optimización #{{ optimizacion.id }}</strong></p>
+            <p class="mb-1"><strong>📐 Tablero:</strong> {{ ancho_mostrar }} × {{ alto_mostrar }} {{ unidad_medida }}</p>
+            <p class="mb-1"><strong>📊 Aprovechamiento:</strong> {{ optimizacion.aprovechamiento_total|floatformat:2 }}%</p>
+            <p class="mb-1"><strong>📅 Fecha:</strong> {{ optimizacion.fecha|date:"d/m/Y H:i" }}</p>
+          </div>
+
+          <hr>
+
+          <div class="mb-4">
+            <h5>📊 Resumen de Piezas</h5>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="card bg-light">
+                  <div class="card-body text-center">
+                    <h6 class="text-muted">Total de Piezas</h6>
+                    <h3 class="text-primary">{{ total_piezas }}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card bg-light">
+                  <div class="card-body text-center">
+                    <h6 class="text-muted">Tipos de Piezas</h6>
+                    <h3 class="text-info">{{ tipos_piezas }}</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card bg-light">
+                  <div class="card-body text-center">
+                    <h6 class="text-muted">Tableros Estimados</h6>
+                    <h3 class="text-success">{{ num_tableros_estimado }}</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+          <div class="mb-4">
+            <h5>⏱️ Tiempo Estimado de Corte</h5>
+            <div class="alert alert-info">
+              <h4 class="alert-heading">Tiempo Total Estimado</h4>
+              <p class="mb-0" style="font-size: 2rem; font-weight: bold; color: #0c5460;">
+                {{ tiempo_formateado }}
+              </p>
+              <hr>
+              <p class="mb-0"><small>Equivalente a: {{ tiempo_total_horas|floatformat:2 }} horas o {{ tiempo_total_minutos|floatformat:2 }} minutos</small></p>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h5>📝 Desglose de Tiempos</h5>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Concepto</th>
+                  <th class="text-end">Tiempo</th>
+                  <th class="text-end">% del Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>⏱️ Tiempo de Corte</td>
+                  <td class="text-end">{{ tiempo_corte_minutos|floatformat:2 }} minutos</td>
+                  <td class="text-end">{{ porcentaje_corte }}%</td>
+                </tr>
+                <tr>
+                  <td>🔧 Tiempo de Setup (Preparación)</td>
+                  <td class="text-end">{{ tiempo_setup_total|floatformat:2 }} minutos</td>
+                  <td class="text-end">{{ porcentaje_setup }}%</td>
+                </tr>
+                <tr>
+                  <td>🛠️ Tiempo de Cambio de Herramienta</td>
+                  <td class="text-end">{{ tiempo_cambio_total|floatformat:2 }} minutos</td>
+                  <td class="text-end">{{ porcentaje_cambio }}%</td>
+                </tr>
+                <tr class="table-primary">
+                  <td><strong>TOTAL</strong></td>
+                  <td class="text-end"><strong>{{ tiempo_total_minutos|floatformat:2 }} minutos</strong></td>
+                  <td class="text-end"><strong>100%</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mb-4">
+            <h5>📏 Parámetros Utilizados</h5>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h6 class="text-muted">Velocidad de Corte</h6>
+                    <p class="mb-0"><strong>{{ velocidad_corte }} cm/segundo</strong></p>
+                    <small class="text-muted">Aproximadamente {{ velocidad_corte_cm_min }} cm/minuto</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h6 class="text-muted">Tiempo de Setup por Tablero</h6>
+                    <p class="mb-0"><strong>{{ tiempo_setup }} minutos</strong></p>
+                    <small class="text-muted">Preparación y posicionamiento</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h6 class="text-muted">Tiempo de Cambio de Herramienta</h6>
+                    <p class="mb-0"><strong>{{ tiempo_cambio_herramienta }} minutos</strong></p>
+                    <small class="text-muted">Por cambio de herramienta</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h5>📐 Información Técnica</h5>
+            <p><strong>Perímetro Total a Cortar:</strong> {{ perimetro_total|floatformat:2 }} cm</p>
+            <p class="text-muted"><small>Este valor representa la suma de todos los perímetros de las piezas a cortar.</small></p>
+          </div>
+
+          <div class="alert alert-warning">
+            <h6 class="alert-heading">⚠️ Nota Importante</h6>
+            <p class="mb-0">
+              Estos tiempos son estimaciones basadas en parámetros estándar. El tiempo real puede variar según:
+              <ul class="mb-0">
+                <li>El tipo de material (madera, MDF, aglomerado, etc.)</li>
+                <li>El tipo de herramienta de corte utilizada</li>
+                <li>La experiencia del operador</li>
+                <li>La complejidad de los cortes</li>
+                <li>Condiciones del taller (temperatura, humedad, etc.)</li>
+              </ul>
+            </p>
+          </div>
+
+          <div class="text-center mt-4">
+            <a href="{% url 'opticut:mis_optimizaciones' %}" class="btn btn-secondary me-2">← Volver al Historial</a>
+            <a href="{% url 'opticut:descargar_pdf' optimizacion.id %}" class="btn btn-primary">📄 Descargar PDF</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.card {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: none;
+  border-radius: 8px;
+}
+
+.card-header {
+  border-radius: 8px 8px 0 0 !important;
+}
+
+.alert {
+  border-radius: 8px;
+}
+
+.table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %}
+

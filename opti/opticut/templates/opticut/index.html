@@ -11,26 +11,18 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h2 class="text-center mb-4">Optimizador de Cortes</h2>
+  <h2 class="text-center mb-4" data-intro-title="Optimizador de Cortes" data-intro="Aquí puedes crear nuevas optimizaciones de corte ingresando las dimensiones del tablero y las piezas que necesitas.">Optimizador de Cortes</h2>
   
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
-    {% endfor %}
-  {% endif %}
-
   <form method="post" action="{% url 'opticut:index' %}" id="optimizacion-form">
     {% csrf_token %}
     
     <!-- Sección: Dimensiones del Tablero -->
-    <div class="card mb-4 fade-in">
+    <div class="card mb-4 fade-in" data-intro-title="Dimensiones del Tablero" data-intro="Ingresa el ancho y alto del tablero de madera. Puedes elegir la unidad de medida que prefieras (cm, m, pulgadas o pies).">
       <div class="card-header bg-primary text-white">
         <h4 class="mb-0">📐 Dimensiones del Tablero</h4>
       </div>
       <div class="card-body">
+        <!-- Dropdown de tableros predefinidos se creará aquí dinámicamente -->
         <div id="medidas-pred-container"></div>
         <div class="row mb-3">
           <div class="col-md-12">

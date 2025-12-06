@@ -79,8 +79,13 @@
     {% for img in imagenes %}
     <div class="col-md-6 mb-4">
       <div class="card">
-        <div class="card-header text-center bg-primary text-white">
-          <h5>Tablero {{ forloop.counter }} de {{ num_tableros }}</h5>
+        <div class="card-header text-center bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Tablero {{ forloop.counter }} de {{ num_tableros }}</h5>
+          <a href="{% url 'opticut:descargar_png_tablero' optimizacion.id forloop.counter %}" 
+             class="btn btn-sm btn-light" 
+             title="Descargar imagen PNG">
+            📥 PNG
+          </a>
         </div>
         <div class="card-body text-center">
           <img src="data:image/png;base64,{{ img }}" alt="Tablero {{ forloop.counter }}" class="img-fluid">

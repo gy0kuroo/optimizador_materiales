@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
+from django.http import JsonResponse
 from .forms import RegistroForm, PerfilForm, CambiarPasswordForm
 from .models import PerfilUsuario
 
@@ -88,3 +89,17 @@ def perfil(request):
         'password_form': password_form,
         'perfil': perfil
     })
+
+
+@login_required
+def completar_tutorial(request):
+    """
+    Marca el tutorial como completado para el usuario actual.
+    """
+    try:
+        perfil = request.user.perfil
+        perfil.tutorial_completado = True
+        perfil.save()
+        return JsonResponse({'success': True, 'message': 'Tutorial marcado como completado'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)

@@ -6,8 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Optimizador de Cortes - OptiCut{% endblock %}</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{% static 'opticut/favicon.svg' %}">
+    <link rel="alternate icon" href="{% static 'opticut/favicon.svg' %}">
+    
     <!-- Bootstrap CSS (opcional, para compatibilidad) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Intro.js CSS para tutorial -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/introjs.min.css">
     
     <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{% static 'opticut/css/main.css' %}">
@@ -26,9 +33,8 @@
                     <span class="navbar-greeting">👤 Hola, {{ user.username }}</span>
                 {% endif %}
             </div>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
-                    style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+            <button class="navbar-toggler navbar-toggler-custom" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -37,7 +43,16 @@
                         <a class="nav-link" href="{% url 'opticut:index' %}">🏠 Inicio</a>
                         <a class="nav-link" href="{% url 'opticut:mis_optimizaciones' %}">📋 Historial</a>
                         <a class="nav-link" href="{% url 'opticut:estadisticas' %}">📊 Estadísticas</a>
-                        <a class="nav-link" href="{% url 'usuarios:perfil' %}">⚙️ Configuración</a>
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                ⚙️ Más
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">⚙️ Configuración</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" id="btn-tutorial">❓ Ayuda / Tutorial</a></li>
+                            </ul>
+                        </div>
                     {% else %}
                         <a href="{% url 'usuarios:login' %}" class="btn btn-outline-primary btn-sm me-2">🔑 Iniciar sesión</a>
                         <a href="{% url 'usuarios:registro' %}" class="btn btn-outline-success btn-sm">📝 Registrarse</a>
@@ -65,6 +80,9 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
+    <!-- Intro.js para tutorial interactivo -->
+    <script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/intro.min.js"></script>
+    
     <!-- JavaScript Personalizado -->
     <script src="{% static 'opticut/js/theme.js' %}"></script>
     {% if user.is_authenticated %}
@@ -79,6 +97,218 @@
             }
         })();
     </script>
+    
+    <!-- Sistema de Tutorial/Ayuda -->
+    <script>
+        // Detectar si es usuario nuevo
+        const esUsuarioNuevo = {% if user.perfil.tutorial_completado %}false{% else %}true{% endif %};
+        // Verificar si tiene optimizaciones (se pasará desde la vista)
+        const tieneOptimizaciones = {% if tiene_optimizaciones %}true{% else %}false{% endif %};
+        
+        // Mostrar modal de bienvenida solo si es usuario nuevo y no tiene optimizaciones
+        if (esUsuarioNuevo && !tieneOptimizaciones) {
+            document.addEventListener('DOMContentLoaded', function() {
+                // Esperar un poco para que la página cargue completamente
+                setTimeout(function() {
+                    const modalBienvenida = new bootstrap.Modal(document.getElementById('modalBienvenida'));
+                    modalBienvenida.show();
+                }, 500);
+            });
+        }
+        
+        // Función para iniciar tutorial interactivo
+        function iniciarTutorial() {
+            // Cerrar modal de bienvenida si está abierto
+            const modalBienvenida = bootstrap.Modal.getInstance(document.getElementById('modalBienvenida'));
+            if (modalBienvenida) {
+                modalBienvenida.hide();
+            }
+            
+            // Configurar pasos del tutorial según la página actual
+            const pasos = obtenerPasosTutorial();
+            
+            if (pasos.length > 0) {
+                introJs().setOptions({
+                    steps: pasos,
+                    showProgress: true,
+                    showBullets: true,
+                    exitOnOverlayClick: true,
+                    exitOnEsc: true,
+                    nextLabel: 'Siguiente →',
+                    prevLabel: '← Anterior',
+                    skipLabel: 'Omitir',
+                    doneLabel: 'Finalizar',
+                    tooltipClass: 'customTooltip',
+                    highlightClass: 'customHighlight',
+                }).oncomplete(function() {
+                    // Marcar tutorial como completado
+                    marcarTutorialCompletado();
+                }).onexit(function() {
+                    // También marcar como completado si el usuario sale
+                    marcarTutorialCompletado();
+                }).start();
+            }
+        }
+        
+        // Obtener pasos del tutorial según la página
+        function obtenerPasosTutorial() {
+            const path = window.location.pathname;
+            const pasos = [];
+            
+            if (path.includes('index') || path === '/opticut/') {
+                // Tutorial en página principal
+                pasos.push(
+                    {
+                        title: '👋 ¡Bienvenido a OptiCut!',
+                        intro: 'Este tutorial te guiará paso a paso para usar el sistema de optimización de cortes.',
+                        element: document.querySelector('h2') || document.body
+                    },
+                    {
+                        title: '📐 Dimensiones del Tablero',
+                        intro: 'Ingresa las dimensiones del tablero de madera que vas a cortar. Puedes usar diferentes unidades (cm, m, pulgadas, pies).',
+                        element: document.querySelector('input[name="ancho"]') || document.querySelector('.form-control')
+                    },
+                    {
+                        title: '📦 Agregar Piezas',
+                        intro: 'Agrega las piezas que necesitas cortar. Puedes darle un nombre a cada pieza para identificarla mejor. Haz clic en "Agregar otra pieza" para añadir más.',
+                        element: document.querySelector('input[name*="nombre"]') || document.querySelector('.formset')
+                    },
+                    {
+                        title: '✅ Calcular Optimización',
+                        intro: 'Una vez que hayas ingresado todas las piezas, haz clic en "Calcular Optimización" para generar el plan de corte.',
+                        element: document.querySelector('button[type="submit"]') || document.body
+                    }
+                );
+            } else if (path.includes('mis-optimizaciones')) {
+                pasos.push(
+                    {
+                        title: '📋 Historial de Optimizaciones',
+                        intro: 'Aquí puedes ver todas tus optimizaciones guardadas. Puedes filtrar, buscar y ordenar según tus necesidades.',
+                        element: document.querySelector('h2') || document.body
+                    },
+                    {
+                        title: '🔍 Buscar y Filtrar',
+                        intro: 'Usa estos filtros para encontrar optimizaciones específicas por nombre de pieza, fecha o aprovechamiento.',
+                        element: document.querySelector('.search-filters') || document.body
+                    },
+                    {
+                        title: '⭐ Favoritos',
+                        intro: 'Haz clic en la estrella para marcar optimizaciones importantes como favoritas. Luego puedes filtrar para ver solo tus favoritos.',
+                        element: document.querySelector('.favorito-btn') || document.body
+                    },
+                    {
+                        title: '📄 Acciones',
+                        intro: 'Cada optimización tiene acciones disponibles: descargar PDF, duplicar, descargar PNG, calcular tiempo y más opciones en el menú.',
+                        element: document.querySelector('.action-buttons') || document.body
+                    }
+                );
+            } else if (path.includes('estadisticas')) {
+                pasos.push(
+                    {
+                        title: '📊 Estadísticas',
+                        intro: 'Aquí puedes ver gráficos y métricas de todas tus optimizaciones para analizar tu eficiencia.',
+                        element: document.querySelector('h2') || document.body
+                    }
+                );
+            }
+            
+            return pasos;
+        }
+        
+        // Marcar tutorial como completado
+        function marcarTutorialCompletado() {
+            fetch('{% url "usuarios:completar_tutorial" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      console.log('Tutorial marcado como completado');
+                  }
+              });
+        }
+        
+        // Función auxiliar para obtener cookie CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Event listener para botón de tutorial
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnTutorial = document.getElementById('btn-tutorial');
+            if (btnTutorial) {
+                btnTutorial.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    iniciarTutorial();
+                });
+            }
+        });
+    </script>
+    
+    <!-- Modal de Bienvenida -->
+    <div class="modal fade" id="modalBienvenida" tabindex="-1" aria-labelledby="modalBienvenidaLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalBienvenidaLabel">👋 ¡Bienvenido a OptiCut!</h5>
+                </div>
+                <div class="modal-body">
+                    <p class="lead">¡Hola, <strong>{{ user.username }}</strong>! 👋</p>
+                    <p>OptiCut es un sistema diseñado para ayudarte a optimizar el corte de madera y reducir el desperdicio de material.</p>
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">📚 ¿Primera vez aquí?</h6>
+                        <p class="mb-0">Te recomendamos seguir el tutorial interactivo para conocer todas las funcionalidades del sistema.</p>
+                    </div>
+                    <p class="mb-0"><small class="text-muted">Puedes acceder al tutorial en cualquier momento desde el botón "❓ Ayuda" en el menú superior.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="marcarTutorialCompletado(); bootstrap.Modal.getInstance(document.getElementById('modalBienvenida')).hide();">
+                        Omitir
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="iniciarTutorial();">
+                        🎯 Iniciar Tutorial
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Estilos para el tutorial -->
+    <style>
+        .customTooltip {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .customHighlight {
+            border: 3px solid #0d6efd;
+            border-radius: 8px;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.25);
+        }
+        
+        .introjs-tooltip {
+            min-width: 300px;
+        }
+        
+        .introjs-tooltipbuttons {
+            text-align: center;
+        }
+    </style>
     {% endif %}
     {% block extra_js %}{% endblock %}
 </body>

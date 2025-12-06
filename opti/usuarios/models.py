@@ -21,6 +21,10 @@ class PerfilUsuario(models.Model):
         default='auto',
         help_text="Tema de color preferido"
     )
+    tutorial_completado = models.BooleanField(
+        default=False,
+        help_text="Indica si el usuario ha completado el tutorial inicial"
+    )
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
 

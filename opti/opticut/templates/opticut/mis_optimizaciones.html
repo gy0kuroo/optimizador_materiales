@@ -1,6 +1,10 @@
 {% extends 'opticut/base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'opticut/css/mis_optimizaciones.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
   <h2 class="text-center mb-4 fade-in">📋 Mis Optimizaciones Guardadas</h2>
@@ -35,7 +39,7 @@
                  name="fecha_hasta" 
                  value="{{ fecha_hasta }}">
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-2 mb-3">
           <label for="ordenar_por" class="form-label">Ordenar por</label>
           <select class="form-control" id="ordenar_por" name="ordenar_por">
             <option value="fecha_desc" {% if ordenar_por == 'fecha_desc' %}selected{% endif %}>Fecha (Más recientes )</option>
@@ -43,6 +47,14 @@
             <option value="aprovechamiento_desc" {% if ordenar_por == 'aprovechamiento_desc' %}selected{% endif %}>Aprovechamiento (Mayor a menor)</option>
             <option value="aprovechamiento_asc" {% if ordenar_por == 'aprovechamiento_asc' %}selected{% endif %}>Aprovechamiento (Menor a mayor)</option>
           </select>
+        </div>
+        <div class="col-md-2 mb-3 d-flex align-items-end">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="solo_favoritos" name="solo_favoritos" value="true" {% if solo_favoritos == 'true' %}checked{% endif %}>
+            <label class="form-check-label" for="solo_favoritos">
+              ⭐ Solo Favoritos
+            </label>
+          </div>
         </div>
         <div class="col-md-2 mb-3 d-flex align-items-end">
           <button type="submit" class="btn btn-primary w-100">🔍 Buscar</button>
@@ -87,19 +99,33 @@
         <div class="col-md-6 col-lg-4 mb-4 fade-in">
           <div class="optimizacion-card">
             {% if optimizacion.imagen %}
-              <div class="chart-container" style="position: relative; cursor: pointer;" 
+              <div class="chart-container chart-container-clickable" 
                    onclick="abrirModalImagen('{{ optimizacion.imagen.url }}', {{ optimizacion.id }})">
                 <img src="{{ optimizacion.imagen.url }}" 
                      class="card-img-top chart-thumbnail" 
-                     alt="Optimización #{{ optimizacion.id }}"
-                     style="max-height: 200px; object-fit: cover;">
+                     alt="Optimización #{{ optimizacion.id }}">
                 <div class="chart-overlay">
                   <span class="chart-hint">🔍 Click para ver en pantalla completa</span>
                 </div>
               </div>
             {% endif %}
             <div class="card-body">
-              <h5 class="card-title">Optimización #{{ item.numero }}</h5>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="card-title mb-0">Optimización #{{ optimizacion.id }}</h5>
+                <button type="button" 
+                        class="btn btn-sm p-0 border-0 bg-transparent favorito-btn align-self-center" 
+                        data-optimizacion-id="{{ optimizacion.id }}"
+                        data-favorito-url="{% url 'opticut:toggle_favorito' optimizacion.id %}"
+                        data-favorito="{{ optimizacion.favorito|yesno:'true,false' }}"
+                        title="{% if optimizacion.favorito %}Quitar de favoritos{% else %}Marcar como favorito{% endif %}"
+                        class="favorito-btn-inline">
+                  {% if optimizacion.favorito %}
+                    <span class="favorito-icon favorito-icon-active">⭐</span>
+                  {% else %}
+                    <span class="favorito-icon favorito-icon-inactive">☆</span>
+                  {% endif %}
+                </button>
+              </div>
               <p class="card-text">
                 <strong>📅 Fecha:</strong> {{ optimizacion.fecha|date:"d/m/Y" }}<br>
                 <strong>🕐 Hora:</strong> {{ optimizacion.fecha|date:"H:i" }} (Chile)<br>
@@ -111,10 +137,10 @@
               <!-- Lista de piezas -->
               {% if piezas %}
               <details class="mb-2">
-                <summary style="cursor: pointer; color: var(--accent-primary); font-weight: 600;">
+                <summary class="piezas-summary">
                   📦 Ver Piezas ({{ piezas|length }})
                 </summary>
-                <div class="mt-2" style="font-size: 0.9rem;">
+                <div class="mt-2 piezas-details">
                   {% for pieza in piezas %}
                     <div>• <strong>{{ pieza.nombre }}</strong>: {{ pieza.ancho }}×{{ pieza.alto }}cm (x{{ pieza.cantidad }})</div>
                   {% endfor %}
@@ -122,26 +148,54 @@
               </details>
               {% endif %}
               
-              <div class="action-buttons mt-3">
-                <a href="{% url 'opticut:duplicar_optimizacion' optimizacion.id %}" 
-                   class="btn-action btn-duplicar" 
-                   title="Duplicar esta optimización">
-                  <span class="icon"></span> Duplicar
-                </a>
+              <div class="action-buttons mt-3 d-flex gap-2 align-items-center">
+                <!-- Botones principales -->
                 <a href="{% url 'opticut:descargar_pdf' optimizacion.id %}?ordenar_por={{ ordenar_por }}" 
-                   class="btn-action btn-pdf"
-                   title="Descargar PDF">
-                  <span class="icon"></span> PDF
+                   class="btn-action btn-pdf flex-fill"
+                   title="Descargar PDF completo">
+                  <span class="icon"></span> 📄 PDF
                 </a>
-                <form method="post" 
-                      action="{% url 'opticut:borrar_optimizacion' optimizacion.id %}" 
-                      style="display:inline;" 
-                      onsubmit="return confirm('¿Eliminar esta optimización?');">
-                  {% csrf_token %}
-                  <button type="submit" class="btn-action btn-eliminar" title="Eliminar">
-                    <span class="icon"></span> Borrar
+                <a href="{% url 'opticut:duplicar_optimizacion' optimizacion.id %}" 
+                   class="btn-action btn-duplicar flex-fill" 
+                   title="Duplicar esta optimización">
+                  <span class="icon"></span> 📋 Duplicar
+                </a>
+                
+                <!-- Menú desplegable para acciones secundarias -->
+                <div class="dropdown">
+                  <button class="btn btn-action btn-mas-opciones flex-fill" 
+                          type="button" 
+                          id="dropdownMenuButton{{ optimizacion.id }}" 
+                          data-bs-toggle="dropdown" 
+                          aria-expanded="false"
+                          title="Más opciones">
+                    <span class="icon">⚙️</span> Más opciones
                   </button>
-                </form>
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ optimizacion.id }}">
+                    <li>
+                      <a class="dropdown-item" href="{% url 'opticut:descargar_png' optimizacion.id %}">
+                        📥 Descargar PNG
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{% url 'opticut:calcular_tiempo_corte' optimizacion.id %}">
+                        ⏱️ Calcular Tiempo
+                      </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                      <form method="post" 
+                            action="{% url 'opticut:borrar_optimizacion' optimizacion.id %}" 
+                         class="delete-form-inline" 
+                         onsubmit="return confirm('¿Eliminar esta optimización?');">
+                       {% csrf_token %}
+                       <button type="submit" class="dropdown-item text-danger delete-button">
+                          🗑️ Eliminar
+                        </button>
+                      </form>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -157,7 +211,7 @@
       </p>
     </div>
   {% else %}
-    <div class="card fade-in text-center" style="padding: 3rem;">
+    <div class="card fade-in text-center card-empty-state">
       <h4 class="text-muted mb-3">📭 No hay optimizaciones</h4>
       <p class="text-muted mb-4">
         {% if nombre_pieza or fecha_desde or fecha_hasta %}
@@ -190,16 +244,15 @@
                 </div>
               </div>
               <div class="col-2 d-flex flex-column justify-content-center align-items-center zoom-controls">
-                <label for="zoomSliderImagen" class="text-white mb-2" style="writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.9rem;">Zoom</label>
+                <label for="zoomSliderImagen" class="text-white mb-2 zoom-label">Zoom</label>
                 <input type="range" 
-                       class="form-range" 
+                       class="form-range zoom-slider" 
                        id="zoomSliderImagen" 
                        min="50" 
                        max="300" 
                        value="100" 
-                       step="5"
-                       style="width: 200px; transform: rotate(-90deg); margin: 50px 0;">
-                <span id="zoomValueImagen" class="text-white mt-2" style="font-size: 0.85rem;">100%</span>
+                       step="5">
+                <span id="zoomValueImagen" class="text-white mt-2 zoom-value">100%</span>
               </div>
             </div>
           </div>
@@ -210,146 +263,6 @@
         </div>
       </div>
     </div>
-
-<style>
-.badge {
-    padding: 0.35em 0.65em;
-    border-radius: 6px;
-    font-weight: 600;
-}
-
-details summary {
-    user-select: none;
-}
-
-details summary::-webkit-details-marker {
-    display: none;
-}
-
-/* Estilos para gráficos clicables */
-.chart-container {
-    position: relative;
-    transition: transform 0.2s;
-}
-
-.chart-container:hover {
-    transform: scale(1.02);
-}
-
-.chart-thumbnail {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-.chart-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.chart-container:hover .chart-overlay {
-    opacity: 1;
-}
-
-.chart-hint {
-    color: white;
-    font-weight: bold;
-    font-size: 1.1rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-}
-
-/* Estilos para modal de imagen */
-.modal-grafico-body {
-    background-color: #f8f9fa;
-    overflow: hidden;
-    padding: 0;
-    min-height: calc(100vh - 120px);
-}
-
-.modal-grafico-body .row {
-    height: 100%;
-    margin: 0;
-}
-
-.modal-grafico-body .col-10 {
-    overflow: auto;
-    padding: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.zoom-controls {
-    background: linear-gradient(180deg, rgba(33, 37, 41, 0.95) 0%, rgba(52, 58, 64, 0.95) 100%);
-    padding: 1rem 0.5rem;
-    border-left: 2px solid rgba(0, 123, 255, 0.5);
-    min-width: 100px;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
-}
-
-.zoom-controls input[type="range"] {
-    cursor: pointer;
-    width: 300px;
-    height: 8px;
-    margin: 80px 0;
-}
-
-.zoom-controls label {
-    font-weight: bold;
-    margin-bottom: 1rem;
-}
-
-.zoom-controls #zoomValueImagen {
-    font-weight: bold;
-    font-size: 1rem;
-    margin-top: 1rem;
-}
-
-.modal-grafico-contenido {
-    display: inline-block;
-    max-width: 100%;
-    padding: 2rem;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    position: relative;
-    overflow: visible;
-}
-
-#modalImagenContenido {
-    width: 100%;
-    text-align: center;
-    position: relative;
-}
-
-#modalImagenContenido img {
-    max-width: 100%;
-    max-height: 90vh;
-    width: auto;
-    height: auto;
-    cursor: grab;
-    transition: transform 0.2s ease-out;
-    display: block;
-    margin: 0 auto;
-    user-select: none;
-    -webkit-user-drag: none;
-    touch-action: none;
-    object-fit: contain;
-}
-
-#modalImagenContenido img:active {
-    cursor: grabbing;
-}
-</style>
 
 <script>
 function abrirModalImagen(urlImagen, optimizacionId) {
@@ -547,6 +460,93 @@ function resetearZoomImagen() {
         }
     }
 }
+
+// Función para obtener el token CSRF de las cookies
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Funcionalidad AJAX para favoritos
+document.addEventListener('DOMContentLoaded', function() {
+    const favoritoButtons = document.querySelectorAll('.favorito-btn');
+    
+    favoritoButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const optimizacionId = this.getAttribute('data-optimizacion-id');
+            const favoritoUrl = this.getAttribute('data-favorito-url');
+            const icon = this.querySelector('.favorito-icon');
+            const buttonElement = this;
+            
+            // Deshabilitar el botón mientras se procesa
+            buttonElement.disabled = true;
+            buttonElement.style.opacity = '0.6';
+            
+            // Obtener token CSRF
+            const csrftoken = getCookie('csrftoken');
+            
+            // Crear FormData para enviar el CSRF token
+            const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', csrftoken);
+            
+            // Hacer petición AJAX usando la URL del atributo data
+            const url = favoritoUrl + '?ajax=true';
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrftoken
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Actualizar el estado visual
+                    if (data.favorito) {
+                        icon.textContent = '⭐';
+                        icon.style.color = '#ffc107';
+                        buttonElement.setAttribute('data-favorito', 'true');
+                        buttonElement.setAttribute('title', 'Quitar de favoritos');
+                    } else {
+                        icon.textContent = '☆';
+                        icon.style.color = '#ccc';
+                        buttonElement.setAttribute('data-favorito', 'false');
+                        buttonElement.setAttribute('title', 'Marcar como favorito');
+                    }
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al actualizar favorito. Por favor, recarga la página.');
+            })
+            .finally(() => {
+                // Rehabilitar el botón
+                buttonElement.disabled = false;
+                buttonElement.style.opacity = '1';
+            });
+        });
+    });
+});
 </script>
 
 {% endblock %}

@@ -207,6 +207,11 @@ def index(request):
 def mis_optimizaciones(request):
     optimizaciones = Optimizacion.objects.filter(usuario=request.user)
     
+    # Filtro por favoritos
+    solo_favoritos = request.GET.get('solo_favoritos', '').strip()
+    if solo_favoritos == 'true':
+        optimizaciones = optimizaciones.filter(favorito=True)
+    
     # Filtro por nombre de pieza
     nombre_pieza = request.GET.get('nombre_pieza', '').strip()
     if nombre_pieza:
@@ -302,6 +307,7 @@ def mis_optimizaciones(request):
         'fecha_desde': fecha_desde,
         'fecha_hasta': fecha_hasta,
         'ordenar_por': ordenar_por,
+        'solo_favoritos': solo_favoritos,
     })
 
 
@@ -512,16 +518,16 @@ def duplicar_optimizacion(request, pk):
                 nombre, ancho, alto, cantidad = partes
                 piezas_data.append({
                     'nombre': nombre.strip(),
-                    'ancho': int(ancho.strip()),
-                    'alto': int(alto.strip()),
+                    'ancho': float(ancho.strip()),  # Cambiado a float para manejar decimales
+                    'alto': float(alto.strip()),    # Cambiado a float para manejar decimales
                     'cantidad': int(cantidad.strip())
                 })
             else:  # Sin nombre (formato antiguo)
                 ancho, alto, cantidad = partes
                 piezas_data.append({
                     'nombre': '',
-                    'ancho': int(ancho.strip()),
-                    'alto': int(alto.strip()),
+                    'ancho': float(ancho.strip()),  # Cambiado a float para manejar decimales
+                    'alto': float(alto.strip()),    # Cambiado a float para manejar decimales
                     'cantidad': int(cantidad.strip())
                 })
         
@@ -549,7 +555,10 @@ def duplicar_optimizacion(request, pk):
         
         pieza_formset = PiezaFormSet(initial=piezas_data)
         
-        messages.info(request, f"📋 Cargando datos de la optimización #{pk}. Puedes modificarlos antes de calcular.")
+        # Usar el ID real de la optimización obtenida de la base de datos
+        # El optimizacion.id siempre debe coincidir con el pk de la URL porque se obtiene con get(pk=pk)
+        # Mostramos el ID real que es el correcto
+        messages.info(request, f"📋 Cargando datos de la optimización #{optimizacion.id}. Puedes modificarlos antes de calcular.")
         
         return render(request, "opticut/index.html", {
             "tablero_form": tablero_form,
@@ -687,3 +696,218 @@ def estadisticas(request):
         'grafico_desperdicio_hd': grafico_desperdicio_hd,
         'periodo': periodo,
     })
+
+
+@login_required
+def toggle_favorito(request, pk):
+    """
+    Marca o desmarca una optimización como favorita.
+    Soporta tanto peticiones AJAX como peticiones normales.
+    """
+    try:
+        optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
+        optimizacion.favorito = not optimizacion.favorito
+        optimizacion.save()
+        
+        # Si es una petición AJAX, devolver JSON
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.GET.get('ajax') == 'true':
+            from django.http import JsonResponse
+            return JsonResponse({
+                'success': True,
+                'favorito': optimizacion.favorito,
+                'message': f"⭐ Optimización #{pk} marcada como favorita." if optimizacion.favorito else f"Optimización #{pk} eliminada de favoritos."
+            })
+        
+        # Si no es AJAX, comportamiento normal con mensajes
+        if optimizacion.favorito:
+            messages.success(request, f"⭐ Optimización #{pk} marcada como favorita.")
+        else:
+            messages.info(request, f"Optimización #{pk} eliminada de favoritos.")
+    except Optimizacion.DoesNotExist:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.GET.get('ajax') == 'true':
+            from django.http import JsonResponse
+            return JsonResponse({
+                'success': False,
+                'message': 'No se encontró la optimización o no tienes permiso.'
+            }, status=404)
+        messages.error(request, "No se encontró la optimización o no tienes permiso.")
+    
+    # Redirigir de vuelta a mis_optimizaciones, manteniendo los filtros (solo si no es AJAX)
+    return redirect(request.META.get('HTTP_REFERER', 'opticut:mis_optimizaciones'))
+
+
+@login_required
+def calcular_tiempo_corte(request, pk):
+    """
+    Calcula el tiempo estimado de corte para una optimización.
+    Considera: número de piezas, tipo de corte, material, etc.
+    """
+    try:
+        optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
+        
+        # Obtener parámetros de cálculo (pueden venir del POST o usar valores por defecto)
+        velocidad_corte = float(request.POST.get('velocidad_corte', 2.0))  # cm/segundo (por defecto)
+        tiempo_setup = float(request.POST.get('tiempo_setup', 5.0))  # minutos por tablero
+        tiempo_cambio_herramienta = float(request.POST.get('tiempo_cambio_herramienta', 2.0))  # minutos
+        
+        # Parsear piezas
+        piezas = []
+        total_piezas = 0
+        perimetro_total = 0  # Perímetro total a cortar en cm
+        
+        for linea in optimizacion.piezas.splitlines():
+            if linea.strip():
+                partes = linea.split(',')
+                if len(partes) == 4:
+                    nombre, ancho, alto, cantidad = partes
+                    ancho_cm = convertir_a_cm(float(ancho), optimizacion.unidad_medida)
+                    alto_cm = convertir_a_cm(float(alto), optimizacion.unidad_medida)
+                elif len(partes) == 3:
+                    ancho, alto, cantidad = partes
+                    ancho_cm = convertir_a_cm(float(ancho), optimizacion.unidad_medida)
+                    alto_cm = convertir_a_cm(float(alto), optimizacion.unidad_medida)
+                
+                cantidad = int(cantidad)
+                total_piezas += cantidad
+                # Perímetro de cada pieza: 2*(ancho + alto)
+                perimetro_pieza = 2 * (ancho_cm + alto_cm)
+                perimetro_total += perimetro_pieza * cantidad
+        
+        # Calcular número de tableros (aproximado basado en el área)
+        area_tablero = optimizacion.ancho_tablero * optimizacion.alto_tablero
+        area_total_piezas = sum(
+            convertir_a_cm(float(p.split(',')[1]), optimizacion.unidad_medida) * 
+            convertir_a_cm(float(p.split(',')[2]), optimizacion.unidad_medida) * 
+            int(p.split(',')[3]) 
+            for p in optimizacion.piezas.splitlines() if p.strip()
+        )
+        num_tableros_estimado = max(1, int(area_total_piezas / area_tablero) + 1)
+        
+        # Calcular tiempos
+        # Tiempo de corte = perímetro total / velocidad de corte
+        tiempo_corte_segundos = perimetro_total / velocidad_corte
+        tiempo_corte_minutos = tiempo_corte_segundos / 60
+        
+        # Tiempo de setup (preparación de cada tablero)
+        tiempo_setup_total = tiempo_setup * num_tableros_estimado
+        
+        # Tiempo de cambio de herramienta (estimado: 1 cambio por cada 10 piezas diferentes)
+        tipos_piezas = len([p for p in optimizacion.piezas.splitlines() if p.strip()])
+        cambios_herramienta = max(0, tipos_piezas - 1)
+        tiempo_cambio_total = tiempo_cambio_herramienta * cambios_herramienta
+        
+        # Tiempo total estimado
+        tiempo_total_minutos = tiempo_corte_minutos + tiempo_setup_total + tiempo_cambio_total
+        tiempo_total_horas = tiempo_total_minutos / 60
+        
+        # Formatear tiempo
+        horas = int(tiempo_total_horas)
+        minutos = int(tiempo_total_minutos % 60)
+        segundos = int((tiempo_total_minutos % 1) * 60)
+        
+        # Calcular porcentajes
+        porcentaje_corte = round((tiempo_corte_minutos / tiempo_total_minutos * 100) if tiempo_total_minutos > 0 else 0, 1)
+        porcentaje_setup = round((tiempo_setup_total / tiempo_total_minutos * 100) if tiempo_total_minutos > 0 else 0, 1)
+        porcentaje_cambio = round((tiempo_cambio_total / tiempo_total_minutos * 100) if tiempo_total_minutos > 0 else 0, 1)
+        
+        # Preparar datos para mostrar
+        unidad_opt = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
+        ancho_mostrar = round(convertir_desde_cm(optimizacion.ancho_tablero, unidad_opt), 2)
+        alto_mostrar = round(convertir_desde_cm(optimizacion.alto_tablero, unidad_opt), 2)
+        
+        return render(request, 'opticut/calcular_tiempo.html', {
+            'optimizacion': optimizacion,
+            'ancho_mostrar': ancho_mostrar,
+            'alto_mostrar': alto_mostrar,
+            'unidad_medida': unidad_opt,
+            'total_piezas': total_piezas,
+            'tipos_piezas': tipos_piezas,
+            'num_tableros_estimado': num_tableros_estimado,
+            'perimetro_total': round(perimetro_total, 2),
+            'tiempo_corte_minutos': round(tiempo_corte_minutos, 2),
+            'tiempo_setup_total': round(tiempo_setup_total, 2),
+            'tiempo_cambio_total': round(tiempo_cambio_total, 2),
+            'tiempo_total_minutos': round(tiempo_total_minutos, 2),
+            'tiempo_total_horas': round(tiempo_total_horas, 2),
+            'tiempo_formateado': f"{horas}h {minutos}m {segundos}s" if horas > 0 else f"{minutos}m {segundos}s",
+            'velocidad_corte': velocidad_corte,
+            'tiempo_setup': tiempo_setup,
+            'tiempo_cambio_herramienta': tiempo_cambio_herramienta,
+            'porcentaje_corte': porcentaje_corte,
+            'porcentaje_setup': porcentaje_setup,
+            'porcentaje_cambio': porcentaje_cambio,
+            'velocidad_corte_cm_min': round(velocidad_corte * 60, 0),
+        })
+        
+    except Optimizacion.DoesNotExist:
+        messages.error(request, "No se encontró la optimización o no tienes permiso.")
+        return redirect('opticut:mis_optimizaciones')
+    except Exception as e:
+        messages.error(request, f"Error al calcular tiempo: {str(e)}")
+        return redirect('opticut:mis_optimizaciones')
+
+
+@login_required
+def descargar_png(request, pk, tablero_num=None):
+    """
+    Descarga una imagen PNG de un tablero específico de una optimización.
+    Si tablero_num no se especifica, descarga la primera imagen (tablero 1).
+    """
+    try:
+        optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
+        
+        # Obtener unidad de la optimización
+        unidad_opt = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
+        
+        # Parsear piezas y convertir a cm
+        piezas = []
+        for linea in optimizacion.piezas.splitlines():
+            if linea.strip():
+                partes = linea.split(",")
+                if len(partes) == 4:  # Con nombre
+                    nombre, w, h, c = partes
+                    w_cm = convertir_a_cm(float(w), unidad_opt)
+                    h_cm = convertir_a_cm(float(h), unidad_opt)
+                    piezas.append((w_cm, h_cm, int(c)))
+                elif len(partes) == 3:  # Sin nombre
+                    w, h, c = partes
+                    w_cm = convertir_a_cm(float(w), unidad_opt)
+                    h_cm = convertir_a_cm(float(h), unidad_opt)
+                    piezas.append((w_cm, h_cm, int(c)))
+        
+        # Generar todas las imágenes
+        imagenes_base64, _, _ = generar_grafico(piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero, unidad_opt)
+        
+        if not imagenes_base64:
+            messages.error(request, "No se encontraron imágenes para esta optimización.")
+            return redirect('opticut:mis_optimizaciones')
+        
+        # Determinar qué tablero descargar
+        if tablero_num is None:
+            tablero_num = 1
+        
+        # Validar que el número de tablero existe
+        if tablero_num < 1 or tablero_num > len(imagenes_base64):
+            messages.error(request, f"El tablero #{tablero_num} no existe. Esta optimización tiene {len(imagenes_base64)} tablero(s).")
+            return redirect('opticut:mis_optimizaciones')
+        
+        # Obtener la imagen del tablero solicitado (índice 0-based)
+        imagen_base64 = imagenes_base64[tablero_num - 1]
+        
+        # Decodificar la imagen
+        image_data = base64.b64decode(imagen_base64)
+        
+        # Crear respuesta HTTP con la imagen
+        from django.http import HttpResponse
+        response = HttpResponse(image_data, content_type='image/png')
+        filename = f"tablero_{tablero_num}_optimizacion_{optimizacion.id}_{optimizacion.usuario.username}.png"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        return response
+        
+    except Optimizacion.DoesNotExist:
+        messages.error(request, "No se encontró la optimización o no tienes permiso.")
+        return redirect('opticut:mis_optimizaciones')
+    except Exception as e:
+        messages.error(request, f"Error al generar imagen PNG: {str(e)}")
+        return redirect('opticut:mis_optimizaciones')
