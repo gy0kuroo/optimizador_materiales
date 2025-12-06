@@ -1,6 +1,10 @@
 {% extends 'opticut/base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'opticut/css/estadisticas.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
   <h2 class="text-center mb-4 fade-in">📊 Estadísticas y Análisis</h2>
@@ -67,7 +71,7 @@
           </div>
           <div class="card-body">
             {% if grafico_aprovechamiento %}
-              <div class="chart-container" style="position: relative; cursor: pointer;" 
+              <div class="chart-container" 
                    onclick="abrirModalGrafico('aprovechamiento')">
                 <img src="data:image/png;base64,{{ grafico_aprovechamiento }}" 
                      alt="Gráfico de Aprovechamiento" 
@@ -90,7 +94,7 @@
           </div>
           <div class="card-body">
             {% if grafico_desperdicio %}
-              <div class="chart-container" style="position: relative; cursor: pointer;" 
+              <div class="chart-container" 
                    onclick="abrirModalGrafico('desperdicio')">
                 <img src="data:image/png;base64,{{ grafico_desperdicio }}" 
                      alt="Gráfico de Desperdicio" 
@@ -123,16 +127,15 @@
                 </div>
               </div>
               <div class="col-2 d-flex flex-column justify-content-center align-items-center zoom-controls">
-                <label for="zoomSlider" class="text-white mb-2" style="writing-mode: vertical-rl; text-orientation: mixed; font-size: 0.9rem;">Zoom</label>
+                <label for="zoomSlider" class="text-white mb-2">Zoom</label>
                 <input type="range" 
                        class="form-range" 
                        id="zoomSlider" 
                        min="50" 
                        max="300" 
                        value="100" 
-                       step="5"
-                       style="width: 200px; transform: rotate(-90deg); margin: 50px 0;">
-                <span id="zoomValue" class="text-white mt-2" style="font-size: 0.85rem;">100%</span>
+                       step="5">
+                <span id="zoomValue" class="text-white mt-2">100%</span>
               </div>
             </div>
           </div>
@@ -174,8 +177,8 @@
                     <td>{{ item.ancho_mostrar }} × {{ item.alto_mostrar }} {{ item.unidad_medida }}</td>
                     <td>
                       <details>
-                        <summary style="cursor: pointer; color: #007bff;">Ver ({{ item.piezas|length }})</summary>
-                        <div class="mt-2" style="font-size: 0.85rem;">
+                        <summary>Ver ({{ item.piezas|length }})</summary>
+                        <div class="mt-2">
                           {% for pieza in item.piezas %}
                             <div>• <strong>{{ pieza.nombre }}</strong>: {{ pieza.ancho }}×{{ pieza.alto }}cm (x{{ pieza.cantidad }})</div>
                           {% endfor %}
@@ -204,7 +207,7 @@
     </div>
     
   {% else %}
-    <div class="card fade-in text-center" style="padding: 3rem;">
+      <div class="card fade-in text-center stats-card-center">
       <h4 class="text-muted mb-3">📭 No hay datos</h4>
       <p class="text-muted mb-4">
         {% if periodo != 'todos' %}
@@ -231,203 +234,6 @@
   </div>
 </div>
 
-<style>
-.badge {
-    padding: 0.35em 0.65em;
-    border-radius: 6px;
-    font-weight: 600;
-}
-
-details summary {
-    user-select: none;
-}
-
-details summary::-webkit-details-marker {
-    display: none;
-}
-
-.card {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border: none;
-    margin-bottom: 1rem;
-}
-
-.fade-in {
-    animation: fadeIn 0.5s;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Estilos para tarjetas de estadísticas */
-.stats-card {
-    min-height: 140px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.stats-card .card-body {
-    padding: 1.5rem;
-    width: 100%;
-}
-
-.stats-title {
-    font-size: 0.95rem;
-    line-height: 1.3;
-    margin-bottom: 0.75rem;
-    word-wrap: break-word;
-    white-space: normal;
-    height: auto;
-    min-height: 2.6em;
-}
-
-.stats-card h2 {
-    font-size: 2rem;
-    margin: 0;
-}
-
-/* Estilos para gráficos clicables */
-.chart-container {
-    position: relative;
-    transition: transform 0.2s;
-}
-
-.chart-container:hover {
-    transform: scale(1.02);
-}
-
-.chart-thumbnail {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-.chart-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.chart-container:hover .chart-overlay {
-    opacity: 1;
-}
-
-.chart-hint {
-    color: white;
-    font-weight: bold;
-    font-size: 1.1rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-}
-
-/* Estilos para modal de gráfico */
-.modal-grafico-body {
-    background-color: #f8f9fa;
-    overflow: hidden;
-    padding: 0;
-    min-height: calc(100vh - 120px);
-}
-
-.modal-grafico-body .row {
-    height: 100%;
-    margin: 0;
-}
-
-.modal-grafico-body .col-11 {
-    overflow: auto;
-    padding: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.zoom-controls {
-    background: linear-gradient(180deg, rgba(33, 37, 41, 0.95) 0%, rgba(52, 58, 64, 0.95) 100%);
-    padding: 1rem 0.5rem;
-    border-left: 2px solid rgba(0, 123, 255, 0.5);
-    min-width: 100px;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
-}
-
-.zoom-controls input[type="range"] {
-    cursor: pointer;
-    width: 300px;
-    height: 8px;
-    margin: 80px 0;
-}
-
-.zoom-controls label {
-    font-weight: bold;
-    margin-bottom: 1rem;
-}
-
-.zoom-controls #zoomValue {
-    font-weight: bold;
-    font-size: 1rem;
-    margin-top: 1rem;
-}
-
-.modal-grafico-contenido {
-    display: inline-block;
-    max-width: 100%;
-    padding: 2rem;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    position: relative;
-    overflow: visible;
-}
-
-#modalGraficoContenido {
-    width: 100%;
-    text-align: center;
-    position: relative;
-}
-
-#modalGraficoContenido > div {
-    width: 100%;
-    min-height: 400px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#modalGraficoContenido img {
-    max-width: 100%;
-    height: auto;
-    cursor: grab;
-    transition: transform 0.2s ease-out;
-    display: block;
-    margin: 0 auto;
-    user-select: none;
-    -webkit-user-drag: none;
-    touch-action: none;
-}
-
-#modalGraficoContenido img:active {
-    cursor: grabbing;
-}
-
-@media (max-width: 768px) {
-    .stats-title {
-        font-size: 0.85rem;
-    }
-    
-    .stats-card h2 {
-        font-size: 1.5rem;
-    }
-}
-</style>
 
 <script>
 // Datos de gráficos en alta resolución

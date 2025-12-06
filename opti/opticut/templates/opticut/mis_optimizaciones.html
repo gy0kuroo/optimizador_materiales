@@ -111,7 +111,7 @@
             {% endif %}
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="card-title mb-0">Optimización #{{ optimizacion.id }}</h5>
+                <h5 class="card-title mb-0">Optimización #{{ item.numero }}</h5>
                 <button type="button" 
                         class="btn btn-sm p-0 border-0 bg-transparent favorito-btn align-self-center" 
                         data-optimizacion-id="{{ optimizacion.id }}"
@@ -155,7 +155,7 @@
                    title="Descargar PDF completo">
                   <span class="icon"></span> 📄 PDF
                 </a>
-                <a href="{% url 'opticut:duplicar_optimizacion' optimizacion.id %}" 
+                <a href="{% url 'opticut:duplicar_optimizacion' optimizacion.id %}?ordenar_por={{ ordenar_por }}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}" 
                    class="btn-action btn-duplicar flex-fill" 
                    title="Duplicar esta optimización">
                   <span class="icon"></span> 📋 Duplicar

@@ -7,6 +7,8 @@
     let warningShown = false;
     let timeoutSeconds = null;
     let warningSeconds = 60; // Mostrar advertencia 1 minuto antes
+    let countdownInterval = null;
+    let modalListenersAdded = false;
     
     // Obtener timeout desde el atributo data del body o usar valor por defecto
     function initializeTimeout() {
@@ -36,6 +38,10 @@
         
         clearTimeout(inactivityTimer);
         clearTimeout(warningTimer);
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
         warningShown = false;
         
         // Ocultar advertencia si está visible
@@ -124,7 +130,10 @@
         
         // Contador regresivo
         let remaining = warningSeconds;
-        const countdown = setInterval(function() {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+        }
+        countdownInterval = setInterval(function() {
             remaining--;
             const minutes = Math.floor(remaining / 60);
             const seconds = remaining % 60;
@@ -135,22 +144,10 @@
             }
             
             if (remaining <= 0) {
-                clearInterval(countdown);
+                clearInterval(countdownInterval);
+                countdownInterval = null;
             }
         }, 1000);
-        
-        // Botón para continuar
-        document.getElementById('session-stay-active').addEventListener('click', function() {
-            clearInterval(countdown);
-            bsModal.hide();
-            resetTimer();
-        });
-        
-        // Botón para cerrar sesión ahora
-        document.getElementById('session-logout-now').addEventListener('click', function() {
-            clearInterval(countdown);
-            logout();
-        });
     }
     
     // Cerrar sesión
@@ -158,6 +155,10 @@
         // Limpiar timers
         clearTimeout(inactivityTimer);
         clearTimeout(warningTimer);
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
         
         // Redirigir a logout
         window.location.href = '/usuarios/logout/';
@@ -166,6 +167,32 @@
     // Agregar listeners de actividad
     activityEvents.forEach(function(event) {
         document.addEventListener(event, resetTimer, true);
+    });
+    
+    // Agregar listeners del modal usando event delegation (una sola vez)
+    document.body.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'session-stay-active') {
+            e.preventDefault();
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            const modal = document.getElementById('session-warning-modal');
+            if (modal) {
+                const bsModal = bootstrap.Modal.getInstance(modal);
+                if (bsModal) {
+                    bsModal.hide();
+                }
+            }
+            resetTimer();
+        } else if (e.target && e.target.id === 'session-logout-now') {
+            e.preventDefault();
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            logout();
+        }
     });
     
     // Inicializar cuando el DOM esté listo

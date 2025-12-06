@@ -510,6 +510,47 @@ def duplicar_optimizacion(request, pk):
     try:
         optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
         
+        # Obtener el ordenamiento actual desde los parámetros GET (si existe)
+        ordenar_por = request.GET.get('ordenar_por', 'fecha_desc')
+        
+        # Calcular el número de visualización igual que en mis_optimizaciones
+        todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user)
+        
+        # Aplicar filtros si existen (para mantener consistencia)
+        solo_favoritos = request.GET.get('solo_favoritos', '').strip()
+        if solo_favoritos == 'true':
+            todas_optimizaciones = todas_optimizaciones.filter(favorito=True)
+        
+        nombre_pieza = request.GET.get('nombre_pieza', '').strip()
+        if nombre_pieza:
+            todas_optimizaciones = todas_optimizaciones.filter(piezas__icontains=nombre_pieza)
+        
+        # Aplicar el mismo ordenamiento que se usa en mis_optimizaciones
+        if ordenar_por == 'fecha_desc':
+            todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
+        elif ordenar_por == 'fecha_asc':
+            todas_optimizaciones = todas_optimizaciones.order_by('fecha')
+        elif ordenar_por == 'aprovechamiento_desc':
+            todas_optimizaciones = todas_optimizaciones.order_by('-aprovechamiento_total')
+        elif ordenar_por == 'aprovechamiento_asc':
+            todas_optimizaciones = todas_optimizaciones.order_by('aprovechamiento_total')
+        else:
+            todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
+        
+        total_optimizaciones = todas_optimizaciones.count()
+        es_descendente = ordenar_por in ['fecha_desc', 'aprovechamiento_desc']
+        
+        # Encontrar la posición de esta optimización en la lista
+        numero_mostrado = optimizacion.id  # Por defecto usar el ID real
+        for idx, opt in enumerate(todas_optimizaciones, start=1):
+            if opt.id == optimizacion.id:
+                # Calcular número de lista según el ordenamiento (igual que en mis_optimizaciones)
+                if es_descendente:
+                    numero_mostrado = total_optimizaciones - idx + 1
+                else:
+                    numero_mostrado = idx
+                break
+        
         # Parsear las piezas guardadas
         piezas_data = []
         for linea in optimizacion.piezas.splitlines():
@@ -555,10 +596,9 @@ def duplicar_optimizacion(request, pk):
         
         pieza_formset = PiezaFormSet(initial=piezas_data)
         
-        # Usar el ID real de la optimización obtenida de la base de datos
-        # El optimizacion.id siempre debe coincidir con el pk de la URL porque se obtiene con get(pk=pk)
-        # Mostramos el ID real que es el correcto
-        messages.info(request, f"📋 Cargando datos de la optimización #{optimizacion.id}. Puedes modificarlos antes de calcular.")
+        # Usar el número de visualización calculado (igual que se muestra en mis_optimizaciones)
+        # Esto asegura que el mensaje muestre el mismo número que se ve en la pantalla
+        messages.info(request, f"📋 Cargando datos de la optimización #{numero_mostrado}. Puedes modificarlos antes de calcular.")
         
         return render(request, "opticut/index.html", {
             "tablero_form": tablero_form,

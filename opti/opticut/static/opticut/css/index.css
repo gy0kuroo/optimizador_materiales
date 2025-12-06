@@ -24,3 +24,12 @@
     color: var(--text-primary) !important;
 }
 
+/* Estilos para botón de eliminar pieza */
+.remove-pieza {
+    display: none;
+}
+
+.pieza-form:not(:only-child) .remove-pieza {
+    display: block;
+}
+
