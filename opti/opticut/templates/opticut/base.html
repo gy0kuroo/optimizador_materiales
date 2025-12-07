@@ -30,7 +30,7 @@
                     🪚 OptiCut
                 </a>
                 {% if user.is_authenticated %}
-                    <span class="navbar-greeting">👤 Hola, {{ user.username }}</span>
+                    <span class="navbar-greeting">Hola, {{ user.username }}</span>
                 {% endif %}
             </div>
             <button class="navbar-toggler navbar-toggler-custom" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
@@ -258,6 +258,110 @@
                 });
             }
         });
+        
+        // Función para iniciar tutorial de sección específica
+        function iniciarTutorialSeccion(seccion) {
+            const path = window.location.pathname;
+            let pasos = [];
+            
+            if (seccion === 'tablero') {
+                pasos = [
+                    {
+                        title: '📐 Dimensiones del Tablero',
+                        intro: 'Ingresa el ancho y alto del tablero de madera disponible. Puedes usar tableros predefinidos o ingresar medidas personalizadas. Selecciona la unidad de medida que prefieras (cm, m, pulgadas o pies).',
+                        element: document.querySelector('input[name="ancho"]') || document.querySelector('#medidas-pred-container')
+                    },
+                    {
+                        title: '📏 Tableros Predefinidos',
+                        intro: 'Usa el menú desplegable para seleccionar medidas estándar de tableros comunes (OSB, MDF, Melamina, etc.). Esto ahorra tiempo al ingresar dimensiones frecuentes.',
+                        element: document.querySelector('#tableros-dropdown') || document.querySelector('#medidas-pred-container')
+                    }
+                ];
+            } else if (seccion === 'piezas') {
+                pasos = [
+                    {
+                        title: '✂️ Piezas a Cortar',
+                        intro: 'Agrega las piezas que necesitas cortar del tablero. Para cada pieza, ingresa un nombre (opcional), ancho, alto y cantidad. Puedes agregar hasta 20 piezas diferentes.',
+                        element: document.querySelector('input[name*="nombre"]') || document.querySelector('.pieza-form')
+                    },
+                    {
+                        title: '➕ Agregar Más Piezas',
+                        intro: 'Haz clic en "Agregar otra pieza" para añadir más piezas a tu lista. El sistema calculará la mejor forma de organizarlas en el tablero.',
+                        element: document.getElementById('add-pieza')
+                    }
+                ];
+            } else if (seccion === 'historial') {
+                pasos = [
+                    {
+                        title: '📋 Historial de Optimizaciones',
+                        intro: 'Aquí puedes ver todas tus optimizaciones guardadas. Cada optimización muestra el aprovechamiento, fecha y dimensiones del tablero usado.',
+                        element: document.querySelector('h2') || document.querySelector('.optimizacion-card')
+                    },
+                    {
+                        title: '🔍 Buscar y Filtrar',
+                        intro: 'Usa los filtros para encontrar optimizaciones específicas. Puedes buscar por nombre de pieza, filtrar por fecha, ordenar por aprovechamiento o mostrar solo favoritos.',
+                        element: document.querySelector('.search-filters')
+                    },
+                    {
+                        title: '⭐ Favoritos',
+                        intro: 'Marca optimizaciones importantes como favoritas haciendo clic en la estrella. Luego puedes filtrar para ver solo tus favoritos.',
+                        element: document.querySelector('.favorito-btn')
+                    },
+                    {
+                        title: '📄 Acciones Disponibles',
+                        intro: 'Cada optimización tiene varias acciones: descargar PDF completo, duplicar para reutilizar, descargar PNG individual, calcular tiempo de corte y más opciones en el menú.',
+                        element: document.querySelector('.action-buttons')
+                    }
+                ];
+            } else if (seccion === 'estadisticas') {
+                pasos = [
+                    {
+                        title: '📊 Estadísticas y Análisis',
+                        intro: 'Esta sección te muestra métricas importantes sobre todas tus optimizaciones. Puedes analizar tu eficiencia y mejorar tus procesos de corte.',
+                        element: document.querySelector('h2')
+                    },
+                    {
+                        title: '📈 Métricas Principales',
+                        intro: 'Las tarjetas muestran: total de optimizaciones, aprovechamiento promedio, mejor aprovechamiento alcanzado y desperdicio promedio. Estos datos te ayudan a evaluar tu eficiencia.',
+                        element: document.querySelector('.stats-card')
+                    },
+                    {
+                        title: '📅 Seleccionar Período',
+                        intro: 'Filtra las estadísticas por período de tiempo: última semana, último mes, último año o todos los tiempos. Esto te permite analizar tendencias específicas.',
+                        element: document.querySelector('select[name="periodo"]')
+                    },
+                    {
+                        title: '📊 Gráficos Interactivos',
+                        intro: 'Los gráficos muestran la tendencia de aprovechamiento y desperdicio a lo largo del tiempo. Haz clic en ellos para verlos en pantalla completa con zoom.',
+                        element: document.querySelector('.chart-container')
+                    },
+                    {
+                        title: '🏆 Top 10 Optimizaciones',
+                        intro: 'Revisa tus mejores optimizaciones ordenadas por aprovechamiento. Puedes duplicar o descargar estas optimizaciones para reutilizarlas.',
+                        element: document.querySelector('.table')
+                    }
+                ];
+            }
+            
+            if (pasos.length > 0) {
+                introJs().setOptions({
+                    steps: pasos,
+                    showProgress: true,
+                    showBullets: true,
+                    exitOnOverlayClick: true,
+                    exitOnEsc: true,
+                    nextLabel: 'Siguiente →',
+                    prevLabel: '← Anterior',
+                    skipLabel: 'Omitir',
+                    doneLabel: 'Finalizar',
+                    tooltipClass: 'customTooltip',
+                    highlightClass: 'customHighlight',
+                }).start();
+            }
+        }
+        
+        // Hacer función global para que esté disponible desde onclick
+        window.iniciarTutorialSeccion = iniciarTutorialSeccion;
     </script>
     
     <!-- Modal de Bienvenida -->

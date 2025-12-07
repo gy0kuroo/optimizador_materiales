@@ -3,7 +3,9 @@
 .badge {
     padding: 0.35em 0.65em;
     border-radius: 6px;
-    font-weight: 600;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    line-height: 1.4;
 }
 
 details summary {

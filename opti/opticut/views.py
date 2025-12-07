@@ -175,6 +175,15 @@ def index(request):
                 'info_tableros': info_tableros_convertida,
             }
             
+            # Combinar imágenes con información de tableros para asegurar enumeración correcta
+            tableros_con_imagenes = []
+            for idx, (img, info) in enumerate(zip(imagenes_base64, info_tableros_convertida), start=1):
+                tableros_con_imagenes.append({
+                    'numero': info['numero'],
+                    'imagen': img,
+                    'info': info
+                })
+            
             return render(request, "opticut/resultado.html", {
                 "imagen": imagen_principal,
                 "imagenes": imagenes_base64,
@@ -183,6 +192,8 @@ def index(request):
                 "num_tableros": len(imagenes_base64),
                 "piezas_con_nombre": piezas_con_nombre,
                 "info_desperdicio": info_desperdicio_mostrar,
+                "tableros_con_imagenes": tableros_con_imagenes,
+                "numero_lista": numero_lista,  # Pasar número de lista para usar en descarga PNG
                 "unidad_medida": unidad,
                 "simbolo_area": simbolo_area,
             })
@@ -456,8 +467,20 @@ def resultado_view(request):
             file = ContentFile(image_data)
             optimizacion.imagen.save(f"optimizacion_{request.user.username}_{optimizacion.id}.png", file)
 
-        # Generar UN SOLO PDF con todas las imágenes
-        pdf_path = generar_pdf(optimizacion, imagenes_base64)
+        # Calcular el número de lista para el PDF (basado en orden por fecha descendente por defecto)
+        todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
+        total_optimizaciones = todas_optimizaciones.count()
+        
+        # Encontrar la posición real de esta optimización en la lista ordenada
+        for idx, opt in enumerate(todas_optimizaciones, start=1):
+            if opt.id == optimizacion.id:
+                numero_lista = total_optimizaciones - idx + 1
+                break
+        else:
+            numero_lista = total_optimizaciones
+
+        # Generar UN SOLO PDF con todas las imágenes usando el número de lista correcto
+        pdf_path = generar_pdf(optimizacion, imagenes_base64, numero_lista=numero_lista)
         optimizacion.pdf = pdf_path
         optimizacion.save()
 
@@ -490,6 +513,15 @@ def resultado_view(request):
             'info_tableros': info_tableros_convertida,
         }
         
+        # Combinar imágenes con información de tableros para asegurar enumeración correcta
+        tableros_con_imagenes = []
+        for idx, (img, info) in enumerate(zip(imagenes_base64, info_tableros_convertida), start=1):
+            tableros_con_imagenes.append({
+                'numero': info['numero'],
+                'imagen': img,
+                'info': info
+            })
+        
         return render(request, "opticut/resultado.html", {
             "optimizacion": optimizacion,
             "imagen": imagen_principal,
@@ -497,6 +529,8 @@ def resultado_view(request):
             "pdf_path": pdf_path,
             "num_tableros": len(imagenes_base64),
             "info_desperdicio": info_desperdicio_mostrar,
+            "tableros_con_imagenes": tableros_con_imagenes,
+            "numero_lista": numero_lista,  # Pasar número de lista para usar en descarga PNG
             "unidad_medida": unidad,
             "simbolo_area": simbolo_area,
         })
@@ -896,6 +930,39 @@ def descargar_png(request, pk, tablero_num=None):
     try:
         optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
         
+        # Obtener el ordenamiento actual desde los parámetros GET (si existe)
+        ordenar_por = request.GET.get('ordenar_por', 'fecha_desc')
+        
+        # Aplicar el mismo ordenamiento que se usa en mis_optimizaciones
+        todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user)
+        
+        if ordenar_por == 'fecha_desc':
+            todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
+        elif ordenar_por == 'fecha_asc':
+            todas_optimizaciones = todas_optimizaciones.order_by('fecha')
+        elif ordenar_por == 'aprovechamiento_desc':
+            todas_optimizaciones = todas_optimizaciones.order_by('-aprovechamiento_total')
+        elif ordenar_por == 'aprovechamiento_asc':
+            todas_optimizaciones = todas_optimizaciones.order_by('aprovechamiento_total')
+        else:
+            todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
+        
+        total_optimizaciones = todas_optimizaciones.count()
+        
+        # Determinar si el ordenamiento es descendente o ascendente
+        es_descendente = ordenar_por in ['fecha_desc', 'aprovechamiento_desc']
+        
+        # Encontrar la posición de esta optimización en la lista
+        numero_lista = None
+        for idx, opt in enumerate(todas_optimizaciones, start=1):
+            if opt.id == optimizacion.id:
+                # Calcular número de lista según el ordenamiento
+                if es_descendente:
+                    numero_lista = total_optimizaciones - idx + 1
+                else:
+                    numero_lista = idx
+                break
+        
         # Obtener unidad de la optimización
         unidad_opt = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
         
@@ -940,7 +1007,13 @@ def descargar_png(request, pk, tablero_num=None):
         # Crear respuesta HTTP con la imagen
         from django.http import HttpResponse
         response = HttpResponse(image_data, content_type='image/png')
-        filename = f"tablero_{tablero_num}_optimizacion_{optimizacion.id}_{optimizacion.usuario.username}.png"
+        
+        # Usar número de lista si está disponible (igual que en PDFs), sino usar el ID
+        if numero_lista is not None:
+            filename = f"tablero_{tablero_num}_optimizacion_{optimizacion.usuario.username}_{numero_lista}.png"
+        else:
+            filename = f"tablero_{tablero_num}_optimizacion_{optimizacion.usuario.username}_{optimizacion.id}.png"
+        
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         
         return response

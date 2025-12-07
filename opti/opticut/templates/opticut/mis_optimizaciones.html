@@ -7,11 +7,18 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h2 class="text-center mb-4 fade-in">📋 Mis Optimizaciones Guardadas</h2>
+  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+    <h2 class="text-center mb-0 flex-grow-1">Mis Optimizaciones Guardadas</h2>
+    <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+            onclick="iniciarTutorialSeccion('historial')" 
+            title="Ayuda sobre el historial">
+      ❓ Ayuda
+    </button>
+  </div>
 
   <!-- Filtros y Búsqueda -->
   <div class="search-filters fade-in">
-    <h5 class="mb-3">🔍 Buscar y Filtrar</h5>
+    <h5 class="mb-3">Buscar y Filtrar</h5>
     <form method="GET" action="{% url 'opticut:mis_optimizaciones' %}" id="filtros-form">
       <div class="row">
         <div class="col-md-3 mb-3">
@@ -57,13 +64,13 @@
           </div>
         </div>
         <div class="col-md-2 mb-3 d-flex align-items-end">
-          <button type="submit" class="btn btn-primary w-100">🔍 Buscar</button>
+          <button type="submit" class="btn btn-primary w-100">Buscar</button>
         </div>
       </div>
       {% if nombre_pieza or fecha_desde or fecha_hasta %}
       <div class="mt-2">
         <a href="{% url 'opticut:mis_optimizaciones' %}?ordenar_por={{ ordenar_por }}" class="btn btn-sm btn-outline-secondary">
-          🗑️ Limpiar Filtros
+          Limpiar Filtros
         </a>
         {% if nombre_pieza %}
           <span class="filter-badge">Pieza: {{ nombre_pieza }}</span>
@@ -86,7 +93,7 @@
       <button type="submit" 
               class="btn btn-danger" 
               onclick="return confirm('¿Seguro que deseas borrar todo tu historial? Esta acción no se puede deshacer.')">
-        🗑️ Borrar Todo el Historial
+        Borrar Todo el Historial
       </button>
     </form>
   </div>
@@ -127,18 +134,23 @@
                 </button>
               </div>
               <p class="card-text">
-                <strong>📅 Fecha:</strong> {{ optimizacion.fecha|date:"d/m/Y" }}<br>
-                <strong>🕐 Hora:</strong> {{ optimizacion.fecha|date:"H:i" }} (Chile)<br>
-                <strong>📐 Tablero:</strong> {{ item.ancho_mostrar }} × {{ item.alto_mostrar }} {{ item.unidad_medida }}<br>
-                <strong>📊 Aprovechamiento:</strong> 
-                <span class="badge bg-success">{{ optimizacion.aprovechamiento_total|floatformat:2 }}%</span>
+                <strong>Fecha:</strong> {{ optimizacion.fecha|date:"d/m/Y" }}<br>
+                <strong>Hora:</strong> {{ optimizacion.fecha|date:"H:i" }} (Chile)<br>
+                <strong>Tablero:</strong> {{ item.ancho_mostrar }} × {{ item.alto_mostrar }} {{ item.unidad_medida }}<br>
+                <strong>Aprovechamiento:</strong> 
+                <span class="badge 
+                     {% if optimizacion.aprovechamiento_total < 30 %}bg-danger
+                     {% elif optimizacion.aprovechamiento_total < 60 %}bg-warning
+                     {% else %}bg-success{% endif %}">
+                  {{ optimizacion.aprovechamiento_total|floatformat:2 }}%
+                </span>
               </p>
               
               <!-- Lista de piezas -->
               {% if piezas %}
               <details class="mb-2">
                 <summary class="piezas-summary">
-                  📦 Ver Piezas ({{ piezas|length }})
+                  Ver Piezas ({{ piezas|length }})
                 </summary>
                 <div class="mt-2 piezas-details">
                   {% for pieza in piezas %}
@@ -153,12 +165,12 @@
                 <a href="{% url 'opticut:descargar_pdf' optimizacion.id %}?ordenar_por={{ ordenar_por }}" 
                    class="btn-action btn-pdf flex-fill"
                    title="Descargar PDF completo">
-                  <span class="icon"></span> 📄 PDF
+                  <span class="icon"></span> PDF
                 </a>
                 <a href="{% url 'opticut:duplicar_optimizacion' optimizacion.id %}?ordenar_por={{ ordenar_por }}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}" 
                    class="btn-action btn-duplicar flex-fill" 
                    title="Duplicar esta optimización">
-                  <span class="icon"></span> 📋 Duplicar
+                  <span class="icon"></span> Duplicar
                 </a>
                 
                 <!-- Menú desplegable para acciones secundarias -->
@@ -169,17 +181,17 @@
                           data-bs-toggle="dropdown" 
                           aria-expanded="false"
                           title="Más opciones">
-                    <span class="icon">⚙️</span> Más opciones
+                    <span class="icon"></span> Más opciones
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ optimizacion.id }}">
                     <li>
                       <a class="dropdown-item" href="{% url 'opticut:descargar_png' optimizacion.id %}">
-                        📥 Descargar PNG
+                        Descargar PNG
                       </a>
                     </li>
                     <li>
                       <a class="dropdown-item" href="{% url 'opticut:calcular_tiempo_corte' optimizacion.id %}">
-                        ⏱️ Calcular Tiempo
+                        Calcular Tiempo
                       </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
@@ -190,7 +202,7 @@
                          onsubmit="return confirm('¿Eliminar esta optimización?');">
                        {% csrf_token %}
                        <button type="submit" class="dropdown-item text-danger delete-button">
-                          🗑️ Eliminar
+                          Eliminar
                         </button>
                       </form>
                     </li>
@@ -212,7 +224,7 @@
     </div>
   {% else %}
     <div class="card fade-in text-center card-empty-state">
-      <h4 class="text-muted mb-3">📭 No hay optimizaciones</h4>
+      <h4 class="text-muted mb-3">No hay optimizaciones</h4>
       <p class="text-muted mb-4">
         {% if nombre_pieza or fecha_desde or fecha_hasta %}
           No se encontraron optimizaciones con los filtros aplicados.
@@ -222,7 +234,7 @@
         {% endif %}
       </p>
       <a href="{% url 'opticut:index' %}" class="btn btn-primary">
-        ➕ Crear Nueva Optimización
+        Crear Nueva Optimización
       </a>
     </div>
   {% endif %}

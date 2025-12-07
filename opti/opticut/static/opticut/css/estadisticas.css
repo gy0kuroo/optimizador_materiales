@@ -3,7 +3,9 @@
 .badge {
     padding: 0.35em 0.65em;
     border-radius: 6px;
-    font-weight: 600;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    line-height: 1.4;
 }
 
 details summary {
@@ -35,6 +37,7 @@ details summary::-webkit-details-marker {
     display: flex;
     align-items: center;
     justify-content: center;
+    border: none;
 }
 
 .stats-card .card-body {
@@ -50,11 +53,53 @@ details summary::-webkit-details-marker {
     white-space: normal;
     height: auto;
     min-height: 2.6em;
+    font-weight: 500;
+    opacity: 0.95;
 }
 
 .stats-card h2 {
     font-size: 2rem;
     margin: 0;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Mejorar contraste de texto en tarjetas de colores */
+.stats-card.bg-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%) !important;
+}
+
+.stats-card.bg-primary .stats-title,
+.stats-card.bg-primary h2 {
+    color: #ffffff;
+}
+
+.stats-card.bg-success {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%) !important;
+}
+
+.stats-card.bg-success .stats-title,
+.stats-card.bg-success h2 {
+    color: #ffffff;
+}
+
+.stats-card.bg-info {
+    background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%) !important;
+}
+
+.stats-card.bg-info .stats-title,
+.stats-card.bg-info h2 {
+    color: #ffffff;
+}
+
+.stats-card.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
+}
+
+.stats-card.bg-warning .stats-title,
+.stats-card.bg-warning h2 {
+    color: #000000;
+    text-shadow: none;
 }
 
 .stats-card-center {

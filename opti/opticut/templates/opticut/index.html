@@ -18,8 +18,13 @@
     
     <!-- Sección: Dimensiones del Tablero -->
     <div class="card mb-4 fade-in" data-intro-title="Dimensiones del Tablero" data-intro="Ingresa el ancho y alto del tablero de madera. Puedes elegir la unidad de medida que prefieras (cm, m, pulgadas o pies).">
-      <div class="card-header bg-primary text-white">
-        <h4 class="mb-0">📐 Dimensiones del Tablero</h4>
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Dimensiones del Tablero</h4>
+        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion" 
+                onclick="iniciarTutorialSeccion('tablero')" 
+                title="Ayuda sobre dimensiones del tablero">
+          ❓
+        </button>
       </div>
       <div class="card-body">
         <!-- Dropdown de tableros predefinidos se creará aquí dinámicamente -->
@@ -61,8 +66,13 @@
 
     <!-- Sección: Piezas a Cortar -->
     <div class="card mb-4 fade-in">
-      <div class="card-header bg-success text-white">
-        <h4 class="mb-0">✂️ Piezas a Cortar</h4>
+      <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Piezas a Cortar</h4>
+        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion" 
+                onclick="iniciarTutorialSeccion('piezas')" 
+                title="Ayuda sobre piezas a cortar">
+          ❓
+        </button>
       </div>
       <div class="card-body">
         {{ pieza_formset.management_form }}
@@ -73,7 +83,7 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h5 class="mb-0">Pieza #<span class="pieza-numero">{{ forloop.counter }}</span></h5>
               <button type="button" class="btn btn-danger btn-sm remove-pieza" {% if forloop.counter <= 1 %}style="display:none;"{% endif %}>
-                🗑️ Eliminar
+                Eliminar
               </button>
             </div>
             
@@ -105,7 +115,7 @@
         </div>
 
         <button type="button" id="add-pieza" class="btn btn-outline-success">
-          ➕ Agregar otra pieza
+          Agregar otra pieza
         </button>
       </div>
     </div>
@@ -113,10 +123,10 @@
     <!-- Botón de envío -->
     <div class="text-center fade-in">
       <button type="submit" class="btn btn-primary btn-lg">
-        🚀 Calcular Optimización
+        Calcular Optimización
       </button>
       <a href="{% url 'opticut:mis_optimizaciones' %}" class="btn btn-secondary btn-lg">
-        📋 Ver Historial
+        Ver Historial
       </a>
     </div>
   </form>

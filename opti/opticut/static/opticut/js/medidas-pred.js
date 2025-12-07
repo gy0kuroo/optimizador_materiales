@@ -111,7 +111,7 @@
         // Crear label
         const label = document.createElement('label');
         label.className = 'form-label mb-2';
-        label.textContent = '📏 Tableros Predefinidos:';
+        label.textContent = 'Tableros Predefinidos:';
         label.setAttribute('for', 'tableros-dropdown');
         container.appendChild(label);
         
