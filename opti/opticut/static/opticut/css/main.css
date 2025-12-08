@@ -979,3 +979,34 @@ h6 {
     background: var(--accent-info);
 }
 
+/* ============================================
+   ESTILOS PARA TUTORIAL (Intro.js)
+   ============================================ */
+
+.customTooltip {
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.customHighlight {
+    border: 3px solid #0d6efd;
+    border-radius: 8px;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.25);
+}
+
+.introjs-tooltip {
+    min-width: 300px;
+}
+
+.introjs-tooltipbuttons {
+    text-align: center;
+}
+
+/* ============================================
+   UTILIDADES PARA VISIBILIDAD
+   ============================================ */
+
+.remove-pieza-hidden {
+    display: none !important;
+}
+

@@ -107,7 +107,7 @@
           <div class="pieza-form border rounded p-3 mb-3 bg-light">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h5 class="mb-0">Pieza #<span class="pieza-numero">{{ forloop.counter }}</span></h5>
-              <button type="button" class="btn btn-danger btn-sm remove-pieza" {% if forloop.counter <= 1 %}style="display:none;"{% endif %}>
+              <button type="button" class="btn btn-danger btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %}">
                 Eliminar
               </button>
             </div>
@@ -173,8 +173,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Mostrar/ocultar botones de eliminar
         const removeBtns = document.querySelectorAll('.remove-pieza');
+        const totalPiezas = document.querySelectorAll('.pieza-form').length;
         removeBtns.forEach((btn, index) => {
-            btn.style.display = document.querySelectorAll('.pieza-form').length > 1 ? 'block' : 'none';
+            if (totalPiezas > 1) {
+                btn.classList.remove('remove-pieza-hidden');
+            } else {
+                btn.classList.add('remove-pieza-hidden');
+            }
         });
     }
 
