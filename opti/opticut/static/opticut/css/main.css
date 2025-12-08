@@ -540,6 +540,19 @@ body {
     transform: translateY(-1px);
 }
 
+.btn-edit {
+    background: linear-gradient(135deg, #497404 0%, #478007 100%);
+    box-shadow: 0 2px 6px rgba(255, 152, 0, 0.25);
+    color: #ffffff !important;
+}
+
+.btn-edit:hover {
+    background: linear-gradient(135deg,  #3a5809 0%, #478007 100%);
+    box-shadow: 0 4px 10px rgba(255, 152, 0, 0.35);
+    transform: translateY(-1px);
+    color: #ffffff !important;
+}
+
 .btn-eliminar {
     background: var(--accent-danger);
     box-shadow: 0 2px 6px rgba(220, 53, 69, 0.25);

@@ -8,6 +8,71 @@
     line-height: 1.4;
 }
 
+/* Estilos para filtros y búsqueda - más visibles para adultos mayores */
+.search-filters {
+    background: var(--bg-secondary, #f8f9fa);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color, #dee2e6);
+}
+
+/* Botón Limpiar Filtros - muy visible para adultos mayores */
+.btn-limpiar-filtros {
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    border: 2px solid #dc3545;
+    border-radius: 8px;
+    color: #dc3545;
+    background-color: #ffffff;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.15);
+}
+
+.btn-limpiar-filtros:hover {
+    background-color: #dc3545;
+    color: #ffffff;
+    border-color: #dc3545;
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    text-decoration: none;
+}
+
+/* Badges de filtro activo - más visibles */
+.filter-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    color: #ffffff;
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+}
+
+/* Texto de resultados filtrados - más visible */
+.results-info {
+    background: #e8f4fd;
+    border: 1px solid #b8daff;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    display: inline-block;
+}
+
+.results-count {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #0c5460;
+}
+
+.results-count strong {
+    font-weight: 700;
+    color: #0d6efd;
+}
+
 details summary {
     user-select: none;
 }

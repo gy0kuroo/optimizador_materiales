@@ -21,6 +21,9 @@ class Optimizacion(models.Model):
     aprovechamiento_total = models.FloatField(default=0)
     # Campo legado para evitar errores de integridad en la BD
     favorito = models.BooleanField(default=False)
+    # Nuevos campos para rotación y margen de corte
+    permitir_rotacion = models.BooleanField(default=True, help_text="Permitir rotación automática de piezas 90°")
+    margen_corte = models.FloatField(default=0.3, help_text="Margen de corte (kerf) en cm (guardado internamente). El valor se ingresa en mm.")
 
     def __str__(self):
         return f"Optimización de {self.usuario.username} ({self.fecha.strftime('%d/%m/%Y %H:%M')})"

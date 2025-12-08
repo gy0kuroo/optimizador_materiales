@@ -110,13 +110,16 @@
   
   <hr>
   
-  <!-- Botón para descargar PDF -->
+  <!-- Botones para descargar PDF y Excel -->
   <div class="text-center mt-4 fade-in">
     {% if pdf_path %}
-    <a href="/media/{{ pdf_path }}" class="btn btn-success btn-lg" download>
-      Descargar PDF Completo
+    <a href="/media/{{ pdf_path }}" class="btn btn-success btn-lg me-2" download>
+       Descargar PDF 
     </a>
     {% endif %}
+    <a href="{% url 'opticut:descargar_excel' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-primary btn-lg">
+       Descargar Excel
+    </a>
   </div>
   
   <!-- Botón para volver -->

@@ -67,9 +67,9 @@
           <button type="submit" class="btn btn-primary w-100">Buscar</button>
         </div>
       </div>
-      {% if nombre_pieza or fecha_desde or fecha_hasta %}
+      {% if nombre_pieza or fecha_desde or fecha_hasta or solo_favoritos == 'true' %}
       <div class="mt-2">
-        <a href="{% url 'opticut:mis_optimizaciones' %}?ordenar_por={{ ordenar_por }}" class="btn btn-sm btn-outline-secondary">
+        <a href="{% url 'opticut:mis_optimizaciones' %}?ordenar_por={{ ordenar_por }}" class="btn btn-limpiar-filtros">
           Limpiar Filtros
         </a>
         {% if nombre_pieza %}
@@ -81,6 +81,15 @@
         {% if fecha_hasta %}
           <span class="filter-badge">Hasta: {{ fecha_hasta }}</span>
         {% endif %}
+        {% if solo_favoritos == 'true' %}
+          <span class="filter-badge">⭐ Solo Favoritos</span>
+        {% endif %}
+      </div>
+      <!-- Indicador de resultados filtrados -->
+      <div class="mt-3 results-info">
+        <span class="results-count">
+          📋 Mostrando <strong>{{ optimizaciones_con_piezas|length }}</strong> de <strong>{{ total_sin_filtro }}</strong> optimizaciones
+        </span>
       </div>
       {% endif %}
     </form>
@@ -161,11 +170,11 @@
               {% endif %}
               
               <div class="action-buttons mt-3 d-flex gap-2 align-items-center">
-                <!-- Botones principales -->
-                <a href="{% url 'opticut:descargar_pdf' optimizacion.id %}?ordenar_por={{ ordenar_por }}" 
-                   class="btn-action btn-pdf flex-fill"
-                   title="Descargar PDF completo">
-                  <span class="icon"></span> PDF
+                <!-- Botones principales: Editar y Duplicar -->
+                <a href="{% url 'opticut:editar_optimizacion' optimizacion.id %}" 
+                   class="btn-action btn-edit flex-fill"
+                   title="Editar esta optimización">
+                   Editar
                 </a>
                 <a href="{% url 'opticut:duplicar_optimizacion' optimizacion.id %}?ordenar_por={{ ordenar_por }}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}" 
                    class="btn-action btn-duplicar flex-fill" 
@@ -185,13 +194,23 @@
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ optimizacion.id }}">
                     <li>
-                      <a class="dropdown-item" href="{% url 'opticut:descargar_png' optimizacion.id %}">
-                        Descargar PNG
+                      <a class="dropdown-item" href="{% url 'opticut:calcular_tiempo_corte' optimizacion.id %}">
+                         Calcular Tiempo
                       </a>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="{% url 'opticut:calcular_tiempo_corte' optimizacion.id %}">
-                        Calcular Tiempo
+                      <a class="dropdown-item" href="{% url 'opticut:descargar_png' optimizacion.id %}">
+                         Descargar PNG
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{% url 'opticut:descargar_pdf' optimizacion.id %}?ordenar_por={{ ordenar_por }}">
+                          Descargar PDF
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{% url 'opticut:descargar_excel' optimizacion.id %}?ordenar_por={{ ordenar_por }}">
+                          Descargar Excel
                       </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
@@ -202,7 +221,7 @@
                          onsubmit="return confirm('¿Eliminar esta optimización?');">
                        {% csrf_token %}
                        <button type="submit" class="dropdown-item text-danger delete-button">
-                          Eliminar
+                           Eliminar
                         </button>
                       </form>
                     </li>

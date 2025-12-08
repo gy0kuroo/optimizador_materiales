@@ -1,18 +1,27 @@
-from django.shortcuts import render, redirect
+# Imports estándar de Python
+import base64
+import os
+from datetime import timedelta
+
+# Imports de Django
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.forms import formset_factory
 from django.core.files.base import ContentFile
+from django.db.models import Avg, Count, Sum, Max, Min
+from django.forms import formset_factory
+from django.http import FileResponse
+from django.shortcuts import render, redirect
+from django.utils import timezone
+
+# Imports del proyecto
+from opti import settings
 from .forms import TableroForm, PiezaForm
 from .models import Optimizacion
-from .utils import generar_grafico, generar_pdf, generar_grafico_aprovechamiento, generar_grafico_desperdicio, convertir_a_cm, convertir_desde_cm, obtener_simbolo_unidad, obtener_simbolo_area
-import base64
-from django.contrib import messages
-from django.http import FileResponse
-from django.db.models import Avg, Count, Sum, Max, Min
-from django.utils import timezone
-from datetime import timedelta
-import os
-from opti import settings
+from .utils import (
+    convertir_a_cm, convertir_desde_cm, generar_excel, generar_grafico,
+    generar_grafico_aprovechamiento, generar_grafico_desperdicio, generar_pdf,
+    obtener_simbolo_area, obtener_simbolo_unidad
+)
 
 @login_required
 def index(request):
@@ -90,8 +99,18 @@ def index(request):
                     "pieza_formset": pieza_formset
                 })
 
+            # Obtener parámetros de rotación y margen de corte
+            permitir_rotacion = tablero_form.cleaned_data.get('permitir_rotacion', True)
+            margen_corte_mm = tablero_form.cleaned_data.get('margen_corte', 3)  # Siempre en mm
+            # Convertir margen de corte de mm a cm (el sistema trabaja en cm)
+            margen_corte_cm = margen_corte_mm / 10.0
+
             # Generar TODAS las imágenes, aprovechamiento Y desperdicio
-            imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(piezas, ancho, alto, unidad)
+            imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(
+                piezas, ancho, alto, unidad, 
+                permitir_rotacion=permitir_rotacion, 
+                margen_corte=margen_corte_cm
+            )
             
             # Usar la primera imagen para vista previa
             imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
@@ -108,7 +127,9 @@ def index(request):
                 alto_tablero=alto,  # Guardado en cm
                 unidad_medida=unidad,  # Guardar unidad original
                 piezas=piezas_texto,
-                aprovechamiento_total=aprovechamiento
+                aprovechamiento_total=aprovechamiento,
+                permitir_rotacion=permitir_rotacion,
+                margen_corte=margen_corte_cm
             )
 
             # Guardar la primera imagen en el FileField
@@ -147,7 +168,6 @@ def index(request):
             
             # Convertir áreas de cm² a la unidad del usuario para mostrar
             # Para áreas: si 1 cm = X unidades, entonces 1 cm² = X² unidades²
-            from .utils import convertir_desde_cm, obtener_simbolo_area
             simbolo_area = obtener_simbolo_area(unidad)
             
             # Factor de conversión para áreas (factor lineal al cuadrado)
@@ -215,8 +235,266 @@ def index(request):
 
 
 @login_required
+def editar_optimizacion(request, pk):
+    """
+    Permite editar una optimización existente.
+    """
+    try:
+        optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
+    except Optimizacion.DoesNotExist:
+        messages.error(request, "No se encontró la optimización o no tienes permiso para editarla.")
+        return redirect('opticut:mis_optimizaciones')
+    
+    # Crear formset con solo 1 formulario extra vacío para edición
+    PiezaFormSet = formset_factory(PiezaForm, extra=1, max_num=20, validate_max=True)
+    
+    if request.method == "POST":
+        tablero_form = TableroForm(request.POST)
+        pieza_formset = PiezaFormSet(request.POST)
+        
+        if tablero_form.is_valid() and pieza_formset.is_valid():
+            # Obtener unidad seleccionada
+            unidad = tablero_form.cleaned_data.get("unidad_medida", "cm")
+            
+            # Obtener valores en la unidad del usuario
+            ancho_usuario = tablero_form.cleaned_data["ancho"]
+            alto_usuario = tablero_form.cleaned_data["alto"]
+            
+            # Convertir a cm para cálculos internos
+            ancho = convertir_a_cm(ancho_usuario, unidad)
+            alto = convertir_a_cm(alto_usuario, unidad)
+            
+            piezas = []
+            piezas_con_nombre = []
+            
+            for form in pieza_formset:
+                if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                    pieza_ancho = form.cleaned_data.get("ancho")
+                    pieza_alto = form.cleaned_data.get("alto")
+                    cantidad = form.cleaned_data.get("cantidad")
+                    nombre = form.cleaned_data.get("nombre", "").strip()
+                    
+                    if pieza_ancho and pieza_alto and cantidad:
+                        if not nombre:
+                            nombre = f"Pieza {len(piezas_con_nombre) + 1}"
+                        
+                        pieza_ancho_cm = convertir_a_cm(pieza_ancho, unidad)
+                        pieza_alto_cm = convertir_a_cm(pieza_alto, unidad)
+                        
+                        if pieza_ancho_cm > ancho or pieza_alto_cm > alto:
+                            simbolo = obtener_simbolo_unidad(unidad)
+                            messages.error(
+                                request, 
+                                f"❌ La pieza '{nombre}' ({pieza_ancho}x{pieza_alto} {simbolo}) NO CABE en el tablero ({ancho_usuario}x{alto_usuario} {simbolo})."
+                            )
+                            return render(request, "opticut/editar_optimizacion.html", {
+                                "tablero_form": tablero_form,
+                                "pieza_formset": pieza_formset,
+                                "optimizacion": optimizacion
+                            })
+                        
+                        piezas.append((pieza_ancho_cm, pieza_alto_cm, cantidad))
+                        piezas_con_nombre.append({
+                            'nombre': nombre,
+                            'ancho': pieza_ancho,
+                            'alto': pieza_alto,
+                            'cantidad': cantidad
+                        })
+            
+            if not piezas:
+                messages.error(request, "❌ Debes agregar al menos una pieza con dimensiones válidas.")
+                return render(request, "opticut/editar_optimizacion.html", {
+                    "tablero_form": tablero_form,
+                    "pieza_formset": pieza_formset,
+                    "optimizacion": optimizacion
+                })
+            
+            # Obtener parámetros de rotación y margen de corte
+            permitir_rotacion = tablero_form.cleaned_data.get('permitir_rotacion', True)
+            margen_corte_mm = tablero_form.cleaned_data.get('margen_corte', 3)
+            margen_corte_cm = margen_corte_mm / 10.0
+            
+            # Generar nuevas imágenes
+            imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(
+                piezas, ancho, alto, unidad, 
+                permitir_rotacion=permitir_rotacion, 
+                margen_corte=margen_corte_cm
+            )
+            
+            imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
+            
+            # Actualizar la optimización
+            piezas_texto = "\n".join([
+                f"{p['nombre']},{p['ancho']},{p['alto']},{p['cantidad']}" 
+                for p in piezas_con_nombre
+            ])
+            
+            optimizacion.ancho_tablero = ancho
+            optimizacion.alto_tablero = alto
+            optimizacion.unidad_medida = unidad
+            optimizacion.piezas = piezas_texto
+            optimizacion.aprovechamiento_total = aprovechamiento
+            optimizacion.permitir_rotacion = permitir_rotacion
+            optimizacion.margen_corte = margen_corte_cm
+            
+            # Actualizar imagen
+            if imagen_principal:
+                image_data = base64.b64decode(imagen_principal)
+                file = ContentFile(image_data, name=f"optimizacion_{request.user.username}_{optimizacion.id}.png")
+                optimizacion.imagen.save(f"optimizacion_{request.user.username}_{optimizacion.id}.png", file, save=False)
+            
+            optimizacion.save()
+            
+            # Regenerar PDF
+            todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
+            total_optimizaciones = todas_optimizaciones.count()
+            for idx, opt in enumerate(todas_optimizaciones, start=1):
+                if opt.id == optimizacion.id:
+                    numero_lista = total_optimizaciones - idx + 1
+                    break
+            else:
+                numero_lista = total_optimizaciones
+            
+            try:
+                pdf_path = generar_pdf(optimizacion, imagenes_base64, numero_lista=numero_lista)
+            except Exception as e:
+                messages.warning(request, f"⚠️ PDF no generado: {str(e)}")
+                pdf_path = None
+            
+            messages.success(request, f"✅ Optimización actualizada exitosamente. Aprovechamiento: {aprovechamiento:.2f}%")
+            
+            # Preparar datos para mostrar
+            unidad_opt = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
+            simbolo_area = obtener_simbolo_area(unidad_opt)
+            factor_lineal = convertir_desde_cm(1, unidad_opt)
+            factor_area = factor_lineal ** 2
+            
+            area_usada_mostrar = round(info_desperdicio['area_usada_total'] * factor_area, 2)
+            desperdicio_mostrar = round(info_desperdicio['desperdicio_total'] * factor_area, 2)
+            
+            info_tableros_convertida = []
+            for info in info_desperdicio['info_tableros']:
+                area_usada_tab = round(info['area_usada'] * factor_area, 2)
+                desperdicio_tab = round(info['desperdicio'] * factor_area, 2)
+                info_tableros_convertida.append({
+                    **info,
+                    'area_usada': area_usada_tab,
+                    'desperdicio': desperdicio_tab,
+                })
+            
+            info_desperdicio_mostrar = {
+                **info_desperdicio,
+                'area_usada_total': area_usada_mostrar,
+                'desperdicio_total': desperdicio_mostrar,
+                'info_tableros': info_tableros_convertida,
+            }
+            
+            tableros_con_imagenes = []
+            for idx, (img, info) in enumerate(zip(imagenes_base64, info_tableros_convertida), start=1):
+                tableros_con_imagenes.append({
+                    'numero': info['numero'],
+                    'imagen': img,
+                    'info': info
+                })
+            
+            return render(request, "opticut/resultado.html", {
+                "imagen": imagen_principal,
+                "imagenes": imagenes_base64,
+                "optimizacion": optimizacion,
+                "pdf_path": pdf_path,
+                "num_tableros": len(imagenes_base64),
+                "piezas_con_nombre": piezas_con_nombre,
+                "info_desperdicio": info_desperdicio_mostrar,
+                "tableros_con_imagenes": tableros_con_imagenes,
+                "numero_lista": numero_lista,
+                "unidad_medida": unidad_opt,
+                "simbolo_area": simbolo_area,
+            })
+        else:
+            if not tablero_form.is_valid():
+                messages.error(request, "❌ Error en las dimensiones del tablero.")
+            if not pieza_formset.is_valid():
+                messages.error(request, "❌ Error en los datos de las piezas.")
+    else:
+        # Cargar datos existentes en el formulario
+        unidad_opt = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
+        ancho_mostrar = round(convertir_desde_cm(optimizacion.ancho_tablero, unidad_opt), 2)
+        alto_mostrar = round(convertir_desde_cm(optimizacion.alto_tablero, unidad_opt), 2)
+        
+        # Crear formulario con datos iniciales
+        initial_tablero = {
+            'unidad_medida': unidad_opt,
+            'ancho': ancho_mostrar,
+            'alto': alto_mostrar,
+            'permitir_rotacion': getattr(optimizacion, 'permitir_rotacion', True),
+            'margen_corte': round(getattr(optimizacion, 'margen_corte', 0.3) * 10, 1),  # Convertir de cm a mm
+        }
+        tablero_form = TableroForm(initial=initial_tablero)
+        
+        # Cargar piezas existentes
+        piezas_data = []
+        for linea in optimizacion.piezas.splitlines():
+            if linea.strip():
+                partes = linea.split(',')
+                if len(partes) == 4:
+                    nombre, ancho, alto, cantidad = partes
+                    # Convertir dimensiones de pieza a la unidad del tablero
+                    ancho_cm = float(ancho.strip())
+                    alto_cm = float(alto.strip())
+                    ancho_mostrar = round(convertir_desde_cm(ancho_cm, unidad_opt), 2)
+                    alto_mostrar = round(convertir_desde_cm(alto_cm, unidad_opt), 2)
+                    piezas_data.append({
+                        'nombre': nombre.strip(),
+                        'ancho': ancho_mostrar,
+                        'alto': alto_mostrar,
+                        'cantidad': int(cantidad.strip())
+                    })
+        
+        # Crear formset con datos iniciales
+        # El formset ya tiene extra=1, así que solo pasamos las piezas existentes
+        # El formset automáticamente agregará 1 formulario vacío adicional
+        pieza_formset = PiezaFormSet(initial=piezas_data)
+    
+    return render(request, "opticut/editar_optimizacion.html", {
+        "tablero_form": tablero_form,
+        "pieza_formset": pieza_formset,
+        "optimizacion": optimizacion
+    })
+
+
+@login_required
 def mis_optimizaciones(request):
-    optimizaciones = Optimizacion.objects.filter(usuario=request.user)
+    # Obtener TODAS las optimizaciones del usuario para calcular números absolutos
+    todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user)
+    total_absoluto = todas_optimizaciones.count()
+    
+    # Ordenamiento (aplicar a todas para calcular números correctos)
+    ordenar_por = request.GET.get('ordenar_por', 'fecha_desc')
+    
+    if ordenar_por == 'fecha_desc':
+        todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
+    elif ordenar_por == 'fecha_asc':
+        todas_optimizaciones = todas_optimizaciones.order_by('fecha')
+    elif ordenar_por == 'aprovechamiento_desc':
+        todas_optimizaciones = todas_optimizaciones.order_by('-aprovechamiento_total')
+    elif ordenar_por == 'aprovechamiento_asc':
+        todas_optimizaciones = todas_optimizaciones.order_by('aprovechamiento_total')
+    else:
+        todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
+    
+    # Determinar si el ordenamiento es descendente o ascendente
+    es_descendente = ordenar_por in ['fecha_desc', 'aprovechamiento_desc']
+    
+    # Crear diccionario de ID -> número absoluto
+    numeros_absolutos = {}
+    for idx, opt in enumerate(todas_optimizaciones, start=1):
+        if es_descendente:
+            numeros_absolutos[opt.id] = total_absoluto - idx + 1
+        else:
+            numeros_absolutos[opt.id] = idx
+    
+    # Ahora aplicar filtros para mostrar
+    optimizaciones = todas_optimizaciones
     
     # Filtro por favoritos
     solo_favoritos = request.GET.get('solo_favoritos', '').strip()
@@ -249,36 +527,12 @@ def mis_optimizaciones(request):
         except ValueError:
             pass
     
-    # Ordenamiento
-    ordenar_por = request.GET.get('ordenar_por', 'fecha_desc')
-    
-    if ordenar_por == 'fecha_desc':
-        optimizaciones = optimizaciones.order_by('-fecha')
-    elif ordenar_por == 'fecha_asc':
-        optimizaciones = optimizaciones.order_by('fecha')
-    elif ordenar_por == 'aprovechamiento_desc':
-        optimizaciones = optimizaciones.order_by('-aprovechamiento_total')
-    elif ordenar_por == 'aprovechamiento_asc':
-        optimizaciones = optimizaciones.order_by('aprovechamiento_total')
-    else:
-        # Por defecto: fecha descendente
-        optimizaciones = optimizaciones.order_by('-fecha')
-    
-    total_optimizaciones = optimizaciones.count()
-    
-    # Determinar si el ordenamiento es descendente o ascendente
-    es_descendente = ordenar_por in ['fecha_desc', 'aprovechamiento_desc']
-    
     # Procesar piezas para cada optimización
     optimizaciones_con_piezas = []
-    for idx, opt in enumerate(optimizaciones, start=1):
-        # Calcular número de lista según el ordenamiento
-        if es_descendente:
-            # Para orden descendente: primera = número más alto
-            numero_mostrado = total_optimizaciones - idx + 1
-        else:
-            # Para orden ascendente: primera = número 1
-            numero_mostrado = idx
+    for opt in optimizaciones:
+        # Usar el número absoluto calculado antes de los filtros
+        numero_mostrado = numeros_absolutos.get(opt.id, 0)
+        
         piezas_procesadas = []
         for linea in opt.piezas.splitlines():
             if linea.strip():
@@ -319,6 +573,7 @@ def mis_optimizaciones(request):
         'fecha_hasta': fecha_hasta,
         'ordenar_por': ordenar_por,
         'solo_favoritos': solo_favoritos,
+        'total_sin_filtro': total_absoluto,  # Para mostrar "X de Y optimizaciones"
     })
 
 
@@ -414,7 +669,15 @@ def descargar_pdf(request, pk):
         
         # Generar TODAS las imágenes nuevamente (con info de desperdicio)
         # Nota: ancho_tablero y alto_tablero ya están en cm en la BD
-        imagenes_base64, _, info_desperdicio = generar_grafico(piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero, unidad_opt)
+        # Usar los parámetros de rotación y margen de corte guardados
+        permitir_rotacion = getattr(optimizacion, 'permitir_rotacion', True)
+        margen_corte = getattr(optimizacion, 'margen_corte', 0.3)
+        
+        imagenes_base64, _, info_desperdicio = generar_grafico(
+            piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero, unidad_opt,
+            permitir_rotacion=permitir_rotacion,
+            margen_corte=margen_corte
+        )
         
         # Generar UN SOLO PDF con todas las imágenes (usando número de lista)
         pdf_path = generar_pdf(optimizacion, imagenes_base64, numero_lista=numero_lista)
@@ -427,6 +690,123 @@ def descargar_pdf(request, pk):
 
 
 @login_required
+def descargar_excel(request, pk):
+    """
+    Descarga un archivo Excel con la información detallada de la optimización.
+    """
+    try:
+        optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
+        
+        # Obtener el ordenamiento actual desde los parámetros GET (si existe)
+        ordenar_por = request.GET.get('ordenar_por', 'fecha_desc')
+        
+        # Aplicar el mismo ordenamiento que se usa en mis_optimizaciones
+        todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user)
+        
+        if ordenar_por == 'fecha_desc':
+            todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
+        elif ordenar_por == 'fecha_asc':
+            todas_optimizaciones = todas_optimizaciones.order_by('fecha')
+        elif ordenar_por == 'aprovechamiento_desc':
+            todas_optimizaciones = todas_optimizaciones.order_by('-aprovechamiento_total')
+        elif ordenar_por == 'aprovechamiento_asc':
+            todas_optimizaciones = todas_optimizaciones.order_by('aprovechamiento_total')
+        else:
+            todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
+        
+        total_optimizaciones = todas_optimizaciones.count()
+        es_descendente = ordenar_por in ['fecha_desc', 'aprovechamiento_desc']
+        
+        # Encontrar la posición de esta optimización en la lista
+        numero_lista = None
+        for idx, opt in enumerate(todas_optimizaciones, start=1):
+            if opt.id == optimizacion.id:
+                if es_descendente:
+                    numero_lista = total_optimizaciones - idx + 1
+                else:
+                    numero_lista = idx
+                break
+        
+        # Regenerar las imágenes para obtener info_desperdicio
+        unidad_opt = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
+        piezas = []
+        piezas_con_nombre = []
+        
+        for linea in optimizacion.piezas.splitlines():
+            if linea.strip():
+                partes = linea.split(',')
+                if len(partes) == 4:
+                    nombre, w, h, c = partes
+                    w_cm = convertir_a_cm(float(w), unidad_opt)
+                    h_cm = convertir_a_cm(float(h), unidad_opt)
+                    piezas.append((w_cm, h_cm, int(c)))
+                    piezas_con_nombre.append({
+                        'nombre': nombre.strip(),
+                        'ancho': float(w),
+                        'alto': float(h),
+                        'cantidad': int(c)
+                    })
+                elif len(partes) == 3:
+                    w, h, c = partes
+                    w_cm = convertir_a_cm(float(w), unidad_opt)
+                    h_cm = convertir_a_cm(float(h), unidad_opt)
+                    piezas.append((w_cm, h_cm, int(c)))
+                    piezas_con_nombre.append({
+                        'nombre': 'Pieza',
+                        'ancho': float(w),
+                        'alto': float(h),
+                        'cantidad': int(c)
+                    })
+        
+        # Regenerar gráfico para obtener info_desperdicio
+        permitir_rotacion = getattr(optimizacion, 'permitir_rotacion', True)
+        margen_corte = getattr(optimizacion, 'margen_corte', 0.3)
+        
+        _, _, info_desperdicio = generar_grafico(
+            piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero, unidad_opt,
+            permitir_rotacion=permitir_rotacion,
+            margen_corte=margen_corte
+        )
+        
+        # Convertir áreas a la unidad del usuario
+        factor_lineal = convertir_desde_cm(1, unidad_opt)
+        factor_area = factor_lineal ** 2
+        
+        info_desperdicio_convertida = {
+            'area_usada_total': round(info_desperdicio['area_usada_total'] * factor_area, 2),
+            'desperdicio_total': round(info_desperdicio['desperdicio_total'] * factor_area, 2),
+            'info_tableros': [
+                {
+                    **info,
+                    'area_usada': round(info['area_usada'] * factor_area, 2),
+                    'desperdicio': round(info['desperdicio'] * factor_area, 2),
+                }
+                for info in info_desperdicio['info_tableros']
+            ]
+        }
+        
+        # Generar Excel
+        excel_buffer = generar_excel(optimizacion, info_desperdicio_convertida, piezas_con_nombre, numero_lista)
+        
+        # Preparar respuesta
+        from django.http import HttpResponse
+        response = HttpResponse(
+            excel_buffer.read(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename="optimizacion_{numero_lista if numero_lista else optimizacion.id}.xlsx"'
+        
+        return response
+        
+    except Optimizacion.DoesNotExist:
+        messages.error(request, "No se encontró la optimización o no tienes permiso para acceder.")
+        return redirect('opticut:mis_optimizaciones')
+    except Exception as e:
+        messages.error(request, f"Error al generar Excel: {str(e)}")
+        return redirect('opticut:mis_optimizaciones')
+
+
+@login_required
 def resultado_view(request):
     if request.method == "POST":
         ancho = float(request.POST.get("ancho_tablero"))
@@ -434,22 +814,44 @@ def resultado_view(request):
         piezas_texto = request.POST.get("piezas")
 
         piezas = []
+        piezas_con_nombre = []
         for linea in piezas_texto.strip().splitlines():
             partes = linea.split(",")
             if len(partes) == 4:  # Con nombre
                 nombre, w, h, c = partes
                 piezas.append((float(w), float(h), int(c)))
+                piezas_con_nombre.append({
+                    'nombre': nombre.strip(),
+                    'ancho': float(w),
+                    'alto': float(h),
+                    'cantidad': int(c)
+                })
             else:  # Sin nombre
                 w, h, c = partes
                 piezas.append((float(w), float(h), int(c)))
+                piezas_con_nombre.append({
+                    'nombre': 'Pieza',
+                    'ancho': float(w),
+                    'alto': float(h),
+                    'cantidad': int(c)
+                })
 
         # Obtener unidad (asumir cm para datos antiguos o del POST)
         unidad_resultado = request.POST.get('unidad_medida', 'cm')
         if not unidad_resultado:
             unidad_resultado = 'cm'
         
+        # Obtener parámetros de rotación y margen de corte (valores por defecto para compatibilidad)
+        permitir_rotacion = request.POST.get('permitir_rotacion', 'true').lower() == 'true'
+        margen_corte_mm = float(request.POST.get('margen_corte', 3))  # Siempre en mm
+        margen_corte_cm = margen_corte_mm / 10.0  # Convertir de mm a cm
+        
         # Generar TODAS las imágenes con info de desperdicio
-        imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(piezas, ancho, alto, unidad_resultado)
+        imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(
+            piezas, ancho, alto, unidad_resultado,
+            permitir_rotacion=permitir_rotacion,
+            margen_corte=margen_corte_cm
+        )
         imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
 
         optimizacion = Optimizacion.objects.create(
@@ -458,7 +860,9 @@ def resultado_view(request):
             alto_tablero=alto,
             unidad_medida=unidad_resultado,
             piezas=piezas_texto,
-            aprovechamiento_total=aprovechamiento
+            aprovechamiento_total=aprovechamiento,
+            permitir_rotacion=permitir_rotacion,
+            margen_corte=margen_corte_cm
         )
 
         # Guardar la primera imagen en el modelo
@@ -488,7 +892,6 @@ def resultado_view(request):
         unidad = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
         
         # Convertir áreas de cm² a la unidad del usuario para mostrar
-        from .utils import convertir_desde_cm, obtener_simbolo_area
         simbolo_area = obtener_simbolo_area(unidad)
         factor_lineal = convertir_desde_cm(1, unidad)
         factor_area = factor_lineal ** 2
@@ -528,6 +931,7 @@ def resultado_view(request):
             "imagenes": imagenes_base64,
             "pdf_path": pdf_path,
             "num_tableros": len(imagenes_base64),
+            "piezas_con_nombre": piezas_con_nombre,
             "info_desperdicio": info_desperdicio_mostrar,
             "tableros_con_imagenes": tableros_con_imagenes,
             "numero_lista": numero_lista,  # Pasar número de lista para usar en descarga PNG
@@ -982,8 +1386,15 @@ def descargar_png(request, pk, tablero_num=None):
                     h_cm = convertir_a_cm(float(h), unidad_opt)
                     piezas.append((w_cm, h_cm, int(c)))
         
-        # Generar todas las imágenes
-        imagenes_base64, _, _ = generar_grafico(piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero, unidad_opt)
+        # Generar todas las imágenes (usando parámetros guardados)
+        permitir_rotacion = getattr(optimizacion, 'permitir_rotacion', True)
+        margen_corte = getattr(optimizacion, 'margen_corte', 0.3)
+        
+        imagenes_base64, _, _ = generar_grafico(
+            piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero, unidad_opt,
+            permitir_rotacion=permitir_rotacion,
+            margen_corte=margen_corte
+        )
         
         if not imagenes_base64:
             messages.error(request, "No se encontraron imágenes para esta optimización.")

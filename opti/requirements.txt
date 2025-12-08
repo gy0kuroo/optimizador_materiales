@@ -10,6 +10,9 @@ reportlab==4.2.5
 # Procesamiento de imágenes
 Pillow==11.0.0
 
+# Exportación a Excel
+openpyxl==3.1.5
+
 # Utilidades (opcionales pero recomendadas)
 sqlparse==0.5.1
 tzdata==2024.2

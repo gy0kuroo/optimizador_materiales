@@ -11,13 +11,18 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h2 class="text-center mb-4" data-intro-title="Optimizador de Cortes" data-intro="Aquí puedes crear nuevas optimizaciones de corte ingresando las dimensiones del tablero y las piezas que necesitas.">Optimizador de Cortes</h2>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-center mb-0 flex-grow-1">Editar Optimización #{{ optimizacion.id }}</h2>
+    <a href="{% url 'opticut:mis_optimizaciones' %}" class="btn btn-secondary">
+      ← Volver al Historial
+    </a>
+  </div>
   
-  <form method="post" action="{% url 'opticut:index' %}" id="optimizacion-form">
+  <form method="post" action="{% url 'opticut:editar_optimizacion' optimizacion.id %}" id="optimizacion-form">
     {% csrf_token %}
     
     <!-- Sección: Dimensiones del Tablero -->
-    <div class="card mb-4 fade-in" data-intro-title="Dimensiones del Tablero" data-intro="Ingresa el ancho y alto del tablero de madera. Puedes elegir la unidad de medida que prefieras (cm, m, pulgadas o pies).">
+    <div class="card mb-4 fade-in">
       <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h4 class="mb-0">Dimensiones del Tablero</h4>
         <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion" 
@@ -143,10 +148,10 @@
     <!-- Botón de envío -->
     <div class="text-center fade-in">
       <button type="submit" class="btn btn-primary btn-lg">
-        Calcular Optimización
+        Actualizar Optimización
       </button>
       <a href="{% url 'opticut:mis_optimizaciones' %}" class="btn btn-secondary btn-lg">
-        Ver Historial
+        Cancelar
       </a>
     </div>
   </form>
@@ -268,3 +273,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+

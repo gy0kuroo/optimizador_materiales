@@ -48,6 +48,32 @@ class TableroForm(forms.Form):
         help_text="Ingresa el alto del tablero"
     )
     
+    permitir_rotacion = forms.BooleanField(
+        label="Permitir rotación automática",
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={
+            'class': 'form-check-input',
+            'id': 'permitir_rotacion'
+        }),
+        help_text="El sistema intentará rotar piezas 90° si mejora el aprovechamiento"
+    )
+    
+    margen_corte = forms.FloatField(
+        label="Margen de corte (kerf)",
+        min_value=0,
+        max_value=10,  # Máximo 10 mm
+        initial=3,  # 3 mm es un valor típico
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': '3',
+            'step': '0.1',
+            'id': 'margen_corte'
+        }),
+        help_text="Grosor de la hoja de sierra en milímetros (típicamente 2-4 mm)"
+    )
+    
     def clean(self):
         from .utils import convertir_a_cm
         
@@ -71,6 +97,14 @@ class TableroForm(forms.Form):
             raise forms.ValidationError(f"El ancho debe estar entre {self._get_min_unidad(unidad)} y {self._get_max_unidad(unidad)} {unidad}.")
         if alto_cm < 50 or alto_cm > 300:
             raise forms.ValidationError(f"El alto debe estar entre {self._get_min_unidad(unidad)} y {self._get_max_unidad(unidad)} {unidad}.")
+        
+        # Validar margen de corte (siempre en mm, máximo 10 mm)
+        margen = cleaned_data.get('margen_corte')
+        if margen is not None:
+            if margen < 0:
+                raise forms.ValidationError("El margen de corte no puede ser negativo.")
+            if margen > 10:  # Máximo 10 mm
+                raise forms.ValidationError("El margen de corte no puede ser mayor a 10 mm.")
         
         return cleaned_data
     
@@ -134,20 +168,25 @@ class PiezaForm(forms.Form):
         ancho = cleaned_data.get('ancho')
         alto = cleaned_data.get('alto')
         cantidad = cleaned_data.get('cantidad')
+        nombre = cleaned_data.get('nombre', '').strip()
         
-        # Si alguno está lleno, todos deben estar llenos
-        tiene_datos = any([ancho, alto, cantidad])
+        # Si TODOS los campos están vacíos, el formulario es válido (formulario vacío)
+        todos_vacios = not ancho and not alto and not cantidad and not nombre
         
-        if tiene_datos:
-            if not ancho:
-                raise forms.ValidationError("El ancho es requerido si ingresas una pieza.")
-            if not alto:
-                raise forms.ValidationError("El alto es requerido si ingresas una pieza.")
-            if not cantidad:
-                cleaned_data['cantidad'] = 1  # Valor por defecto
-            
-            if ancho and alto:
-                if ancho <= 0 or alto <= 0:
-                    raise forms.ValidationError("Las dimensiones deben ser positivas.")
+        if todos_vacios:
+            # Formulario completamente vacío - es válido, se ignorará
+            return cleaned_data
+        
+        # Si alguno está lleno, ancho y alto son requeridos
+        if not ancho:
+            raise forms.ValidationError("El ancho es requerido si ingresas una pieza.")
+        if not alto:
+            raise forms.ValidationError("El alto es requerido si ingresas una pieza.")
+        if not cantidad:
+            cleaned_data['cantidad'] = 1  # Valor por defecto
+        
+        if ancho and alto:
+            if ancho <= 0 or alto <= 0:
+                raise forms.ValidationError("Las dimensiones deben ser positivas.")
         
         return cleaned_data
