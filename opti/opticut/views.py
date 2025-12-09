@@ -139,7 +139,7 @@ def index(request):
                 optimizacion.imagen.save(f"optimizacion_{request.user.username}_{optimizacion.id}.png", file)
             
             # Calcular el número de lista para el PDF (basado en orden por fecha descendente por defecto)
-            # Obtener todas las optimizaciones ordenadas por fecha descendente (igual que en mis_optimizaciones)
+            # Obtener todas las optimizaciones ordenadas por fecha descendente (igual que en historial)
             todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
             total_optimizaciones = todas_optimizaciones.count()
             
@@ -243,7 +243,7 @@ def editar_optimizacion(request, pk):
         optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
     except Optimizacion.DoesNotExist:
         messages.error(request, "No se encontró la optimización o no tienes permiso para editarla.")
-        return redirect('opticut:mis_optimizaciones')
+        return redirect('opticut:historial')
     
     # Crear formset con solo 1 formulario extra vacío para edición
     PiezaFormSet = formset_factory(PiezaForm, extra=1, max_num=20, validate_max=True)
@@ -463,7 +463,7 @@ def editar_optimizacion(request, pk):
 
 
 @login_required
-def mis_optimizaciones(request):
+def historial(request):
     # Obtener TODAS las optimizaciones del usuario para calcular números absolutos
     todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user)
     total_absoluto = todas_optimizaciones.count()
@@ -566,7 +566,7 @@ def mis_optimizaciones(request):
             'unidad_medida': unidad_opt,
         })
     
-    return render(request, 'opticut/mis_optimizaciones.html', {
+    return render(request, 'opticut/historial.html', {
         'optimizaciones_con_piezas': optimizaciones_con_piezas,
         'nombre_pieza': nombre_pieza,
         'fecha_desde': fecha_desde,
@@ -586,10 +586,10 @@ def borrar_historial(request):
         count = optimizaciones.count()
         optimizaciones.delete()
         messages.success(request, f"Se eliminaron {count} optimizaciones del historial.")
-        return redirect('opticut:mis_optimizaciones')
+        return redirect('opticut:historial')
     else:
         messages.error(request, "Operación no permitida.")
-        return redirect('opticut:mis_optimizaciones')
+        return redirect('opticut:historial')
 
 
 @login_required
@@ -599,12 +599,29 @@ def borrar_optimizacion(request, pk):
     """
     try:
         optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
+        
+        # Calcular el número mostrado ANTES de eliminar (igual que en historial)
+        todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
+        total_absoluto = todas_optimizaciones.count()
+        
+        # Buscar la posición de esta optimización en la lista ordenada
+        numero_mostrado = None
+        for idx, opt in enumerate(todas_optimizaciones, start=1):
+            if opt.id == pk:
+                # Para orden descendente (más recientes primero): numero = total - idx + 1
+                numero_mostrado = total_absoluto - idx + 1
+                break
+        
+        # Si no se encuentra (no debería pasar), usar el ID como fallback
+        if numero_mostrado is None:
+            numero_mostrado = pk
+        
         optimizacion.delete()
-        messages.success(request, f"Optimización #{pk} eliminada correctamente.")
+        messages.success(request, f"Optimización #{numero_mostrado} eliminada correctamente.")
     except Optimizacion.DoesNotExist:
         messages.error(request, "No se encontró la optimización o no tienes permiso para eliminarla.")
 
-    return redirect('opticut:mis_optimizaciones')
+    return redirect('opticut:historial')
 
 
 @login_required
@@ -615,7 +632,7 @@ def descargar_pdf(request, pk):
         # Obtener el ordenamiento actual desde los parámetros GET (si existe)
         ordenar_por = request.GET.get('ordenar_por', 'fecha_desc')
         
-        # Aplicar el mismo ordenamiento que se usa en mis_optimizaciones
+        # Aplicar el mismo ordenamiento que se usa en historial
         todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user)
         
         if ordenar_por == 'fecha_desc':
@@ -686,7 +703,7 @@ def descargar_pdf(request, pk):
         return FileResponse(open(full_path, "rb"), as_attachment=True, filename=os.path.basename(full_path))
     except Exception as e:
         messages.error(request, f"Error generando PDF: {e}")
-        return redirect('opticut:mis_optimizaciones')
+        return redirect('opticut:historial')
 
 
 @login_required
@@ -700,7 +717,7 @@ def descargar_excel(request, pk):
         # Obtener el ordenamiento actual desde los parámetros GET (si existe)
         ordenar_por = request.GET.get('ordenar_por', 'fecha_desc')
         
-        # Aplicar el mismo ordenamiento que se usa en mis_optimizaciones
+        # Aplicar el mismo ordenamiento que se usa en historial
         todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user)
         
         if ordenar_por == 'fecha_desc':
@@ -800,10 +817,10 @@ def descargar_excel(request, pk):
         
     except Optimizacion.DoesNotExist:
         messages.error(request, "No se encontró la optimización o no tienes permiso para acceder.")
-        return redirect('opticut:mis_optimizaciones')
+        return redirect('opticut:historial')
     except Exception as e:
         messages.error(request, f"Error al generar Excel: {str(e)}")
-        return redirect('opticut:mis_optimizaciones')
+        return redirect('opticut:historial')
 
 
 @login_required
@@ -951,7 +968,7 @@ def duplicar_optimizacion(request, pk):
         # Obtener el ordenamiento actual desde los parámetros GET (si existe)
         ordenar_por = request.GET.get('ordenar_por', 'fecha_desc')
         
-        # Calcular el número de visualización igual que en mis_optimizaciones
+        # Calcular el número de visualización igual que en historial
         todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user)
         
         # Aplicar filtros si existen (para mantener consistencia)
@@ -963,7 +980,7 @@ def duplicar_optimizacion(request, pk):
         if nombre_pieza:
             todas_optimizaciones = todas_optimizaciones.filter(piezas__icontains=nombre_pieza)
         
-        # Aplicar el mismo ordenamiento que se usa en mis_optimizaciones
+        # Aplicar el mismo ordenamiento que se usa en historial
         if ordenar_por == 'fecha_desc':
             todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
         elif ordenar_por == 'fecha_asc':
@@ -982,7 +999,7 @@ def duplicar_optimizacion(request, pk):
         numero_mostrado = optimizacion.id  # Por defecto usar el ID real
         for idx, opt in enumerate(todas_optimizaciones, start=1):
             if opt.id == optimizacion.id:
-                # Calcular número de lista según el ordenamiento (igual que en mis_optimizaciones)
+                # Calcular número de lista según el ordenamiento (igual que en historial)
                 if es_descendente:
                     numero_mostrado = total_optimizaciones - idx + 1
                 else:
@@ -1034,7 +1051,7 @@ def duplicar_optimizacion(request, pk):
         
         pieza_formset = PiezaFormSet(initial=piezas_data)
         
-        # Usar el número de visualización calculado (igual que se muestra en mis_optimizaciones)
+        # Usar el número de visualización calculado (igual que se muestra en historial)
         # Esto asegura que el mensaje muestre el mismo número que se ve en la pantalla
         messages.info(request, f"📋 Cargando datos de la optimización #{numero_mostrado}. Puedes modificarlos antes de calcular.")
         
@@ -1047,7 +1064,7 @@ def duplicar_optimizacion(request, pk):
         
     except Optimizacion.DoesNotExist:
         messages.error(request, "No se encontró la optimización.")
-        return redirect('opticut:mis_optimizaciones')
+        return redirect('opticut:historial')
 
 
 @login_required
@@ -1210,8 +1227,8 @@ def toggle_favorito(request, pk):
             }, status=404)
         messages.error(request, "No se encontró la optimización o no tienes permiso.")
     
-    # Redirigir de vuelta a mis_optimizaciones, manteniendo los filtros (solo si no es AJAX)
-    return redirect(request.META.get('HTTP_REFERER', 'opticut:mis_optimizaciones'))
+    # Redirigir de vuelta a historial, manteniendo los filtros (solo si no es AJAX)
+    return redirect(request.META.get('HTTP_REFERER', 'opticut:historial'))
 
 
 @login_required
@@ -1319,10 +1336,10 @@ def calcular_tiempo_corte(request, pk):
         
     except Optimizacion.DoesNotExist:
         messages.error(request, "No se encontró la optimización o no tienes permiso.")
-        return redirect('opticut:mis_optimizaciones')
+        return redirect('opticut:historial')
     except Exception as e:
         messages.error(request, f"Error al calcular tiempo: {str(e)}")
-        return redirect('opticut:mis_optimizaciones')
+        return redirect('opticut:historial')
 
 
 @login_required
@@ -1337,7 +1354,7 @@ def descargar_png(request, pk, tablero_num=None):
         # Obtener el ordenamiento actual desde los parámetros GET (si existe)
         ordenar_por = request.GET.get('ordenar_por', 'fecha_desc')
         
-        # Aplicar el mismo ordenamiento que se usa en mis_optimizaciones
+        # Aplicar el mismo ordenamiento que se usa en historial
         todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user)
         
         if ordenar_por == 'fecha_desc':
@@ -1398,7 +1415,7 @@ def descargar_png(request, pk, tablero_num=None):
         
         if not imagenes_base64:
             messages.error(request, "No se encontraron imágenes para esta optimización.")
-            return redirect('opticut:mis_optimizaciones')
+            return redirect('opticut:historial')
         
         # Determinar qué tablero descargar
         if tablero_num is None:
@@ -1407,7 +1424,7 @@ def descargar_png(request, pk, tablero_num=None):
         # Validar que el número de tablero existe
         if tablero_num < 1 or tablero_num > len(imagenes_base64):
             messages.error(request, f"El tablero #{tablero_num} no existe. Esta optimización tiene {len(imagenes_base64)} tablero(s).")
-            return redirect('opticut:mis_optimizaciones')
+            return redirect('opticut:historial')
         
         # Obtener la imagen del tablero solicitado (índice 0-based)
         imagen_base64 = imagenes_base64[tablero_num - 1]
@@ -1431,7 +1448,7 @@ def descargar_png(request, pk, tablero_num=None):
         
     except Optimizacion.DoesNotExist:
         messages.error(request, "No se encontró la optimización o no tienes permiso.")
-        return redirect('opticut:mis_optimizaciones')
+        return redirect('opticut:historial')
     except Exception as e:
         messages.error(request, f"Error al generar imagen PNG: {str(e)}")
-        return redirect('opticut:mis_optimizaciones')
+        return redirect('opticut:historial')

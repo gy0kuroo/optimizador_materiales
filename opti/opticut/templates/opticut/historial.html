@@ -2,13 +2,13 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'opticut/css/mis_optimizaciones.css' %}">
+<link rel="stylesheet" href="{% static 'opticut/css/historial.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
-    <h2 class="text-center mb-0 flex-grow-1">Mis Optimizaciones Guardadas</h2>
+    <h2 class="text-center mb-0 flex-grow-1">Historial de Optimizaciones </h2>
     <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
             onclick="iniciarTutorialSeccion('historial')" 
             title="Ayuda sobre el historial">
@@ -19,7 +19,7 @@
   <!-- Filtros y Búsqueda -->
   <div class="search-filters fade-in">
     <h5 class="mb-3">Buscar y Filtrar</h5>
-    <form method="GET" action="{% url 'opticut:mis_optimizaciones' %}" id="filtros-form">
+    <form method="GET" action="{% url 'opticut:historial' %}" id="filtros-form">
       <div class="row">
         <div class="col-md-3 mb-3">
           <label for="nombre_pieza" class="form-label">Nombre de Pieza</label>
@@ -69,7 +69,7 @@
       </div>
       {% if nombre_pieza or fecha_desde or fecha_hasta or solo_favoritos == 'true' %}
       <div class="mt-2">
-        <a href="{% url 'opticut:mis_optimizaciones' %}?ordenar_por={{ ordenar_por }}" class="btn btn-limpiar-filtros">
+        <a href="{% url 'opticut:historial' %}?ordenar_por={{ ordenar_por }}" class="btn btn-limpiar-filtros">
           Limpiar Filtros
         </a>
         {% if nombre_pieza %}
@@ -247,7 +247,7 @@
       <p class="text-muted mb-4">
         {% if nombre_pieza or fecha_desde or fecha_hasta %}
           No se encontraron optimizaciones con los filtros aplicados.
-          <a href="{% url 'opticut:mis_optimizaciones' %}">Ver todas las optimizaciones</a>
+          <a href="{% url 'opticut:historial' %}">Ver todas las optimizaciones</a>
         {% else %}
           Aún no tienes optimizaciones guardadas.
         {% endif %}
@@ -581,3 +581,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 {% endblock %}
+

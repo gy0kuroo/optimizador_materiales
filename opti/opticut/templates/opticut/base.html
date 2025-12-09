@@ -41,7 +41,7 @@
                 <div class="navbar-nav ms-auto d-flex align-items-center">
                     {% if user.is_authenticated %}
                         <a class="nav-link" href="{% url 'opticut:index' %}">🏠 Inicio</a>
-                        <a class="nav-link" href="{% url 'opticut:mis_optimizaciones' %}">📋 Historial</a>
+                        <a class="nav-link" href="{% url 'opticut:historial' %}">📋 Historial</a>
                         <a class="nav-link" href="{% url 'opticut:estadisticas' %}">📊 Estadísticas</a>
                         <div class="dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -82,6 +82,41 @@
     
     <!-- Intro.js para tutorial interactivo -->
     <script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/intro.min.js"></script>
+    
+    <!-- Auto-cierre de mensajes con fade-out suave -->
+    <script>
+        // Auto-cerrar mensajes después de cierto tiempo con animación suave
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert.alert-dismissible');
+            
+            alerts.forEach(function(alert) {
+                // Determinar tiempo según el tipo de mensaje
+                let tiempoCierre = 5000; // Por defecto 5 segundos
+                
+                if (alert.classList.contains('alert-success')) {
+                    tiempoCierre = 5000; // 5 segundos para éxito
+                } else if (alert.classList.contains('alert-danger')) {
+                    tiempoCierre = 8000; // 8 segundos para errores (más tiempo para leer)
+                } else if (alert.classList.contains('alert-warning')) {
+                    tiempoCierre = 6000; // 6 segundos para advertencias
+                } else if (alert.classList.contains('alert-info')) {
+                    tiempoCierre = 5000; // 5 segundos para información
+                }
+                
+                // Cerrar automáticamente después del tiempo determinado con fade-out suave
+                setTimeout(function() {
+                    // Agregar clase de fade-out
+                    alert.classList.add('alert-fade-out');
+                    
+                    // Esperar a que termine la animación (500ms) antes de remover el elemento
+                    setTimeout(function() {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }, 500); // Tiempo de la animación
+                }, tiempoCierre);
+            });
+        });
+    </script>
     
     <!-- JavaScript Personalizado -->
     <script src="{% static 'opticut/js/theme.js' %}"></script>
