@@ -24,4 +24,7 @@ urlpatterns = [
     
     # Utilidades
     path('calcular-tiempo/<int:pk>/', views.calcular_tiempo_corte, name='calcular_tiempo_corte'),
+    
+    # API
+    path('api/tableros/<int:pk>/', views.api_tableros_optimizacion, name='api_tableros'),
 ]

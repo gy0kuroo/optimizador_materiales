@@ -89,7 +89,7 @@ def obtener_simbolo_area(unidad):
     return simbolos.get(unidad, 'cm²')
 
 
-def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_rotacion=True, margen_corte=0.3):
+def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_rotacion=True, margen_corte=0.3, nombres_piezas=None):
     """
     Algoritmo First Fit Decreasing (FFD) mejorado para optimización de cortes.
     Incluye rotación automática de piezas y margen de corte (kerf).
@@ -101,6 +101,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
         unidad: Unidad de medida para mostrar
         permitir_rotacion: Si True, intenta rotar piezas 90° para mejor aprovechamiento
         margen_corte: Margen de corte (kerf) en cm. Se suma al espacio necesario entre piezas
+        nombres_piezas: Lista opcional de nombres (no usado actualmente, para compatibilidad)
     """
     AREA_TABLERO = ancho_tablero * alto_tablero
     tableros = []
@@ -116,7 +117,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                 'alto': h,
                 'area': area,
                 'original': (w, h),
-                'rotada': False  # Track si esta pieza fue rotada
+                'rotada': False
             })
     
     piezas_expandidas.sort(key=lambda x: x['area'], reverse=True)
@@ -135,90 +136,64 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
     def intentar_colocar_pieza(pieza, tablero, w, h, rotada=False):
         """
         Intenta colocar una pieza de dimensiones w x h en el tablero.
-        
-        El kerf (margen de corte) se aplica ENTRE piezas:
-        - Horizontalmente: después de cada pieza si hay espacio para otra
-        - Verticalmente: entre niveles si hay espacio para otro
-        - NO se aplica en los bordes del tablero
-        
-        Args:
-            pieza: Diccionario con información de la pieza (incluye 'ancho', 'alto', 'original')
-            tablero: Diccionario con 'posiciones' y 'niveles'
-            w, h: Dimensiones a colocar (ya intercambiadas si rotada=True)
-            rotada: Si True, la pieza está rotada 90°
+        Prioriza llenar niveles existentes con la MISMA altura para maximizar aprovechamiento.
         """
         posiciones = tablero['posiciones']
         niveles = tablero['niveles']
-        # Guardar dimensiones originales para visualización
         w_orig = pieza.get('ancho', w)
         h_orig = pieza.get('alto', h)
         
-        # Intentar colocar en niveles existentes
-        for nivel in niveles:
+        mejor_nivel_idx = None
+        mejor_prioridad = float('inf')
+        
+        # Buscar el mejor nivel existente
+        for idx, nivel in enumerate(niveles):
+            x = nivel['x_actual']
+            altura_nivel = nivel['altura']
+            espacio_horizontal = ancho_tablero - x
+            
+            # La pieza debe caber
+            if h > altura_nivel or w > espacio_horizontal:
+                continue
+            
+            # Prioridad: preferir niveles donde la altura coincide exactamente
+            # Esto maximiza el aprovechamiento al evitar espacios verticales perdidos
+            diferencia_altura = abs(altura_nivel - h)
+            
+            # Dar máxima prioridad a altura exacta (0), luego por espacio sobrante
+            if diferencia_altura < mejor_prioridad:
+                mejor_prioridad = diferencia_altura
+                mejor_nivel_idx = idx
+        
+        # Si encontramos un nivel adecuado, colocar ahí
+        if mejor_nivel_idx is not None:
+            nivel = niveles[mejor_nivel_idx]
             x = nivel['x_actual']
             y = nivel['y_inicio']
-            altura_nivel = nivel['altura']
-            
-            # Verificar si la pieza cabe en este nivel
-            # IMPORTANTE: Verificar que haya espacio para la pieza + margen de corte
-            # El margen se aplica siempre porque representa el material perdido en el corte
-            espacio_necesario = w + margen_corte
-            espacio_sin_margen = w
-            
-            # Primero intentar con margen (si hay espacio para otra pieza después)
-            if x + espacio_necesario <= ancho_tablero and h <= altura_nivel:
-                # Guardar: (x, y, w_colocada, h_colocada, rotada, w_original, h_original)
-                posiciones.append((x, y, w, h, rotada, w_orig, h_orig))
-                # Avanzar posición: añadir kerf para el potencial siguiente corte
-                # El kerf representa el espacio del corte de sierra entre piezas
-                nivel['x_actual'] += w + margen_corte
-                return True
-            # Si no cabe con margen, intentar sin margen (última pieza del nivel)
-            elif x + espacio_sin_margen <= ancho_tablero and h <= altura_nivel:
-                # Guardar: (x, y, w_colocada, h_colocada, rotada, w_original, h_original)
-                posiciones.append((x, y, w, h, rotada, w_orig, h_orig))
-                # Avanzar posición sin margen (es la última pieza del nivel)
-                nivel['x_actual'] += w
-                return True
+            posiciones.append((x, y, w, h, rotada, w_orig, h_orig))
+            nivel['x_actual'] += w + margen_corte
+            return True
         
         # Si no cabe en niveles existentes, crear nuevo nivel
         if niveles:
             ultimo_nivel = niveles[-1]
-            # El kerf se aplica entre niveles (representa el corte horizontal)
             y_nuevo_nivel = ultimo_nivel['y_inicio'] + ultimo_nivel['altura'] + margen_corte
             
-            # Verificar si la pieza cabe en el nuevo nivel
-            # IMPORTANTE: Verificar que haya espacio para la pieza + margen de corte
-            espacio_vertical_necesario = h
-            espacio_horizontal_con_margen = w + margen_corte
-            espacio_horizontal_sin_margen = w
-            
-            # Intentar con margen primero (si cabe y hay espacio para otra pieza)
-            if y_nuevo_nivel + espacio_vertical_necesario <= alto_tablero and espacio_horizontal_con_margen <= ancho_tablero:
+            if y_nuevo_nivel + h <= alto_tablero and w <= ancho_tablero:
                 niveles.append({
                     'y_inicio': y_nuevo_nivel,
-                    'x_actual': w + margen_corte,  # Primera pieza + kerf
+                    'x_actual': w + margen_corte,
                     'altura': h
                 })
-                # Guardar: (x, y, w_colocada, h_colocada, rotada, w_original, h_original)
-                posiciones.append((0, y_nuevo_nivel, w, h, rotada, w_orig, h_orig))
-                return True
-            # Si no cabe con margen, intentar sin margen (última pieza del tablero)
-            elif y_nuevo_nivel + espacio_vertical_necesario <= alto_tablero and espacio_horizontal_sin_margen <= ancho_tablero:
-                niveles.append({
-                    'y_inicio': y_nuevo_nivel,
-                    'x_actual': w,  # Primera pieza sin kerf (última del tablero)
-                    'altura': h
-                })
-                # Guardar: (x, y, w_colocada, h_colocada, rotada, w_original, h_original)
                 posiciones.append((0, y_nuevo_nivel, w, h, rotada, w_orig, h_orig))
                 return True
         
         return False
     
     # Paso 2: Algoritmo de empaquetado por niveles con rotación (MEJORADO: Best Fit)
-    # MEJORA: En lugar de First Fit (primer lugar donde cabe), ahora usa Best Fit
-    # (prueba TODOS los tableros y elige el que deja menos desperdicio)
+    # Diccionario para recordar la mejor orientación por tamaño de pieza
+    orientacion_optima = {}  # {(w, h): rotada}
+    
     for pieza in piezas_expandidas:
         w_original = pieza['ancho']
         h_original = pieza['alto']
@@ -226,63 +201,110 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
         
         # Si la pieza no es cuadrada y se permite rotación, probar ambas orientaciones
         if permitir_rotacion and w_original != h_original:
-            # MEJORA: Probar TODOS los tableros y elegir el mejor (Best Fit)
-            mejor_resultado_original = None
-            mejor_tablero_idx_original = None
-            mejor_desperdicio_original = float('inf')
+            tam_pieza = (w_original, h_original)
             
-            mejor_resultado_rotada = None
-            mejor_tablero_idx_rotada = None
-            mejor_desperdicio_rotada = float('inf')
-            
-            # Probar orientación original en TODOS los tableros
-            for tablero_idx, tablero in enumerate(tableros):
-                tablero_temp = {
-                    'posiciones': list(tablero['posiciones']),
-                    'niveles': [dict(n) for n in tablero['niveles']]
-                }
-                if intentar_colocar_pieza(pieza, tablero_temp, w_original, h_original, rotada=False):
-                    desperdicio = calcular_desperdicio_estimado(tablero_temp, ancho_tablero, alto_tablero)
-                    if desperdicio < mejor_desperdicio_original:
-                        mejor_desperdicio_original = desperdicio
-                        mejor_resultado_original = tablero_temp
-                        mejor_tablero_idx_original = tablero_idx
-            
-            # Probar orientación rotada en TODOS los tableros
-            for tablero_idx, tablero in enumerate(tableros):
-                tablero_temp = {
-                    'posiciones': list(tablero['posiciones']),
-                    'niveles': [dict(n) for n in tablero['niveles']]
-                }
-                if intentar_colocar_pieza(pieza, tablero_temp, h_original, w_original, rotada=True):
-                    desperdicio = calcular_desperdicio_estimado(tablero_temp, ancho_tablero, alto_tablero)
-                    if desperdicio < mejor_desperdicio_rotada:
-                        mejor_desperdicio_rotada = desperdicio
-                        mejor_resultado_rotada = tablero_temp
-                        mejor_tablero_idx_rotada = tablero_idx
-            
-            # Elegir la mejor opción global (menor desperdicio entre todas las opciones)
-            if mejor_resultado_original and mejor_resultado_rotada:
-                if mejor_desperdicio_rotada < mejor_desperdicio_original:
-                    # Usar rotada (mejor opción)
-                    tableros[mejor_tablero_idx_rotada] = mejor_resultado_rotada
-                    area_usada_total += w_original * h_original
-                    pieza['rotada'] = True
-                    colocada = True
+            # Si ya determinamos la orientación óptima para este tamaño, usarla
+            if tam_pieza in orientacion_optima:
+                usar_rotacion_previa = orientacion_optima[tam_pieza]
+                if usar_rotacion_previa:
+                    w_usar, h_usar = h_original, w_original
                 else:
-                    # Usar original (mejor opción)
-                    tableros[mejor_tablero_idx_original] = mejor_resultado_original
+                    w_usar, h_usar = w_original, h_original
+                
+                # Intentar colocar con la orientación predeterminada
+                for tablero_idx, tablero in enumerate(tableros):
+                    tablero_temp = {
+                        'posiciones': list(tablero['posiciones']),
+                        'niveles': [dict(n) for n in tablero['niveles']]
+                    }
+                    if intentar_colocar_pieza(pieza, tablero_temp, w_usar, h_usar, rotada=usar_rotacion_previa):
+                        tableros[tablero_idx] = tablero_temp
+                        area_usada_total += w_original * h_original
+                        pieza['rotada'] = usar_rotacion_previa
+                        colocada = True
+                        break
+            
+            # Si no se colocó (primera pieza de este tamaño o no cabe), buscar mejor opción
+            if not colocada:
+                mejor_resultado = None
+                mejor_tablero_idx = None
+                mejor_score = float('inf')
+                mejor_rotada = False
+                
+                for tablero_idx, tablero in enumerate(tableros):
+                    for nivel in tablero['niveles']:
+                        altura_nivel = nivel['altura']
+                        espacio_h = ancho_tablero - nivel['x_actual']
+                        
+                        # Probar orientación original
+                        if h_original <= altura_nivel and w_original <= espacio_h:
+                            tablero_temp = {
+                                'posiciones': list(tablero['posiciones']),
+                                'niveles': [dict(n) for n in tablero['niveles']]
+                            }
+                            if intentar_colocar_pieza(pieza, tablero_temp, w_original, h_original, rotada=False):
+                                diff_altura = abs(altura_nivel - h_original)
+                                desperdicio = calcular_desperdicio_estimado(tablero_temp, ancho_tablero, alto_tablero)
+                                score = diff_altura * 10000 + desperdicio
+                                if score < mejor_score:
+                                    mejor_score = score
+                                    mejor_resultado = tablero_temp
+                                    mejor_tablero_idx = tablero_idx
+                                    mejor_rotada = False
+                        
+                        # Probar orientación rotada
+                        if w_original <= altura_nivel and h_original <= espacio_h:
+                            tablero_temp = {
+                                'posiciones': list(tablero['posiciones']),
+                                'niveles': [dict(n) for n in tablero['niveles']]
+                            }
+                            if intentar_colocar_pieza(pieza, tablero_temp, h_original, w_original, rotada=True):
+                                diff_altura = abs(altura_nivel - w_original)
+                                desperdicio = calcular_desperdicio_estimado(tablero_temp, ancho_tablero, alto_tablero)
+                                score = diff_altura * 10000 + desperdicio
+                                if score < mejor_score:
+                                    mejor_score = score
+                                    mejor_resultado = tablero_temp
+                                    mejor_tablero_idx = tablero_idx
+                                    mejor_rotada = True
+                    
+                    # Probar nuevo nivel
+                    if tablero['niveles']:
+                        ultimo = tablero['niveles'][-1]
+                        y_nuevo = ultimo['y_inicio'] + ultimo['altura'] + margen_corte
+                        
+                        if y_nuevo + h_original <= alto_tablero and w_original <= ancho_tablero:
+                            tablero_temp = {
+                                'posiciones': list(tablero['posiciones']),
+                                'niveles': [dict(n) for n in tablero['niveles']]
+                            }
+                            if intentar_colocar_pieza(pieza, tablero_temp, w_original, h_original, rotada=False):
+                                desperdicio = calcular_desperdicio_estimado(tablero_temp, ancho_tablero, alto_tablero)
+                                if desperdicio < mejor_score:
+                                    mejor_score = desperdicio
+                                    mejor_resultado = tablero_temp
+                                    mejor_tablero_idx = tablero_idx
+                                    mejor_rotada = False
+                        
+                        if y_nuevo + w_original <= alto_tablero and h_original <= ancho_tablero:
+                            tablero_temp = {
+                                'posiciones': list(tablero['posiciones']),
+                                'niveles': [dict(n) for n in tablero['niveles']]
+                            }
+                            if intentar_colocar_pieza(pieza, tablero_temp, h_original, w_original, rotada=True):
+                                desperdicio = calcular_desperdicio_estimado(tablero_temp, ancho_tablero, alto_tablero)
+                                if desperdicio < mejor_score:
+                                    mejor_score = desperdicio
+                                    mejor_resultado = tablero_temp
+                                    mejor_tablero_idx = tablero_idx
+                                    mejor_rotada = True
+                
+                if mejor_resultado is not None:
+                    tableros[mejor_tablero_idx] = mejor_resultado
                     area_usada_total += w_original * h_original
+                    pieza['rotada'] = mejor_rotada
+                    orientacion_optima[tam_pieza] = mejor_rotada  # Recordar orientación
                     colocada = True
-            elif mejor_resultado_original:
-                tableros[mejor_tablero_idx_original] = mejor_resultado_original
-                area_usada_total += w_original * h_original
-                colocada = True
-            elif mejor_resultado_rotada:
-                tableros[mejor_tablero_idx_rotada] = mejor_resultado_rotada
-                area_usada_total += w_original * h_original
-                pieza['rotada'] = True
-                colocada = True
         else:
             # Sin rotación o pieza cuadrada: MEJORA - probar TODOS los tableros (Best Fit)
             mejor_tablero_idx = None
@@ -309,54 +331,69 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
         # Si no se pudo colocar en ningún tablero existente, crear uno nuevo
         if not colocada:
             if permitir_rotacion and w_original != h_original:
-                # Probar ambas orientaciones para el nuevo tablero
-                # Elegir la que mejor aprovecha el espacio
-                # Verificar si cabe con margen (para futuras piezas) o sin margen (si es la única)
-                if h_original + margen_corte <= ancho_tablero and w_original <= alto_tablero:
-                    # Rotada cabe mejor con margen
-                    nuevo_tablero = {
-                        'posiciones': [(0, 0, h_original, w_original, True, w_original, h_original)],
-                        'niveles': [{
-                            'y_inicio': 0,
-                            'x_actual': h_original + margen_corte,
-                            'altura': w_original
-                        }]
-                    }
-                    pieza['rotada'] = True
-                elif h_original <= ancho_tablero and w_original <= alto_tablero:
-                    # Rotada cabe sin margen (última pieza)
-                    nuevo_tablero = {
-                        'posiciones': [(0, 0, h_original, w_original, True, w_original, h_original)],
-                        'niveles': [{
-                            'y_inicio': 0,
-                            'x_actual': h_original,
-                            'altura': w_original
-                        }]
-                    }
-                    pieza['rotada'] = True
-                elif w_original + margen_corte <= ancho_tablero and h_original <= alto_tablero:
-                    # Original cabe con margen
-                    nuevo_tablero = {
-                        'posiciones': [(0, 0, w_original, h_original, False, w_original, h_original)],
-                        'niveles': [{
-                            'y_inicio': 0,
-                            'x_actual': w_original + margen_corte,
-                            'altura': h_original
-                        }]
-                    }
-                elif w_original <= ancho_tablero and h_original <= alto_tablero:
-                    # Original cabe sin margen (última pieza)
-                    nuevo_tablero = {
-                        'posiciones': [(0, 0, w_original, h_original, False, w_original, h_original)],
-                        'niveles': [{
-                            'y_inicio': 0,
-                            'x_actual': w_original,
-                            'altura': h_original
-                        }]
-                    }
-                else:
-                    # No cabe en ninguna orientación - esto no debería pasar si las validaciones son correctas
+                # Definir las dos orientaciones posibles
+                # Orientación A: pieza tal como viene (w_original x h_original)
+                # Orientación B: pieza rotada (h_original x w_original)
+                w_a, h_a = w_original, h_original
+                w_b, h_b = h_original, w_original
+                
+                # Verificar si cada orientación cabe en el tablero
+                cabe_a = w_a <= ancho_tablero and h_a <= alto_tablero
+                cabe_b = w_b <= ancho_tablero and h_b <= alto_tablero
+                
+                if not cabe_a and not cabe_b:
                     continue
+                
+                # Calcular cuántas piezas cabrían en cada orientación
+                if cabe_a:
+                    piezas_x_a = int(ancho_tablero / (w_a + margen_corte)) or (1 if w_a <= ancho_tablero else 0)
+                    piezas_y_a = int(alto_tablero / (h_a + margen_corte)) or (1 if h_a <= alto_tablero else 0)
+                    # Verificar que realmente caben
+                    if piezas_x_a * (w_a + margen_corte) - margen_corte > ancho_tablero:
+                        piezas_x_a = max(1, piezas_x_a - 1)
+                    if piezas_y_a * (h_a + margen_corte) - margen_corte > alto_tablero:
+                        piezas_y_a = max(1, piezas_y_a - 1)
+                    total_a = piezas_x_a * piezas_y_a
+                else:
+                    total_a = 0
+                
+                if cabe_b:
+                    piezas_x_b = int(ancho_tablero / (w_b + margen_corte)) or (1 if w_b <= ancho_tablero else 0)
+                    piezas_y_b = int(alto_tablero / (h_b + margen_corte)) or (1 if h_b <= alto_tablero else 0)
+                    # Verificar que realmente caben
+                    if piezas_x_b * (w_b + margen_corte) - margen_corte > ancho_tablero:
+                        piezas_x_b = max(1, piezas_x_b - 1)
+                    if piezas_y_b * (h_b + margen_corte) - margen_corte > alto_tablero:
+                        piezas_y_b = max(1, piezas_y_b - 1)
+                    total_b = piezas_x_b * piezas_y_b
+                else:
+                    total_b = 0
+                
+                # Elegir la orientación que permite más piezas
+                # Si son iguales, preferir no rotar
+                usar_rotada = total_b > total_a
+                
+                if usar_rotada:
+                    nuevo_tablero = {
+                        'posiciones': [(0, 0, w_b, h_b, True, w_original, h_original)],
+                        'niveles': [{
+                            'y_inicio': 0,
+                            'x_actual': w_b + margen_corte,
+                            'altura': h_b
+                        }]
+                    }
+                    pieza['rotada'] = True
+                    orientacion_optima[(w_original, h_original)] = True  # Recordar
+                else:
+                    nuevo_tablero = {
+                        'posiciones': [(0, 0, w_a, h_a, False, w_original, h_original)],
+                        'niveles': [{
+                            'y_inicio': 0,
+                            'x_actual': w_a + margen_corte,
+                            'altura': h_a
+                        }]
+                    }
+                    orientacion_optima[(w_original, h_original)] = False  # Recordar
             else:
                 # Sin rotación o pieza cuadrada
                 if w_original + margen_corte <= ancho_tablero and h_original <= alto_tablero:
@@ -419,7 +456,6 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
     
     # Paso 4: Generar imágenes
     imagenes_base64 = []
-    colores = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2']
     
     for i, tablero in enumerate(tableros, start=1):
         posiciones = tablero['posiciones']
@@ -455,6 +491,8 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
         ax.add_patch(borde)
         
         # Dibujar piezas (ahora incluyen información de rotación)
+        colores = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2']
+        
         for idx, pos_data in enumerate(posiciones):
             # Manejar diferentes formatos de posiciones
             if len(pos_data) >= 7:
@@ -463,7 +501,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
             elif len(pos_data) == 5:
                 # Formato intermedio: (x, y, w, h, rotada)
                 x, y, w, h, rotada = pos_data
-                w_orig, h_orig = w, h  # Usar dimensiones colocadas como originales
+                w_orig, h_orig = w, h
             else:
                 # Formato antiguo: (x, y, w, h)
                 x, y, w, h = pos_data
@@ -476,14 +514,12 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                                      edgecolor='darkblue', facecolor=color, alpha=0.7)
             ax.add_patch(rect)
             
-            # MEJORA: Mostrar dimensiones ORIGINALES siempre, y luego indicar rotación
-            # Esto es más claro para el usuario
+            # Mostrar dimensiones
             w_orig_mostrar = round(convertir_desde_cm(w_orig, unidad), 1)
             h_orig_mostrar = round(convertir_desde_cm(h_orig, unidad), 1)
             
-            # Mostrar dimensiones originales con indicador de rotación
+            # Mostrar dimensiones con indicador de rotación
             if rotada:
-                # Si está rotada, mostrar dimensiones originales y aclarar que está rotada
                 texto_dimensiones = f'{w_orig_mostrar}×{h_orig_mostrar}\n(ROTADA 90°)'
             else:
                 texto_dimensiones = f'{w_orig_mostrar}×{h_orig_mostrar}'

@@ -105,11 +105,15 @@ def index(request):
             # Convertir margen de corte de mm a cm (el sistema trabaja en cm)
             margen_corte_cm = margen_corte_mm / 10.0
 
+            # Extraer nombres de piezas para colores consistentes
+            nombres_piezas = [p['nombre'] for p in piezas_con_nombre]
+            
             # Generar TODAS las imágenes, aprovechamiento Y desperdicio
             imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(
                 piezas, ancho, alto, unidad, 
                 permitir_rotacion=permitir_rotacion, 
-                margen_corte=margen_corte_cm
+                margen_corte=margen_corte_cm,
+                nombres_piezas=nombres_piezas
             )
             
             # Usar la primera imagen para vista previa
@@ -314,11 +318,15 @@ def editar_optimizacion(request, pk):
             margen_corte_mm = tablero_form.cleaned_data.get('margen_corte', 3)
             margen_corte_cm = margen_corte_mm / 10.0
             
+            # Extraer nombres de piezas para colores consistentes
+            nombres_piezas = [p['nombre'] for p in piezas_con_nombre]
+            
             # Generar nuevas imágenes
             imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(
                 piezas, ancho, alto, unidad, 
                 permitir_rotacion=permitir_rotacion, 
-                margen_corte=margen_corte_cm
+                margen_corte=margen_corte_cm,
+                nombres_piezas=nombres_piezas
             )
             
             imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
@@ -669,16 +677,19 @@ def descargar_pdf(request, pk):
         
         # Las piezas se guardaron en la unidad original, necesitamos convertirlas a cm
         piezas = []
+        nombres_piezas = []
         for linea in optimizacion.piezas.splitlines():
             partes = linea.split(",")
             if len(partes) == 4:  # Con nombre
                 nombre, w, h, c = partes
+                nombres_piezas.append(nombre.strip())
                 # Convertir de unidad original a cm
                 w_cm = convertir_a_cm(float(w), unidad_opt)
                 h_cm = convertir_a_cm(float(h), unidad_opt)
                 piezas.append((w_cm, h_cm, int(c)))
             else:  # Sin nombre (formato antiguo)
                 w, h, c = partes
+                nombres_piezas.append(f"Pieza {len(nombres_piezas)+1}")
                 # Convertir de unidad original a cm
                 w_cm = convertir_a_cm(float(w), unidad_opt)
                 h_cm = convertir_a_cm(float(h), unidad_opt)
@@ -693,7 +704,8 @@ def descargar_pdf(request, pk):
         imagenes_base64, _, info_desperdicio = generar_grafico(
             piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero, unidad_opt,
             permitir_rotacion=permitir_rotacion,
-            margen_corte=margen_corte
+            margen_corte=margen_corte,
+            nombres_piezas=nombres_piezas
         )
         
         # Generar UN SOLO PDF con todas las imágenes (usando número de lista)
@@ -778,11 +790,13 @@ def descargar_excel(request, pk):
         # Regenerar gráfico para obtener info_desperdicio
         permitir_rotacion = getattr(optimizacion, 'permitir_rotacion', True)
         margen_corte = getattr(optimizacion, 'margen_corte', 0.3)
+        nombres_piezas = [p['nombre'] for p in piezas_con_nombre]
         
         _, _, info_desperdicio = generar_grafico(
             piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero, unidad_opt,
             permitir_rotacion=permitir_rotacion,
-            margen_corte=margen_corte
+            margen_corte=margen_corte,
+            nombres_piezas=nombres_piezas
         )
         
         # Convertir áreas a la unidad del usuario
@@ -863,11 +877,15 @@ def resultado_view(request):
         margen_corte_mm = float(request.POST.get('margen_corte', 3))  # Siempre en mm
         margen_corte_cm = margen_corte_mm / 10.0  # Convertir de mm a cm
         
+        # Extraer nombres de piezas para colores consistentes
+        nombres_piezas = [p['nombre'] for p in piezas_con_nombre]
+        
         # Generar TODAS las imágenes con info de desperdicio
         imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(
             piezas, ancho, alto, unidad_resultado,
             permitir_rotacion=permitir_rotacion,
-            margen_corte=margen_corte_cm
+            margen_corte=margen_corte_cm,
+            nombres_piezas=nombres_piezas
         )
         imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
 
@@ -1389,16 +1407,19 @@ def descargar_png(request, pk, tablero_num=None):
         
         # Parsear piezas y convertir a cm
         piezas = []
+        nombres_piezas = []
         for linea in optimizacion.piezas.splitlines():
             if linea.strip():
                 partes = linea.split(",")
                 if len(partes) == 4:  # Con nombre
                     nombre, w, h, c = partes
+                    nombres_piezas.append(nombre.strip())
                     w_cm = convertir_a_cm(float(w), unidad_opt)
                     h_cm = convertir_a_cm(float(h), unidad_opt)
                     piezas.append((w_cm, h_cm, int(c)))
                 elif len(partes) == 3:  # Sin nombre
                     w, h, c = partes
+                    nombres_piezas.append(f"Pieza {len(nombres_piezas)+1}")
                     w_cm = convertir_a_cm(float(w), unidad_opt)
                     h_cm = convertir_a_cm(float(h), unidad_opt)
                     piezas.append((w_cm, h_cm, int(c)))
@@ -1410,7 +1431,8 @@ def descargar_png(request, pk, tablero_num=None):
         imagenes_base64, _, _ = generar_grafico(
             piezas, optimizacion.ancho_tablero, optimizacion.alto_tablero, unidad_opt,
             permitir_rotacion=permitir_rotacion,
-            margen_corte=margen_corte
+            margen_corte=margen_corte,
+            nombres_piezas=nombres_piezas
         )
         
         if not imagenes_base64:
@@ -1452,3 +1474,60 @@ def descargar_png(request, pk, tablero_num=None):
     except Exception as e:
         messages.error(request, f"Error al generar imagen PNG: {str(e)}")
         return redirect('opticut:historial')
+
+
+@login_required
+def api_tableros_optimizacion(request, pk):
+    """
+    API que retorna todas las imágenes de tableros de una optimización en base64.
+    """
+    from django.http import JsonResponse
+    
+    try:
+        optimizacion = Optimizacion.objects.get(pk=pk, usuario=request.user)
+        
+        # Parsear piezas
+        piezas = []
+        nombres_piezas = []
+        for linea in optimizacion.piezas.splitlines():
+            partes = linea.split(',')
+            if len(partes) >= 3:
+                try:
+                    if len(partes) == 4:
+                        nombres_piezas.append(partes[0].strip())
+                        ancho = float(partes[1].strip())
+                        alto = float(partes[2].strip())
+                        cantidad = int(partes[3].strip())
+                    else:
+                        nombres_piezas.append(f"Pieza {len(nombres_piezas)+1}")
+                        ancho = float(partes[0].strip())
+                        alto = float(partes[1].strip())
+                        cantidad = int(partes[2].strip())
+                    
+                    ancho_cm = convertir_a_cm(ancho, optimizacion.unidad_medida)
+                    alto_cm = convertir_a_cm(alto, optimizacion.unidad_medida)
+                    piezas.append((ancho_cm, alto_cm, cantidad))
+                except (ValueError, IndexError):
+                    continue
+        
+        # Generar todas las imágenes
+        imagenes_base64, _, _ = generar_grafico(
+            piezas,
+            optimizacion.ancho_tablero,
+            optimizacion.alto_tablero,
+            unidad=optimizacion.unidad_medida,
+            permitir_rotacion=getattr(optimizacion, 'permitir_rotacion', True),
+            margen_corte=getattr(optimizacion, 'margen_corte', 0.3),
+            nombres_piezas=nombres_piezas
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'imagenes': imagenes_base64,
+            'total': len(imagenes_base64)
+        })
+        
+    except Optimizacion.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'No encontrado'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

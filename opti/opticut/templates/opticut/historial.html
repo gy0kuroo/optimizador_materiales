@@ -264,14 +264,14 @@
       <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
           <div class="modal-header bg-dark text-white">
-            <h5 class="modal-title" id="modalImagenLabel">Tablero en Pantalla Completa</h5>
+            <h5 class="modal-title" id="modalImagenLabel">Tableros en Pantalla Completa</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body text-center modal-grafico-body">
+          <div class="modal-body text-center modal-grafico-body" style="overflow: auto;">
             <div class="row h-100">
               <div class="col-10">
-                <div id="modalImagenContenido" class="modal-grafico-contenido">
-                  <!-- La imagen se cargará aquí -->
+                <div id="modalImagenContenido" class="d-flex align-items-center justify-content-center gap-3" style="min-height: 100%; flex-wrap: nowrap; transform-origin: center center;">
+                  <!-- Las imágenes se cargarán aquí lado a lado -->
                 </div>
               </div>
               <div class="col-2 d-flex flex-column justify-content-center align-items-center zoom-controls">
@@ -279,8 +279,8 @@
                 <input type="range" 
                        class="form-range zoom-slider" 
                        id="zoomSliderImagen" 
-                       min="50" 
-                       max="300" 
+                       min="30" 
+                       max="200" 
                        value="100" 
                        step="5">
                 <span id="zoomValueImagen" class="text-white mt-2 zoom-value">100%</span>
@@ -302,195 +302,148 @@ function abrirModalImagen(urlImagen, optimizacionId) {
     const titulo = document.getElementById('modalImagenLabel');
     
     // Limpiar contenido anterior
-    contenido.innerHTML = '';
+    contenido.innerHTML = '<div class="text-white">Cargando tableros...</div>';
     
-    // Establecer título
-    titulo.textContent = `Tablero - Optimización #${optimizacionId} - Pantalla Completa`;
-    
-    // Crear contenedor para la imagen con capacidad de arrastre
-    const contenedorImagen = document.createElement('div');
-    contenedorImagen.style.position = 'relative';
-    contenedorImagen.style.overflow = 'hidden';
-    contenedorImagen.style.width = '100%';
-    contenedorImagen.style.height = '100%';
-    contenedorImagen.style.cursor = 'grab';
-    
-    // Crear imagen
-    const img = document.createElement('img');
-    img.src = urlImagen;
-    img.alt = `Optimización #${optimizacionId}`;
-    img.className = 'img-fluid';
-    // Ajustar tamaño inicial para que se vea completo sin zoom excesivo
-    // La imagen se ajustará automáticamente al contenedor
-    img.style.maxWidth = '100%';
-    img.style.maxHeight = '90vh';
-    img.style.width = 'auto';
-    img.style.height = 'auto';
-    img.style.display = 'block';
-    img.style.margin = '0 auto';
-    img.style.transition = 'transform 0.1s ease-out';
-    img.style.userSelect = 'none';
-    img.draggable = false;
-    img.style.objectFit = 'contain';
-    // Asegurar que no haya transformación inicial
-    img.style.transform = 'scale(1) translate(0px, 0px)';
-    
-    // Variables para zoom y arrastre
-    let zoomLevel = 1; // Valor del zoom (1.0 = 100%)
-    let isDragging = false;
-    let startX = 0;
-    let startY = 0;
-    let translateX = 0;
-    let translateY = 0;
-    let currentTranslateX = 0;
-    let currentTranslateY = 0;
-    
-    // Esperar a que la imagen cargue para inicializar correctamente
-    img.onload = function() {
-        // Resetear transformación inicial
-        img.style.transform = 'scale(1) translate(0px, 0px)';
-        translateX = 0;
-        translateY = 0;
-        currentTranslateX = 0;
-        currentTranslateY = 0;
-    };
-    
-    // Función para actualizar el zoom basado en el slider
-    const actualizarZoom = (zoomPercent) => {
-        zoomLevel = zoomPercent / 100; // Convertir porcentaje a escala (50% = 0.5, 100% = 1.0, 300% = 3.0)
-        img.style.transform = `scale(${zoomLevel}) translate(${translateX}px, ${translateY}px)`;
-        img.style.transformOrigin = 'center center';
-        
-        // Actualizar cursor según el zoom
-        if (zoomLevel > 1) {
-            img.style.cursor = 'grab';
-            contenedorImagen.style.cursor = 'grab';
-        } else {
-            img.style.cursor = 'default';
-            contenedorImagen.style.cursor = 'default';
-        }
-        
-        // Actualizar el valor mostrado
-        document.getElementById('zoomValueImagen').textContent = zoomPercent + '%';
-    };
-    
-    // Configurar el slider de zoom
-    const zoomSlider = document.getElementById('zoomSliderImagen');
-    zoomSlider.addEventListener('input', function(e) {
-        const zoomPercent = parseInt(e.target.value);
-        actualizarZoom(zoomPercent);
-    });
-    
-    // Funcionalidad de arrastre cuando está en zoom
-    img.addEventListener('mousedown', function(e) {
-        if (zoomLevel > 1) {
-            // Cuando está en zoom, permitir arrastre
-            e.preventDefault();
-            isDragging = true;
-            startX = e.clientX - currentTranslateX;
-            startY = e.clientY - currentTranslateY;
-            this.style.cursor = 'grabbing';
-            contenedorImagen.style.cursor = 'grabbing';
-        }
-    });
-    
-    img.addEventListener('mousemove', function(e) {
-        if (isDragging && zoomLevel > 1) {
-            e.preventDefault();
-            currentTranslateX = e.clientX - startX;
-            currentTranslateY = e.clientY - startY;
-            translateX = currentTranslateX;
-            translateY = currentTranslateY;
-            this.style.transform = `scale(${zoomLevel}) translate(${translateX}px, ${translateY}px)`;
-        }
-    });
-    
-    img.addEventListener('mouseup', function(e) {
-        if (isDragging) {
-            isDragging = false;
-            if (zoomLevel > 1) {
-                this.style.cursor = 'grab';
-                contenedorImagen.style.cursor = 'grab';
+    // Cargar todas las imágenes de la optimización via AJAX
+    fetch(`/opticut/api/tableros/${optimizacionId}/`)
+        .then(response => response.json())
+        .then(data => {
+            contenido.innerHTML = '';
+            
+            if (data.imagenes && data.imagenes.length > 0) {
+                titulo.textContent = `Tableros (${data.imagenes.length}) - Optimización #${optimizacionId}`;
+                
+                data.imagenes.forEach((imgBase64, idx) => {
+                    const contenedorImagen = document.createElement('div');
+                    contenedorImagen.className = 'tablero-modal-item';
+                    contenedorImagen.style.flex = '0 0 auto';
+                    contenedorImagen.style.textAlign = 'center';
+                    
+                    const label = document.createElement('div');
+                    label.className = 'text-white mb-2';
+                    label.innerHTML = `<strong>Tablero ${idx + 1} de ${data.imagenes.length}</strong>`;
+                    
+                    const img = document.createElement('img');
+                    img.src = `data:image/png;base64,${imgBase64}`;
+                    img.alt = `Tablero ${idx + 1}`;
+                    img.style.maxHeight = '80vh';
+                    img.style.maxWidth = data.imagenes.length > 1 ? '45vw' : '90vw';
+                    img.style.objectFit = 'contain';
+                    img.style.border = '2px solid #444';
+                    img.style.borderRadius = '8px';
+                    
+                    contenedorImagen.appendChild(label);
+                    contenedorImagen.appendChild(img);
+                    contenido.appendChild(contenedorImagen);
+                });
             } else {
-                this.style.cursor = 'default';
-                contenedorImagen.style.cursor = 'default';
+                // Fallback: mostrar imagen guardada
+                titulo.textContent = `Tablero - Optimización #${optimizacionId}`;
+                const img = document.createElement('img');
+                img.src = urlImagen;
+                img.alt = `Optimización #${optimizacionId}`;
+                img.style.maxHeight = '85vh';
+                img.style.maxWidth = '90vw';
+                img.style.objectFit = 'contain';
+                contenido.appendChild(img);
             }
-        }
-    });
+        })
+        .catch(error => {
+            // En caso de error, mostrar la imagen guardada
+            contenido.innerHTML = '';
+            titulo.textContent = `Tablero - Optimización #${optimizacionId}`;
+            const img = document.createElement('img');
+            img.src = urlImagen;
+            img.alt = `Optimización #${optimizacionId}`;
+            img.style.maxHeight = '85vh';
+            img.style.maxWidth = '90vw';
+            img.style.objectFit = 'contain';
+            contenido.appendChild(img);
+        });
     
-    img.addEventListener('mouseleave', function(e) {
-        if (isDragging) {
-            isDragging = false;
-            if (zoomLevel > 1) {
-                this.style.cursor = 'grab';
-                contenedorImagen.style.cursor = 'grab';
-            }
-        }
-    });
-    
-    // Prevenir menú contextual al hacer click derecho cuando está en zoom
-    img.addEventListener('contextmenu', function(e) {
-        if (zoomLevel > 1) {
-            e.preventDefault();
-        }
-    });
-    
-    // Soporte para touch (móviles)
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchCurrentX = 0;
-    let touchCurrentY = 0;
-    let isTouchDragging = false;
-    
-    img.addEventListener('touchstart', function(e) {
-        if (zoomLevel > 1) {
-            e.preventDefault();
-            isTouchDragging = true;
-            touchStartX = e.touches[0].clientX - currentTranslateX;
-            touchStartY = e.touches[0].clientY - currentTranslateY;
-        }
-    });
-    
-    img.addEventListener('touchmove', function(e) {
-        if (isTouchDragging && zoomLevel > 1) {
-            e.preventDefault();
-            touchCurrentX = e.touches[0].clientX - touchStartX;
-            touchCurrentY = e.touches[0].clientY - touchStartY;
-            translateX = touchCurrentX;
-            translateY = touchCurrentY;
-            currentTranslateX = touchCurrentX;
-            currentTranslateY = touchCurrentY;
-            this.style.transform = `scale(${zoomLevel}) translate(${translateX}px, ${translateY}px)`;
-        }
-    });
-    
-    img.addEventListener('touchend', function(e) {
-        isTouchDragging = false;
-    });
-    
-    contenedorImagen.appendChild(img);
-    contenido.appendChild(contenedorImagen);
     modal.show();
 }
 
 function resetearZoomImagen() {
-    const img = document.querySelector('#modalImagenContenido img');
+    const contenido = document.getElementById('modalImagenContenido');
     const zoomSlider = document.getElementById('zoomSliderImagen');
-    if (img && zoomSlider) {
-        // Resetear slider a 100%
+    if (contenido && zoomSlider) {
+        modalZoomLevel = 1;
+        modalTranslateX = 0;
+        modalTranslateY = 0;
         zoomSlider.value = 100;
-        // Resetear transformación visual
-        img.style.transform = 'scale(1) translate(0px, 0px)';
-        img.style.cursor = 'default';
-        // Actualizar el valor mostrado
+        contenido.style.transform = 'scale(1) translate(0px, 0px)';
         document.getElementById('zoomValueImagen').textContent = '100%';
-        // Resetear variables de arrastre si están definidas
-        if (window.currentTranslateX !== undefined) {
-            window.currentTranslateX = 0;
-            window.currentTranslateY = 0;
-        }
     }
 }
+
+// Variables globales para el arrastre y zoom
+let modalZoomLevel = 1;
+let modalIsDragging = false;
+let modalStartX, modalStartY;
+let modalTranslateX = 0, modalTranslateY = 0;
+
+// Configurar slider de zoom cuando el modal se muestra
+document.getElementById('modalImagen').addEventListener('shown.bs.modal', function() {
+    const zoomSlider = document.getElementById('zoomSliderImagen');
+    const contenido = document.getElementById('modalImagenContenido');
+    
+    // Resetear valores
+    modalZoomLevel = 1;
+    modalTranslateX = 0;
+    modalTranslateY = 0;
+    zoomSlider.value = 100;
+    contenido.style.transform = 'scale(1) translate(0px, 0px)';
+    contenido.style.transformOrigin = 'center center';
+    contenido.style.cursor = 'grab';
+    
+    zoomSlider.oninput = function() {
+        const zoomPercent = parseInt(this.value);
+        modalZoomLevel = zoomPercent / 100;
+        contenido.style.transform = `scale(${modalZoomLevel}) translate(${modalTranslateX}px, ${modalTranslateY}px)`;
+        document.getElementById('zoomValueImagen').textContent = zoomPercent + '%';
+    };
+});
+
+// Eventos de arrastre solo en el contenido de imágenes
+document.addEventListener('mousedown', function(e) {
+    const contenido = document.getElementById('modalImagenContenido');
+    
+    // No activar arrastre si se hace click en el slider o sus controles
+    if (e.target.closest('.zoom-controls')) {
+        return;
+    }
+    
+    if (contenido && contenido.contains(e.target)) {
+        modalIsDragging = true;
+        modalStartX = e.clientX;
+        modalStartY = e.clientY;
+        contenido.style.cursor = 'grabbing';
+        e.preventDefault();
+    }
+});
+
+document.addEventListener('mousemove', function(e) {
+    if (!modalIsDragging) return;
+    const contenido = document.getElementById('modalImagenContenido');
+    if (contenido) {
+        const dx = (e.clientX - modalStartX) / modalZoomLevel;
+        const dy = (e.clientY - modalStartY) / modalZoomLevel;
+        modalStartX = e.clientX;
+        modalStartY = e.clientY;
+        modalTranslateX += dx;
+        modalTranslateY += dy;
+        contenido.style.transform = `scale(${modalZoomLevel}) translate(${modalTranslateX}px, ${modalTranslateY}px)`;
+    }
+});
+
+document.addEventListener('mouseup', function() {
+    if (modalIsDragging) {
+        modalIsDragging = false;
+        const contenido = document.getElementById('modalImagenContenido');
+        if (contenido) contenido.style.cursor = 'grab';
+    }
+});
 
 // Función para obtener el token CSRF de las cookies
 function getCookie(name) {
