@@ -1,0 +1,201 @@
+{% extends 'opticut/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'opticut/css/historial.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+    <h2 class="text-center mb-0 flex-grow-1">⚖️ Comparar Optimizaciones</h2>
+    <div class="d-flex gap-2 align-items-center">
+      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+              onclick="iniciarTutorialSeccion('comparar')" 
+              title="Ayuda sobre comparación">
+        ❓ Ayuda
+      </button>
+      <a href="{% url 'opticut:index' %}" class="btn btn-secondary">
+        ← Volver al Inicio
+      </a>
+    </div>
+  </div>
+
+  <!-- Selector de Optimizaciones -->
+  {% if not optimizacion1 or not optimizacion2 %}
+  <div class="card mb-4 fade-in">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Seleccionar Optimizaciones para Comparar</h4>
+    </div>
+    <div class="card-body">
+      <form method="GET" action="{% url 'opticut:comparar_optimizaciones' %}">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="opt1" class="form-label">Primera Optimización:</label>
+            <select name="opt1" id="opt1" class="form-select" required>
+              <option value="">Seleccionar...</option>
+              {% for opt in optimizaciones %}
+              <option value="{{ opt.pk }}" {% if optimizacion1 and optimizacion1.pk == opt.pk %}selected{% endif %}>
+                {{ opt.fecha|date:"d/m/Y H:i" }} - {{ opt.ancho_tablero }}×{{ opt.alto_tablero }} cm ({{ opt.aprovechamiento_total|floatformat:1 }}%)
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="opt2" class="form-label">Segunda Optimización:</label>
+            <select name="opt2" id="opt2" class="form-select" required>
+              <option value="">Seleccionar...</option>
+              {% for opt in optimizaciones %}
+              <option value="{{ opt.pk }}" {% if optimizacion2 and optimizacion2.pk == opt.pk %}selected{% endif %}>
+                {{ opt.fecha|date:"d/m/Y H:i" }} - {{ opt.ancho_tablero }}×{{ opt.alto_tablero }} cm ({{ opt.aprovechamiento_total|floatformat:1 }}%)
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="text-center">
+          <button type="submit" class="btn btn-primary">🔍 Comparar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Comparación Lado a Lado -->
+  {% if optimizacion1 and optimizacion2 %}
+  <div class="row fade-in">
+    <!-- Optimización 1 -->
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Optimización #1</h4>
+          <small>{{ optimizacion1.fecha|date:"d/m/Y H:i" }}</small>
+        </div>
+        <div class="card-body">
+          <h5>Dimensiones del Tablero</h5>
+          <p>{{ optimizacion1.ancho_tablero }} × {{ optimizacion1.alto_tablero }} cm</p>
+          
+          <h5>Métricas</h5>
+          <ul class="list-group mb-3">
+            <li class="list-group-item">
+              <strong>Aprovechamiento:</strong> 
+              <span class="badge bg-{% if optimizacion1.aprovechamiento_total >= 80 %}success{% elif optimizacion1.aprovechamiento_total >= 60 %}warning{% else %}danger{% endif %}">
+                {{ optimizacion1.aprovechamiento_total|floatformat:2 }}%
+              </span>
+            </li>
+            <li class="list-group-item"><strong>Número de Tableros:</strong> {{ optimizacion1.num_tableros|default:0 }}</li>
+            {% if optimizacion1.material %}
+            <li class="list-group-item"><strong>Material:</strong> {{ optimizacion1.material.nombre }}</li>
+            {% endif %}
+            {% if optimizacion1.get_costo_total %}
+            <li class="list-group-item"><strong>Costo Total:</strong> ${{ optimizacion1.get_costo_total|floatformat:0 }}</li>
+            {% endif %}
+          </ul>
+          
+          <a href="{% url 'opticut:resultado' optimizacion1.pk %}" class="btn btn-outline-primary w-100">Ver Detalles</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Optimización 2 -->
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header bg-success text-white">
+          <h4 class="mb-0">Optimización #2</h4>
+          <small>{{ optimizacion2.fecha|date:"d/m/Y H:i" }}</small>
+        </div>
+        <div class="card-body">
+          <h5>Dimensiones del Tablero</h5>
+          <p>{{ optimizacion2.ancho_tablero }} × {{ optimizacion2.alto_tablero }} cm</p>
+          
+          <h5>Métricas</h5>
+          <ul class="list-group mb-3">
+            <li class="list-group-item">
+              <strong>Aprovechamiento:</strong> 
+              <span class="badge bg-{% if optimizacion2.aprovechamiento_total >= 80 %}success{% elif optimizacion2.aprovechamiento_total >= 60 %}warning{% else %}danger{% endif %}">
+                {{ optimizacion2.aprovechamiento_total|floatformat:2 }}%
+              </span>
+            </li>
+            <li class="list-group-item"><strong>Número de Tableros:</strong> {{ optimizacion2.num_tableros|default:0 }}</li>
+            {% if optimizacion2.material %}
+            <li class="list-group-item"><strong>Material:</strong> {{ optimizacion2.material.nombre }}</li>
+            {% endif %}
+            {% if optimizacion2.get_costo_total %}
+            <li class="list-group-item"><strong>Costo Total:</strong> ${{ optimizacion2.get_costo_total|floatformat:0 }}</li>
+            {% endif %}
+          </ul>
+          
+          <a href="{% url 'opticut:resultado' optimizacion2.pk %}" class="btn btn-outline-success w-100">Ver Detalles</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla Comparativa -->
+  <div class="card mb-4 fade-in">
+    <div class="card-header bg-info text-white">
+      <h4 class="mb-0">Comparación Detallada</h4>
+    </div>
+    <div class="card-body">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Métrica</th>
+            <th class="text-center">Optimización #1</th>
+            <th class="text-center">Optimización #2</th>
+            <th class="text-center">Diferencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Aprovechamiento</strong></td>
+            <td class="text-center">{{ optimizacion1.aprovechamiento_total|floatformat:2 }}%</td>
+            <td class="text-center">{{ optimizacion2.aprovechamiento_total|floatformat:2 }}%</td>
+            <td class="text-center {% if diferencia_aprovechamiento > 0 %}text-success{% elif diferencia_aprovechamiento < 0 %}text-danger{% endif %}">
+              {% if diferencia_aprovechamiento > 0 %}+{% endif %}{{ diferencia_aprovechamiento|floatformat:2 }}%
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Desperdicio</strong></td>
+            <td class="text-center">{{ desperdicio1|floatformat:2 }}%</td>
+            <td class="text-center">{{ desperdicio2|floatformat:2 }}%</td>
+            <td class="text-center {% if diferencia_desperdicio < 0 %}text-success{% elif diferencia_desperdicio > 0 %}text-danger{% endif %}">
+              {% if diferencia_desperdicio > 0 %}+{% endif %}{{ diferencia_desperdicio|floatformat:2 }}%
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Número de Tableros</strong></td>
+            <td class="text-center">{{ optimizacion1.num_tableros|default:0 }}</td>
+            <td class="text-center">{{ optimizacion2.num_tableros|default:0 }}</td>
+            <td class="text-center {% if diferencia_tableros < 0 %}text-success{% elif diferencia_tableros > 0 %}text-danger{% endif %}">
+              {% if diferencia_tableros > 0 %}+{% endif %}{{ diferencia_tableros }}
+            </td>
+          </tr>
+          {% if optimizacion1.get_costo_total and optimizacion2.get_costo_total %}
+          <tr>
+            <td><strong>Costo Total</strong></td>
+            <td class="text-center">${{ optimizacion1.get_costo_total|floatformat:0 }}</td>
+            <td class="text-center">${{ optimizacion2.get_costo_total|floatformat:0 }}</td>
+            <td class="text-center {% if optimizacion2.get_costo_total < optimizacion1.get_costo_total %}text-success{% elif optimizacion2.get_costo_total > optimizacion1.get_costo_total %}text-danger{% endif %}">
+              {% if optimizacion1.get_costo_total and optimizacion2.get_costo_total %}
+                {% with diff=optimizacion2.get_costo_total|add:optimizacion1.get_costo_total|add:"-" %}
+                  {% if optimizacion2.get_costo_total > optimizacion1.get_costo_total %}+{% endif %}${{ diff|floatformat:0 }}
+                {% endwith %}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="text-center mb-4">
+    <a href="{% url 'opticut:comparar_optimizaciones' %}" class="btn btn-secondary">Comparar Otras Optimizaciones</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+

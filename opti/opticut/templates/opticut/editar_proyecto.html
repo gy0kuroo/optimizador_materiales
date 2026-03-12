@@ -1,0 +1,186 @@
+{% extends 'opticut/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'opticut/css/index.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-center mb-0 flex-grow-1">✏️ Editar Proyecto: {{ proyecto.nombre }}</h2>
+    <div class="d-flex gap-2 align-items-center">
+      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+              onclick="iniciarTutorialSeccion('editar_proyecto')" 
+              title="Ayuda sobre editar proyecto">
+        ❓ Ayuda
+      </button>
+      <a href="{% url 'opticut:detalle_proyecto' proyecto.pk %}" class="btn btn-secondary">
+        ← Volver al Proyecto
+      </a>
+    </div>
+  </div>
+  
+  <div class="card fade-in">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Información del Proyecto</h4>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+          <div class="alert alert-danger">
+            <strong>Error:</strong> Por favor, corrige los siguientes errores.
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+        
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <label for="{{ form.nombre.id_for_label }}" class="form-label">
+              {{ form.nombre.label }} <span class="text-danger">*</span>
+            </label>
+            {{ form.nombre }}
+            {% if form.nombre.errors %}
+              <div class="text-danger small">{{ form.nombre.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+              {{ form.descripcion.label }}
+            </label>
+            {{ form.descripcion }}
+            {% if form.descripcion.errors %}
+              <div class="text-danger small">{{ form.descripcion.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="{{ form.cliente.id_for_label }}" class="form-label">
+              {{ form.cliente.label }}
+            </label>
+            {{ form.cliente }}
+            {% if form.cliente.errors %}
+              <div class="text-danger small">{{ form.cliente.errors }}</div>
+            {% endif %}
+            <small class="form-text text-muted">
+              <a href="{% url 'opticut:crear_cliente' %}" target="_blank">Crear nuevo cliente</a>
+            </small>
+          </div>
+          <div class="col-md-6">
+            <label for="{{ form.estado.id_for_label }}" class="form-label">
+              {{ form.estado.label }}
+            </label>
+            {{ form.estado }}
+            {% if form.estado.errors %}
+              <div class="text-danger small">{{ form.estado.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="{{ form.fecha_inicio.id_for_label }}" class="form-label">
+              {{ form.fecha_inicio.label }}
+            </label>
+            <input type="date" 
+                   name="{{ form.fecha_inicio.name }}" 
+                   id="{{ form.fecha_inicio.id_for_label }}" 
+                   class="form-control" 
+                   value="{% if form.fecha_inicio.value %}{{ form.fecha_inicio.value|date:'Y-m-d' }}{% elif proyecto.fecha_inicio %}{{ proyecto.fecha_inicio|date:'Y-m-d' }}{% endif %}">
+            {% if form.fecha_inicio.errors %}
+              <div class="text-danger small">{{ form.fecha_inicio.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label for="{{ form.fecha_fin.id_for_label }}" class="form-label">
+              {{ form.fecha_fin.label }}
+            </label>
+            <input type="date" 
+                   name="{{ form.fecha_fin.name }}" 
+                   id="{{ form.fecha_fin.id_for_label }}" 
+                   class="form-control" 
+                   value="{% if form.fecha_fin.value %}{{ form.fecha_fin.value|date:'Y-m-d' }}{% elif proyecto.fecha_fin %}{{ proyecto.fecha_fin|date:'Y-m-d' }}{% endif %}">
+            {% if form.fecha_fin.errors %}
+              <div class="text-danger small">{{ form.fecha_fin.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <label for="{{ form.optimizaciones.id_for_label }}" class="form-label">
+              {{ form.optimizaciones.label }}
+            </label>
+            <div class="border rounded p-3 optimizaciones-container">
+              {% if optimizaciones_info %}
+                {% for item in optimizaciones_info %}
+                  <div class="form-check mb-3 p-3 border rounded optimizacion-card">
+                    <input class="form-check-input" type="checkbox" name="optimizaciones" value="{{ item.optimizacion.pk }}" id="opt_{{ item.optimizacion.pk }}" 
+                           {% if item.seleccionada %}checked{% endif %}>
+                    <label class="form-check-label ms-2 w-100 label-clickable" for="opt_{{ item.optimizacion.pk }}">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                          <strong>Optimización #{{ item.numero_lista }}</strong>
+                          <br><small class="text-muted">
+                            Fecha: {{ item.optimizacion.fecha|date:"d/m/Y H:i" }}
+                          </small>
+                        </div>
+                      </div>
+                      <div class="mt-2">
+                        <small class="text-muted">
+                          <strong>Dimensiones:</strong> {{ item.optimizacion.ancho_tablero }} × {{ item.optimizacion.alto_tablero }} cm | 
+                          <strong>Aprovechamiento:</strong> <span class="badge bg-{% if item.optimizacion.aprovechamiento_total >= 80 %}success{% elif item.optimizacion.aprovechamiento_total >= 60 %}warning{% else %}danger{% endif %}">{{ item.optimizacion.aprovechamiento_total|floatformat:1 }}%</span> | 
+                          <strong>Tableros:</strong> {{ item.optimizacion.num_tableros|default:"0" }}
+                          {% if item.optimizacion.material %}
+                            | <strong>Material:</strong> {{ item.optimizacion.material.nombre }}
+                          {% endif %}
+                        </small>
+                      </div>
+                      {% if item.nombres_piezas %}
+                      <div class="mt-2">
+                        <small class="text-muted">
+                          <strong>Piezas:</strong> 
+                          {% for nombre_pieza in item.nombres_piezas %}
+                            <span class="badge bg-info text-dark me-1">{{ nombre_pieza }}</span>
+                          {% endfor %}
+                          {% if item.total_piezas > 5 %}
+                            <span class="text-muted">... y {{ item.total_piezas|add:"-5" }} más</span>
+                          {% endif %}
+                        </small>
+                      </div>
+                      {% endif %}
+                    </label>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <div class="alert alert-info mb-0">
+                  <small>No hay optimizaciones disponibles. Todas tus optimizaciones ya están asignadas a otros proyectos o no tienes optimizaciones creadas.</small>
+                </div>
+              {% endif %}
+            </div>
+            {% if form.optimizaciones.errors %}
+              <div class="text-danger small mt-2">{{ form.optimizaciones.errors }}</div>
+            {% endif %}
+            <small class="form-text text-muted">
+              Selecciona una o más optimizaciones marcando las casillas.
+            </small>
+          </div>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'opticut:detalle_proyecto' proyecto.pk %}" class="btn btn-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-primary">💾 Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

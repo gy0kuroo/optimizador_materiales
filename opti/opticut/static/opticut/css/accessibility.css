@@ -1,0 +1,259 @@
+/* ============================================
+   MEJORAS DE ACCESIBILIDAD PARA PERSONAS MAYORES
+   ============================================ */
+
+/* Mejorar contraste y visibilidad */
+* {
+    -webkit-tap-highlight-color: rgba(13, 110, 253, 0.2);
+}
+
+/* Áreas de clic más grandes - Solo para elementos interactivos */
+button, input[type="submit"], input[type="button"], 
+input[type="checkbox"], input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Labels clickeables */
+label[for] {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Enlaces como botones */
+a.btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Mejorar visibilidad de enlaces de texto */
+a:not(.btn) {
+    text-decoration: none; /* Sin subrayado */
+    color: var(--accent-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+a:not(.btn):hover {
+    color: #0b5ed7;
+    text-decoration: none; /* Sin subrayado al hover */
+}
+
+/* Mejorar contraste de texto */
+.text-muted {
+    color: #495057 !important; /* Más oscuro para mejor contraste */
+    font-size: var(--font-size-base);
+}
+
+/* Mejorar visibilidad de placeholders */
+::placeholder {
+    color: #6c757d;
+    opacity: 0.8;
+    font-size: var(--font-size-base);
+}
+
+/* Mejorar visibilidad de checkboxes y radios */
+.form-check-input {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    border-width: 2px !important;
+    cursor: pointer;
+}
+
+.form-check-label {
+    margin-left: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: var(--font-size-base) !important;
+}
+
+/* Mejorar visibilidad de iconos en navegación */
+.navbar-brand, .nav-link, .dropdown-item {
+    font-size: var(--font-size-base) !important;
+}
+
+/* Espaciado mejorado entre elementos */
+.form-group, .mb-3, .mb-4 {
+    margin-bottom: 1.5rem !important;
+}
+
+/* Mejorar visibilidad de títulos */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-weight-bold);
+    line-height: 1.4;
+    margin-bottom: 1rem;
+}
+
+h2 {
+    font-size: var(--font-size-2xl);
+}
+
+h3 {
+    font-size: var(--font-size-xl);
+}
+
+h4 {
+    font-size: var(--font-size-lg);
+}
+
+/* Mejorar visibilidad de badges */
+.badge {
+    padding: 0.5rem 0.75rem;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--border-radius-md);
+}
+
+/* Mejorar visibilidad de alertas */
+.alert {
+    font-size: var(--font-size-base);
+    padding: 1.25rem 1.5rem;
+    border-left-width: 5px;
+}
+
+/* Mejorar visibilidad de cards */
+.card {
+    border-width: 2px;
+}
+
+.card-header {
+    font-size: var(--font-size-lg);
+    padding: 1.25rem 1.5rem;
+}
+
+/* Mejorar visibilidad de inputs de fecha */
+input[type="date"], input[type="time"] {
+    font-size: var(--font-size-input);
+    padding: 0.875rem 1.125rem;
+    min-height: 48px;
+}
+
+/* Mejorar visibilidad de selects */
+select.form-select {
+    font-size: var(--font-size-input);
+    padding: 0.75rem 1rem;
+    min-height: 42px;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-size: 20px 20px;
+}
+
+/* Mejorar visibilidad de tooltips */
+.tooltip {
+    font-size: var(--font-size-base);
+}
+
+/* Simplificar animaciones para reducir distracción */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Mejorar visibilidad en modo de alto contraste */
+@media (prefers-contrast: high) {
+    .btn {
+        border-width: 3px;
+    }
+    
+    .form-control, .form-select {
+        border-width: 3px;
+    }
+    
+    .card {
+        border-width: 3px;
+    }
+}
+
+/* Mejorar espaciado en formularios */
+.form-control + .form-text,
+.form-select + .form-text {
+    margin-top: 0.5rem;
+    display: block;
+}
+
+/* Mejorar visibilidad de errores */
+.text-danger, .form-control.is-invalid {
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-base);
+}
+
+.is-invalid {
+    border-width: 3px !important;
+}
+
+/* Mejorar visibilidad de ayuda */
+.btn-ayuda-seccion {
+    font-size: 1.25rem !important;
+    padding: 0.75rem 1rem !important;
+    min-width: 50px;
+    min-height: 50px;
+}
+
+/* Asegurar que los textos sean legibles */
+small, .small {
+    font-size: 1rem !important; /* No más pequeño que el tamaño base */
+}
+
+/* Mejorar visibilidad de tablas en móviles */
+@media (max-width: 768px) {
+    .table {
+        font-size: var(--font-size-base);
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.875rem 0.75rem;
+    }
+}
+
+/* Mejorar contraste de bordes */
+.card, .form-control, .form-select, .btn {
+    border-width: 2px;
+}
+
+/* Mejorar visibilidad de dropdowns */
+.dropdown-menu {
+    font-size: var(--font-size-base);
+    padding: 0.5rem 0;
+}
+
+.dropdown-header {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-bold);
+    padding: 0.75rem 1.25rem;
+}
+
+/* Mejorar visibilidad de modales */
+.modal-content {
+    border-width: 2px;
+}
+
+.modal-header {
+    border-bottom-width: 2px;
+    padding: 1.25rem 1.5rem;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    font-size: var(--font-size-base);
+}
+
+.modal-footer {
+    border-top-width: 2px;
+    padding: 1.25rem 1.5rem;
+}
+
+/* Mejorar visibilidad de breadcrumbs si existen */
+.breadcrumb {
+    font-size: var(--font-size-base);
+    padding: 1rem 0;
+}
+
+.breadcrumb-item a {
+    font-weight: var(--font-weight-medium);
+}

@@ -5,6 +5,10 @@
 <link rel="stylesheet" href="{% static 'usuarios/css/registro.css' %}">
 {% endblock %}
 
+{% block show_auth_buttons %}
+{# Ocultar botones de autenticación en la página de registro ya que el formulario está en el centro #}
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
   <div class="row justify-content-center">

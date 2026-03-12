@@ -213,17 +213,16 @@
                           Descargar Excel
                       </a>
                     </li>
+                    <li>
+                      <a class="dropdown-item" href="{% url 'opticut:imprimir_plan_corte' optimizacion.id %}" target="_blank">
+                           Imprimir Plan de Corte
+                      </a>
+                    </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
-                      <form method="post" 
-                            action="{% url 'opticut:borrar_optimizacion' optimizacion.id %}" 
-                         class="delete-form-inline" 
-                         onsubmit="return confirm('¿Eliminar esta optimización?');">
-                       {% csrf_token %}
-                       <button type="submit" class="dropdown-item text-danger delete-button">
-                           Eliminar
-                        </button>
-                      </form>
+                      <a href="{% url 'opticut:borrar_optimizacion' optimizacion.id %}" class="dropdown-item text-danger delete-button">
+                        Eliminar
+                      </a>
                     </li>
                   </ul>
                 </div>
@@ -234,26 +233,69 @@
         {% endwith %}
       {% endfor %}
     </div>
-    
-    <!-- Contador de resultados -->
-    <div class="text-center mt-4 mb-4">
-      <p class="text-muted">
-        Mostrando <strong>{{ optimizaciones_con_piezas|length }}</strong> optimización{{ optimizaciones_con_piezas|length|pluralize:"es" }}
-      </p>
-    </div>
+
+    <!-- Paginador -->
+    {% if paginator.num_pages > 1 %}
+    <nav aria-label="Paginación de historial">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Primera">
+              <span aria-hidden="true">&laquo;&laquo;</span>
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Anterior">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&laquo;&laquo;</span></li>
+          <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+        {% endif %}
+
+        {% for num in paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item"><a class="page-link" href="?page={{ num }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}">{{ num }}</a></li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Siguiente">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ paginator.num_pages }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Última">
+              <span aria-hidden="true">&raquo;&raquo;</span>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+          <li class="page-item disabled"><span class="page-link">&raquo;&raquo;</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+    <!-- Fin paginador -->
   {% else %}
     <div class="card fade-in text-center card-empty-state">
-      <h4 class="text-muted mb-3">No hay optimizaciones</h4>
-      <p class="text-muted mb-4">
+      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;">📋</div>
+      <h4 class="mb-3">No hay optimizaciones</h4>
+      <p class="mb-4" style="max-width: 500px; margin: 0 auto;">
         {% if nombre_pieza or fecha_desde or fecha_hasta %}
           No se encontraron optimizaciones con los filtros aplicados.
-          <a href="{% url 'opticut:historial' %}">Ver todas las optimizaciones</a>
+          <br>
+          <a href="{% url 'opticut:historial' %}" class="mt-2 d-inline-block">Ver todas las optimizaciones</a>
         {% else %}
-          Aún no tienes optimizaciones guardadas.
+          Aún no tienes optimizaciones guardadas. Crea tu primera optimización para comenzar.
         {% endif %}
       </p>
-      <a href="{% url 'opticut:index' %}" class="btn btn-primary">
-        Crear Nueva Optimización
+      <a href="{% url 'opticut:index' %}" class="btn btn-primary btn-lg">
+        ➕ Crear Nueva Optimización
       </a>
     </div>
   {% endif %}
@@ -267,10 +309,10 @@
             <h5 class="modal-title" id="modalImagenLabel">Tableros en Pantalla Completa</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body text-center modal-grafico-body" style="overflow: auto;">
+          <div class="modal-body text-center modal-grafico-body">
             <div class="row h-100">
               <div class="col-10">
-                <div id="modalImagenContenido" class="d-flex align-items-center justify-content-center gap-3" style="min-height: 100%; flex-wrap: nowrap; transform-origin: center center;">
+                <div id="modalImagenContenido" class="d-flex align-items-center justify-content-center gap-3 modal-imagen-contenido">
                   <!-- Las imágenes se cargarán aquí lado a lado -->
                 </div>
               </div>

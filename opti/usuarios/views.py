@@ -1,9 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, SetPasswordForm
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import JsonResponse
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.core.mail import send_mail
+from django.conf import settings
+from django.template.loader import render_to_string
 from .forms import RegistroForm, PerfilForm, CambiarPasswordForm
 from .models import PerfilUsuario
 
@@ -27,14 +34,22 @@ def login_view(request):
             login(request, user)
             # Asegurar que el usuario tenga un perfil
             perfil, created = PerfilUsuario.objects.get_or_create(usuario=user)
-            # Guardar timeout personalizado en la sesión si existe y no está desactivado
+            # Configurar timeout de sesión según el perfil del usuario
             if perfil.timeout_sesion is not None and perfil.timeout_sesion != 0:
                 timeout_segundos = perfil.get_timeout_segundos()
                 if timeout_segundos:
                     request.session['timeout_personalizado'] = timeout_segundos
+                    # Configurar expiración de sesión en Django (en segundos)
+                    request.session.set_expiry(timeout_segundos)
             elif perfil.timeout_sesion == 0:
-                # Si está desactivado, limpiar cualquier timeout previo
+                # Si está desactivado (0), configurar sesión para que no expire nunca
+                # Usar un valor muy grande (10 años en segundos) para simular "sin expiración"
                 request.session.pop('timeout_personalizado', None)
+                request.session.set_expiry(315360000)  # 10 años en segundos (prácticamente sin expiración)
+            else:
+                # Si es None, usar el valor por defecto del sistema
+                request.session.pop('timeout_personalizado', None)
+                request.session.set_expiry(None)  # Usar SESSION_COOKIE_AGE por defecto
             return redirect('opticut:index')  #la entrada al usuario va con separacion de :, el nombre de opticut quedó como "index
     else:
         form = AuthenticationForm()
@@ -54,6 +69,10 @@ def perfil(request):
         # Si no existe, crearlo
         perfil = PerfilUsuario.objects.create(usuario=request.user)
     
+    # CORREGIDO: Refrescar el perfil desde la BD antes de inicializar el formulario
+    # Esto asegura que siempre tengamos los valores más recientes
+    perfil.refresh_from_db()
+    
     perfil_form = PerfilForm(instance=perfil, user=request.user)
     password_form = CambiarPasswordForm(user=request.user)
     
@@ -65,9 +84,19 @@ def perfil(request):
                 # Actualizar timeout en sesión
                 perfil.refresh_from_db()  # Recargar para obtener los valores actualizados
                 if perfil.timeout_sesion is not None and perfil.timeout_sesion != 0:
-                    request.session['timeout_personalizado'] = perfil.get_timeout_segundos()
-                else:
+                    timeout_segundos = perfil.get_timeout_segundos()
+                    if timeout_segundos:
+                        request.session['timeout_personalizado'] = timeout_segundos
+                        # Configurar expiración de sesión en Django (en segundos)
+                        request.session.set_expiry(timeout_segundos)
+                elif perfil.timeout_sesion == 0:
+                    # Si está desactivado (0), configurar sesión para que no expire nunca
                     request.session.pop('timeout_personalizado', None)
+                    request.session.set_expiry(315360000)  # 10 años en segundos (prácticamente sin expiración)
+                else:
+                    # Si es None, usar el valor por defecto del sistema
+                    request.session.pop('timeout_personalizado', None)
+                    request.session.set_expiry(None)  # Usar SESSION_COOKIE_AGE por defecto
                 # Guardar tema preferido en sesión y localStorage (se aplicará con JavaScript)
                 if perfil.tema_preferido != 'auto':
                     request.session['tema_preferido'] = perfil.tema_preferido
@@ -92,6 +121,67 @@ def perfil(request):
 
 
 @login_required
+def configuracion_sistema(request):
+    """Vista para editar solo la configuración del sistema (valores predeterminados)"""
+    try:
+        perfil = request.user.perfil
+    except PerfilUsuario.DoesNotExist:
+        perfil = PerfilUsuario.objects.create(usuario=request.user)
+    
+    perfil.refresh_from_db()
+    
+    # Crear formulario solo con campos de configuración del sistema
+    perfil_form = PerfilForm(instance=perfil, user=request.user)
+    password_form = CambiarPasswordForm(user=request.user)  # Necesario para el template
+    
+    if request.method == "POST":
+        if 'editar_configuracion' in request.POST:
+            post_data = request.POST.copy()
+            perfil.refresh_from_db()
+
+
+
+            # Asegurar que los campos ocultos tengan valores válidos
+            if not post_data.get('timeout_sesion') or post_data.get('timeout_sesion') == '':
+                if perfil.timeout_sesion is not None:
+                    post_data['timeout_sesion'] = str(perfil.timeout_sesion)
+                else:
+                    if 'timeout_sesion' in post_data:
+                        del post_data['timeout_sesion']
+
+            if not post_data.get('tema_preferido') or post_data.get('tema_preferido') == '':
+                post_data['tema_preferido'] = perfil.tema_preferido if perfil.tema_preferido else 'auto'
+
+            # Asegurar campos de información personal
+            if not post_data.get('username'):
+                post_data['username'] = request.user.username
+            if not post_data.get('email'):
+                post_data['email'] = request.user.email
+
+            perfil_form = PerfilForm(post_data, instance=perfil, user=request.user)
+            if perfil_form.is_valid():
+                perfil_form.save()
+                perfil.refresh_from_db()
+                messages.success(request, 'Configuración del sistema actualizada exitosamente.')
+                if response:
+                    return response
+                return redirect('usuarios:configuracion_sistema')
+            else:
+                messages.error(request, 'Por favor corrige los errores en el formulario.')
+                if settings.DEBUG:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Errores del formulario: {perfil_form.errors}")
+                    print(f"Errores del formulario: {perfil_form.errors}")
+    
+    return render(request, 'usuarios/configuracion_sistema.html', {
+        'perfil_form': perfil_form,
+        'password_form': password_form,
+        'perfil': perfil
+    })
+
+
+@login_required
 def completar_tutorial(request):
     """
     Marca el tutorial como completado para el usuario actual.
@@ -103,3 +193,99 @@ def completar_tutorial(request):
         return JsonResponse({'success': True, 'message': 'Tutorial marcado como completado'})
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+
+def recuperar_password(request):
+    """
+    Vista para solicitar recuperación de contraseña.
+    """
+    if request.method == "POST":
+        form = PasswordResetForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            try:
+                user = User.objects.get(email=email)
+                # Generar token
+                token = default_token_generator.make_token(user)
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                
+                # Crear URL de reset
+                reset_url = request.build_absolute_uri(
+                    f'/usuarios/reset-password/{uid}/{token}/'
+                )
+                
+                # Enviar email
+                subject = 'Recuperación de contraseña - OptiCut'
+                message = render_to_string('usuarios/email_reset_password.html', {
+                    'user': user,
+                    'reset_url': reset_url,
+                    'site_name': 'OptiCut'
+                })
+                
+                # Intentar enviar email
+                try:
+                    send_mail(
+                        subject,
+                        message,
+                        settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@opticut.com',
+                        [email],
+                        html_message=message,
+                        fail_silently=False,
+                    )
+                    messages.success(
+                        request, 
+                        'Se ha enviado un correo electrónico con las instrucciones para recuperar tu contraseña. '
+                        'Por favor revisa tu bandeja de entrada.'
+                    )
+                except Exception as e:
+                    # Si no hay configuración de email, mostrar el link directamente (solo en desarrollo)
+                    if settings.DEBUG:
+                        messages.warning(
+                            request,
+                            f'⚠️ Configuración de email no disponible. En producción, configura SMTP. '
+                            f'Link de reset: {reset_url}'
+                        )
+                    else:
+                        messages.error(
+                            request,
+                            'Error al enviar el correo. Por favor contacta al administrador.'
+                        )
+                
+                return redirect('usuarios:login')
+            except User.DoesNotExist:
+                # Por seguridad, no revelar si el email existe o no
+                messages.success(
+                    request,
+                    'Si el correo existe en nuestro sistema, recibirás las instrucciones para recuperar tu contraseña.'
+                )
+                return redirect('usuarios:login')
+    else:
+        form = PasswordResetForm()
+    
+    return render(request, 'usuarios/recuperar_password.html', {'form': form})
+
+
+def reset_password_confirm(request, uidb64, token):
+    """
+    Vista para confirmar y establecer nueva contraseña.
+    """
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+    
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == "POST":
+            form = SetPasswordForm(user, request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Tu contraseña ha sido restablecida exitosamente. Puedes iniciar sesión ahora.')
+                return redirect('usuarios:login')
+        else:
+            form = SetPasswordForm(user)
+        
+        return render(request, 'usuarios/reset_password_confirm.html', {'form': form})
+    else:
+        messages.error(request, 'El enlace de recuperación no es válido o ha expirado. Por favor solicita uno nuevo.')
+        return redirect('usuarios:recuperar_password')

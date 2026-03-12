@@ -10,9 +10,14 @@
   <div class="row justify-content-center">
     <div class="col-md-8 col-lg-7">
       <div class="auth-card fade-in">
-        <div class="auth-card-header bg-primary-custom">
+        <div class="auth-card-header bg-primary-custom position-relative">
           <h2 class="text-center mb-0">⚙️ Configuración de Perfil</h2>
           <p class="text-center text-muted mt-2 mb-0">Gestiona tu información personal y preferencias</p>
+          <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion position-absolute top-0 end-0 m-2" 
+                  onclick="iniciarTutorialSeccion('perfil')" 
+                  title="Ayuda sobre perfil">
+            ❓ Ayuda
+          </button>
         </div>
         <div class="auth-card-body">
           
@@ -174,5 +179,6 @@
     </div>
   </div>
 </div>
+
 {% endblock %}
 

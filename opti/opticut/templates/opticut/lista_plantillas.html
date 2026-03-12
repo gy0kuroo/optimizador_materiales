@@ -1,0 +1,134 @@
+{% extends 'opticut/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'opticut/css/historial.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+    <h2 class="text-center mb-0 flex-grow-1">📋 Biblioteca de Plantillas</h2>
+    <div class="d-flex gap-2 align-items-center">
+      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+              onclick="iniciarTutorialSeccion('plantillas')" 
+              title="Ayuda sobre plantillas">
+        ❓ Ayuda
+      </button>
+      <a href="{% url 'opticut:crear_plantilla' %}" class="btn btn-primary">
+        ➕ Crear Plantilla
+      </a>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="search-filters fade-in mb-4">
+    <form method="GET" action="{% url 'opticut:lista_plantillas' %}">
+      <div class="row">
+        <div class="col-md-4">
+          <input type="text" 
+                 class="form-control" 
+                 name="busqueda" 
+                 placeholder="Buscar por nombre..."
+                 value="{{ busqueda }}">
+        </div>
+        <div class="col-md-3">
+          <select name="categoria" class="form-select">
+            <option value="">Todas las categorías</option>
+            <option value="cocina" {% if categoria_filtro == 'cocina' %}selected{% endif %}>Cocina</option>
+            <option value="muebles" {% if categoria_filtro == 'muebles' %}selected{% endif %}>Muebles</option>
+            <option value="puertas" {% if categoria_filtro == 'puertas' %}selected{% endif %}>Puertas</option>
+            <option value="ventanas" {% if categoria_filtro == 'ventanas' %}selected{% endif %}>Ventanas</option>
+            <option value="estantes" {% if categoria_filtro == 'estantes' %}selected{% endif %}>Estantes</option>
+            <option value="otros" {% if categoria_filtro == 'otros' %}selected{% endif %}>Otros</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-outline-primary w-100">🔍 Buscar</button>
+        </div>
+        {% if busqueda or categoria_filtro %}
+        <div class="col-md-2">
+          <a href="{% url 'opticut:lista_plantillas' %}" class="btn btn-outline-secondary w-100">Limpiar</a>
+        </div>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Plantillas del Usuario -->
+  <div class="fade-in mb-5">
+    <h4 class="mb-3">Mis Plantillas</h4>
+    {% if plantillas_usuario %}
+    <div class="row">
+      {% for plantilla in plantillas_usuario %}
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">{{ plantilla.nombre }}</h5>
+            <small>{{ plantilla.get_categoria_display }}</small>
+          </div>
+          <div class="card-body">
+            {% if plantilla.descripcion %}
+            <p class="card-text">{{ plantilla.descripcion|truncatewords:15 }}</p>
+            {% endif %}
+            <p class="mb-2"><strong>Tablero:</strong> {{ plantilla.ancho_tablero }} × {{ plantilla.alto_tablero }} {{ plantilla.get_unidad_medida_display }}</p>
+            <p class="mb-2"><strong>Piezas:</strong> {{ plantilla.get_piezas_list|length }}</p>
+            <p class="mb-0"><strong>Rotación:</strong> {% if plantilla.permitir_rotacion %}Sí{% else %}No{% endif %}</p>
+          </div>
+          <div class="card-footer">
+            <a href="{% url 'opticut:usar_plantilla' plantilla.pk %}" class="btn btn-success btn-sm">✅ Usar</a>
+            <a href="{% url 'opticut:editar_plantilla' plantilla.pk %}" class="btn btn-primary btn-sm">✏️ Editar</a>
+            <a href="{% url 'opticut:eliminar_plantilla' plantilla.pk %}" class="btn btn-danger btn-sm">🗑️ Eliminar</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card fade-in text-center card-empty-state">
+      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;">📋</div>
+      <h4 class="mb-3">No tienes plantillas creadas</h4>
+      <p class="mb-4" style="max-width: 500px; margin: 0 auto;">
+        Aún no has creado plantillas personalizadas. Crea tu primera plantilla para guardar configuraciones de optimización que uses frecuentemente.
+      </p>
+      <a href="{% url 'opticut:crear_plantilla' %}" class="btn btn-primary btn-lg">
+        ➕ Crear Primera Plantilla
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Plantillas Predefinidas del Sistema -->
+  {% if plantillas_sistema %}
+  <div class="fade-in">
+    <h4 class="mb-3">📚 Plantillas Predefinidas</h4>
+    <div class="row">
+      {% for plantilla in plantillas_sistema %}
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+          <div class="card-header bg-info text-white">
+            <h5 class="mb-0">{{ plantilla.nombre }}</h5>
+            <small>{{ plantilla.get_categoria_display }}</small>
+            <span class="badge bg-light text-dark ms-2">Sistema</span>
+          </div>
+          <div class="card-body">
+            {% if plantilla.descripcion %}
+            <p class="card-text">{{ plantilla.descripcion|truncatewords:15 }}</p>
+            {% endif %}
+            <p class="mb-2"><strong>Tablero:</strong> {{ plantilla.ancho_tablero }} × {{ plantilla.alto_tablero }} {{ plantilla.get_unidad_medida_display }}</p>
+            <p class="mb-2"><strong>Piezas:</strong> {{ plantilla.get_piezas_list|length }}</p>
+            <p class="mb-0"><strong>Rotación:</strong> {% if plantilla.permitir_rotacion %}Sí{% else %}No{% endif %}</p>
+          </div>
+          <div class="card-footer">
+            <a href="{% url 'opticut:usar_plantilla' plantilla.pk %}" class="btn btn-success btn-sm">✅ Usar</a>
+            <a href="{% url 'opticut:editar_plantilla' plantilla.pk %}" class="btn btn-primary btn-sm">✏️ Editar</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+

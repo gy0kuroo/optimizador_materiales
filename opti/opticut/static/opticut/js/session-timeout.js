@@ -8,23 +8,54 @@
     let timeoutSeconds = null;
     let warningSeconds = 60; // Mostrar advertencia 1 minuto antes
     let countdownInterval = null;
-    let modalListenersAdded = false;
     
     // Obtener timeout desde el atributo data del body o usar valor por defecto
     function initializeTimeout() {
         const body = document.body;
-        const timeoutAttr = body.getAttribute('data-session-timeout');
-        
-        if (timeoutAttr && timeoutAttr !== 'null' && timeoutAttr !== '0') {
-            timeoutSeconds = parseInt(timeoutAttr);
-            // Mostrar advertencia 1 minuto antes o 10% del tiempo, lo que sea menor
-            warningSeconds = Math.min(60, Math.floor(timeoutSeconds * 0.1));
-        } else {
-            // Si está desactivado (0) o no configurado, no hacer nada
+        if (!body) {
+            console.warn('Session Timeout - Body no encontrado');
             return;
         }
         
-        if (timeoutSeconds > 0) {
+        const timeoutAttr = body.getAttribute('data-session-timeout');
+        
+        // Debug: verificar que el atributo se esté leyendo correctamente (solo en desarrollo)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('Session Timeout - Atributo data-session-timeout:', timeoutAttr);
+        }
+        
+        // Verificar si el timeout está desactivado (0)
+        if (timeoutAttr === '0' || timeoutAttr === 'null' || timeoutAttr === '') {
+            // Si está desactivado (0) o no configurado, no hacer nada
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                console.log('Session Timeout - Desactivado (timeout = 0). La sesión no se cerrará automáticamente.');
+            }
+            // No inicializar ningún timer
+            timeoutSeconds = null;
+            return;
+        }
+        
+        // Si hay un valor válido, parsearlo y validarlo
+        if (timeoutAttr) {
+            timeoutSeconds = parseInt(timeoutAttr, 10);
+            
+            // Validar que sea un número válido y mayor que 0
+            if (isNaN(timeoutSeconds) || timeoutSeconds <= 0) {
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    console.log('Session Timeout - Valor inválido, desactivando');
+                }
+                timeoutSeconds = null;
+                return;
+            }
+            
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                console.log('Session Timeout - Inicializado con', timeoutSeconds, 'segundos');
+            }
+            
+            // Mostrar advertencia 1 minuto antes o 10% del tiempo, lo que sea menor
+            warningSeconds = Math.min(60, Math.floor(timeoutSeconds * 0.1));
+            
+            // Iniciar el timer de inactividad
             startInactivityTimer();
         }
     }
@@ -47,9 +78,12 @@
         // Ocultar advertencia si está visible
         const warningModal = document.getElementById('session-warning-modal');
         if (warningModal) {
-            const bsModal = bootstrap.Modal.getInstance(warningModal);
-            if (bsModal) {
-                bsModal.hide();
+            const Bootstrap = typeof bootstrap !== 'undefined' ? bootstrap : (typeof window.bootstrap !== 'undefined' ? window.bootstrap : null);
+            if (Bootstrap) {
+                const bsModal = Bootstrap.Modal.getInstance(warningModal);
+                if (bsModal) {
+                    bsModal.hide();
+                }
             }
         }
         
@@ -78,6 +112,8 @@
     
     // Mostrar advertencia de que la sesión está por expirar
     function showWarning() {
+        // Si el timeout está desactivado, no mostrar advertencia
+        if (timeoutSeconds === null || timeoutSeconds === 0) return;
         if (warningShown) return;
         warningShown = true;
         
@@ -124,8 +160,14 @@
             timeElement.textContent = timeText;
         }
         
-        // Mostrar modal
-        const bsModal = new bootstrap.Modal(modal);
+        // Mostrar modal (usar bootstrap global o window.bootstrap)
+        const Bootstrap = typeof bootstrap !== 'undefined' ? bootstrap : (typeof window.bootstrap !== 'undefined' ? window.bootstrap : null);
+        if (!Bootstrap) {
+            console.error('Session Timeout - Bootstrap no está disponible');
+            return;
+        }
+        
+        const bsModal = new Bootstrap.Modal(modal);
         bsModal.show();
         
         // Contador regresivo
@@ -169,7 +211,7 @@
         document.addEventListener(event, resetTimer, true);
     });
     
-    // Agregar listeners del modal usando event delegation (una sola vez)
+    // Agregar listeners del modal usando event delegation
     document.body.addEventListener('click', function(e) {
         if (e.target && e.target.id === 'session-stay-active') {
             e.preventDefault();
@@ -179,9 +221,12 @@
             }
             const modal = document.getElementById('session-warning-modal');
             if (modal) {
-                const bsModal = bootstrap.Modal.getInstance(modal);
-                if (bsModal) {
-                    bsModal.hide();
+                const Bootstrap = typeof bootstrap !== 'undefined' ? bootstrap : (typeof window.bootstrap !== 'undefined' ? window.bootstrap : null);
+                if (Bootstrap) {
+                    const bsModal = Bootstrap.Modal.getInstance(modal);
+                    if (bsModal) {
+                        bsModal.hide();
+                    }
                 }
             }
             resetTimer();
@@ -195,11 +240,35 @@
         }
     });
     
-    // Inicializar cuando el DOM esté listo
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeTimeout);
-    } else {
+    // Inicializar cuando el DOM esté listo y Bootstrap esté disponible
+    function initWhenReady() {
+        // Verificar que Bootstrap esté disponible
+        const Bootstrap = typeof bootstrap !== 'undefined' ? bootstrap : (typeof window.bootstrap !== 'undefined' ? window.bootstrap : null);
+        if (!Bootstrap) {
+            // Si Bootstrap no está disponible, esperar un poco más
+            setTimeout(initWhenReady, 100);
+            return;
+        }
+        
+        // Verificar que el body tenga el atributo
+        const body = document.body;
+        if (!body) {
+            setTimeout(initWhenReady, 100);
+            return;
+        }
+        
+        // Inicializar
         initializeTimeout();
     }
+    
+    // Inicializar cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Esperar un poco para asegurar que Bootstrap esté cargado
+            setTimeout(initWhenReady, 200);
+        });
+    } else {
+        // DOM ya está listo, esperar un poco para Bootstrap
+        setTimeout(initWhenReady, 200);
+    }
 })();
-

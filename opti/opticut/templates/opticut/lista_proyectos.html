@@ -1,0 +1,135 @@
+{% extends 'opticut/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'opticut/css/historial.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+    <h2 class="text-center mb-0 flex-grow-1">📁 Gestión de Proyectos</h2>
+    <div class="d-flex gap-2 align-items-center">
+      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+              onclick="iniciarTutorialSeccion('proyectos')" 
+              title="Ayuda sobre proyectos">
+        ❓ Ayuda
+      </button>
+      <a href="{% url 'opticut:crear_proyecto' %}" class="btn btn-primary">
+        ➕ Crear Proyecto
+      </a>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="search-filters fade-in mb-4">
+    <form method="GET" action="{% url 'opticut:lista_proyectos' %}">
+      <div class="row">
+        <div class="col-md-4">
+          <input type="text" 
+                 class="form-control" 
+                 name="busqueda" 
+                 placeholder="Buscar por nombre, descripción o cliente..."
+                 value="{{ busqueda }}">
+        </div>
+        <div class="col-md-3">
+          <select name="estado" class="form-select">
+            <option value="">Todos los estados</option>
+            <option value="planificacion" {% if estado_filtro == 'planificacion' %}selected{% endif %}>Planificación</option>
+            <option value="en_proceso" {% if estado_filtro == 'en_proceso' %}selected{% endif %}>En Proceso</option>
+            <option value="completado" {% if estado_filtro == 'completado' %}selected{% endif %}>Completado</option>
+            <option value="cancelado" {% if estado_filtro == 'cancelado' %}selected{% endif %}>Cancelado</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-outline-primary w-100">🔍 Buscar</button>
+        </div>
+        {% if busqueda or estado_filtro %}
+        <div class="col-md-2">
+          <a href="{% url 'opticut:lista_proyectos' %}" class="btn btn-outline-secondary w-100">Limpiar</a>
+        </div>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Lista de Proyectos -->
+  {% if proyectos %}
+  <div class="table-responsive fade-in">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Cliente</th>
+          <th>Estado</th>
+          <th>Optimizaciones</th>
+          <th>Costo Total</th>
+          <th>Fecha Creación</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for proyecto in proyectos %}
+        <tr>
+          <td>
+            <strong>{{ proyecto.nombre }}</strong>
+            {% if proyecto.descripcion %}
+              <br><small class="text-muted">{{ proyecto.descripcion|truncatewords:10 }}</small>
+            {% endif %}
+          </td>
+          <td>{{ proyecto.cliente.nombre|default:"Sin cliente" }}</td>
+          <td>
+            <span class="badge bg-{% if proyecto.estado == 'completado' %}success{% elif proyecto.estado == 'en_proceso' %}primary{% elif proyecto.estado == 'cancelado' %}danger{% else %}secondary{% endif %}">
+              {{ proyecto.get_estado_display }}
+            </span>
+          </td>
+          <td>
+            <span class="badge bg-info">{{ proyecto.get_total_optimizaciones }}</span>
+          </td>
+          <td>
+            {% if proyecto.get_total_costo %}
+              <strong>${{ proyecto.get_total_costo|floatformat:0 }}</strong>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          <td>{{ proyecto.fecha_creacion|date:"d/m/Y" }}</td>
+          <td>
+            <a href="{% url 'opticut:detalle_proyecto' proyecto.pk %}" class="btn btn-sm btn-primary"> Ver</a>
+            <a href="{% url 'opticut:editar_proyecto' proyecto.pk %}" class="btn btn-sm btn-success">✏️ Editar</a>
+            <a href="{% url 'opticut:eliminar_proyecto' proyecto.pk %}" class="btn btn-sm btn-danger">🗑️ Eliminar</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card fade-in text-center card-empty-state">
+    <div class="mb-4" style="font-size: 4rem; opacity: 0.3;">📁</div>
+    <h4 class="mb-3">
+      {% if busqueda or estado_filtro %}
+        No se encontraron proyectos
+      {% else %}
+        No tienes proyectos creados
+      {% endif %}
+    </h4>
+    <p class="mb-4" style="max-width: 500px; margin: 0 auto;">
+      {% if busqueda or estado_filtro %}
+        No se encontraron proyectos que coincidan con los filtros aplicados.
+        <br>
+        <a href="{% url 'opticut:lista_proyectos' %}" class="mt-2 d-inline-block">Ver todos los proyectos</a>
+      {% else %}
+        Aún no has creado proyectos. Crea tu primer proyecto para comenzar a organizar tus optimizaciones.
+      {% endif %}
+    </p>
+    {% if not busqueda and not estado_filtro %}
+    <a href="{% url 'opticut:crear_proyecto' %}" class="btn btn-primary btn-lg">
+      ➕ Crear Primer Proyecto
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+

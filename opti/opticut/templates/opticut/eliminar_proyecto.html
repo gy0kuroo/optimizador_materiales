@@ -1,0 +1,60 @@
+{% extends 'opticut/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card fade-in">
+    <div class="card-header bg-danger text-white">
+      <h4 class="mb-0">⚠️ Eliminar Proyecto</h4>
+    </div>
+    <div class="card-body">
+      <p class="lead">¿Estás seguro de que deseas eliminar el proyecto <strong>"{{ proyecto.nombre }}"</strong>?</p>
+      
+      {% if optimizaciones_count > 0 %}
+      <div class="alert alert-warning">
+        <strong>⚠️ Advertencia:</strong> Este proyecto tiene <strong>{{ optimizaciones_count }}</strong> optimización(es) asociada(s).
+      </div>
+      
+      <div class="mb-3">
+        <label class="form-label"><strong>¿Qué hacer con las optimizaciones?</strong></label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="accion" id="accion_mover" value="mover" checked>
+          <label class="form-check-label" for="accion_mover">
+            Mantener las optimizaciones (solo se desasociarán del proyecto)
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="accion" id="accion_eliminar" value="eliminar">
+          <label class="form-check-label" for="accion_eliminar">
+            Eliminar también todas las optimizaciones del proyecto
+          </label>
+        </div>
+      </div>
+      {% endif %}
+      
+      <div class="alert alert-danger">
+        <strong>⚠️ Advertencia:</strong> Esta acción no se puede deshacer.
+      </div>
+      
+      <form method="post" data-tipo="proyecto">
+        {% csrf_token %}
+        {% if optimizaciones_count > 0 %}
+        <input type="hidden" name="accion" id="accion_hidden" value="mover">
+        <script>
+          document.querySelectorAll('input[name="accion"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+              document.getElementById('accion_hidden').value = this.value;
+            });
+          });
+        </script>
+        {% endif %}
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'opticut:detalle_proyecto' proyecto.pk %}" class="btn btn-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-danger" data-tipo="proyecto">🗑️ Sí, eliminar proyecto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -131,9 +131,15 @@ details summary::-webkit-details-marker {
 /* Estilos para modal de imagen */
 .modal-grafico-body {
     background-color: #f8f9fa;
-    overflow: hidden;
+    overflow: auto;
     padding: 0;
     min-height: calc(100vh - 120px);
+}
+
+.modal-imagen-contenido {
+    min-height: 100%;
+    flex-wrap: nowrap;
+    transform-origin: center center;
 }
 
 .modal-grafico-body .row {

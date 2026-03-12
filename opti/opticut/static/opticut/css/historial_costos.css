@@ -1,0 +1,107 @@
+/* ============================================
+   ESTILOS PARA HISTORIAL DE COSTOS
+   ============================================ */
+
+/* Tarjetas de estadísticas */
+.stats-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+}
+
+.stats-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.stats-card .card-body {
+  padding: 1.5rem;
+}
+
+.stats-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.stats-value {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+}
+
+.stats-label {
+  color: #6c757d;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Tabla de costos */
+.cost-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cost-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.cost-table thead th {
+  border: none;
+  padding: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+.cost-table tbody tr {
+  transition: background-color 0.2s;
+}
+
+.cost-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.cost-table tbody td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.cost-badge {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.material-info {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+/* Contenedor de gráfico */
+.chart-container {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Tarjeta de filtros */
+.filter-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.avg-cost {
+  font-size: 1.1rem;
+  color: #495057;
+  margin-top: 0.5rem;
+}
+

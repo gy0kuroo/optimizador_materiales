@@ -1,0 +1,28 @@
+{% extends 'opticut/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card fade-in">
+    <div class="card-header bg-danger text-white">
+      <h4 class="mb-0">⚠️ Eliminar Cliente</h4>
+    </div>
+    <div class="card-body">
+      <p class="lead">¿Estás seguro de que deseas eliminar el cliente <strong>"{{ cliente.nombre }}"</strong>?</p>
+      
+      <div class="alert alert-warning">
+        <strong>⚠️ Advertencia:</strong> Esta acción no se puede deshacer.
+      </div>
+      
+      <form method="post" data-tipo="cliente">
+        {% csrf_token %}
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'opticut:lista_clientes' %}" class="btn btn-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-danger" data-tipo="cliente">🗑️ Sí, eliminar cliente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

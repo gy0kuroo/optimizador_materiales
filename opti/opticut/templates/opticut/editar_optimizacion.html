@@ -89,6 +89,76 @@
       </div>
     </div>
 
+    <!-- Sección: Costos (Opcional) -->
+    <div class="card mb-4 fade-in">
+      <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">💰 Costos (Opcional)</h4>
+        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion" 
+                onclick="iniciarTutorialSeccion('costos')" 
+                title="Ayuda sobre costos">
+          ❓
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="{{ tablero_form.material.id_for_label }}">{{ tablero_form.material.label }}</label>
+            {{ tablero_form.material }}
+            <small class="form-text text-muted">{{ tablero_form.material.help_text }}</small>
+            {% if tablero_form.material.errors %}
+              <div class="text-danger">{{ tablero_form.material.errors }}</div>
+            {% endif %}
+            <div class="mt-2">
+              <a href="{% url 'opticut:lista_materiales' %}" class="btn btn-sm btn-outline-primary" target="_blank">
+                📦 Gestionar Materiales
+              </a>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label for="{{ tablero_form.precio_tablero.id_for_label }}">{{ tablero_form.precio_tablero.label }}</label>
+            {{ tablero_form.precio_tablero }}
+            <small class="form-text text-muted">{{ tablero_form.precio_tablero.help_text }}</small>
+            {% if tablero_form.precio_tablero.errors %}
+              <div class="text-danger">{{ tablero_form.precio_tablero.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-3 mb-3">
+            <label for="{{ tablero_form.mano_obra.id_for_label }}">{{ tablero_form.mano_obra.label }}</label>
+            {{ tablero_form.mano_obra }}
+            <small class="form-text text-muted">{{ tablero_form.mano_obra.help_text }}</small>
+            {% if tablero_form.mano_obra.errors %}
+              <div class="text-danger">{{ tablero_form.mano_obra.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="{{ tablero_form.cliente.id_for_label }}">{{ tablero_form.cliente.label }}</label>
+            {{ tablero_form.cliente }}
+            <small class="form-text text-muted">{{ tablero_form.cliente.help_text }}</small>
+            {% if tablero_form.cliente.errors %}
+              <div class="text-danger">{{ tablero_form.cliente.errors }}</div>
+            {% endif %}
+            <small class="form-text text-muted">
+              <a href="{% url 'opticut:crear_cliente' %}" target="_blank">Crear nuevo cliente</a>
+            </small>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="{{ tablero_form.proyecto.id_for_label }}">{{ tablero_form.proyecto.label }}</label>
+            {{ tablero_form.proyecto }}
+            <small class="form-text text-muted">{{ tablero_form.proyecto.help_text }}</small>
+            {% if tablero_form.proyecto.errors %}
+              <div class="text-danger">{{ tablero_form.proyecto.errors }}</div>
+            {% endif %}
+            <small class="form-text text-muted">
+              <a href="{% url 'opticut:crear_proyecto' %}" target="_blank">Crear nuevo proyecto</a>
+            </small>
+          </div>
+        </div>
+        <div class="alert alert-info mb-0">
+          <small>💡 <strong>Tip:</strong> Selecciona un material de tu biblioteca para llenar automáticamente el precio. El costo total se calculará después de la optimización.</small>
+        </div>
+      </div>
+    </div>
+
     <!-- Sección: Piezas a Cortar -->
     <div class="card mb-4 fade-in">
       <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
@@ -273,6 +343,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const originalAddHandler = addButton.onclick;
         addButton.addEventListener('click', function() {
             setTimeout(actualizarLabelsUnidad, 100);
+        });
+    }
+    
+    // Manejar selección de material para llenar precio automáticamente
+    const materialSelect = document.getElementById('material_select');
+    const precioTableroInput = document.getElementById('precio_tablero');
+    
+    if (materialSelect && precioTableroInput) {
+        // Obtener precios de materiales desde el contexto de Django
+        const materialPrices = {{ materiales_data_json|safe }};
+        
+        materialSelect.addEventListener('change', function() {
+            const selectedMaterialId = this.value;
+            if (selectedMaterialId && materialPrices[selectedMaterialId] && materialPrices[selectedMaterialId].precio) {
+                precioTableroInput.value = materialPrices[selectedMaterialId].precio;
+            } else if (!selectedMaterialId) {
+                // Si se deselecciona, no cambiar el precio (dejar que el usuario lo edite)
+            }
         });
     }
 });

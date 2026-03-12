@@ -18,6 +18,7 @@
     
     <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{% static 'opticut/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'opticut/css/accessibility.css' %}">
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -45,17 +46,32 @@
                         <a class="nav-link" href="{% url 'opticut:estadisticas' %}">📊 Estadísticas</a>
                         <div class="dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                ⚙️ Más
+                                ⚙️ Más Opciones
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">⚙️ Configuración</a></li>
+                                <li><h6 class="dropdown-header">Gestión</h6></li>
+                                <li><a class="dropdown-item" href="{% url 'opticut:lista_materiales' %}">📦 Materiales</a></li>
+                                <li><a class="dropdown-item" href="{% url 'opticut:lista_clientes' %}">👥 Clientes</a></li>
+                                <li><a class="dropdown-item" href="{% url 'opticut:lista_proyectos' %}">📁 Proyectos</a></li>
+                                <li><a class="dropdown-item" href="{% url 'opticut:lista_presupuestos' %}">📄 Presupuestos</a></li>
+                                <li><a class="dropdown-item" href="{% url 'opticut:lista_plantillas' %}">📋 Plantillas</a></li>
+                                <li><a class="dropdown-item" href="{% url 'opticut:historial_costos' %}">💰 Costos</a></li>
+                                <li><a class="dropdown-item" href="{% url 'opticut:comparar_optimizaciones' %}">⚖️ Comparar</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">Configuración de Perfil</h6></li>
+                                <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">👤 Mi Perfil</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">Configuración del Sistema</h6></li>
+                                <li><a class="dropdown-item" href="{% url 'usuarios:configuracion_sistema' %}">⚙️ Sistema</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="#" id="btn-tutorial">❓ Ayuda / Tutorial</a></li>
                             </ul>
                         </div>
                     {% else %}
+                        {% block show_auth_buttons %}
                         <a href="{% url 'usuarios:login' %}" class="btn btn-outline-primary btn-sm me-2">🔑 Iniciar sesión</a>
                         <a href="{% url 'usuarios:registro' %}" class="btn btn-outline-success btn-sm">📝 Registrarse</a>
+                        {% endblock %}
                     {% endif %}
                 </div>
             </div>
@@ -120,6 +136,7 @@
     
     <!-- JavaScript Personalizado -->
     <script src="{% static 'opticut/js/theme.js' %}"></script>
+    <script src="{% static 'opticut/js/confirmaciones.js' %}"></script>
     {% if user.is_authenticated %}
     <script src="{% static 'opticut/js/session-timeout.js' %}"></script>
     <script>
@@ -374,6 +391,487 @@
                         title: '🏆 Top 10 Optimizaciones',
                         intro: 'Revisa tus mejores optimizaciones ordenadas por aprovechamiento. Puedes duplicar o descargar estas optimizaciones para reutilizarlas.',
                         element: document.querySelector('.table')
+                    }
+                ];
+            } else if (seccion === 'presupuestos') {
+                pasos = [
+                    {
+                        title: '💰 Gestión de Presupuestos',
+                        intro: 'Aquí puedes crear y gestionar presupuestos para tus clientes. Cada presupuesto puede incluir una o más optimizaciones con sus costos asociados.',
+                        element: document.querySelector('h2')
+                    },
+                    {
+                        title: '🔍 Filtrar Presupuestos',
+                        intro: 'Usa los filtros para buscar presupuestos por número, cliente, estado o rango de fechas. Esto te ayuda a encontrar rápidamente el presupuesto que necesitas.',
+                        element: document.querySelector('.search-filters')
+                    },
+                    {
+                        title: '➕ Crear Presupuesto',
+                        intro: 'Haz clic en "Crear Presupuesto" para generar un nuevo presupuesto. Puedes asociar múltiples optimizaciones y calcular el costo total automáticamente.',
+                        element: document.querySelector('a[href*="crear_presupuesto"]')
+                    },
+                    {
+                        title: '📋 Lista de Presupuestos',
+                        intro: 'La tabla muestra todos tus presupuestos con información clave: número, cliente, estado, costo total y fecha. Usa los botones de acción para ver, editar o generar PDF.',
+                        element: document.querySelector('.table')
+                    }
+                ];
+            } else if (seccion === 'proyectos') {
+                pasos = [
+                    {
+                        title: '📁 Gestión de Proyectos',
+                        intro: 'Los proyectos te permiten agrupar múltiples optimizaciones relacionadas. Útiles para organizar trabajos grandes o proyectos con múltiples fases.',
+                        element: document.querySelector('h2')
+                    },
+                    {
+                        title: '🔍 Filtrar Proyectos',
+                        intro: 'Busca proyectos por nombre, cliente o estado. Los filtros te ayudan a encontrar rápidamente el proyecto que necesitas.',
+                        element: document.querySelector('.search-filters')
+                    },
+                    {
+                        title: '➕ Crear Proyecto',
+                        intro: 'Crea un nuevo proyecto para organizar tus optimizaciones. Puedes asociar un cliente, definir fechas y agregar múltiples optimizaciones.',
+                        element: document.querySelector('a[href*="crear_proyecto"]')
+                    },
+                    {
+                        title: '📊 Vista de Proyectos',
+                        intro: 'La tabla muestra todos tus proyectos con información sobre cliente, estado, número de optimizaciones y costo total. Usa los botones para ver detalles, editar o eliminar.',
+                        element: document.querySelector('.table')
+                    }
+                ];
+            } else if (seccion === 'clientes') {
+                pasos = [
+                    {
+                        title: '👥 Gestión de Clientes',
+                        intro: 'Mantén un registro de todos tus clientes. Puedes asociar optimizaciones, presupuestos y proyectos a cada cliente para un mejor seguimiento.',
+                        element: document.querySelector('h2')
+                    },
+                    {
+                        title: '🔍 Buscar Clientes',
+                        intro: 'Usa el campo de búsqueda para encontrar clientes por nombre, RUT o email. Esto te ayuda a localizar rápidamente la información del cliente.',
+                        element: document.querySelector('.search-filters')
+                    },
+                    {
+                        title: '➕ Agregar Cliente',
+                        intro: 'Crea un nuevo cliente con su información de contacto. Puedes agregar RUT, email, teléfono y dirección para mantener un registro completo.',
+                        element: document.querySelector('a[href*="crear_cliente"]')
+                    },
+                    {
+                        title: '📋 Lista de Clientes',
+                        intro: 'La tabla muestra todos tus clientes con su información de contacto y el número de optimizaciones asociadas. Usa los botones para ver historial, editar o eliminar.',
+                        element: document.querySelector('.table')
+                    }
+                ];
+            } else if (seccion === 'materiales') {
+                pasos = [
+                    {
+                        title: '📦 Biblioteca de Materiales',
+                        intro: 'Guarda los materiales que usas frecuentemente con sus dimensiones y precios. Esto agiliza la creación de optimizaciones y presupuestos.',
+                        element: document.querySelector('h2')
+                    },
+                    {
+                        title: '🔍 Buscar Materiales',
+                        intro: 'Busca materiales por nombre o descripción. Los materiales predefinidos del sistema también están disponibles para usar.',
+                        element: document.querySelector('.search-filters')
+                    },
+                    {
+                        title: '➕ Agregar Material',
+                        intro: 'Crea un nuevo material con sus dimensiones y precio. Los materiales guardados aparecerán automáticamente al crear optimizaciones.',
+                        element: document.querySelector('a[href*="crear_material"]')
+                    },
+                    {
+                        title: '📋 Lista de Materiales',
+                        intro: 'La tabla muestra todos tus materiales con sus dimensiones, precio y área. Los materiales predefinidos del sistema están marcados.',
+                        element: document.querySelector('.table')
+                    }
+                ];
+            } else if (seccion === 'plantillas') {
+                pasos = [
+                    {
+                        title: '📋 Biblioteca de Plantillas',
+                        intro: 'Las plantillas te permiten guardar configuraciones de tableros y piezas que usas frecuentemente. Ahorra tiempo reutilizando plantillas.',
+                        element: document.querySelector('h2')
+                    },
+                    {
+                        title: '🔍 Filtrar Plantillas',
+                        intro: 'Busca plantillas por nombre o categoría. Puedes filtrar entre tus plantillas y las predefinidas del sistema.',
+                        element: document.querySelector('.search-filters')
+                    },
+                    {
+                        title: '➕ Crear Plantilla',
+                        intro: 'Crea una nueva plantilla desde una optimización existente. Las plantillas guardan las dimensiones del tablero y todas las piezas.',
+                        element: document.querySelector('a[href*="crear_plantilla"]')
+                    },
+                    {
+                        title: '✅ Usar Plantilla',
+                        intro: 'Haz clic en "Usar" para aplicar una plantilla a una nueva optimización. Esto carga automáticamente todas las piezas y configuraciones guardadas.',
+                        element: document.querySelector('.card')
+                    }
+                ];
+            } else if (seccion === 'costos') {
+                pasos = [
+                    {
+                        title: '💰 Historial de Costos',
+                        intro: 'Esta sección muestra un análisis detallado de los costos de todas tus optimizaciones. Útil para controlar gastos y calcular márgenes.',
+                        element: document.querySelector('h2')
+                    },
+                    {
+                        title: '📊 Estadísticas de Costos',
+                        intro: 'Las tarjetas muestran métricas importantes: costo total, costo promedio por optimización, costo por tablero y porcentaje de material vs. mano de obra.',
+                        element: document.querySelector('.stats-card')
+                    },
+                    {
+                        title: '📅 Filtrar por Fecha',
+                        intro: 'Selecciona un rango de fechas para analizar costos en un período específico. Esto te ayuda a evaluar gastos mensuales o por proyecto.',
+                        element: document.querySelector('input[type="date"]')
+                    },
+                    {
+                        title: '📈 Gráfico de Costos',
+                        intro: 'El gráfico muestra la evolución de los costos a lo largo del tiempo. Identifica tendencias y picos de gasto.',
+                        element: document.querySelector('.chart-container')
+                    },
+                    {
+                        title: '📊 Tabla Detallada',
+                        intro: 'La tabla lista todas las optimizaciones con sus costos desglosados: material, mano de obra y total. Puedes exportar estos datos a Excel.',
+                        element: document.querySelector('.table')
+                    }
+                ];
+            } else if (seccion === 'comparar') {
+                pasos = [
+                    {
+                        title: '⚖️ Comparar Optimizaciones',
+                        intro: 'Compara dos optimizaciones lado a lado para evaluar cuál es más eficiente. Útil para decidir entre diferentes configuraciones.',
+                        element: document.querySelector('h2')
+                    },
+                    {
+                        title: '🔍 Seleccionar Optimizaciones',
+                        intro: 'Elige dos optimizaciones de la lista para comparar. Puedes buscar por nombre de pieza o fecha para encontrar las que necesitas.',
+                        element: document.querySelector('.card')
+                    },
+                    {
+                        title: '📊 Resultados de Comparación',
+                        intro: 'La comparación muestra: número de tableros, aprovechamiento, desperdicio y diferencias entre ambas optimizaciones. Esto te ayuda a elegir la mejor opción.',
+                        element: document.querySelector('.comparison-result')
+                    },
+                    {
+                        title: '👁️ Ver Detalles',
+                        intro: 'Haz clic en "Ver Detalles" para ver el plan de corte completo de cada optimización, incluyendo el gráfico visual y la lista de piezas.',
+                        element: document.querySelector('a[href*="resultado"]')
+                    }
+                ];
+            } else if (seccion === 'crear_presupuesto' || seccion === 'editar_presupuesto') {
+                pasos = [
+                    {
+                        title: '💰 Información del Presupuesto',
+                        intro: 'Completa la información básica del presupuesto: cliente, proyecto (opcional), precio por tablero y mano de obra. También puedes crear un cliente nuevo directamente aquí.',
+                        element: document.querySelector('.card')
+                    },
+                    {
+                        title: '📋 Seleccionar Optimizaciones',
+                        intro: 'Elige una o más optimizaciones para incluir en el presupuesto. Puedes ver los detalles de cada optimización antes de seleccionarla. El costo total se calculará automáticamente.',
+                        element: document.querySelector('.optimizaciones-container')
+                    },
+                    {
+                        title: '📅 Fecha de Validez',
+                        intro: 'Establece hasta cuándo es válido el presupuesto. Esto es importante para controlar la vigencia de las ofertas a tus clientes.',
+                        element: document.querySelector('input[type="date"]')
+                    },
+                    {
+                        title: '✅ Guardar Presupuesto',
+                        intro: 'Una vez completado, guarda el presupuesto. Podrás editarlo, generar un PDF o agregar más optimizaciones más tarde.',
+                        element: document.querySelector('button[type="submit"]')
+                    }
+                ];
+            } else if (seccion === 'crear_proyecto' || seccion === 'editar_proyecto') {
+                pasos = [
+                    {
+                        title: '📁 Información del Proyecto',
+                        intro: 'Completa los datos del proyecto: nombre, descripción, cliente asociado, estado y fechas de inicio y fin. Esto te ayuda a organizar tus trabajos.',
+                        element: document.querySelector('.card')
+                    },
+                    {
+                        title: '📋 Seleccionar Optimizaciones',
+                        intro: 'Elige las optimizaciones que forman parte de este proyecto. Puedes seleccionar múltiples optimizaciones y ver sus detalles antes de agregarlas.',
+                        element: document.querySelector('.optimizaciones-container')
+                    },
+                    {
+                        title: '📅 Fechas del Proyecto',
+                        intro: 'Define las fechas de inicio y fin del proyecto. Esto es útil para planificar y hacer seguimiento del progreso.',
+                        element: document.querySelector('input[type="date"]')
+                    },
+                    {
+                        title: '✅ Guardar Proyecto',
+                        intro: 'Guarda el proyecto con todas sus optimizaciones asociadas. Podrás agregar más optimizaciones o editar la información más tarde.',
+                        element: document.querySelector('button[type="submit"]')
+                    }
+                ];
+            } else if (seccion === 'crear_cliente' || seccion === 'editar_cliente') {
+                pasos = [
+                    {
+                        title: '👤 Información del Cliente',
+                        intro: 'Completa los datos del cliente: nombre, RUT, email, teléfono y dirección. Esta información será útil para generar presupuestos y mantener contacto.',
+                        element: document.querySelector('.card')
+                    },
+                    {
+                        title: '📝 Campos Opcionales',
+                        intro: 'Algunos campos como RUT, email y teléfono son opcionales, pero te recomendamos completarlos para tener un registro completo del cliente.',
+                        element: document.querySelector('.form-control')
+                    },
+                    {
+                        title: '✅ Guardar Cliente',
+                        intro: 'Una vez guardado, el cliente estará disponible para asociarlo a optimizaciones, presupuestos y proyectos.',
+                        element: document.querySelector('button[type="submit"]')
+                    }
+                ];
+            } else if (seccion === 'crear_material' || seccion === 'editar_material') {
+                pasos = [
+                    {
+                        title: '📦 Información del Material',
+                        intro: 'Completa los datos del material: nombre, descripción, dimensiones (ancho y alto), unidad de medida y precio por tablero.',
+                        element: document.querySelector('.card')
+                    },
+                    {
+                        title: '📏 Dimensiones',
+                        intro: 'Ingresa las dimensiones del tablero en la unidad que prefieras (cm, m, pulgadas o pies). Estas dimensiones se usarán automáticamente al seleccionar el material.',
+                        element: document.querySelector('input[name*="ancho"]')
+                    },
+                    {
+                        title: '💰 Precio',
+                        intro: 'Establece el precio por tablero. Este precio se usará automáticamente al crear optimizaciones o presupuestos con este material.',
+                        element: document.querySelector('input[name*="precio"]')
+                    },
+                    {
+                        title: '✅ Guardar Material',
+                        intro: 'Guarda el material en tu biblioteca. Estará disponible para usar en futuras optimizaciones y presupuestos.',
+                        element: document.querySelector('button[type="submit"]')
+                    }
+                ];
+            } else if (seccion === 'crear_plantilla' || seccion === 'editar_plantilla') {
+                pasos = [
+                    {
+                        title: '📋 Información de la Plantilla',
+                        intro: 'Completa los datos de la plantilla: nombre, descripción, categoría y dimensiones del tablero. Las piezas se cargarán desde la optimización seleccionada.',
+                        element: document.querySelector('.card')
+                    },
+                    {
+                        title: '📏 Configuración del Tablero',
+                        intro: 'Define las dimensiones del tablero y si se permite rotación de piezas. Esta configuración se aplicará cuando uses la plantilla.',
+                        element: document.querySelector('input[name*="ancho"]')
+                    },
+                    {
+                        title: '✂️ Piezas de la Plantilla',
+                        intro: 'Las piezas se cargan automáticamente desde la optimización. Puedes ver la lista de piezas que se guardarán en la plantilla.',
+                        element: document.querySelector('.pieza-form')
+                    },
+                    {
+                        title: '✅ Guardar Plantilla',
+                        intro: 'Guarda la plantilla para reutilizarla en el futuro. Podrás aplicarla rápidamente a nuevas optimizaciones.',
+                        element: document.querySelector('button[type="submit"]')
+                    }
+                ];
+            } else if (seccion === 'detalle_presupuesto') {
+                pasos = [
+                    {
+                        title: '💰 Información del Presupuesto',
+                        intro: 'Aquí puedes ver todos los detalles del presupuesto: número, cliente, estado, fechas, costos y optimizaciones asociadas.',
+                        element: document.querySelector('.card')
+                    },
+                    {
+                        title: '📋 Optimizaciones Incluidas',
+                        intro: 'La lista muestra todas las optimizaciones asociadas al presupuesto con sus detalles: dimensiones, aprovechamiento, tableros y piezas.',
+                        element: document.querySelector('.table')
+                    },
+                    {
+                        title: '💰 Costos',
+                        intro: 'Puedes ver el desglose de costos: precio por tablero, número de tableros, costo de material, mano de obra y costo total.',
+                        element: document.querySelector('.costo-total')
+                    },
+                    {
+                        title: '📄 Acciones Disponibles',
+                        intro: 'Puedes editar el presupuesto, agregar más optimizaciones, generar un PDF para enviar al cliente o volver a la lista de presupuestos.',
+                        element: document.querySelector('.btn')
+                    }
+                ];
+            } else if (seccion === 'detalle_proyecto') {
+                pasos = [
+                    {
+                        title: '📁 Información del Proyecto',
+                        intro: 'Aquí puedes ver todos los detalles del proyecto: nombre, cliente, estado, fechas, descripción y optimizaciones asociadas.',
+                        element: document.querySelector('.card')
+                    },
+                    {
+                        title: '📋 Optimizaciones del Proyecto',
+                        intro: 'La lista muestra todas las optimizaciones que forman parte del proyecto. Puedes ver detalles de cada una o agregar más optimizaciones.',
+                        element: document.querySelector('.table')
+                    },
+                    {
+                        title: '💰 Costo Total',
+                        intro: 'Si las optimizaciones tienen costos asociados, verás el costo total del proyecto calculado automáticamente.',
+                        element: document.querySelector('.costo-total')
+                    },
+                    {
+                        title: '📄 Acciones Disponibles',
+                        intro: 'Puedes editar el proyecto, agregar más optimizaciones o volver a la lista de proyectos.',
+                        element: document.querySelector('.btn')
+                    }
+                ];
+            } else if (seccion === 'historial_cliente') {
+                pasos = [
+                    {
+                        title: '👤 Información del Cliente',
+                        intro: 'Aquí puedes ver todos los datos del cliente: nombre, RUT, contacto y estadísticas de optimizaciones asociadas.',
+                        element: document.querySelector('.card')
+                    },
+                    {
+                        title: '📋 Optimizaciones del Cliente',
+                        intro: 'La tabla muestra todas las optimizaciones asociadas a este cliente. Puedes ver detalles, aprovechamiento y fechas de cada una.',
+                        element: document.querySelector('.table')
+                    },
+                    {
+                        title: '📊 Estadísticas',
+                        intro: 'Puedes ver métricas del cliente como total de optimizaciones, aprovechamiento promedio y costo total si hay costos asociados.',
+                        element: document.querySelector('.stats-card')
+                    }
+                ];
+            } else if (seccion === 'agregar_optimizaciones') {
+                pasos = [
+                    {
+                        title: '➕ Agregar Optimizaciones',
+                        intro: 'Selecciona una o más optimizaciones disponibles para agregar al proyecto o presupuesto. Solo se muestran las optimizaciones que aún no están asociadas.',
+                        element: document.querySelector('h2')
+                    },
+                    {
+                        title: '📋 Lista de Optimizaciones',
+                        intro: 'Cada optimización muestra sus detalles: fecha, dimensiones, aprovechamiento, número de tableros y piezas. Usa los checkboxes para seleccionar.',
+                        element: document.querySelector('.optimizaciones-container')
+                    },
+                    {
+                        title: '✅ Confirmar Selección',
+                        intro: 'Una vez seleccionadas las optimizaciones, haz clic en "Agregar Optimizaciones" para asociarlas al proyecto o presupuesto.',
+                        element: document.querySelector('button[type="submit"]')
+                    }
+                ];
+            } else if (seccion === 'configuracion_sistema') {
+                pasos = [
+                    {
+                        title: '⚙️ Configuración del Sistema',
+                        intro: 'Aquí puedes establecer valores predeterminados que se aplicarán automáticamente al crear nuevas optimizaciones. Esto te ahorra tiempo al no tener que configurar estos valores cada vez.',
+                        element: document.querySelector('.auth-card')
+                    },
+                    {
+                        title: '📏 Unidad de Medida Predeterminada',
+                        intro: 'Selecciona la unidad de medida que usarás más frecuentemente (cm, m, pulgadas o pies). Esta unidad se autocompletará en el formulario de optimización.',
+                        element: document.querySelector('select[name*="unidad_medida"]')
+                    },
+                    {
+                        title: '✂️ Margen de Corte Predeterminado',
+                        intro: 'Establece el margen de corte en milímetros que se usará por defecto. Este margen representa el espacio que se pierde en cada corte debido al grosor de la sierra.',
+                        element: document.querySelector('input[name*="margen_corte"]')
+                    },
+                    {
+                        title: '🔄 Rotación Automática',
+                        intro: 'Activa o desactiva la rotación automática de piezas por defecto. Cuando está activada, el sistema puede rotar las piezas para optimizar mejor el espacio.',
+                        element: document.querySelector('input[name*="rotacion_automatica"]')
+                    },
+                    {
+                        title: '🔔 Notificaciones',
+                        intro: 'Configura cómo y cuándo recibir notificaciones. Puedes activar notificaciones por email y/o en pantalla, y elegir qué eventos quieres que te notifiquen.',
+                        element: document.querySelector('h5')
+                    },
+                    {
+                        title: '💾 Guardar Configuración',
+                        intro: 'Una vez configurados los valores predeterminados, guarda los cambios. Estos valores se aplicarán automáticamente en futuras optimizaciones.',
+                        element: document.querySelector('button[type="submit"]')
+                    }
+                ];
+            } else if (seccion === 'perfil') {
+                pasos = [
+                    {
+                        title: '👤 Configuración de Perfil',
+                        intro: 'Aquí puedes gestionar tu información personal, preferencias de seguridad y apariencia del sistema.',
+                        element: document.querySelector('.auth-card')
+                    },
+                    {
+                        title: '📝 Información Personal',
+                        intro: 'En la pestaña "Información Personal" puedes editar tu nombre de usuario, email y configurar el timeout de sesión y el tema preferido.',
+                        element: document.querySelector('#perfil-tab')
+                    },
+                    {
+                        title: '⏱️ Timeout de Sesión',
+                        intro: 'Configura cuánto tiempo de inactividad debe pasar antes de que se cierre tu sesión automáticamente. Esto mejora la seguridad de tu cuenta.',
+                        element: document.querySelector('input[name*="timeout_sesion"]')
+                    },
+                    {
+                        title: '🎨 Tema Preferido',
+                        intro: 'Elige entre modo claro, oscuro o automático (sigue la configuración de tu sistema). El tema se aplicará en toda la aplicación.',
+                        element: document.querySelector('select[name*="tema_preferido"]')
+                    },
+                    {
+                        title: '🔒 Seguridad',
+                        intro: 'En la pestaña "Seguridad" puedes cambiar tu contraseña. Asegúrate de usar una contraseña segura y única.',
+                        element: document.querySelector('#seguridad-tab')
+                    },
+                    {
+                        title: '💾 Guardar Cambios',
+                        intro: 'No olvides guardar los cambios después de modificar tu información o preferencias.',
+                        element: document.querySelector('button[type="submit"]')
+                    }
+                ];
+            } else if (seccion === 'resultado') {
+                pasos = [
+                    {
+                        title: '📊 Resumen de la Optimización',
+                        intro: 'Aquí puedes ver el resumen de tu optimización: aprovechamiento, área utilizada, desperdicio y número de tableros necesarios.',
+                        element: document.querySelector('.row.mt-4')
+                    },
+                    {
+                        title: '📐 Plan de Corte Visual',
+                        intro: 'Cada tablero muestra el plan de corte visual con las piezas distribuidas. Puedes ver el número de tablero, área utilizada y desperdicio de cada uno.',
+                        element: document.querySelector('.tableros-container')
+                    },
+                    {
+                        title: '📋 Lista de Piezas',
+                        intro: 'La tabla muestra todas las piezas que se cortarán: nombre, dimensiones, cantidad y en qué tablero se encuentra cada pieza.',
+                        element: document.querySelector('table')
+                    },
+                    {
+                        title: '💾 Descargar Resultados',
+                        intro: 'Puedes descargar el plan de corte en PDF, Excel o imágenes PNG. También puedes editar, duplicar o eliminar la optimización.',
+                        element: document.querySelector('.btn-group')
+                    }
+                ];
+            } else if (seccion === 'calcular_tiempo') {
+                pasos = [
+                    {
+                        title: '⏱️ Calculadora de Tiempo',
+                        intro: 'Esta herramienta te ayuda a estimar el tiempo necesario para cortar todas las piezas de la optimización. Considera velocidad de corte, tiempo de setup y cambios de herramienta.',
+                        element: document.querySelector('.card')
+                    },
+                    {
+                        title: '⚙️ Parámetros de Cálculo',
+                        intro: 'Ajusta los parámetros según tu máquina y proceso: velocidad de corte (cm/seg), tiempo de setup por tablero (min) y tiempo de cambio de herramienta (min).',
+                        element: document.querySelector('form')
+                    },
+                    {
+                        title: '📊 Resumen de Piezas',
+                        intro: 'Aquí puedes ver el resumen: total de piezas, tipos de piezas diferentes, perímetro total a cortar y número estimado de tableros.',
+                        element: document.querySelector('.mb-4')
+                    },
+                    {
+                        title: '⏰ Tiempo Estimado',
+                        intro: 'El sistema calcula automáticamente el tiempo total estimado desglosado en: tiempo de corte, setup y cambios de herramienta. También muestra el porcentaje de cada componente.',
+                        element: document.querySelector('.tiempo-total')
+                    }
+                ];
+            }
+            
+            // Si no hay pasos definidos, mostrar mensaje genérico
+            if (pasos.length === 0) {
+                pasos = [
+                    {
+                        title: '❓ Ayuda',
+                        intro: 'Esta sección te permite gestionar y organizar tus datos. Usa los botones de acción para ver detalles, editar o eliminar elementos. Si necesitas más ayuda específica, consulta el menú "Ayuda / Tutorial" en la barra de navegación.',
+                        element: document.querySelector('h2') || document.body
                     }
                 ];
             }

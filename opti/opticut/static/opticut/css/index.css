@@ -2,16 +2,21 @@
 
 .pieza-form {
     transition: all 0.3s ease;
+    padding: 1.5rem !important; /* Aumentado para mejor espaciado */
+    margin-bottom: 1.5rem !important;
 }
 
 .pieza-form:hover {
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* Mejorar legibilidad del texto de ayuda en modo oscuro */
+/* Mejorar legibilidad del texto de ayuda */
 .form-text.text-muted {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
+    color: #495057; /* Más oscuro para mejor contraste */
+    font-size: 1rem; /* Aumentado de 0.875rem */
+    line-height: 1.6;
+    margin-top: 0.5rem;
+    display: block;
 }
 
 [data-theme="dark"] .form-text.text-muted {
@@ -19,7 +24,14 @@
     opacity: 0.9;
 }
 
-/* Asegurar que las etiquetas sean legibles en modo oscuro */
+/* Asegurar que las etiquetas sean legibles */
+label {
+    font-size: var(--font-size-label) !important;
+    font-weight: var(--font-weight-semibold) !important;
+    color: var(--text-primary) !important;
+    margin-bottom: 0.75rem !important;
+}
+
 [data-theme="dark"] label {
     color: var(--text-primary) !important;
 }
@@ -27,9 +39,41 @@
 /* Estilos para botón de eliminar pieza */
 .remove-pieza {
     display: none;
+    font-size: var(--font-size-base) !important;
+    padding: 0.625rem 1.25rem !important;
+    min-height: 44px;
 }
 
 .pieza-form:not(:only-child) .remove-pieza {
     display: block;
+}
+
+/* Mejorar visibilidad de botón principal */
+.btn-primary.btn-lg {
+    font-size: 1.125rem !important;
+    padding: 1rem 2rem !important;
+    font-weight: 600 !important;
+    min-height: 50px;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3) !important;
+}
+
+/* Mejorar visibilidad de secciones */
+.card-header h4 {
+    font-size: var(--font-size-xl) !important;
+    font-weight: var(--font-weight-bold) !important;
+}
+
+/* Mejorar espaciado en formularios de piezas */
+.pieza-form .form-control,
+.pieza-form .form-select {
+    margin-bottom: 1rem;
+}
+
+/* Mejorar visibilidad de botones de ayuda */
+.btn-ayuda-seccion {
+    font-size: 1.125rem !important;
+    padding: 0.625rem 0.875rem !important;
+    min-width: 44px;
+    min-height: 44px;
 }
 

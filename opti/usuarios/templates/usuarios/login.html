@@ -5,6 +5,10 @@
 <link rel="stylesheet" href="{% static 'usuarios/css/login.css' %}">
 {% endblock %}
 
+{% block show_auth_buttons %}
+{# Ocultar botones de autenticación en la página de login ya que el formulario está en el centro #}
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
   <div class="row justify-content-center">
@@ -47,13 +51,14 @@
             
             <div class="text-center">
               <button type="submit" class="btn btn-primary btn-lg btn-auth">
-                🚀 Entrar
+                 Entrar
               </button>
             </div>
           </form>
         </div>
         <div class="auth-card-footer text-center">
-          <p class="mb-0">¿No tienes cuenta? <a href="{% url 'usuarios:registro' %}" class="auth-link">Regístrate aquí</a></p>
+          <p class="mb-2">¿No tienes cuenta? <a href="{% url 'usuarios:registro' %}" class="auth-link">Regístrate aquí</a></p>
+          <p class="mb-0"><a href="{% url 'usuarios:recuperar_password' %}" class="auth-link">¿Olvidaste tu contraseña?</a></p>
         </div>
       </div>
     </div>

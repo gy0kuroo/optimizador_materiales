@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan de Corte #{{ numero_lista|default:optimizacion.id }}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'opticut/css/imprimir_plan_corte.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Barra de herramientas (solo visible en pantalla) -->
+    <div class="toolbar no-print">
+        <div class="toolbar-content">
+            <h4 class="toolbar-title">Plan de Corte - Optimización #{{ numero_lista|default:optimizacion.id }}</h4>
+            <div class="toolbar-buttons">
+                <button onclick="window.print()" class="btn btn-primary btn-print">
+                    🖨️ Imprimir
+                </button>
+                <button onclick="window.close()" class="btn btn-secondary btn-close">
+                    ✕ Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableros Generados -->
+    <div class="tableros-container">
+        {% for item in tableros_con_imagenes %}
+        <div class="tablero-page">
+            <!-- Imagen del Plan de Corte (centrada y grande) -->
+            <div class="tablero-imagen-container">
+                <div class="tablero-imagen">
+                    <img src="data:image/png;base64,{{ item.imagen }}" alt="Plan de Corte - Tablero {{ item.numero }}">
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Opcional: Auto-imprimir cuando se carga la página (comentado por defecto)
+        // Descomenta la siguiente línea si quieres que se abra el diálogo de impresión automáticamente
+        // window.onload = function() { window.print(); };
+    </script>
+</body>
+</html>
+

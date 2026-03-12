@@ -40,3 +40,7 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Handlers de error personalizados
+handler404 = 'opticut.views.handler404'
+handler500 = 'opticut.views.handler500'

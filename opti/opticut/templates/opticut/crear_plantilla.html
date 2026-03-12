@@ -1,0 +1,167 @@
+{% extends 'opticut/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'opticut/css/index.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-center mb-0 flex-grow-1">➕ Crear Nueva Plantilla</h2>
+    <div class="d-flex gap-2 align-items-center">
+      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+              onclick="iniciarTutorialSeccion('crear_plantilla')" 
+              title="Ayuda sobre crear plantilla">
+        ❓ Ayuda
+      </button>
+      <a href="{% url 'opticut:lista_plantillas' %}" class="btn btn-secondary">
+        ← Volver a Plantillas
+      </a>
+    </div>
+  </div>
+  
+  {% if optimizacion %}
+  <div class="alert alert-info fade-in mb-4">
+    <strong>ℹ️ Optimización seleccionada:</strong> Tablero {{ optimizacion.ancho_tablero }}×{{ optimizacion.alto_tablero }} cm 
+    ({{ optimizacion.aprovechamiento_total|floatformat:1 }}% aprovechamiento)
+    <a href="{% url 'opticut:resultado' optimizacion.pk %}" class="btn btn-sm btn-outline-primary ms-2">Ver optimización</a>
+  </div>
+  {% endif %}
+  
+  <div class="card fade-in">
+    <div class="card-header bg-primary text-white">
+      <h4 class="mb-0">Información de la Plantilla</h4>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+          <div class="alert alert-danger">
+            <strong>Error:</strong> Por favor, corrige los siguientes errores.
+            {{ form.non_field_errors }}
+            {% for field in form %}
+              {% if field.errors %}
+                <div>{{ field.label }}: {{ field.errors }}</div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+        
+        <div class="row mb-3">
+          <div class="col-md-8">
+            <label for="{{ form.nombre.id_for_label }}" class="form-label">
+              {{ form.nombre.label }} <span class="text-danger">*</span>
+            </label>
+            {{ form.nombre }}
+            {% if form.nombre.errors %}
+              <div class="text-danger small">{{ form.nombre.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <label for="{{ form.categoria.id_for_label }}" class="form-label">
+              {{ form.categoria.label }}
+            </label>
+            {{ form.categoria }}
+            {% if form.categoria.errors %}
+              <div class="text-danger small">{{ form.categoria.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+              {{ form.descripcion.label }}
+            </label>
+            {{ form.descripcion }}
+            {% if form.descripcion.errors %}
+              <div class="text-danger small">{{ form.descripcion.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label for="{{ form.ancho_tablero.id_for_label }}" class="form-label">
+              {{ form.ancho_tablero.label }} <span class="text-danger">*</span>
+            </label>
+            {{ form.ancho_tablero }}
+            {% if form.ancho_tablero.errors %}
+              <div class="text-danger small">{{ form.ancho_tablero.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <label for="{{ form.alto_tablero.id_for_label }}" class="form-label">
+              {{ form.alto_tablero.label }} <span class="text-danger">*</span>
+            </label>
+            {{ form.alto_tablero }}
+            {% if form.alto_tablero.errors %}
+              <div class="text-danger small">{{ form.alto_tablero.errors }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <label for="{{ form.unidad_medida.id_for_label }}" class="form-label">
+              {{ form.unidad_medida.label }}
+            </label>
+            {{ form.unidad_medida }}
+            {% if form.unidad_medida.errors %}
+              <div class="text-danger small">{{ form.unidad_medida.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="{{ form.permitir_rotacion.id_for_label }}" class="form-label">
+              {{ form.permitir_rotacion.label }}
+            </label>
+            <div class="form-check">
+              {{ form.permitir_rotacion }}
+              <label class="form-check-label" for="{{ form.permitir_rotacion.id_for_label }}">
+                Permitir rotación automática de piezas
+              </label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="{{ form.margen_corte.id_for_label }}" class="form-label">
+              {{ form.margen_corte.label }}
+            </label>
+            {{ form.margen_corte }}
+            {% if form.margen_corte.errors %}
+              <div class="text-danger small">{{ form.margen_corte.errors }}</div>
+            {% endif %}
+            <small class="form-text text-muted">En milímetros (típicamente 2-4 mm)</small>
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <label for="{{ form.piezas.id_for_label }}" class="form-label">
+              {{ form.piezas.label }} <span class="text-danger">*</span>
+            </label>
+            {{ form.piezas }}
+            {% if form.piezas.errors %}
+              <div class="text-danger small">{{ form.piezas.errors }}</div>
+            {% endif %}
+            <small class="form-text text-muted">
+              Formato: nombre,ancho,alto,cantidad (una pieza por línea)<br>
+              Ejemplo:<br>
+              Puerta,80,200,2<br>
+              Cajón,40,50,4<br>
+              Estante,100,30,3
+            </small>
+          </div>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+          <a href="{% url 'opticut:lista_plantillas' %}" class="btn btn-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-primary">💾 Crear Plantilla</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

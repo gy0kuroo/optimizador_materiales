@@ -141,15 +141,17 @@
 }
 
 .auth-form .form-text {
-    color: var(--text-secondary);
+    color: #495057;
     font-size: 0.875rem;
     margin-top: 0.5rem;
     display: block;
+    line-height: 1.5;
+    font-weight: 400;
 }
 
 [data-theme="dark"] .auth-form .form-text {
-    color: #adb5bd !important;
-    opacity: 0.9;
+    color: #ced4da !important;
+    opacity: 1;
 }
 
 /* Mejorar legibilidad de textos en modo oscuro */
@@ -173,6 +175,79 @@
     background-color: #3d3d3d !important;
     color: #e9ecef !important;
     border-color: #495057 !important;
+}
+
+/* Estilos para checkboxes */
+.form-check-input {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-top: 0.125rem;
+    margin-right: 0.5rem;
+    cursor: pointer;
+    appearance: auto;
+    -webkit-appearance: checkbox;
+    -moz-appearance: checkbox;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--input-bg);
+    flex-shrink: 0;
+}
+
+.form-check-input:checked {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+
+.form-check-input:focus {
+    border-color: var(--accent-primary);
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-check-label {
+    cursor: pointer;
+    margin-left: 0.5rem;
+    user-select: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+[data-theme="dark"] .form-check-label {
+    color: #e9ecef !important;
+}
+
+.form-check {
+    display: flex;
+    align-items: flex-start;
+    min-height: 1.5rem;
+    padding-left: 0;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.form-check .form-check-label {
+    margin-left: 0;
+    width: 100%;
+}
+
+.form-check .form-text {
+    margin-left: 1.75rem;
+    margin-top: 0.25rem;
+}
+
+[data-theme="dark"] .form-check-input {
+    background-color: #ffffff;
+    border-color: #6c757d;
+}
+
+[data-theme="dark"] .form-check-input:checked {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
 }
 
 @media (max-width: 768px) {

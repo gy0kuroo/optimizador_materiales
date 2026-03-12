@@ -1,0 +1,199 @@
+/* Estilos para impresión del plan de corte - Versión Técnica Blanco y Negro */
+
+/* Reset y configuración general */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', 'Helvetica', sans-serif;
+    color: #000;
+    background: #fff;
+    padding: 0;
+}
+
+/* Barra de herramientas (solo visible en pantalla) */
+.toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-bottom: 2px solid #000;
+    padding: 15px 20px;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.toolbar-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toolbar-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: #000;
+}
+
+.toolbar-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-print, .btn-close {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 2px solid;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-print {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+.btn-print:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.btn-close {
+    background-color: #dc3545;
+    color: #fff;
+    border-color: #dc3545;
+}
+
+.btn-close:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* Contenedor de tableros */
+.tableros-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 80px; /* Espacio para la barra de herramientas */
+}
+
+.tablero-page {
+    page-break-after: always;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Imagen del Plan de Corte (centrada y grande) */
+.tablero-imagen-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20mm;
+}
+
+.tablero-imagen {
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tablero-imagen img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    border: none;
+    page-break-inside: avoid;
+    background: #fff;
+    filter: grayscale(100%);
+    -webkit-filter: grayscale(100%);
+}
+
+/* Estilos específicos para impresión */
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 0;
+    }
+
+    body {
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Ocultar barra de herramientas al imprimir */
+    .no-print {
+        display: none !important;
+    }
+
+    .tableros-container {
+        margin-top: 0;
+    }
+
+    .tablero-page {
+        page-break-after: always;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        height: 100vh;
+    }
+
+    .tablero-page:last-child {
+        page-break-after: auto;
+    }
+
+    /* Evitar que las imágenes se corten */
+    .tablero-imagen-container {
+        page-break-inside: avoid;
+        padding: 10mm;
+    }
+    
+    .tablero-imagen img {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+    }
+
+    /* Asegurar blanco y negro */
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+/* Estilos para pantalla (previsualización) */
+@media screen {
+    body {
+        background-color: #f5f5f5;
+        padding-bottom: 20px;
+    }
+
+    .tablero-page {
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin: 20px auto;
+        max-width: 1200px;
+        min-height: auto;
+    }
+}
+

@@ -17,6 +17,7 @@ openpyxl==3.1.5
 sqlparse==0.5.1
 tzdata==2024.2
 
+
 # Nota: Las dependencias transitivas (como numpy para matplotlib) 
 # se instalan automáticamente al instalar los paquetes principales.
 

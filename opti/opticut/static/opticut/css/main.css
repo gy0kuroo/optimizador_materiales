@@ -30,18 +30,23 @@
     --spacing-lg: 2rem;
     --spacing-xl: 3rem;
     
-    /* Tipografía mejorada - Legible para adultos */
+    /* Tipografía mejorada - Legible para adultos mayores */
     --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-    --font-size-base: 1rem;
-    --font-size-sm: 0.9375rem;
-    --font-size-lg: 1.125rem;
-    --font-size-xl: 1.25rem;
-    --font-size-2xl: 1.5rem;
-    --font-size-3xl: 2rem;
+    --font-size-base: 1rem; /* Tamaño base estándar */
+    --font-size-sm: 0.9375rem; /* Tamaño pequeño */
+    --font-size-lg: 1.125rem; /* Tamaño grande */
+    --font-size-xl: 1.25rem; /* Tamaño extra grande */
+    --font-size-2xl: 1.5rem; /* Tamaño 2x */
+    --font-size-3xl: 2rem; /* Tamaño 3x */
     --font-weight-normal: 400;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
+    /* Tamaños específicos para accesibilidad */
+    --font-size-button: 1rem;
+    --font-size-label: 1rem;
+    --font-size-input: 1rem;
+    --font-size-nav: 1rem;
     
     /* Bordes y radios */
     --border-radius-sm: 6px;
@@ -126,12 +131,15 @@ body {
 .navbar-custom .nav-link {
     color: var(--nav-text) !important;
     margin: 0 0.5rem;
-    padding: 0.5rem 1rem;
+    padding: 0.625rem 1rem; /* Tamaño estándar */
     border-radius: var(--border-radius-sm);
     transition: all 0.3s ease;
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-normal);
+    font-size: var(--font-size-nav); /* Tamaño estándar */
+    font-weight: var(--font-weight-normal); /* Peso normal */
     font-family: var(--font-family-base);
+    min-height: 40px; /* Tamaño mínimo recomendado para accesibilidad */
+    display: flex;
+    align-items: center;
 }
 
 .navbar-custom .nav-link:hover {
@@ -232,12 +240,40 @@ body {
     padding: var(--spacing-lg);
     margin-bottom: var(--spacing-lg);
     transition: all 0.3s ease;
+    overflow: hidden;
 }
 
 .card:hover {
     box-shadow: 0 4px 12px var(--shadow-hover);
-    transform: translateY(-1px);
-    border-color: rgba(13, 110, 253, 0.2);
+    transform: translateY(-2px);
+    border-color: rgba(13, 110, 253, 0.3);
+}
+
+/* Empty states mejorados */
+.card-empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius-lg);
+}
+
+.card-empty-state h4 {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.card-empty-state p {
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.card-empty-state .btn {
+    min-width: 200px;
 }
 
 .card-header {
@@ -276,10 +312,16 @@ body {
     color: var(--text-primary);
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius-md);
-    padding: 0.75rem 1rem;
-    font-size: var(--font-size-base);
+    padding: 0.75rem 1rem; /* Tamaño estándar */
+    font-size: var(--font-size-input); /* Tamaño estándar */
     font-family: var(--font-family-base);
     transition: all 0.3s ease;
+    min-height: 42px; /* Tamaño mínimo para accesibilidad táctil */
+    line-height: 1.5;
+}
+
+.form-control:hover, .form-select:hover {
+    border-color: rgba(13, 110, 253, 0.4);
 }
 
 [data-theme="dark"] .form-control,
@@ -303,10 +345,11 @@ body {
 }
 
 .form-label {
-    font-weight: var(--font-weight-medium);
+    font-weight: var(--font-weight-medium); /* Peso medio */
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    font-size: var(--font-size-base);
+    margin-bottom: 0.5rem; /* Espaciado estándar */
+    font-size: var(--font-size-label); /* Tamaño estándar */
+    line-height: 1.5;
 }
 
 .form-text {
@@ -404,20 +447,28 @@ body {
 
 .btn {
     border-radius: var(--border-radius-md);
-    padding: 0.75rem 1.5rem;
-    font-weight: var(--font-weight-medium);
-    font-size: var(--font-size-base);
+    padding: 0.75rem 1.5rem; /* Tamaño estándar */
+    font-weight: var(--font-weight-medium); /* Peso estándar */
+    font-size: var(--font-size-button); /* Tamaño estándar */
     font-family: var(--font-family-base);
     transition: all 0.3s ease;
     border: none;
     cursor: pointer;
     line-height: 1.5;
+    min-height: 44px; /* Tamaño mínimo para accesibilidad táctil */
+    min-width: 100px; /* Ancho mínimo */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 .btn-primary {
     background: var(--accent-primary);
     color: white;
-    border: none;
+    border: 2px solid var(--accent-primary); /* Borde más visible */
+    font-weight: var(--font-weight-semibold);
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2); /* Sombra para profundidad */
 }
 
 .btn-primary:hover {
@@ -571,15 +622,19 @@ body {
 }
 
 .btn-lg {
-    padding: 1rem 2rem;
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-medium);
+    padding: 1rem 2rem; /* Tamaño estándar para botones grandes */
+    font-size: var(--font-size-lg); /* Tamaño grande estándar */
+    font-weight: var(--font-weight-semibold); /* Más visible */
+    min-height: 50px; /* Tamaño mínimo para botones grandes */
+    min-width: 120px;
 }
 
 .btn-sm {
-    padding: 0.5rem 1rem;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-normal);
+    padding: 0.5rem 1rem; /* Tamaño estándar para botones pequeños */
+    font-size: var(--font-size-sm); /* Tamaño pequeño estándar */
+    font-weight: var(--font-weight-normal); /* Peso normal */
+    min-height: 38px; /* Tamaño mínimo incluso para botones pequeños */
+    min-width: 80px;
 }
 
 /* ============================================
@@ -672,23 +727,45 @@ body {
 .table thead {
     background: rgba(13, 110, 253, 0.95);
     color: white;
+    font-size: var(--font-size-lg); /* Más grande para mejor legibilidad */
+    font-weight: var(--font-weight-semibold);
+}
+
+.table thead th {
+    padding: 1rem 1.25rem; /* Aumentado para mejor espaciado */
+    font-size: var(--font-size-lg);
 }
 
 .table tbody tr {
     transition: all 0.3s ease;
 }
 
+.table tbody td {
+    padding: 1rem 1.25rem; /* Aumentado para mejor espaciado */
+    font-size: var(--font-size-base);
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table tbody tr:last-child {
+    border-bottom: none;
+}
+
 .table tbody tr:hover {
     background: var(--bg-secondary);
-    transform: scale(1.01);
+    transform: translateX(2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .table td, .table th {
-    padding: 1rem;
+    padding: 1rem 1.25rem; /* Aumentado horizontalmente */
     border-color: var(--border-color);
     font-size: var(--font-size-base);
     font-family: var(--font-family-base);
-    line-height: 1.6;
+    line-height: 1.7; /* Aumentado de 1.6 */
 }
 
 .table th {
@@ -710,6 +787,11 @@ body {
     padding: var(--spacing-lg);
     margin-bottom: var(--spacing-lg);
     box-shadow: 0 2px 8px var(--shadow-card);
+    transition: all 0.3s ease;
+}
+
+.search-filters:hover {
+    box-shadow: 0 4px 12px var(--shadow-hover);
 }
 
 .search-filters .form-control {
@@ -718,12 +800,20 @@ body {
 
 .filter-badge {
     display: inline-block;
-    background: var(--accent-primary);
+    background: linear-gradient(135deg, var(--accent-primary) 0%, rgba(13, 110, 253, 0.8) 100%);
     color: white;
-    padding: 0.25rem 0.75rem;
+    padding: 0.4rem 0.9rem;
     border-radius: 20px;
     font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
     margin: 0.25rem;
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+    transition: all 0.2s ease;
+}
+
+.filter-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(13, 110, 253, 0.3);
 }
 
 /* ============================================
@@ -936,6 +1026,87 @@ h6 {
     animation: fadeIn 0.5s ease;
 }
 
+/* Animación suave para elementos interactivos */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Mejoras de accesibilidad y UX */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Mejora de contraste para enlaces */
+a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+a:hover {
+    color: #0b5ed7;
+    text-decoration: underline;
+}
+
+/* Mejora de badges */
+.badge {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--border-radius-sm);
+    display: inline-block;
+    line-height: 1.2;
+    transition: all 0.2s ease;
+}
+
+.badge:hover {
+    transform: scale(1.05);
+}
+
+/* Mejora de tarjetas de resumen en resultado */
+.card.text-center {
+    transition: all 0.3s ease;
+}
+
+.card.text-center:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Mejora de responsive para tablas */
+@media (max-width: 768px) {
+    .table-responsive {
+        border-radius: var(--border-radius-md);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .table {
+        min-width: 600px;
+    }
+    
+    .card-empty-state {
+        padding: 2rem 1rem;
+    }
+    
+    .search-filters {
+        padding: var(--spacing-md);
+    }
+}
+
 /* ============================================
    BOTONES DE AYUDA POR SECCIÓN
    ============================================ */
@@ -1025,5 +1196,68 @@ h6 {
 
 .remove-pieza-hidden {
     display: none !important;
+}
+
+/* ============================================
+   ESTILOS PARA CHECKBOXES DE OPTIMIZACIONES
+   ============================================ */
+.form-check-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.form-check-group .form-check {
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+.form-check-group .form-check:hover {
+    background-color: var(--bg-secondary);
+}
+
+.form-check-group .form-check-label {
+    margin-left: 0.5rem;
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    user-select: none;
+}
+
+.form-check-group .form-check-input {
+    cursor: pointer;
+    margin-top: 0.25rem;
+}
+
+.form-check-group .form-check-input:checked {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+/* Estilos compartidos para formularios de optimizaciones */
+.optimizaciones-container {
+    max-height: 500px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+}
+
+.optimizacion-card {
+    background-color: white;
+}
+
+.label-clickable {
+    cursor: pointer;
+}
+
+.checkbox-column {
+    width: 50px;
+}
+
+.costo-total-large {
+    font-size: 1.1rem;
+}
+
+.costo-total-xl {
+    font-size: 1.2rem;
 }
 
