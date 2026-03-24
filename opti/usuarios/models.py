@@ -24,6 +24,17 @@ class PerfilUsuario(models.Model):
         default='auto',
         help_text="Tema de color preferido"
     )
+    tamanio_fuente = models.CharField(
+        max_length=10,
+        choices=[
+            ('small', 'Pequeño'),
+            ('normal', 'Normal'),
+            ('large', 'Grande'),
+            ('xlarge', 'Extra Grande')
+        ],
+        default='normal',
+        help_text="Tamaño de fuente preferido para facilitar la lectura",
+    )
     tutorial_completado = models.BooleanField(
         default=False,
         help_text="Indica si el usuario ha completado el tutorial inicial"

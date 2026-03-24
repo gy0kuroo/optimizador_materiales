@@ -1,19 +1,6 @@
-al cambiar al modo oscuro el texto del formulario de eliminar (el cual se puede visualizar en el historial de optimizaciones) queda en negro ,por lo cual  no se logra visualizar bien la letra 
-también ocurre con "seleccionar periodo" en el apartado de estadísticas.
-
-en el forms de la optimización en el modo oscuro la  letra queda  en gris lo cual también dificulta su visualización
-ejemplo: fecha,hora,tablero,etc.
-
-proyectos también tiene el mismo problema al apretar la opción "VER"
 
 
 
-el software arroja  el siguiente error al querer eliminar un cliente:ValueError at /opticut/clientes/eliminar/2/
-The view opticut.views.eliminar_cliente didn't return an HttpResponse object. It returned None instead.
 
-el software arroja el siguiente error al intentar crear un presupuesto:IntegrityError at /opticut/presupuestos/crear/
-NOT NULL constraint failed: opticut_presupuesto.usuario_id
 
-corregir formulario de plantillas
 
-el tutorial tampoco se logra visualizar bien con el modo oscuro

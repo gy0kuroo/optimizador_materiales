@@ -56,6 +56,19 @@ class PerfilForm(forms.ModelForm):
             'required': 'Selecciona un tema preferido.'
         }
     )
+
+    tamanio_fuente = forms.ChoiceField(
+        label="Tamaño de letra",
+        choices=[
+            ('small', 'Pequeño'),
+            ('normal', 'Normal'),
+            ('large', 'Grande'),
+            ('xlarge', 'Extra grande')
+        ],
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        help_text="Aumenta o reduce el tamaño de texto para mayor comodidad de lectura."
+    )
     
     # ===== CONFIGURACIÓN DE OPTIMIZACIÓN =====
     unidad_medida_predeterminada = forms.ChoiceField(

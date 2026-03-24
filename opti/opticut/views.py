@@ -2366,15 +2366,15 @@ def eliminar_cliente(request, pk):
         )
         return redirect('opticut:lista_clientes')
         
-        if request.method == "POST":
-            nombre = cliente.nombre
-            cliente.delete()
-            messages.success(request, f'✅ Cliente "{nombre}" eliminado exitosamente.')
-            return redirect('opticut:lista_clientes')
-        
-        return render(request, 'opticut/eliminar_cliente.html', {
-            'cliente': cliente,
-        })
+    if request.method == "POST":
+        nombre = cliente.nombre
+        cliente.delete()
+        messages.success(request, f'✅ Cliente "{nombre}" eliminado exitosamente.')
+        return redirect('opticut:lista_clientes')
+    
+    return render(request, 'opticut/eliminar_cliente.html', {
+        'cliente': cliente,
+    })
 
 
 @login_required
@@ -2458,6 +2458,7 @@ def crear_presupuesto(request):
         form = PresupuestoForm(request.POST, user=request.user)
         if form.is_valid():
             presupuesto = form.save(commit=False)
+            presupuesto.usuario = request.user
             
             # Manejar nombre de cliente nuevo
             nombre_cliente_nuevo = form.cleaned_data.get('nombre_cliente_nuevo', '').strip()

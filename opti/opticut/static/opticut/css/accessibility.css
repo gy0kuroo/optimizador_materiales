@@ -248,6 +248,59 @@ small, .small {
     padding: 1.25rem 1.5rem;
 }
 
+/* Estilos para modal de timeout de sesión en modo oscuro */
+[data-theme="dark"] #session-warning-modal .modal-content {
+    background-color: var(--bg-primary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] #session-warning-modal .modal-header {
+    background-color: var(--warning-dark) !important;
+    border-bottom-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] #session-warning-modal .modal-header .modal-title {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] #session-warning-modal .modal-body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] #session-warning-modal .modal-body strong {
+    color: var(--text-accent);
+}
+
+[data-theme="dark"] #session-warning-modal .modal-footer {
+    background-color: var(--bg-secondary);
+    border-top-color: var(--border-color);
+}
+
+[data-theme="dark"] #session-warning-modal .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--text-on-primary);
+}
+
+[data-theme="dark"] #session-warning-modal .btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+[data-theme="dark"] #session-warning-modal .btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] #session-warning-modal .btn-secondary:hover {
+    background-color: var(--secondary-hover);
+    border-color: var(--secondary-hover);
+}
+
 /* Mejorar visibilidad de breadcrumbs si existen */
 .breadcrumb {
     font-size: var(--font-size-base);

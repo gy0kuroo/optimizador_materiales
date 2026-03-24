@@ -67,6 +67,12 @@
     function resetTimer() {
         if (timeoutSeconds === null || timeoutSeconds === 0) return;
         
+        // Si la advertencia está mostrada, NO reiniciar automáticamente
+        // Solo reiniciar cuando el usuario haga clic en "Continuar"
+        if (warningShown) {
+            return;
+        }
+        
         clearTimeout(inactivityTimer);
         clearTimeout(warningTimer);
         if (countdownInterval) {
@@ -229,6 +235,8 @@
                     }
                 }
             }
+            // Resetear el flag de advertencia y reiniciar timer
+            warningShown = false;
             resetTimer();
         } else if (e.target && e.target.id === 'session-logout-now') {
             e.preventDefault();

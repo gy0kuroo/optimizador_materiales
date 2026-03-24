@@ -184,6 +184,28 @@ body {
     margin: 0.5rem 0;
 }
 
+/* Drop-down de opciones generales (historial) */
+[data-theme="dark"] .dropdown-menu {
+    background-color: #2a2a2e !important;
+    border: 1px solid #495057 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45); 
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: #e9ecef !important;
+}
+
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .dropdown-item:focus {
+    background-color: rgba(77, 171, 247, 0.25) !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .dropdown-divider {
+    border-color: #495057 !important;
+}
+
+
 .navbar-toggler-custom {
     background: rgba(255,255,255,0.2);
     border: 1px solid rgba(255,255,255,0.3);
@@ -326,8 +348,20 @@ body {
 
 [data-theme="dark"] .form-control,
 [data-theme="dark"] .form-select {
-    background-color: #ffffff;
-    color: #212529;
+    background-color: #2f2f2f;
+    color: #e9ecef;
+    border-color: #495057;
+}
+
+.form-control::placeholder,
+.form-select::placeholder {
+    color: #adb5bd;
+    opacity: 1;
+}
+
+[data-theme="dark"] .form-control::placeholder,
+[data-theme="dark"] .form-select::placeholder {
+    color: #ced4da;
 }
 
 .form-control:focus, .form-select:focus {
@@ -340,8 +374,10 @@ body {
 
 [data-theme="dark"] .form-control:focus,
 [data-theme="dark"] .form-select:focus {
-    background-color: #ffffff;
-    color: #212529;
+    background-color: #2f2f2f;
+    color: #e9ecef;
+    border-color: #4dabf7;
+    box-shadow: 0 0 0 0.2rem rgba(77, 171, 247, 0.4);
 }
 
 .form-label {
@@ -365,6 +401,88 @@ body {
     line-height: 1.5;
     font-family: var(--font-family-base);
     cursor: pointer;
+}
+
+/* Dark mode fixes for better visibility */
+[data-theme="dark"] label,
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .card-title,
+[data-theme="dark"] .card-text,
+[data-theme="dark"] .stats-title,
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] .breadcrumb-item,
+[data-theme="dark"] .dropdown-item,
+[data-theme="dark"] .form-check-label,
+[data-theme="dark"] .piezas-summary,
+[data-theme="dark"] .piezas-details {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] option {
+    color: #212529;
+    background-color: #ffffff;
+}
+
+[data-theme="dark"] .form-text,
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .badge {
+    color: #d6d6d6 !important;
+}
+
+[data-theme="dark"] .card,
+[data-theme="dark"] .optimizacion-card,
+[data-theme="dark"] .bg-light,
+[data-theme="dark"] .pieza-form,
+[data-theme="dark"] .card-body {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .card-body p,
+[data-theme="dark"] .card-body .lead,
+[data-theme="dark"] .alert,
+[data-theme="dark"] .optimizacion-card .card-text,
+[data-theme="dark"] .optimizacion-card .card-title,
+[data-theme="dark"] .form-text,
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .lista-piezas,
+[data-theme="dark"] .piezas-summary,
+[data-theme="dark"] .piezas-details {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .bg-light,
+[data-theme="dark"] .pieza-form {
+    background-color: #2f2f2f !important;
+}
+
+[data-theme="dark"] .text-muted {
+    color: #ced4da !important;
+}
+
+
+/* Intro.js tutorial fixes for dark mode */
+[data-theme="dark"] .introjs-tooltip {
+    background-color: var(--card-bg) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .introjs-tooltiptext {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .introjs-button {
+    background-color: var(--accent-primary) !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .introjs-skipbutton {
+    color: var(--text-secondary) !important;
 }
 
 /* Selector de medidas predefinidas - Dropdown */
@@ -898,6 +1016,34 @@ img {
 }
 
 /* ============================================
+   ESCALADO DE FUENTE POR PREFERENCIA DEL USUARIO
+   ============================================ */
+
+html {
+    --font-scale: 1;
+}
+
+body[data-font-size="small"] {
+    --font-scale: 0.88;
+}
+
+body[data-font-size="normal"] {
+    --font-scale: 1;
+}
+
+body[data-font-size="large"] {
+    --font-scale: 1.13;
+}
+
+body[data-font-size="xlarge"] {
+    --font-scale: 1.26;
+}
+
+body {
+    font-size: calc(var(--font-size-base, 1rem) * var(--font-scale));
+}
+
+/* ============================================
    TIPOGRAFÍA - JERARQUÍA
    ============================================ */
 
@@ -925,6 +1071,144 @@ h3 {
     line-height: 1.4;
     margin-bottom: var(--spacing-sm);
     color: var(--text-primary);
+}
+
+/* ============================================
+   ACCESIBILIDAD PARA USUARIOS 50+
+   ============================================ */
+:root {
+    --font-size-base: 1.16rem;
+    --font-size-input: 1.06rem;
+    --font-size-label: 1.06rem;
+    --spacing-sm: 1.1rem;
+    --spacing-md: 1.4rem;
+    --border-radius-md: 10px;
+}
+
+body {
+    font-size: var(--font-size-base);
+}
+
+.form-control,
+.form-select,
+textarea {
+    font-size: var(--font-size-input);
+    min-height: 50px;
+    border-radius: var(--border-radius-md);
+    padding: 0.85rem 1rem;
+}
+
+.form-label,
+label,
+.card-title,
+.card-text {
+    font-size: 1.05rem;
+}
+
+.card-header {
+    font-size: 1.15rem;
+    padding: 1rem 1.2rem;
+}
+
+.btn,
+.btn-link {
+    min-height: 48px;
+    font-size: 1.05rem;
+    padding: 0.78rem 1.2rem;
+    border-radius: 10px;
+}
+
+.btn-primary,
+.btn-info,
+.btn-success,
+.btn-danger,
+.btn-warning {
+    box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+}
+
+.card,
+.optimizacion-card,
+.pieza-form,
+.form-check,
+.dropdown-menu {
+    border-width: 1.8px;
+}
+
+/* Contraste adicional para elementos en modo oscuro */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] textarea {
+    background-color: #31343a;
+    color: #f0f2f5;
+    border-color: #6c757d;
+}
+
+[data-theme="dark"] .btn-light {
+    background-color: #495057;
+    color: #f8f9fa;
+    border-color: #6c757d;
+}
+
+[data-theme="dark"] .card-header.bg-success, 
+[data-theme="dark"] .card-header.bg-info,
+[data-theme="dark"] .card-header.bg-primary {
+    background-image: none;
+    opacity: 0.97;
+}
+
+[data-theme="dark"] .dropdown-menu {
+    background: #2e3138;
+    border-color: #6c757d;
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: #f0f2f5;
+}
+
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .dropdown-item:focus {
+    background-color: rgba(77, 171, 247, 0.3);
+    color: #ffffff;
+}
+
+/* Info justo arriba del botón principal, mejorar foco */
+.btn-lg {
+    font-weight: 700;
+}
+
+/* pasos del tutorial o ayuda rápida */
+.btn-ayuda-seccion {
+    width: auto;
+    min-width: 120px;
+    font-size: 0.97rem;
+}
+
+/* Ajustes responsivos para móviles (mejor visibilidad y botones táctiles) */
+@media (max-width: 768px) {
+    .btn,
+    .btn-link {
+        font-size: 0.98rem;
+        min-height: 42px;
+        padding: 0.62rem 0.92rem;
+    }
+    .form-control,
+    .form-select,
+    textarea {
+        font-size: 1rem;
+        min-height: 46px;
+        padding: 0.72rem 0.9rem;
+    }
+    .navbar-nav .nav-link,
+    .breadcrumb-item a,
+    .dropdown-item {
+        font-size: 0.95rem;
+    }
+    .card-body {
+        padding: 1.1rem;
+    }
+    .card-header {
+        font-size: 1.04rem;
+    }
 }
 
 h4 {
