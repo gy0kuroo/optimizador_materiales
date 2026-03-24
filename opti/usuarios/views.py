@@ -102,6 +102,12 @@ def perfil(request):
                     request.session['tema_preferido'] = perfil.tema_preferido
                 else:
                     request.session.pop('tema_preferido', None)
+
+                # Guardar otras preferencias en sesión para consistencia (también en JS localStorage)
+                request.session['unidad_medida_predeterminada'] = perfil.unidad_medida_predeterminada
+                request.session['algoritmo_predeterminado'] = perfil.algoritmo_predeterminado
+                request.session['tamanio_fuente'] = perfil.tamanio_fuente
+
                 messages.success(request, 'Perfil actualizado exitosamente.')
                 return redirect('usuarios:perfil')
         
@@ -162,6 +168,13 @@ def configuracion_sistema(request):
             if perfil_form.is_valid():
                 perfil_form.save()
                 perfil.refresh_from_db()
+
+                # Sincronizar preferencias de configuración de sistema a sesión
+                request.session['unidad_medida_predeterminada'] = perfil.unidad_medida_predeterminada
+                request.session['algoritmo_predeterminado'] = perfil.algoritmo_predeterminado
+                request.session['tamanio_fuente'] = perfil.tamanio_fuente
+                request.session['tema_preferido'] = perfil.tema_preferido
+
                 messages.success(request, 'Configuración del sistema actualizada exitosamente.')
                 if response:
                     return response

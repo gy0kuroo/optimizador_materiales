@@ -51,7 +51,7 @@ class PerfilForm(forms.ModelForm):
         label="Tema preferido",
         choices=[('light', 'Claro'), ('dark', 'Oscuro'), ('auto', 'Automático')],
         required=True,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control', 'data-pref-key': 'tema_preferido'}),
         error_messages={
             'required': 'Selecciona un tema preferido.'
         }
@@ -66,7 +66,7 @@ class PerfilForm(forms.ModelForm):
             ('xlarge', 'Extra grande')
         ],
         required=True,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control', 'data-pref-key': 'tamanio_fuente'}),
         help_text="Aumenta o reduce el tamaño de texto para mayor comodidad de lectura."
     )
     
@@ -82,7 +82,7 @@ class PerfilForm(forms.ModelForm):
         ],
         required=True,
         help_text="Unidad de medida que se usará por defecto en nuevas optimizaciones",
-        widget=forms.Select(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-control', 'data-pref-key': 'unidad_medida_predeterminada'})
     )
     
     algoritmo_predeterminado = forms.ChoiceField(
@@ -94,7 +94,7 @@ class PerfilForm(forms.ModelForm):
         ],
         required=True,
         help_text="Algoritmo que se usará por defecto (actualmente solo FFD está implementado)",
-        widget=forms.Select(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-control', 'data-pref-key': 'algoritmo_predeterminado'})
     )
     
     margen_corte_predeterminado = forms.DecimalField(
