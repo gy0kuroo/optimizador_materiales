@@ -17,7 +17,7 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h2 class="text-center mb-4" data-intro-title="Optimizador de Cortes" data-intro="Aquí puedes crear nuevas optimizaciones de corte ingresando las dimensiones del tablero y las piezas que necesitas.">Optimizador de Cortes</h2>
+  <h2 class="text-center mb-4" data-intro-title="Optimizador de Cortes" data-intro="Aquí puedes crear nuevas optimizaciones de corte ingresando las dimensiones del tablero y las piezas que necesitas."></h2>
   
   <form method="post" action="{% url 'opticut:index' %}" id="optimizacion-form" onsubmit="mostrarIndicadorCarga('Procesando optimización... Esto puede tardar unos segundos.');">
     {% csrf_token %}

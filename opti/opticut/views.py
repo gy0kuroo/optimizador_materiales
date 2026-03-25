@@ -34,7 +34,7 @@ def index(request):
         storage = messages.get_messages(request)
         storage.used = True
     
-    PiezaFormSet = formset_factory(PiezaForm, extra=3, max_num=20, validate_max=True)
+    PiezaFormSet = formset_factory(PiezaForm, extra=1, max_num=20, validate_max=True)
 
     if request.method == "POST":
         tablero_form = TableroForm(request.POST, user=request.user)

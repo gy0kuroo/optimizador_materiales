@@ -497,15 +497,82 @@ body {
     color: var(--text-primary) !important;
 }
 
+[data-theme="dark"] .card,
+[data-theme="dark"] .card-body,
+[data-theme="dark"] .card-body span,
+[data-theme="dark"] .card-body strong,
+[data-theme="dark"] .card-body b,
+[data-theme="dark"] .card-body h5,
+[data-theme="dark"] .card-body h4,
+[data-theme="dark"] .card-body h3,
+[data-theme="dark"] .card-body h2,
+[data-theme="dark"] .card-body h1 {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .card-body .text-muted {
+    color: #d9dbe0 !important;
+}
+
+[data-theme="dark"] .table,
+[data-theme="dark"] .table th,
+[data-theme="dark"] .table td {
+    color: #f1f5f9 !important;
+    border-color: #4f5b69 !important;
+}
+
+[data-theme="dark"] .table th {
+    background-color: #1f2934 !important;
+}
+
+[data-theme="dark"] .table-dark {
+    color: #e2e8f0 !important;
+}
+
 [data-theme="dark"] .bg-light,
 [data-theme="dark"] .pieza-form {
     background-color: #2f2f2f !important;
 }
 
 [data-theme="dark"] .text-muted {
-    color: #ced4da !important;
+    color: #e2e8f0 !important;
 }
 
+/* Contraste mejorado para etiquetas de texto de estado en modo oscuro */
+[data-theme="dark"] .text-success {
+    color: #7ddb8a !important;
+}
+
+[data-theme="dark"] .text-danger {
+    color: #ff8b94 !important;
+}
+
+[data-theme="dark"] .text-warning {
+    color: #ffdd57 !important;
+}
+
+[data-theme="dark"] .text-info {
+    color: #72c9ff !important;
+}
+
+[data-theme="dark"] .text-dark {
+    color: #f8f9fa !important;
+}
+
+[data-theme="dark"] .card-header.bg-success,
+[data-theme="dark"] .card-header.bg-info,
+[data-theme="dark"] .card-header.bg-warning,
+[data-theme="dark"] .card-header.bg-danger {
+    background-color: rgba(33, 37, 41, 0.95) !important;
+    border-color: #495057 !important;
+}
+
+[data-theme="dark"] .card-header.bg-success h5,
+[data-theme="dark"] .card-header.bg-info h5,
+[data-theme="dark"] .card-header.bg-warning h5,
+[data-theme="dark"] .card-header.bg-danger h5 {
+    color: #ffffff !important;
+}
 
 /* Intro.js tutorial fixes for dark mode */
 [data-theme="dark"] .introjs-tooltip {
@@ -1065,7 +1132,7 @@ html {
 }
 
 body[data-font-size="small"] {
-    --font-scale: 0.88;
+    --font-scale: 0.8;
 }
 
 body[data-font-size="normal"] {
@@ -1073,11 +1140,39 @@ body[data-font-size="normal"] {
 }
 
 body[data-font-size="large"] {
-    --font-scale: 1.13;
+    --font-scale: 1.35;
 }
 
 body[data-font-size="xlarge"] {
-    --font-scale: 1.26;
+    --font-scale: 1.6;
+}
+
+/* Asegura que los títulos también se amplíen/ reduzcan proporcionalmente */
+body[data-font-size="small"] h1,
+body[data-font-size="small"] h2,
+body[data-font-size="small"] h3,
+body[data-font-size="small"] h4,
+body[data-font-size="small"] h5,
+body[data-font-size="small"] h6 {
+    font-size: calc(var(--font-size-base, 1rem) * 0.75);
+}
+
+body[data-font-size="large"] h1,
+body[data-font-size="large"] h2,
+body[data-font-size="large"] h3,
+body[data-font-size="large"] h4,
+body[data-font-size="large"] h5,
+body[data-font-size="large"] h6 {
+    font-size: calc(var(--font-size-base, 1rem) * 1.44);
+}
+
+body[data-font-size="xlarge"] h1,
+body[data-font-size="xlarge"] h2,
+body[data-font-size="xlarge"] h3,
+body[data-font-size="xlarge"] h4,
+body[data-font-size="xlarge"] h5,
+body[data-font-size="xlarge"] h6 {
+    font-size: calc(var(--font-size-base, 1rem) * 1.7);
 }
 
 body {
@@ -1127,13 +1222,13 @@ h3 {
 }
 
 body {
-    font-size: var(--font-size-base);
+    font-size: calc(var(--font-size-base, 1rem) * var(--font-scale));
 }
 
 .form-control,
 .form-select,
 textarea {
-    font-size: var(--font-size-input);
+    font-size: calc(var(--font-size-input, 1rem) * var(--font-scale));
     min-height: 50px;
     border-radius: var(--border-radius-md);
     padding: 0.85rem 1rem;
@@ -1143,7 +1238,7 @@ textarea {
 label,
 .card-title,
 .card-text {
-    font-size: 1.05rem;
+    font-size: calc(1.05rem * var(--font-scale));
 }
 
 .card-header {
@@ -1200,10 +1295,12 @@ label,
 [data-theme="dark"] .dropdown-menu {
     background: #2e3138;
     border-color: #6c757d;
+    font-size: calc(var(--font-size-base, 1rem) * var(--font-scale));
 }
 
 [data-theme="dark"] .dropdown-item {
     color: #f0f2f5;
+    font-size: calc(var(--font-size-base, 1rem) * var(--font-scale));
 }
 
 [data-theme="dark"] .dropdown-item:hover,
