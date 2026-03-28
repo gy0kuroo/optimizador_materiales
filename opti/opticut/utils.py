@@ -130,7 +130,13 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
 
     # Paso 1: Expandir piezas y ordenarlas (FFD)
     piezas_expandidas = []
-    for w, h, c in piezas:
+    for idx, (w, h, c) in enumerate(piezas):
+        nombre_base = None
+        if nombres_piezas and idx < len(nombres_piezas):
+            nombre_base = nombres_piezas[idx].strip() or f"Pieza {idx+1}"
+        else:
+            nombre_base = f"Pieza {idx+1}"
+
         for _ in range(c):
             area = w * h
             piezas_expandidas.append({
@@ -138,7 +144,8 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                 'alto': h,
                 'area': area,
                 'original': (w, h),
-                'rotada': False
+                'rotada': False,
+                'nombre': nombre_base
             })
     
     piezas_expandidas.sort(key=lambda x: x['area'], reverse=True)
@@ -191,7 +198,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
             nivel = niveles[mejor_nivel_idx]
             x = nivel['x_actual']
             y = nivel['y_inicio']
-            posiciones.append((x, y, w, h, rotada, w_orig, h_orig))
+            posiciones.append((x, y, w, h, rotada, w_orig, h_orig, pieza.get('nombre', f'Pieza')))
             nivel['x_actual'] += w + margen_corte
             return True
         
@@ -206,7 +213,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                     'x_actual': w + margen_corte,
                     'altura': h
                 })
-                posiciones.append((0, y_nuevo_nivel, w, h, rotada, w_orig, h_orig))
+                posiciones.append((0, y_nuevo_nivel, w, h, rotada, w_orig, h_orig, pieza.get('nombre', f'Pieza')))
                 return True
         
         return False
@@ -396,7 +403,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                 
                 if usar_rotada:
                     nuevo_tablero = {
-                        'posiciones': [(0, 0, w_b, h_b, True, w_original, h_original)],
+                        'posiciones': [(0, 0, w_b, h_b, True, w_original, h_original, pieza.get('nombre', f'Pieza'))],
                         'niveles': [{
                             'y_inicio': 0,
                             'x_actual': w_b + margen_corte,
@@ -407,7 +414,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                     orientacion_optima[(w_original, h_original)] = True  # Recordar
                 else:
                     nuevo_tablero = {
-                        'posiciones': [(0, 0, w_a, h_a, False, w_original, h_original)],
+                        'posiciones': [(0, 0, w_a, h_a, False, w_original, h_original, pieza.get('nombre', f'Pieza'))],
                         'niveles': [{
                             'y_inicio': 0,
                             'x_actual': w_a + margen_corte,
@@ -420,7 +427,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                 if w_original + margen_corte <= ancho_tablero and h_original <= alto_tablero:
                     # Cabe con margen
                     nuevo_tablero = {
-                        'posiciones': [(0, 0, w_original, h_original, False, w_original, h_original)],
+                        'posiciones': [(0, 0, w_original, h_original, False, w_original, h_original, pieza.get('nombre', f'Pieza'))],
                         'niveles': [{
                             'y_inicio': 0,
                             'x_actual': w_original + margen_corte,
@@ -430,7 +437,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                 elif w_original <= ancho_tablero and h_original <= alto_tablero:
                     # Cabe sin margen (última pieza)
                     nuevo_tablero = {
-                        'posiciones': [(0, 0, w_original, h_original, False, w_original, h_original)],
+                        'posiciones': [(0, 0, w_original, h_original, False, w_original, h_original, pieza.get('nombre', f'Pieza'))],
                         'niveles': [{
                             'y_inicio': 0,
                             'x_actual': w_original,
@@ -527,18 +534,23 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
         
         # Dibujar piezas
         if modo_plan_corte:
-            # Modo plan de corte: blanco y negro, solo medidas
+            # Modo plan de corte: blanco y negro, solo medidas y nombre de pieza
             for idx, pos_data in enumerate(posiciones):
                 # Manejar diferentes formatos de posiciones
-                if len(pos_data) >= 7:
+                if len(pos_data) >= 8:
+                    x, y, w, h, rotada, w_orig, h_orig, nombre_pieza = pos_data
+                elif len(pos_data) == 7:
                     x, y, w, h, rotada, w_orig, h_orig = pos_data
+                    nombre_pieza = f'Pieza {idx+1}'
                 elif len(pos_data) == 5:
                     x, y, w, h, rotada = pos_data
                     w_orig, h_orig = w, h
+                    nombre_pieza = f'Pieza {idx+1}'
                 else:
                     x, y, w, h = pos_data
                     rotada = False
                     w_orig, h_orig = w, h
+                    nombre_pieza = f'Pieza {idx+1}'
                 
                 # Rectángulo blanco con borde negro
                 rect = patches.Rectangle((x, y), w, h, linewidth=1.5,
@@ -549,16 +561,15 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                 w_orig_mostrar = round(convertir_desde_cm(w_orig, unidad), 1)
                 h_orig_mostrar = round(convertir_desde_cm(h_orig, unidad), 1)
                 
-                # Texto de dimensiones simple
+                # Texto incluye nombre de la pieza + dimensiones
+                texto_dimensiones = f'{nombre_pieza}\n{w_orig_mostrar}×{h_orig_mostrar}'
                 if rotada:
-                    texto_dimensiones = f'{w_orig_mostrar}×{h_orig_mostrar}'
-                else:
-                    texto_dimensiones = f'{w_orig_mostrar}×{h_orig_mostrar}'
+                    texto_dimensiones += '\n(ROTADA 90°)'
                 
                 ax.text(x + w/2, y + h/2, texto_dimensiones,
-                       ha='center', va='center', fontsize=8, 
+                       ha='center', va='center', fontsize=7,
                        fontweight='bold', color='black',
-                       bbox=dict(boxstyle='round,pad=0.2', facecolor='white', 
+                       bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
                                 edgecolor='black', linewidth=0.5, alpha=0.9))
         else:
             # Modo normal: colores y más información
@@ -566,15 +577,20 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
             
             for idx, pos_data in enumerate(posiciones):
                 # Manejar diferentes formatos de posiciones
-                if len(pos_data) >= 7:
+                if len(pos_data) >= 8:
+                    x, y, w, h, rotada, w_orig, h_orig, nombre_pieza = pos_data
+                elif len(pos_data) == 7:
                     x, y, w, h, rotada, w_orig, h_orig = pos_data
+                    nombre_pieza = f'Pieza {idx+1}'
                 elif len(pos_data) == 5:
                     x, y, w, h, rotada = pos_data
                     w_orig, h_orig = w, h
+                    nombre_pieza = f'Pieza {idx+1}'
                 else:
                     x, y, w, h = pos_data
                     rotada = False
                     w_orig, h_orig = w, h
+                    nombre_pieza = f'Pieza {idx+1}'
                 
                 color = colores[idx % len(colores)]
                 
@@ -586,14 +602,13 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                 w_orig_mostrar = round(convertir_desde_cm(w_orig, unidad), 1)
                 h_orig_mostrar = round(convertir_desde_cm(h_orig, unidad), 1)
                 
-                # Mostrar dimensiones con indicador de rotación
+                # Mostrar dimensiones con indicador de rotación y nombre
+                texto_dimensiones = f'{nombre_pieza}\n{w_orig_mostrar}×{h_orig_mostrar}'
                 if rotada:
-                    texto_dimensiones = f'{w_orig_mostrar}×{h_orig_mostrar}\n(ROTADA 90°)'
-                else:
-                    texto_dimensiones = f'{w_orig_mostrar}×{h_orig_mostrar}'
+                    texto_dimensiones += '\n(ROTADA 90°)'
                 
                 ax.text(x + w/2, y + h/2, texto_dimensiones,
-                       ha='center', va='center', fontsize=9 if rotada else 10, 
+                       ha='center', va='center', fontsize=8, 
                        fontweight='bold', color='white',
                        bbox=dict(boxstyle='round,pad=0.3', facecolor='darkgreen' if rotada else 'black', alpha=0.8))
             

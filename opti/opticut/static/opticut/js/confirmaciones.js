@@ -24,6 +24,9 @@
     // Indicador de carga para generación de PDFs/gráficos
     window.mostrarIndicadorCarga = function(mensaje) {
         mensaje = mensaje || 'Generando...';
+        // Si ya hay un overlay activo, eliminarlo antes de crear nuevo
+        window.ocultarIndicadorCarga();
+
         // Crear overlay de carga
         const overlay = document.createElement('div');
         overlay.id = 'loading-overlay';
@@ -53,6 +56,14 @@
         overlay.appendChild(spinner);
         overlay.appendChild(texto);
         document.body.appendChild(overlay);
+
+        // Autoocultar para evitar que la UI quede bloqueada en caso de descargas con attachment
+        if (window._loadingOverlayTimeoutId) {
+            clearTimeout(window._loadingOverlayTimeoutId);
+        }
+        window._loadingOverlayTimeoutId = setTimeout(function() {
+            window.ocultarIndicadorCarga();
+        }, 15000); // 15 segundos
         
         return overlay;
     };
@@ -61,6 +72,56 @@
         const overlay = document.getElementById('loading-overlay');
         if (overlay) {
             overlay.remove();
+        }
+        if (window._loadingOverlayTimeoutId) {
+            clearTimeout(window._loadingOverlayTimeoutId);
+            window._loadingOverlayTimeoutId = null;
+        }
+    };
+
+    window.obtenerNombreArchivoDesdeDisposition = function(contentDisposition, fallback) {
+        if (!contentDisposition) {
+            return fallback;
+        }
+        const filenameMatch = /filename\*=UTF-8''([^;]*)/.exec(contentDisposition) || /filename="?([^";]+)"?/.exec(contentDisposition);
+        if (filenameMatch && filenameMatch[1]) {
+            try {
+                return decodeURIComponent(filenameMatch[1]);
+            } catch (e) {
+                return filenameMatch[1];
+            }
+        }
+        return fallback;
+    };
+
+    window.descargarArchivo = async function(url, mensaje) {
+        try {
+            window.mostrarIndicadorCarga(mensaje || 'Generando archivo... Por favor espera.');
+            const response = await fetch(url, {
+                method: 'GET',
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error('Error en la descarga: ' + response.status + ' ' + response.statusText);
+            }
+
+            const blob = await response.blob();
+            const contentDisposition = response.headers.get('content-disposition');
+            const nombreSugerido = window.obtenerNombreArchivoDesdeDisposition(contentDisposition, url.split('/').pop().split('?')[0]);
+            const enlace = document.createElement('a');
+            const objectUrl = URL.createObjectURL(blob);
+            enlace.href = objectUrl;
+            enlace.download = nombreSugerido || 'descarga';
+            document.body.appendChild(enlace);
+            enlace.click();
+            enlace.remove();
+            URL.revokeObjectURL(objectUrl);
+        } catch (error) {
+            console.error(error);
+            alert('No se pudo descargar el archivo. Intenta de nuevo.');
+        } finally {
+            window.ocultarIndicadorCarga();
         }
     };
 })();
@@ -95,13 +156,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Agregar indicadores de carga a enlaces de descarga
-    const pdfLinks = document.querySelectorAll('a[href*="descargar_pdf"], a[href*="descargar_excel"], a[href*="descargar_png"]');
-    pdfLinks.forEach(function(link) {
-        // Solo agregar si no tiene onclick ya definido
-        if (!link.getAttribute('onclick')) {
-            link.addEventListener('click', function() {
-                window.mostrarIndicadorCarga('Generando archivo... Por favor espera.');
+    // Agregar descarga por AJAX para evitar que el overlay quede bloqueado
+    const descargaLinks = document.querySelectorAll(
+        'a[href*="descargar_pdf"], a[href*="descargar_excel"], a[href*="descargar_png"], a[href$=".pdf"], a[href$=".xlsx"], a[href$=".xls"]'
+    );
+    descargaLinks.forEach(function(link) {
+        // No interceptar el botón de imprimir (abre vista previa / nueva ventana)
+        if (link.href.includes('imprimir_plan_corte') || link.target === '_blank') {
+            return;
+        }
+
+        // Evitar doble manejo si ya está configurado
+        if (!link.dataset.descargaAjax) {
+            link.dataset.descargaAjax = 'true';
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                const mensaje = this.dataset.cargaTexto || 'Descargando archivo... Por favor espera.';
+                window.descargarArchivo(this.href, mensaje);
             });
         }
     });

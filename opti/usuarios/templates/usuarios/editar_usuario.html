@@ -1,0 +1,59 @@
+{% extends 'opticut/base.html' %}
+
+{% block title %}Editar Usuario{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-4">
+    <h2>Editar usuario {{ usuario_obj.username }}</h2>
+    <p>Modifica el nombre, email, contraseña y permisos del usuario.</p>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Información del Usuario</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <h5 class="mb-3">Datos Básicos</h5>
+                {{ form.as_p }}
+
+                <div class="mb-3">
+                    <label class="form-label">Rol actual</label>
+                    <input type="text" class="form-control" value="{{ perfil.rol }}" disabled>
+                </div>
+
+                <hr>
+                
+                <h5 class="mb-3">🔐 Permisos y Funcionalidades</h5>
+                <p class="text-muted">Marca las funcionalidades que el usuario puede usar:</p>
+                
+                <div class="row">
+                    {% for field in permisos_form %}
+                        {% if field.field.widget.input_type == 'checkbox' %}
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    {{ field }}
+                                    <label class="form-check-label" for="{{ field.id_for_label }}">
+                                        {{ field.label }}
+                                    </label>
+                                </div>
+                                {% if field.help_text %}
+                                    <small class="form-text text-muted d-block ms-4">
+                                        {{ field.help_text }}
+                                    </small>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'usuarios:admin_dashboard' %}" class="btn btn-secondary">Volver al Dashboard</a>
+                    <button type="submit" class="btn btn-primary">💾 Guardar cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

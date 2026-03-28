@@ -760,7 +760,7 @@ class PlantillaForm(forms.ModelForm):
             'piezas': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 8,
-                'placeholder': 'Formato: nombre,ancho,alto,cantidad (una por línea)\nEj:\nPuerta,80,200,2\nCajón,40,50,4'
+                'placeholder': 'Formato: nombre,ancho,alto,cantidad (una por línea)\n\nEjemplos:\nPuerta,80,200,2\nCajón,40,50,4\nFondo,85,198,1\nTravesaño,70,2,4\n\nCada línea debe tener EXACTAMENTE 4 valores separados por comas.'
             }),
             'permitir_rotacion': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
@@ -795,13 +795,31 @@ class PlantillaForm(forms.ModelForm):
             if linea.strip():
                 partes = linea.split(',')
                 if len(partes) != 4:
-                    raise forms.ValidationError(f"Formato inválido en línea: {linea}. Use: nombre,ancho,alto,cantidad")
+                    raise forms.ValidationError(
+                        f"❌ Línea inválida: '{linea}'\n\n"
+                        f"Esperado: nombre,ancho,alto,cantidad\n\n"
+                        f"Ejemplo correcto:\n"
+                        f"Puerta,80,200,2"
+                    )
                 try:
-                    float(partes[1].strip())
-                    float(partes[2].strip())
-                    int(partes[3].strip())
-                except ValueError:
-                    raise forms.ValidationError(f"Valores numéricos inválidos en línea: {linea}")
+                    ancho = float(partes[1].strip())
+                    alto = float(partes[2].strip())
+                    cantidad = int(partes[3].strip())
+                    
+                    if ancho <= 0 or alto <= 0 or cantidad <= 0:
+                        raise forms.ValidationError(
+                            f"❌ Valores en línea '{linea}' no pueden ser negativos o cero.\n"
+                            f"Ancho: {ancho}, Alto: {alto}, Cantidad: {cantidad}"
+                        )
+                except ValueError as e:
+                    raise forms.ValidationError(
+                        f"❌ Valores numéricos inválidos en línea: '{linea}'\n\n"
+                        f"Asegúrate de que:\n"
+                        f"- Nombre: texto (puede incluir espacios)\n"
+                        f"- Ancho: número\n"
+                        f"- Alto: número\n"
+                        f"- Cantidad: número entero"
+                    )
                 lineas_validas += 1
         
         if lineas_validas == 0:

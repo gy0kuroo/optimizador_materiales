@@ -18,6 +18,7 @@ urlpatterns = [
     path('toggle-favorito/<int:pk>/', views.toggle_favorito, name='toggle_favorito'),
     path('borrar/<int:pk>/', views.borrar_optimizacion, name='borrar_optimizacion'),
     path('borrar-historial/', views.borrar_historial, name='borrar_historial'),
+    path('borrar-seleccion/', views.borrar_seleccion, name='borrar_seleccion'),
     
     # Descargas
     path('descargar-pdf/<int:pk>/', views.descargar_pdf, name='descargar_pdf'),

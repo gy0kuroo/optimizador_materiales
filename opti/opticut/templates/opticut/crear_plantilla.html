@@ -143,14 +143,20 @@
             </label>
             {{ form.piezas }}
             {% if form.piezas.errors %}
-              <div class="text-danger small">{{ form.piezas.errors }}</div>
+              <div class="alert alert-danger mt-2">{{ form.piezas.errors }}</div>
             {% endif %}
-            <small class="form-text text-muted">
-              Formato: nombre,ancho,alto,cantidad (una pieza por línea)<br>
-              Ejemplo:<br>
+            <small class="form-text text-muted d-block mt-2">
+              <strong>📋 Formato REQUERIDO: nombre,ancho,alto,cantidad</strong><br>
+              Una pieza por línea. Cada línea debe tener EXACTAMENTE 4 valores separados por comas.<br><br>
+              <strong>✅ Ejemplos correctos:</strong><br>
               Puerta,80,200,2<br>
               Cajón,40,50,4<br>
-              Estante,100,30,3
+              Estante,100,30,3<br>
+              Fondo,85,198,1<br><br>
+              <strong>❌ Ejemplos INCORRECTOS:</strong><br>
+              Puerta 80x200 (sin comas) ← No válido<br>
+              Puerta,80,200 (falta cantidad) ← No válido<br>
+              80,200,2 (falta nombre) ← No válido
             </small>
           </div>
         </div>

@@ -12,6 +12,79 @@ class RegistroForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
+
+class UsuarioEdicionForm(forms.ModelForm):
+    password1 = forms.CharField(
+        label='Nueva contraseña',
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        help_text='Solo si deseas cambiar la contraseña'
+    )
+    password2 = forms.CharField(
+        label='Confirmar contraseña',
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        p1 = cleaned_data.get('password1')
+        p2 = cleaned_data.get('password2')
+
+        if p1 or p2:
+            if p1 != p2:
+                raise forms.ValidationError('Las contraseñas no coinciden')
+            if len(p1) < 8:
+                raise forms.ValidationError('La contraseña debe tener al menos 8 caracteres')
+
+        return cleaned_data
+
+
+class PermisosUsuarioForm(forms.ModelForm):
+    """Formulario para editar permisos y funcionalidades del usuario"""
+    
+    class Meta:
+        model = PerfilUsuario
+        fields = [
+            'puede_crear_plantillas',
+            'puede_comparar_optimizaciones',
+            'puede_crear_clientes',
+            'puede_crear_proyectos',
+            'puede_crear_presupuestos',
+            'puede_crear_materiales',
+            'puede_ver_estadisticas',
+            'puede_ver_historial_costos',
+        ]
+        widgets = {
+            'puede_crear_plantillas': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'puede_comparar_optimizaciones': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'puede_crear_clientes': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'puede_crear_proyectos': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'puede_crear_presupuestos': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'puede_crear_materiales': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'puede_ver_estadisticas': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'puede_ver_historial_costos': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+        labels = {
+            'puede_crear_plantillas': 'Crear/Editar Plantillas',
+            'puede_comparar_optimizaciones': 'Comparar Optimizaciones',
+            'puede_crear_clientes': 'Crear/Editar Clientes',
+            'puede_crear_proyectos': 'Crear/Editar Proyectos',
+            'puede_crear_presupuestos': 'Crear/Editar Presupuestos',
+            'puede_crear_materiales': 'Crear/Editar Materiales',
+            'puede_ver_estadisticas': 'Ver Estadísticas',
+            'puede_ver_historial_costos': 'Ver Historial de Costos',
+        }
+
+
 class PerfilForm(forms.ModelForm):
     """Formulario para editar información del perfil"""
     username = forms.CharField(

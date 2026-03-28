@@ -3,6 +3,7 @@ import base64
 import os
 from datetime import timedelta
 from decimal import Decimal
+from functools import wraps
 
 # Imports de Django
 from django.contrib import messages
@@ -10,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.files.base import ContentFile
 from django.db.models import Avg, Count, Sum, Max, Min, Q
 from django.forms import formset_factory
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from django.utils import timezone
@@ -27,8 +28,37 @@ from .utils import (
 )
 from .utils_notificaciones import enviar_notificacion
 
+
+# Decoradores para verificar permisos
+def requiere_permiso(permiso_nombre):
+    """Decorador para verificar si el usuario tiene un permiso específico"""
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            if not request.user.is_authenticated:
+                return redirect('usuarios:login')
+            
+            try:
+                perfil = request.user.perfil
+                permiso_activo = getattr(perfil, permiso_nombre, False)
+                
+                if not permiso_activo:
+                    messages.error(request, f"❌ No tienes permiso para acceder a esta funcionalidad.")
+                    return redirect('opticut:index')
+            except:
+                return redirect('usuarios:login')
+            
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
 @login_required
 def index(request):
+    # Si el usuario es admin, redirigir directo al dashboard de administración
+    if request.user.is_superuser or (hasattr(request.user, 'perfil') and request.user.perfil.rol == 'admin'):
+        return redirect('usuarios:admin_dashboard')
+
     # Limpiar mensajes antiguos al cargar el formulario por primera vez
     if request.method == "GET":
         storage = messages.get_messages(request)
@@ -793,6 +823,29 @@ def borrar_historial(request):
         count = optimizaciones.count()
         optimizaciones.delete()
         messages.success(request, f"Se eliminaron {count} optimizaciones del historial.")
+        return redirect('opticut:historial')
+    else:
+        messages.error(request, "Operación no permitida.")
+        return redirect('opticut:historial')
+
+
+@login_required
+def borrar_seleccion(request):
+    if request.method == "POST":
+        seleccion = request.POST.getlist('seleccion')
+        if not seleccion:
+            messages.warning(request, "No se seleccionó ninguna optimización para borrar.")
+            return redirect('opticut:historial')
+
+        optimizaciones = Optimizacion.objects.filter(id__in=seleccion, usuario=request.user)
+        count = optimizaciones.count()
+        optimizaciones.delete()
+
+        if count > 0:
+            messages.success(request, f"Se eliminaron {count} optimizaciones seleccionadas del historial.")
+        else:
+            messages.warning(request, "No se encontraron optimizaciones válidas para eliminar.")
+
         return redirect('opticut:historial')
     else:
         messages.error(request, "Operación no permitida.")
@@ -1594,6 +1647,7 @@ def duplicar_optimizacion(request, pk):
 
 
 @login_required
+@requiere_permiso('puede_ver_estadisticas')
 def estadisticas(request):
     """
     Vista para mostrar estadísticas, gráficos y top de optimizaciones.
@@ -2161,6 +2215,7 @@ def api_tableros_optimizacion(request, pk):
 # ===== VISTAS DE GESTIÓN DE MATERIALES =====
 
 @login_required
+@requiere_permiso('puede_crear_materiales')
 def lista_materiales(request):
     """
     Lista todos los materiales del usuario y los predefinidos del sistema.
@@ -2185,6 +2240,7 @@ def lista_materiales(request):
 
 
 @login_required
+@requiere_permiso('puede_crear_materiales')
 def crear_material(request):
     """
     Crea un nuevo material.
@@ -2276,6 +2332,7 @@ def eliminar_material(request, pk):
 # ==================== VISTAS DE CLIENTES (FASE 2) ====================
 
 @login_required
+@requiere_permiso('puede_crear_clientes')
 def lista_clientes(request):
     """
     Lista todos los clientes del usuario con búsqueda.
@@ -2302,6 +2359,7 @@ def lista_clientes(request):
 
 
 @login_required
+@requiere_permiso('puede_crear_clientes')
 def crear_cliente(request):
     """
     Crea un nuevo cliente.
@@ -2414,6 +2472,7 @@ def historial_cliente(request, pk):
 # ==================== VISTAS DE PRESUPUESTOS (FASE 2) ====================
 
 @login_required
+@requiere_permiso('puede_crear_presupuestos')
 def lista_presupuestos(request):
     """
     Lista todos los presupuestos del usuario.
@@ -2444,6 +2503,7 @@ def lista_presupuestos(request):
 
 
 @login_required
+@requiere_permiso('puede_crear_presupuestos')
 def crear_presupuesto(request):
     """
     Crea un nuevo presupuesto desde una optimización.
@@ -2789,6 +2849,7 @@ def agregar_optimizaciones_presupuesto(request, pk):
 
 
 @login_required
+@requiere_permiso('puede_ver_historial_costos')
 def historial_costos(request):
     """
     Vista de historial de costos con gráficos y filtros por fecha.
@@ -2939,6 +3000,7 @@ def historial_costos(request):
 # ==================== VISTAS DE PROYECTOS (FASE 3) ====================
 
 @login_required
+@requiere_permiso('puede_crear_proyectos')
 def lista_proyectos(request):
     """
     Lista todos los proyectos del usuario con filtros y búsqueda.
@@ -2967,6 +3029,7 @@ def lista_proyectos(request):
 
 
 @login_required
+@requiere_permiso('puede_crear_proyectos')
 def crear_proyecto(request):
     """
     Crea un nuevo proyecto con opción de agregar optimizaciones.
@@ -3243,6 +3306,7 @@ def agregar_optimizaciones_proyecto(request, pk):
 
 
 @login_required
+@requiere_permiso('puede_comparar_optimizaciones')
 def comparar_optimizaciones(request):
     """
     Vista para seleccionar y comparar dos optimizaciones lado a lado.
@@ -3372,6 +3436,7 @@ def comparar_optimizaciones(request):
 # ==================== VISTAS DE PLANTILLAS (FASE 4) ====================
 
 @login_required
+@requiere_permiso('puede_crear_plantillas')
 def lista_plantillas(request):
     """
     Lista todas las plantillas del usuario y las predefinidas del sistema.
@@ -3403,6 +3468,7 @@ def lista_plantillas(request):
 
 
 @login_required
+@requiere_permiso('puede_crear_plantillas')
 def crear_plantilla(request):
     """
     Crea una nueva plantilla desde una optimización o desde cero.

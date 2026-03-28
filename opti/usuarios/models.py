@@ -17,6 +17,18 @@ class PerfilUsuario(models.Model):
         blank=True, 
         help_text="Tiempo de inactividad antes de cerrar sesión (en minutos). Déjalo vacío para usar el valor por defecto (30 min). 0 para desactivar."
     )
+
+    # Rol de usuario dentro de la aplicación
+    ROL_CHOICES = [
+        ('usuario', 'Usuario'),
+        ('admin', 'Administrador'),
+    ]
+    rol = models.CharField(
+        max_length=20,
+        choices=ROL_CHOICES,
+        default='usuario',
+        help_text="Rol del usuario en el sistema"
+    )
     # Tema preferido (opcional, para futuras mejoras)
     tema_preferido = models.CharField(
         max_length=10, 
@@ -152,6 +164,48 @@ class PerfilUsuario(models.Model):
     notificar_errores = models.BooleanField(
         default=True,
         help_text="Notificar cuando hay errores en la optimización"
+    )
+    
+    # ===== PERMISOS Y FUNCIONALIDADES PERSONALIZADAS =====
+    # Funcionalidades activadas (por defecto todas activas)
+    puede_crear_plantillas = models.BooleanField(
+        default=True,
+        help_text="Permitir crear y editar plantillas"
+    )
+    
+    puede_comparar_optimizaciones = models.BooleanField(
+        default=True,
+        help_text="Permitir acceso a herramienta de comparación"
+    )
+    
+    puede_crear_clientes = models.BooleanField(
+        default=True,
+        help_text="Permitir crear y editar clientes"
+    )
+    
+    puede_crear_proyectos = models.BooleanField(
+        default=True,
+        help_text="Permitir crear y editar proyectos"
+    )
+    
+    puede_crear_presupuestos = models.BooleanField(
+        default=True,
+        help_text="Permitir crear y editar presupuestos"
+    )
+    
+    puede_crear_materiales = models.BooleanField(
+        default=True,
+        help_text="Permitir crear y editar materiales"
+    )
+    
+    puede_ver_estadisticas = models.BooleanField(
+        default=True,
+        help_text="Permitir acceso a estadísticas"
+    )
+    
+    puede_ver_historial_costos = models.BooleanField(
+        default=True,
+        help_text="Permitir acceso a historial de costos"
     )
     
     fecha_creacion = models.DateTimeField(auto_now_add=True)

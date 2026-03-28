@@ -95,39 +95,46 @@
     </form>
   </div>
 
-  <!-- Botón Borrar Historial -->
-  <div class="text-end mb-3 fade-in">
-    <form method="POST" action="{% url 'opticut:borrar_historial' %}" class="d-inline">
-      {% csrf_token %}
-      <button type="submit" 
-              class="btn btn-danger" 
-              onclick="return confirm('¿Seguro que deseas borrar todo tu historial? Esta acción no se puede deshacer.')">
-        Borrar Todo el Historial
-      </button>
-    </form>
-  </div>
-
   <!-- Lista de Optimizaciones -->
   {% if optimizaciones_con_piezas %}
-    <div class="row">
+    <form method="POST" action="{% url 'opticut:borrar_seleccion' %}" id="form-borrar-seleccion">
+      {% csrf_token %}
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="select-todos-btn">Seleccionar todos</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect-todos-btn">Deseleccionar todos</button>
+        </div>
+        <button type="submit" class="btn btn-danger" id="btn-borrar-seleccion" disabled
+                onclick="return confirm('¿Estás seguro de que deseas borrar las optimizaciones seleccionadas? Esta acción no se puede deshacer.')">
+          Borrar seleccionadas
+        </button>
+      </div>
+      <div class="row">
       {% for item in optimizaciones_con_piezas %}
         {% with optimizacion=item.optimizacion piezas=item.piezas %}
         <div class="col-md-6 col-lg-4 mb-4 fade-in">
           <div class="optimizacion-card">
             {% if optimizacion.imagen %}
               <div class="chart-container chart-container-clickable" 
-                   onclick="abrirModalImagen('{{ optimizacion.imagen.url }}', {{ optimizacion.id }})">
+                   onclick="abrirModalImagen('{{ optimizacion.imagen.url }}', {{ optimizacion.id }}, '{{ item.numero }}')">
                 <img src="{{ optimizacion.imagen.url }}" 
                      class="card-img-top chart-thumbnail" 
-                     alt="Optimización #{{ optimizacion.id }}">
-                <div class="chart-overlay">
+                     alt="Optimización #{{ item.numero }}">                <div class="chart-overlay">
                   <span class="chart-hint">🔍 Click para ver en pantalla completa</span>
                 </div>
               </div>
             {% endif %}
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="card-title mb-0">Optimización #{{ item.numero }}</h5>
+                <div class="form-check">
+                  <input class="form-check-input optimizacion-select" type="checkbox" 
+                         name="seleccion" 
+                         id="check-opt-{{ optimizacion.id }}" 
+                         value="{{ optimizacion.id }}">
+                  <label class="form-check-label" for="check-opt-{{ optimizacion.id }}">
+                    Optimización #{{ item.numero }}
+                  </label>
+                </div>
                 <button type="button" 
                         class="btn btn-sm p-0 border-0 bg-transparent favorito-btn align-self-center" 
                         data-optimizacion-id="{{ optimizacion.id }}"
@@ -199,17 +206,17 @@
                       </a>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="{% url 'opticut:descargar_png' optimizacion.id %}">
+                      <a class="dropdown-item" href="{% url 'opticut:descargar_png' optimizacion.id %}" data-carga-texto="Generando imagen...">
                          Descargar PNG
                       </a>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="{% url 'opticut:descargar_pdf' optimizacion.id %}?ordenar_por={{ ordenar_por }}">
+                      <a class="dropdown-item" href="{% url 'opticut:descargar_pdf' optimizacion.id %}?ordenar_por={{ ordenar_por }}" data-carga-texto="Descargando PDF...">
                           Descargar PDF
                       </a>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="{% url 'opticut:descargar_excel' optimizacion.id %}?ordenar_por={{ ordenar_por }}">
+                      <a class="dropdown-item" href="{% url 'opticut:descargar_excel' optimizacion.id %}?ordenar_por={{ ordenar_por }}" data-carga-texto="Generando archivo Excel...">
                           Descargar Excel
                       </a>
                     </li>
@@ -232,7 +239,8 @@
         </div>
         {% endwith %}
       {% endfor %}
-    </div>
+      </div>
+    </form>
 
     <!-- Paginador -->
     {% if paginator.num_pages > 1 %}
@@ -338,7 +346,7 @@
     </div>
 
 <script>
-function abrirModalImagen(urlImagen, optimizacionId) {
+function abrirModalImagen(urlImagen, optimizacionId, optimizacionNumero) {
     const modal = new bootstrap.Modal(document.getElementById('modalImagen'));
     const contenido = document.getElementById('modalImagenContenido');
     const titulo = document.getElementById('modalImagenLabel');
@@ -352,8 +360,9 @@ function abrirModalImagen(urlImagen, optimizacionId) {
         .then(data => {
             contenido.innerHTML = '';
             
+            const numeroAMostrar = optimizacionNumero || optimizacionId;
             if (data.imagenes && data.imagenes.length > 0) {
-                titulo.textContent = `Tableros (${data.imagenes.length}) - Optimización #${optimizacionId}`;
+                titulo.textContent = `Tableros (${data.imagenes.length}) - Optimización #${numeroAMostrar}`;
                 
                 data.imagenes.forEach((imgBase64, idx) => {
                     const contenedorImagen = document.createElement('div');
@@ -393,7 +402,8 @@ function abrirModalImagen(urlImagen, optimizacionId) {
         .catch(error => {
             // En caso de error, mostrar la imagen guardada
             contenido.innerHTML = '';
-            titulo.textContent = `Tablero - Optimización #${optimizacionId}`;
+            const numeroAMostrar = optimizacionNumero || optimizacionId;
+            titulo.textContent = `Tablero - Optimización #${numeroAMostrar}`;
             const img = document.createElement('img');
             img.src = urlImagen;
             img.alt = `Optimización #${optimizacionId}`;
@@ -570,6 +580,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 buttonElement.disabled = false;
                 buttonElement.style.opacity = '1';
             });
+        });
+
+        const selectTodosBtn = document.getElementById('select-todos-btn');
+        const deselectTodosBtn = document.getElementById('deselect-todos-btn');
+        const checkboxes = document.querySelectorAll('.optimizacion-select');
+        const btnBorrarSeleccion = document.getElementById('btn-borrar-seleccion');
+
+        function actualizarEstadoBotonBorrar() {
+            const algunosSeleccionados = Array.from(checkboxes).some(chk => chk.checked);
+            btnBorrarSeleccion.disabled = !algunosSeleccionados;
+        }
+
+        selectTodosBtn.addEventListener('click', function() {
+            checkboxes.forEach(chk => chk.checked = true);
+            actualizarEstadoBotonBorrar();
+        });
+
+        deselectTodosBtn.addEventListener('click', function() {
+            checkboxes.forEach(chk => chk.checked = false);
+            actualizarEstadoBotonBorrar();
+        });
+
+        checkboxes.forEach(chk => {
+            chk.addEventListener('change', actualizarEstadoBotonBorrar);
         });
     });
 });

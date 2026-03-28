@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import User
@@ -11,19 +11,132 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
-from .forms import RegistroForm, PerfilForm, CambiarPasswordForm
+from .forms import RegistroForm, PerfilForm, UsuarioEdicionForm, PermisosUsuarioForm, CambiarPasswordForm
 from .models import PerfilUsuario
 
 def registro(request):
     if request.method == "POST":
         form = RegistroForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            # Asegurar la existencia de perfil
+            PerfilUsuario.objects.get_or_create(usuario=user)
             messages.success(request, '¡Cuenta creada exitosamente! Por favor inicia sesión.')
             return redirect('usuarios:login')
     else:
         form = RegistroForm()
     return render(request, 'usuarios/registro.html', {'form': form})
+
+
+def es_admin(usuario):
+    if not usuario.is_authenticated:
+        return False
+    if usuario.is_superuser:
+        return True
+    try:
+        return usuario.perfil.rol == 'admin'
+    except PerfilUsuario.DoesNotExist:
+        return False
+
+
+@login_required
+@user_passes_test(es_admin)
+def admin_dashboard(request):
+    usuarios = User.objects.all().order_by('username')
+
+    if request.method == 'POST' and 'crear_usuario' in request.POST:
+        form = RegistroForm(request.POST)
+        rol = request.POST.get('rol', 'usuario')
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_staff = (rol == 'admin')
+            user.save()
+            perfil, creado = PerfilUsuario.objects.get_or_create(usuario=user)
+            if not creado:
+                perfil.rol = rol
+            else:
+                perfil.rol = rol
+            perfil.save()
+            messages.success(request, f"Usuario '{user.username}' creado con rol '{rol}'.")
+            return redirect('usuarios:admin_dashboard')
+        else:
+            messages.error(request, 'Por favor corrige los errores en el formulario de creación.')
+    else:
+        form = RegistroForm()
+
+    return render(request, 'usuarios/admin_dashboard.html', {
+        'usuarios': usuarios,
+        'form': form
+    })
+
+
+@login_required
+@user_passes_test(es_admin)
+def eliminar_usuario(request, pk):
+    usuario = get_object_or_404(User, pk=pk)
+    if usuario == request.user:
+        messages.error(request, 'No puedes eliminar tu propia cuenta desde aquí.')
+        return redirect('usuarios:admin_dashboard')
+
+    usuario.delete()
+    messages.success(request, f"Usuario {usuario.username} eliminado.")
+    return redirect('usuarios:admin_dashboard')
+
+
+@login_required
+@user_passes_test(es_admin)
+def editar_usuario(request, pk):
+    usuario = get_object_or_404(User, pk=pk)
+    
+    # Obtener o crear el perfil del usuario
+    try:
+        perfil = usuario.perfil
+    except PerfilUsuario.DoesNotExist:
+        perfil = PerfilUsuario.objects.create(usuario=usuario)
+
+    if request.method == 'POST':
+        form = UsuarioEdicionForm(request.POST, instance=usuario)
+        permisos_form = PermisosUsuarioForm(request.POST, instance=perfil)
+        
+        if form.is_valid() and permisos_form.is_valid():
+            form.save()
+            permisos_form.save()
+            password = form.cleaned_data.get('password1')
+            if password:
+                usuario.set_password(password)
+                usuario.save()
+            messages.success(request, f"Usuario '{usuario.username}' actualizado correctamente.")
+            return redirect('usuarios:admin_dashboard')
+        else:
+            messages.error(request, 'Por favor corrige los errores del formulario.')
+    else:
+        form = UsuarioEdicionForm(instance=usuario)
+        permisos_form = PermisosUsuarioForm(instance=perfil)
+
+    return render(request, 'usuarios/editar_usuario.html', {
+        'usuario_obj': usuario,
+        'form': form,
+        'permisos_form': permisos_form,
+        'perfil': perfil,
+    })
+
+
+@login_required
+@user_passes_test(es_admin)
+def actualizar_rol(request, pk):
+    if request.method == 'POST':
+        usuario = get_object_or_404(User, pk=pk)
+        rol = request.POST.get('rol', 'usuario')
+        perfil, _ = PerfilUsuario.objects.get_or_create(usuario=usuario)
+        perfil.rol = rol
+        perfil.save()
+        if rol == 'admin':
+            usuario.is_staff = True
+        else:
+            usuario.is_staff = False
+        usuario.save()
+        messages.success(request, f"Rol del usuario {usuario.username} actualizado a {rol}.")
+    return redirect('usuarios:admin_dashboard')
 
 
 def login_view(request):
