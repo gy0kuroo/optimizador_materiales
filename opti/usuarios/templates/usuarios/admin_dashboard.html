@@ -2,95 +2,6 @@
 
 {% block title %}Admin Dashboard{% endblock %}
 
-{% block extra_css %}
-<style>
-.admin-user-table {
-    width: 100%;
-    border: 1px solid var(--border-color);
-    border-collapse: collapse;
-    background-color: var(--card-bg);
-    color: var(--text-primary) !important;
-    font-size: var(--font-size-base);
-}
-.admin-user-table thead th {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary) !important;
-    border: 1px solid var(--border-color);
-    padding: 0.75rem 0.85rem;
-}
-.admin-user-table tbody td {
-    border: 1px solid var(--border-color);
-    color: var(--text-primary) !important;
-    padding: 0.75rem 0.85rem;
-}
-.admin-user-table tbody tr:nth-child(odd) {
-    background: var(--bg-secondary);
-}
-.admin-user-table tbody tr:nth-child(even) {
-    background: var(--bg-primary);
-}
-
-/* Ajuste para botones de acciones */
-.admin-action-btn {
-    min-width: 100px;
-    margin-bottom: 0.25rem;
-}
-
-@media (max-width: 992px) {
-    .admin-user-table {
-        display: block;
-        overflow-x: auto;
-    }
-}
-
-[data-theme="dark"] .admin-user-table {
-    background-color: #1e2530 !important;
-    color: #e9ecef !important;
-    border-color: #495057 !important;
-}
-
-[data-theme="dark"] .admin-user-table thead th {
-    background-color: #222e3d !important;
-    color: #e9ecef !important;
-    border-color: #495057 !important;
-}
-
-[data-theme="dark"] .admin-user-table tbody td {
-    background-color: #1f2835 !important;
-    color: #dce4ee !important;
-    border-color: #495057 !important;
-}
-
-[data-theme="dark"] .admin-user-table tbody tr:nth-child(odd) {
-    background: #1a2130 !important;
-}
-
-[data-theme="dark"] .admin-user-table tbody tr:nth-child(even) {
-    background: #1f2835 !important;
-}
-
-[data-theme="dark"] .btn {
-    color: #f8f9fa !important;
-}
-
-[data-theme="dark"] .btn-primary {
-    background-color: #2b6cb0 !important;
-    border-color: #2b6cb0 !important;
-}
-
-[data-theme="dark"] .btn-danger {
-    background-color: #e63d4d !important;
-    border-color: #e63d4d !important;
-}
-
-[data-theme="dark"] .btn-success {
-    background-color: #2f9f5e !important;
-    border-color: #2f9f5e !important;
-}
-
-</style>
-{% endblock %}
-
 {% block content %}
 <h2 class="mt-4">Administración de Usuarios</h2>
 <p>Solo accesible para administradores.</p>
@@ -138,7 +49,7 @@
             <a href="{% url 'usuarios:editar_usuario' u.pk %}" class="btn btn-info btn-sm me-1 admin-action-btn">Editar</a>
             <form method="post" action="{% url 'usuarios:actualizar_rol' u.pk %}" class="d-inline">
               {% csrf_token %}
-              <select name="rol" class="form-select form-select-sm d-inline w-auto me-1" style="display:inline-block; width: auto;">
+              <select name="rol" class="form-select form-select-sm d-inline w-auto me-1 rol-select-inline">
                 <option value="usuario" {% if u.perfil.rol == 'usuario' %}selected{% endif %}>Usuario</option>
                 <option value="admin" {% if u.perfil.rol == 'admin' %}selected{% endif %}>Admin</option>
               </select>

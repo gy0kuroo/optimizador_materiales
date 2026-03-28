@@ -41,11 +41,12 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="navbar-nav ms-auto d-flex align-items-center">
                     {% if user.is_authenticated %}
-                        {% if user.is_superuser or user.perfil.rol == 'admin' %}
-                            <a class="nav-link" href="{% url 'usuarios:admin_dashboard' %}">🛡️ Admin Dashboard</a>
+                        {% if user.is_superuser or user.perfil and user.perfil.rol == 'admin' %}
+                            <a class="nav-link" href="{% url 'opticut:index' %}" title="Ir a la página principal del optimizador">🏠 Inicio</a>
+                            <a class="nav-link" href="{% url 'usuarios:admin_dashboard' %}" title="Ir al panel de administración de usuarios">🛡️ Admin Dashboard</a>
                         {% else %}
-                            <a class="nav-link" href="{% url 'opticut:index' %}">🏠 Inicio</a>
-                            <a class="nav-link" href="{% url 'opticut:historial' %}">📋 Historial</a>
+                            <a class="nav-link" href="{% url 'opticut:index' %}" title="Ir a la página principal del optimizador">🏠 Inicio</a>
+                            <a class="nav-link" href="{% url 'opticut:historial' %}" title="Ver historial de optimizaciones">📋 Historial</a>
                         {% endif %}
                         <div class="dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
