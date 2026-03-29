@@ -89,13 +89,13 @@ class PerfilForm(forms.ModelForm):
     """Formulario para editar información del perfil"""
     username = forms.CharField(
         label="Nombre de usuario",
-        max_length=150,
+        max_length=15,
         required=True,
-        help_text="Requerido. 150 caracteres o menos. Únicamente letras, dígitos y @/./+/-/_",
+        help_text="Requerido. 15 caracteres o menos. Únicamente letras.",
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         error_messages={
             'required': 'El nombre de usuario es obligatorio.',
-            'max_length': 'El nombre de usuario no puede tener más de 150 caracteres.'
+            'max_length': 'El nombre de usuario no puede tener más de 15 caracteres.'
         }
     )
     email = forms.EmailField(
@@ -349,6 +349,9 @@ class PerfilForm(forms.ModelForm):
         if not username and self.user:
             return self.user.username
         # Verificar que el nuevo username no esté en uso (si se está cambiando)
+        if username and not username.isalpha():
+            raise forms.ValidationError("El nombre de usuario solo puede contener letras.")
+
         if self.user and username and username != self.user.username:
             if User.objects.filter(username=username).exclude(pk=self.user.pk).exists():
                 raise forms.ValidationError("Este nombre de usuario ya está en uso.")

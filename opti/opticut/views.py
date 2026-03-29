@@ -165,19 +165,26 @@ def index(request):
             margen_corte_mm = tablero_form.cleaned_data.get('margen_corte') or 3  # Siempre en mm, default 3
             # Convertir margen de corte de mm a cm (el sistema trabaja en cm)
             margen_corte_cm = margen_corte_mm / 10.0
-            
+
             # Obtener datos de costos
             material_seleccionado = tablero_form.cleaned_data.get('material')
             precio_tablero = tablero_form.cleaned_data.get('precio_tablero')
             mano_obra = tablero_form.cleaned_data.get('mano_obra') or 0
-            
-            # Si se seleccionó un material y no hay precio manual, usar el del material
-            if material_seleccionado and not precio_tablero:
-                precio_tablero = material_seleccionado.precio
-            
-            # Obtener cliente y proyecto si se seleccionaron
-            cliente_seleccionado = tablero_form.cleaned_data.get('cliente')
-            proyecto_seleccionado = tablero_form.cleaned_data.get('proyecto')
+
+            # Limitar acceso a la sección de costos según el permiso del usuario
+            tiene_permiso_costos = (request.user.is_authenticated and hasattr(request.user, 'perfil') and request.user.perfil.puede_ver_historial_costos)
+            if not tiene_permiso_costos:
+                material_seleccionado = None
+                precio_tablero = None
+                mano_obra = 0
+                cliente_seleccionado = None
+                proyecto_seleccionado = None
+            else:
+                # Si se seleccionó un material y no hay precio manual, usar el del material
+                if material_seleccionado and not precio_tablero:
+                    precio_tablero = material_seleccionado.precio
+                cliente_seleccionado = tablero_form.cleaned_data.get('cliente')
+                proyecto_seleccionado = tablero_form.cleaned_data.get('proyecto')
 
             # Extraer nombres de piezas para colores consistentes
             nombres_piezas = [p['nombre'] for p in piezas_con_nombre]
