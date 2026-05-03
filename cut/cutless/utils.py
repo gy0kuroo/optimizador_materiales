@@ -2,6 +2,7 @@
 import io
 import os
 import base64
+from collections import Counter
 from decimal import Decimal
 
 # Imports de terceros
@@ -110,23 +111,185 @@ def obtener_simbolo_area(unidad):
     return simbolos.get(unidad, 'cm²')
 
 
+def pieza_cabe_en_tablero(pieza_ancho_cm, pieza_alto_cm, tablero_ancho_cm, tablero_alto_cm, permitir_rotacion=True):
+    """
+    True si la pieza puede cortarse en una sola placa sin partirla
+    (orientación original u orientación rotada 90° si permitir_rotacion).
+    """
+    w = float(pieza_ancho_cm)
+    h = float(pieza_alto_cm)
+    W = float(tablero_ancho_cm)
+    H = float(tablero_alto_cm)
+    if w <= W and h <= H:
+        return True
+    if permitir_rotacion and h <= W and w <= H:
+        return True
+    return False
+
+
+def _kern_block(w, h, x, y, W, H, m):
+    """
+    Hueco ocupado tras colocar pieza geométrica w×h en (x,y): añade kerf solo
+    si no tocamos borde derecho/inferior del tablero.
+    """
+    bw = float(w + (m if x + float(w) < W - 1e-9 else 0))
+    bh = float(h + (m if y + float(h) < H - 1e-9 else 0))
+    return bw, bh
+
+
+def _subtract_rect(ax, ay, aw, ah, bx, by, bw, bh, eps=1e-9):
+    """
+    Parte el rectángulo A\(A∩B) en hasta 4 rectángulos (ancla arriba-izquierda, eje y hacia abajo).
+    Devuelve lista de tuplas (x, y, w, h).
+    """
+    ix0 = max(ax, bx)
+    iy0 = max(ay, by)
+    ix1 = min(ax + aw, bx + bw)
+    iy1 = min(ay + ah, by + bh)
+    if ix0 >= ix1 - eps or iy0 >= iy1 - eps:
+        return [(ax, ay, aw, ah)]
+    chunks = []
+    if iy0 > ay + eps:
+        chunks.append((ax, ay, aw, iy0 - ay))
+    if ay + ah > iy1 + eps:
+        chunks.append((ax, iy1, aw, ay + ah - iy1))
+    mh = iy1 - iy0
+    if ix0 > ax + eps:
+        chunks.append((ax, iy0, ix0 - ax, mh))
+    if ax + aw > ix1 + eps:
+        chunks.append((ix1, iy0, ax + aw - ix1, mh))
+    return [(x, y, rw, rh) for x, y, rw, rh in chunks if rw > eps and rh > eps]
+
+
+def _merge_free_rects(rects, eps=1e-9):
+    """Elimina rectángulos totalmente contenidos en otro."""
+    rects = [(float(x), float(y), float(w), float(h)) for x, y, w, h in rects if w > eps and h > eps]
+    kept = []
+    n = len(rects)
+    for i in range(n):
+        x, y, w, h = rects[i]
+        x2, y2 = x + w, y + h
+        inside_other = False
+        for j in range(n):
+            if i == j:
+                continue
+            ox, oy, ow, oh = rects[j]
+            if (
+                ox - eps <= x
+                and oy - eps <= y
+                and ox + ow + eps >= x2
+                and oy + oh + eps >= y2
+            ):
+                inside_other = True
+                break
+        if not inside_other:
+            kept.append((x, y, w, h))
+    return kept
+
+
+def _fuse_adjacent_free_rects(rects, eps=1e-5):
+    """
+    Une rectángulos libres del mismo ancho y apilados en vertical (o misma altura,
+    recorridos en horizontal) para que el empaquetador “vea” columnas y bandas enteras
+    y no solo franjas cortadas por colocaciones anteriores.
+    """
+    rects = [(float(x), float(y), float(w), float(h)) for x, y, w, h in rects if w > eps and h > eps]
+    changed = True
+    while changed and len(rects) > 1:
+        changed = False
+        n = len(rects)
+        for i in range(n):
+            for j in range(i + 1, n):
+                ax, ay, aw, ah = rects[i]
+                bx, by, bw, bh = rects[j]
+                if abs(ax - bx) < eps and abs(aw - bw) < eps:
+                    if abs((ay + ah) - by) < eps or abs((by + bh) - ay) < eps:
+                        y0 = min(ay, by)
+                        y1 = max(ay + ah, by + bh)
+                        merged = (ax, y0, aw, y1 - y0)
+                        rects = [merged] + [rects[k] for k in range(n) if k not in (i, j)]
+                        changed = True
+                        break
+                if abs(ay - by) < eps and abs(ah - bh) < eps:
+                    if abs((ax + aw) - bx) < eps or abs((bx + bw) - ax) < eps:
+                        x0 = min(ax, bx)
+                        x1 = max(ax + aw, bx + bw)
+                        merged = (x0, ay, x1 - x0, ah)
+                        rects = [merged] + [rects[k] for k in range(n) if k not in (i, j)]
+                        changed = True
+                        break
+            if changed:
+                break
+    return rects
+
+
+def _normalizar_rects_libres(rects, eps=1e-5):
+    """Contención + fusión de adyacentes hasta estabilizar."""
+    r = _merge_free_rects(rects)
+    prev = None
+    while prev != r:
+        prev = r
+        r = _fuse_adjacent_free_rects(r, eps)
+        r = _merge_free_rects(r)
+    return r
+
+
+def mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad='cm'):
+    """
+    Mensaje para el usuario cuando hubo piezas omitidas por no caber en el tablero.
+    Devuelve None si no hay piezas omitidas.
+    """
+    omitidas = (info_desperdicio or {}).get('piezas_no_colocadas') or []
+    if not omitidas:
+        return None
+
+    solicitadas = (info_desperdicio or {}).get('num_piezas_solicitadas')
+    colocadas = (info_desperdicio or {}).get('num_piezas_colocadas')
+    simbolo = obtener_simbolo_unidad(unidad)
+    cuenta = Counter()
+    for p in omitidas:
+        key = (p.get('nombre', 'Pieza'), float(p.get('ancho_cm', 0)), float(p.get('alto_cm', 0)))
+        cuenta[key] += 1
+    partes_desc = []
+    for (nombre, aw, ah), cnt in cuenta.items():
+        wu = round(convertir_desde_cm(aw, unidad), 2)
+        hu = round(convertir_desde_cm(ah, unidad), 2)
+        partes_desc.append(f"{nombre} ×{cnt} ({wu}×{hu} {simbolo})")
+    partes_desc.sort()
+    max_items = 12
+    texto = "; ".join(partes_desc[:max_items])
+    if len(partes_desc) > max_items:
+        texto += f"; …(+{len(partes_desc) - max_items})"
+    sufix = ""
+    if solicitadas is not None and colocadas is not None:
+        sufix = f" Piezas en el plano: {colocadas} de {solicitadas}."
+    elif colocadas is not None:
+        sufix = f" Piezas en el plano: {colocadas}."
+    return (
+        f"No se pudieron colocar {len(omitidas)} pieza(s) (dimensiones mayores que el tablero en una sola orientación válida): {texto}.{sufix}"
+    )
+
+
 def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_rotacion=True, margen_corte=0.3, nombres_piezas=None, modo_plan_corte=False):
     """
-    Algoritmo First Fit Decreasing (FFD) mejorado para optimización de cortes.
-    Incluye rotación automática de piezas y margen de corte (kerf).
+    Piezas ordenadas por área (FFD) + colocación en rectángulos libres (BSSF): no todas
+    las piezas comparten una misma “fila” rígida; se pueden colocar en huecos bajo más altas
+    cuando la geometría y el kerf lo permiten. Rotación opcional entre orientaciones válidas.
     
     Args:
         piezas: Lista de tuplas (ancho, alto, cantidad) en cm
         ancho_tablero: Ancho del tablero en cm
         alto_tablero: Alto del tablero en cm
         unidad: Unidad de medida para mostrar
-        permitir_rotacion: Si True, intenta rotar piezas 90° para mejor aprovechamiento
-        margen_corte: Margen de corte (kerf) en cm. Se suma al espacio necesario entre piezas
-        nombres_piezas: Lista opcional de nombres (no usado actualmente, para compatibilidad)
+        permitir_rotacion: Si True, intenta rotar piezas 90° si mejora el aprovechamiento
+        margen_corte: Margen de corte (kerf) en cm entre cortes vecinos (no sobre borde placa).
+        nombres_piezas: Lista opcional de nombres para la etiqueta en el gráfico
     """
     AREA_TABLERO = ancho_tablero * alto_tablero
     tableros = []
     area_usada_total = 0
+    piezas_no_colocadas = []
+    num_piezas_solicitadas = sum(int(c) for _, _, c in piezas)
 
     # Paso 1: Expandir piezas y ordenarlas (FFD)
     piezas_expandidas = []
@@ -150,308 +313,132 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
     
     piezas_expandidas.sort(key=lambda x: x['area'], reverse=True)
     
-    # Función auxiliar para calcular desperdicio estimado
-    def calcular_desperdicio_estimado(tablero, ancho, alto):
-        """Calcula el desperdicio estimado de un tablero"""
+    EPS = 1e-9
+    W_bin = float(ancho_tablero)
+    H_bin = float(alto_tablero)
+    _m = float(margen_corte)
+
+    def _calcular_desperdicio(tablero):
         area_usada = 0
         for pos in tablero['posiciones']:
             if len(pos) >= 5:
-                _, _, w, h, _ = pos[:5]  # Obtener w y h
-                area_usada += w * h
+                _, _, wg, hg, _ = pos[:5]
+                area_usada += wg * hg
         return AREA_TABLERO - area_usada
-    
-    # Función auxiliar para intentar colocar una pieza en un tablero
-    def intentar_colocar_pieza(pieza, tablero, w, h, rotada=False):
-        """
-        Intenta colocar una pieza de dimensiones w x h en el tablero.
-        Prioriza llenar niveles existentes con la MISMA altura para maximizar aprovechamiento.
-        """
-        posiciones = tablero['posiciones']
-        niveles = tablero['niveles']
-        w_orig = pieza.get('ancho', w)
-        h_orig = pieza.get('alto', h)
-        
-        mejor_nivel_idx = None
-        mejor_prioridad = float('inf')
-        
-        # Buscar el mejor nivel existente
-        for idx, nivel in enumerate(niveles):
-            x = nivel['x_actual']
-            altura_nivel = nivel['altura']
-            espacio_horizontal = ancho_tablero - x
-            
-            # La pieza debe caber
-            if h > altura_nivel or w > espacio_horizontal:
+
+    def _tb_clonar(tb):
+        return {
+            'posiciones': list(tb['posiciones']),
+            'free_rects': [(float(a), float(b), float(fw), float(fh)) for a, b, fw, fh in tb['free_rects']],
+        }
+
+    def _tb_vacio():
+        return {'posiciones': [], 'free_rects': [(0.0, 0.0, W_bin, H_bin)]}
+
+    def _mejor_ancla_bssf(tablero, wg, hg):
+        """Esquina sup-izquierda del hueco: BSSF dentro de rectángulos libres."""
+        best_key = None
+        anchor = None
+        for fx, fy, fw, fh in tablero['free_rects']:
+            if fx + wg > W_bin + EPS or fy + hg > H_bin + EPS:
                 continue
-            
-            # Prioridad: preferir niveles donde la altura coincide exactamente
-            # Esto maximiza el aprovechamiento al evitar espacios verticales perdidos
-            diferencia_altura = abs(altura_nivel - h)
-            
-            # Dar máxima prioridad a altura exacta (0), luego por espacio sobrante
-            if diferencia_altura < mejor_prioridad:
-                mejor_prioridad = diferencia_altura
-                mejor_nivel_idx = idx
-        
-        # Si encontramos un nivel adecuado, colocar ahí
-        if mejor_nivel_idx is not None:
-            nivel = niveles[mejor_nivel_idx]
-            x = nivel['x_actual']
-            y = nivel['y_inicio']
-            posiciones.append((x, y, w, h, rotada, w_orig, h_orig, pieza.get('nombre', f'Pieza')))
-            nivel['x_actual'] += w + margen_corte
-            return True
-        
-        # Si no cabe en niveles existentes, crear nuevo nivel
-        if niveles:
-            ultimo_nivel = niveles[-1]
-            y_nuevo_nivel = ultimo_nivel['y_inicio'] + ultimo_nivel['altura'] + margen_corte
-            
-            if y_nuevo_nivel + h <= alto_tablero and w <= ancho_tablero:
-                niveles.append({
-                    'y_inicio': y_nuevo_nivel,
-                    'x_actual': w + margen_corte,
-                    'altura': h
-                })
-                posiciones.append((0, y_nuevo_nivel, w, h, rotada, w_orig, h_orig, pieza.get('nombre', f'Pieza')))
-                return True
-        
-        return False
-    
-    # Paso 2: Algoritmo de empaquetado por niveles con rotación (MEJORADO: Best Fit)
-    # Diccionario para recordar la mejor orientación por tamaño de pieza
-    orientacion_optima = {}  # {(w, h): rotada}
-    
+            bw, bh = _kern_block(wg, hg, fx, fy, W_bin, H_bin, _m)
+            if bw > fw + EPS or bh > fh + EPS:
+                continue
+            ss = fw - bw
+            ls = fh - bh
+            key = (ss, ls, fy, fx)
+            if best_key is None or key < best_key:
+                best_key = key
+                anchor = (fx, fy, bw, bh)
+        return anchor
+
+    def _aplicar_pieza(tablero, gx, gy, bw, bh, wg, hg, rotada, wo, ho, nombre):
+        tablero['posiciones'].append((gx, gy, wg, hg, rotada, wo, ho, nombre))
+        nueva = []
+        for fx, fy, fw, fh in tablero['free_rects']:
+            nueva.extend(_subtract_rect(fx, fy, fw, fh, gx, gy, bw, bh))
+        tablero['free_rects'] = _normalizar_rects_libres(nueva)
+
+    def _intentar_colocacion(tb_orig, pieza, wg, hg, rotada):
+        cand = _tb_clonar(tb_orig)
+        pack = _mejor_ancla_bssf(cand, wg, hg)
+        if pack is None:
+            return None
+        gx, gy, bw, bh = pack
+        _aplicar_pieza(
+            cand,
+            gx,
+            gy,
+            bw,
+            bh,
+            wg,
+            hg,
+            rotada,
+            pieza['ancho'],
+            pieza['alto'],
+            pieza.get('nombre', 'Pieza'),
+        )
+        return cand
+
+    def _considerar(best, nuevo_key, payload):
+        if best is None or nuevo_key < best[0]:
+            return (nuevo_key, payload)
+        return best
+
+    # Paso 2: mismo orden FFD pero colocación en rectángulos libres
     for pieza in piezas_expandidas:
         w_original = pieza['ancho']
         h_original = pieza['alto']
-        colocada = False
-        
-        # Si la pieza no es cuadrada y se permite rotación, probar ambas orientaciones
         if permitir_rotacion and w_original != h_original:
-            tam_pieza = (w_original, h_original)
-            
-            # Si ya determinamos la orientación óptima para este tamaño, usarla
-            if tam_pieza in orientacion_optima:
-                usar_rotacion_previa = orientacion_optima[tam_pieza]
-                if usar_rotacion_previa:
-                    w_usar, h_usar = h_original, w_original
-                else:
-                    w_usar, h_usar = w_original, h_original
-                
-                # Intentar colocar con la orientación predeterminada
-                for tablero_idx, tablero in enumerate(tableros):
-                    tablero_temp = {
-                        'posiciones': list(tablero['posiciones']),
-                        'niveles': [dict(n) for n in tablero['niveles']]
-                    }
-                    if intentar_colocar_pieza(pieza, tablero_temp, w_usar, h_usar, rotada=usar_rotacion_previa):
-                        tableros[tablero_idx] = tablero_temp
-                        area_usada_total += w_original * h_original
-                        pieza['rotada'] = usar_rotacion_previa
-                        colocada = True
-                        break
-            
-            # Si no se colocó (primera pieza de este tamaño o no cabe), buscar mejor opción
-            if not colocada:
-                mejor_resultado = None
-                mejor_tablero_idx = None
-                mejor_score = float('inf')
-                mejor_rotada = False
-                
-                for tablero_idx, tablero in enumerate(tableros):
-                    for nivel in tablero['niveles']:
-                        altura_nivel = nivel['altura']
-                        espacio_h = ancho_tablero - nivel['x_actual']
-                        
-                        # Probar orientación original
-                        if h_original <= altura_nivel and w_original <= espacio_h:
-                            tablero_temp = {
-                                'posiciones': list(tablero['posiciones']),
-                                'niveles': [dict(n) for n in tablero['niveles']]
-                            }
-                            if intentar_colocar_pieza(pieza, tablero_temp, w_original, h_original, rotada=False):
-                                diff_altura = abs(altura_nivel - h_original)
-                                desperdicio = calcular_desperdicio_estimado(tablero_temp, ancho_tablero, alto_tablero)
-                                score = diff_altura * 10000 + desperdicio
-                                if score < mejor_score:
-                                    mejor_score = score
-                                    mejor_resultado = tablero_temp
-                                    mejor_tablero_idx = tablero_idx
-                                    mejor_rotada = False
-                        
-                        # Probar orientación rotada
-                        if w_original <= altura_nivel and h_original <= espacio_h:
-                            tablero_temp = {
-                                'posiciones': list(tablero['posiciones']),
-                                'niveles': [dict(n) for n in tablero['niveles']]
-                            }
-                            if intentar_colocar_pieza(pieza, tablero_temp, h_original, w_original, rotada=True):
-                                diff_altura = abs(altura_nivel - w_original)
-                                desperdicio = calcular_desperdicio_estimado(tablero_temp, ancho_tablero, alto_tablero)
-                                score = diff_altura * 10000 + desperdicio
-                                if score < mejor_score:
-                                    mejor_score = score
-                                    mejor_resultado = tablero_temp
-                                    mejor_tablero_idx = tablero_idx
-                                    mejor_rotada = True
-                    
-                    # Probar nuevo nivel
-                    if tablero['niveles']:
-                        ultimo = tablero['niveles'][-1]
-                        y_nuevo = ultimo['y_inicio'] + ultimo['altura'] + margen_corte
-                        
-                        if y_nuevo + h_original <= alto_tablero and w_original <= ancho_tablero:
-                            tablero_temp = {
-                                'posiciones': list(tablero['posiciones']),
-                                'niveles': [dict(n) for n in tablero['niveles']]
-                            }
-                            if intentar_colocar_pieza(pieza, tablero_temp, w_original, h_original, rotada=False):
-                                desperdicio = calcular_desperdicio_estimado(tablero_temp, ancho_tablero, alto_tablero)
-                                if desperdicio < mejor_score:
-                                    mejor_score = desperdicio
-                                    mejor_resultado = tablero_temp
-                                    mejor_tablero_idx = tablero_idx
-                                    mejor_rotada = False
-                        
-                        if y_nuevo + w_original <= alto_tablero and h_original <= ancho_tablero:
-                            tablero_temp = {
-                                'posiciones': list(tablero['posiciones']),
-                                'niveles': [dict(n) for n in tablero['niveles']]
-                            }
-                            if intentar_colocar_pieza(pieza, tablero_temp, h_original, w_original, rotada=True):
-                                desperdicio = calcular_desperdicio_estimado(tablero_temp, ancho_tablero, alto_tablero)
-                                if desperdicio < mejor_score:
-                                    mejor_score = desperdicio
-                                    mejor_resultado = tablero_temp
-                                    mejor_tablero_idx = tablero_idx
-                                    mejor_rotada = True
-                
-                if mejor_resultado is not None:
-                    tableros[mejor_tablero_idx] = mejor_resultado
-                    area_usada_total += w_original * h_original
-                    pieza['rotada'] = mejor_rotada
-                    orientacion_optima[tam_pieza] = mejor_rotada  # Recordar orientación
-                    colocada = True
+            orientaciones = [(w_original, h_original, False), (h_original, w_original, True)]
         else:
-            # Sin rotación o pieza cuadrada: MEJORA - probar TODOS los tableros (Best Fit)
-            mejor_tablero_idx = None
-            mejor_desperdicio = float('inf')
-            mejor_tablero = None
-            
-            for tablero_idx, tablero in enumerate(tableros):
-                tablero_temp = {
-                    'posiciones': list(tablero['posiciones']),
-                    'niveles': [dict(n) for n in tablero['niveles']]
-                }
-                if intentar_colocar_pieza(pieza, tablero_temp, w_original, h_original, rotada=False):
-                    desperdicio = calcular_desperdicio_estimado(tablero_temp, ancho_tablero, alto_tablero)
-                    if desperdicio < mejor_desperdicio:
-                        mejor_desperdicio = desperdicio
-                        mejor_tablero = tablero_temp
-                        mejor_tablero_idx = tablero_idx
-            
-            if mejor_tablero is not None:
-                tableros[mejor_tablero_idx] = mejor_tablero
-                area_usada_total += w_original * h_original
-                colocada = True
-        
-        # Si no se pudo colocar en ningún tablero existente, crear uno nuevo
-        if not colocada:
-            if permitir_rotacion and w_original != h_original:
-                # Definir las dos orientaciones posibles
-                # Orientación A: pieza tal como viene (w_original x h_original)
-                # Orientación B: pieza rotada (h_original x w_original)
-                w_a, h_a = w_original, h_original
-                w_b, h_b = h_original, w_original
-                
-                # Verificar si cada orientación cabe en el tablero
-                cabe_a = w_a <= ancho_tablero and h_a <= alto_tablero
-                cabe_b = w_b <= ancho_tablero and h_b <= alto_tablero
-                
-                if not cabe_a and not cabe_b:
+            orientaciones = [(w_original, h_original, False)]
+
+        mejor = None  # (clave de orden lex, payload)
+
+        for wg, hg, rot in orientaciones:
+            if wg > W_bin + EPS or hg > H_bin + EPS:
+                continue
+
+            for tbi, tb in enumerate(tableros):
+                prob = _intentar_colocacion(tb, pieza, wg, hg, rot)
+                if prob is None:
                     continue
-                
-                # Calcular cuántas piezas cabrían en cada orientación
-                if cabe_a:
-                    piezas_x_a = int(ancho_tablero / (w_a + margen_corte)) or (1 if w_a <= ancho_tablero else 0)
-                    piezas_y_a = int(alto_tablero / (h_a + margen_corte)) or (1 if h_a <= alto_tablero else 0)
-                    # Verificar que realmente caben
-                    if piezas_x_a * (w_a + margen_corte) - margen_corte > ancho_tablero:
-                        piezas_x_a = max(1, piezas_x_a - 1)
-                    if piezas_y_a * (h_a + margen_corte) - margen_corte > alto_tablero:
-                        piezas_y_a = max(1, piezas_y_a - 1)
-                    total_a = piezas_x_a * piezas_y_a
-                else:
-                    total_a = 0
-                
-                if cabe_b:
-                    piezas_x_b = int(ancho_tablero / (w_b + margen_corte)) or (1 if w_b <= ancho_tablero else 0)
-                    piezas_y_b = int(alto_tablero / (h_b + margen_corte)) or (1 if h_b <= alto_tablero else 0)
-                    # Verificar que realmente caben
-                    if piezas_x_b * (w_b + margen_corte) - margen_corte > ancho_tablero:
-                        piezas_x_b = max(1, piezas_x_b - 1)
-                    if piezas_y_b * (h_b + margen_corte) - margen_corte > alto_tablero:
-                        piezas_y_b = max(1, piezas_y_b - 1)
-                    total_b = piezas_x_b * piezas_y_b
-                else:
-                    total_b = 0
-                
-                # Elegir la orientación que permite más piezas
-                # Si son iguales, preferir no rotar
-                usar_rotada = total_b > total_a
-                
-                if usar_rotada:
-                    nuevo_tablero = {
-                        'posiciones': [(0, 0, w_b, h_b, True, w_original, h_original, pieza.get('nombre', f'Pieza'))],
-                        'niveles': [{
-                            'y_inicio': 0,
-                            'x_actual': w_b + margen_corte,
-                            'altura': h_b
-                        }]
-                    }
-                    pieza['rotada'] = True
-                    orientacion_optima[(w_original, h_original)] = True  # Recordar
-                else:
-                    nuevo_tablero = {
-                        'posiciones': [(0, 0, w_a, h_a, False, w_original, h_original, pieza.get('nombre', f'Pieza'))],
-                        'niveles': [{
-                            'y_inicio': 0,
-                            'x_actual': w_a + margen_corte,
-                            'altura': h_a
-                        }]
-                    }
-                    orientacion_optima[(w_original, h_original)] = False  # Recordar
-            else:
-                # Sin rotación o pieza cuadrada
-                if w_original + margen_corte <= ancho_tablero and h_original <= alto_tablero:
-                    # Cabe con margen
-                    nuevo_tablero = {
-                        'posiciones': [(0, 0, w_original, h_original, False, w_original, h_original, pieza.get('nombre', f'Pieza'))],
-                        'niveles': [{
-                            'y_inicio': 0,
-                            'x_actual': w_original + margen_corte,
-                            'altura': h_original
-                        }]
-                    }
-                elif w_original <= ancho_tablero and h_original <= alto_tablero:
-                    # Cabe sin margen (última pieza)
-                    nuevo_tablero = {
-                        'posiciones': [(0, 0, w_original, h_original, False, w_original, h_original, pieza.get('nombre', f'Pieza'))],
-                        'niveles': [{
-                            'y_inicio': 0,
-                            'x_actual': w_original,
-                            'altura': h_original
-                        }]
-                    }
-                else:
-                    # No cabe - esto no debería pasar si las validaciones son correctas
-                    continue
-            tableros.append(nuevo_tablero)
-            area_usada_total += w_original * h_original
-    
+                desp = _calcular_desperdicio(prob)
+                k = (desp, 1 if rot else 0, tbi)
+                mejor = _considerar(mejor, k, ('existe', tbi, prob, rot))
+
+            nueva_hoja = _intentar_colocacion(_tb_vacio(), pieza, wg, hg, rot)
+            if nueva_hoja is None:
+                continue
+            desp_n = _calcular_desperdicio(nueva_hoja)
+            # Sentinela: tableros existentes mejor que nueva lámina igual desperdicio
+            k_n = (desp_n, 1 if rot else 0, len(tableros) + 1)
+            mejor = _considerar(mejor, k_n, ('nuevo', nueva_hoja, rot))
+
+        if mejor is None:
+            piezas_no_colocadas.append({
+                'nombre': pieza.get('nombre', 'Pieza'),
+                'ancho_cm': w_original,
+                'alto_cm': h_original,
+            })
+            continue
+
+        _, payload = mejor
+        if payload[0] == 'existe':
+            _, tbi, nueva_tb, rot = payload
+            tableros[tbi] = nueva_tb
+            pieza['rotada'] = rot
+        else:
+            _, nueva_tb, rot = payload
+            tableros.append(nueva_tb)
+            pieza['rotada'] = rot
+        area_usada_total += w_original * h_original
+
     # Paso 3: Calcular aprovechamiento y desperdicio
     num_tableros = len(tableros)
+    num_piezas_colocadas = sum(len(t['posiciones']) for t in tableros)
     if num_tableros == 0:
         aprovechamiento_total = 0
         desperdicio_total = 0
@@ -512,7 +499,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
             ax.grid(True, alpha=0.2, linestyle='-', linewidth=0.5, color='gray')
         else:
             # Modo normal: con información completa
-            ax.set_title(f"Tablero {i} de {num_tableros} - FFD\n"
+            ax.set_title(f"Tablero {i} de {num_tableros} - FFD + rect. libres\n"
                         f"Uso: {info['porcentaje_uso']}% | Desperdicio: {desperdicio_mostrar} {simbolo_area}",
                         fontsize=13, fontweight='bold', pad=20)
             ax.set_xlabel(f"Ancho ({simbolo})", fontsize=11)
@@ -633,7 +620,10 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
         'desperdicio_total': desperdicio_total,
         'info_tableros': info_tableros,
         'num_tableros': num_tableros,
-        'area_total_disponible': num_tableros * AREA_TABLERO if num_tableros > 0 else 0
+        'area_total_disponible': num_tableros * AREA_TABLERO if num_tableros > 0 else 0,
+        'piezas_no_colocadas': piezas_no_colocadas,
+        'num_piezas_solicitadas': num_piezas_solicitadas,
+        'num_piezas_colocadas': num_piezas_colocadas,
     }
 
 def generar_pdf(optimizacion, imagenes_base64, numero_lista=None):

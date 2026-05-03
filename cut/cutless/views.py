@@ -24,9 +24,27 @@ from .utils import (
     convertir_a_cm, convertir_desde_cm, generar_excel, generar_grafico,
     generar_grafico_aprovechamiento, generar_grafico_desperdicio, generar_pdf,
     generar_excel_resumen_desperdicio, generar_pdf_resumen_desperdicio,
-    obtener_simbolo_area, obtener_simbolo_unidad
+    mensaje_advertencia_piezas_no_colocadas, obtener_simbolo_area, obtener_simbolo_unidad,
+    pieza_cabe_en_tablero,
 )
 from .utils_notificaciones import enviar_notificacion
+
+
+def _materiales_data_json_index(user):
+    """JSON de materiales para la plantilla index (errores / reintentos)."""
+    import json
+    materiales_data = {}
+    for material in Material.objects.filter(
+        Q(usuario=user) | Q(es_predefinido=True)
+    ):
+        materiales_data[str(material.pk)] = {
+            'precio': float(material.precio) if material.precio else None,
+            'nombre': material.nombre,
+            'ancho': float(material.ancho) if material.ancho else None,
+            'alto': float(material.alto) if material.alto else None,
+            'unidad_medida': material.unidad_medida if material.unidad_medida else 'cm'
+        }
+    return json.dumps(materiales_data)
 
 
 # Decoradores para verificar permisos
@@ -82,6 +100,8 @@ def index(request):
             ancho = convertir_a_cm(ancho_usuario, unidad)
             alto = convertir_a_cm(alto_usuario, unidad)
 
+            permitir_rotacion = tablero_form.cleaned_data.get('permitir_rotacion', True)
+
             piezas = []
             piezas_con_nombre = []
             
@@ -104,31 +124,29 @@ def index(request):
                         pieza_ancho_cm = convertir_a_cm(pieza_ancho, unidad)
                         pieza_alto_cm = convertir_a_cm(pieza_alto, unidad)
                         
-                        # Validar que la pieza no sea más grande que el tablero (en cm)
-                        if pieza_ancho_cm > ancho or pieza_alto_cm > alto:
+                        if not pieza_cabe_en_tablero(
+                            pieza_ancho_cm, pieza_alto_cm, ancho, alto,
+                            permitir_rotacion=permitir_rotacion,
+                        ):
                             simbolo = obtener_simbolo_unidad(unidad)
+                            sug = ''
+                            if (not permitir_rotacion and pieza_cabe_en_tablero(
+                                pieza_ancho_cm, pieza_alto_cm, ancho, alto,
+                                permitir_rotacion=True,
+                            )):
+                                sug = (
+                                    ' Prueba activar «Rotación automática»: con rotación sí cabe como una sola pieza.'
+                                )
                             messages.error(
-                                request, 
-                                f"❌ La pieza '{nombre}' ({pieza_ancho}x{pieza_alto} {simbolo}) NO CABE en el tablero ({ancho_usuario}x{alto_usuario} {simbolo})."
+                                request,
+                                f"❌ La pieza «{nombre}» ({pieza_ancho}×{pieza_alto} {simbolo}) NO CABE "
+                                f"como placas rectangulares en el tablero ({ancho_usuario}×{alto_usuario} {simbolo})."
+                                f"{sug}"
                             )
-                            # Preparar datos de materiales para JavaScript
-                            import json
-                            materiales_data = {}
-                            for material in Material.objects.filter(
-                                Q(usuario=request.user) | Q(es_predefinido=True)
-                            ):
-                                materiales_data[str(material.pk)] = {
-                                    'precio': float(material.precio) if material.precio else None,
-                                    'nombre': material.nombre,
-                                    'ancho': float(material.ancho) if material.ancho else None,
-                                    'alto': float(material.alto) if material.alto else None,
-                                    'unidad_medida': material.unidad_medida if material.unidad_medida else 'cm'
-                                }
-                            materiales_data_json = json.dumps(materiales_data)
                             return render(request, "cutless/index.html", {
-                                "tablero_form": TableroForm(user=request.user),
+                                "tablero_form": tablero_form,
                                 "pieza_formset": pieza_formset,
-                                "materiales_data_json": materiales_data_json
+                                "materiales_data_json": _materiales_data_json_index(request.user),
                             })
                         
                         # Guardar piezas en cm para cálculos
@@ -160,8 +178,6 @@ def index(request):
                     "materiales_data_json": materiales_data_json
                 })
 
-            # Obtener parámetros de rotación y margen de corte
-            permitir_rotacion = tablero_form.cleaned_data.get('permitir_rotacion', True)
             margen_corte_mm = tablero_form.cleaned_data.get('margen_corte') or 3  # Siempre en mm, default 3
             # Convertir margen de corte de mm a cm (el sistema trabaja en cm)
             margen_corte_cm = margen_corte_mm / 10.0
@@ -196,6 +212,21 @@ def index(request):
                 margen_corte=margen_corte_cm,
                 nombres_piezas=nombres_piezas
             )
+
+            ncol = info_desperdicio.get('num_piezas_colocadas') or 0
+            nsol = info_desperdicio.get('num_piezas_solicitadas') or 0
+            if nsol > 0 and ncol == 0:
+                warn = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad)
+                messages.error(request, warn or '❌ No se pudo colocar ninguna pieza en el tablero.')
+                return render(request, "cutless/index.html", {
+                    "tablero_form": tablero_form,
+                    "pieza_formset": pieza_formset,
+                    "materiales_data_json": _materiales_data_json_index(request.user),
+                })
+
+            warn_omitidas = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad)
+            if warn_omitidas:
+                messages.warning(request, warn_omitidas)
             
             # Usar la primera imagen para vista previa
             imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
@@ -443,6 +474,8 @@ def editar_optimizacion(request, pk):
             # Convertir a cm para cálculos internos
             ancho = convertir_a_cm(ancho_usuario, unidad)
             alto = convertir_a_cm(alto_usuario, unidad)
+
+            permitir_rotacion = tablero_form.cleaned_data.get('permitir_rotacion', True)
             
             piezas = []
             piezas_con_nombre = []
@@ -461,11 +494,24 @@ def editar_optimizacion(request, pk):
                         pieza_ancho_cm = convertir_a_cm(pieza_ancho, unidad)
                         pieza_alto_cm = convertir_a_cm(pieza_alto, unidad)
                         
-                        if pieza_ancho_cm > ancho or pieza_alto_cm > alto:
+                        if not pieza_cabe_en_tablero(
+                            pieza_ancho_cm, pieza_alto_cm, ancho, alto,
+                            permitir_rotacion=permitir_rotacion,
+                        ):
                             simbolo = obtener_simbolo_unidad(unidad)
+                            sug = ''
+                            if (not permitir_rotacion and pieza_cabe_en_tablero(
+                                pieza_ancho_cm, pieza_alto_cm, ancho, alto,
+                                permitir_rotacion=True,
+                            )):
+                                sug = (
+                                    ' Prueba activar «Rotación automática»: con rotación sí cabe como una sola pieza.'
+                                )
                             messages.error(
-                                request, 
-                                f"❌ La pieza '{nombre}' ({pieza_ancho}x{pieza_alto} {simbolo}) NO CABE en el tablero ({ancho_usuario}x{alto_usuario} {simbolo})."
+                                request,
+                                f"❌ La pieza «{nombre}» ({pieza_ancho}×{pieza_alto} {simbolo}) NO CABE "
+                                f"como placas rectangulares en el tablero ({ancho_usuario}×{alto_usuario} {simbolo})."
+                                f"{sug}"
                             )
                             return render(request, "cutless/editar_optimizacion.html", {
                                 "tablero_form": tablero_form,
@@ -489,8 +535,6 @@ def editar_optimizacion(request, pk):
                     "optimizacion": optimizacion
                 })
             
-            # Obtener parámetros de rotación y margen de corte
-            permitir_rotacion = tablero_form.cleaned_data.get('permitir_rotacion', True)
             margen_corte_mm = tablero_form.cleaned_data.get('margen_corte') or 3  # Siempre en mm, default 3
             margen_corte_cm = margen_corte_mm / 10.0
             
@@ -517,6 +561,21 @@ def editar_optimizacion(request, pk):
                 margen_corte=margen_corte_cm,
                 nombres_piezas=nombres_piezas
             )
+
+            ncol = info_desperdicio.get('num_piezas_colocadas') or 0
+            nsol = info_desperdicio.get('num_piezas_solicitadas') or 0
+            if nsol > 0 and ncol == 0:
+                warn = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad)
+                messages.error(request, warn or '❌ No se pudo colocar ninguna pieza en el tablero.')
+                return render(request, "cutless/editar_optimizacion.html", {
+                    "tablero_form": tablero_form,
+                    "pieza_formset": pieza_formset,
+                    "optimizacion": optimizacion,
+                })
+
+            warn_omitidas = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad)
+            if warn_omitidas:
+                messages.warning(request, warn_omitidas)
             
             imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
             
@@ -1223,9 +1282,18 @@ def resultado_view(request, pk=None):
         })
     
     if request.method == "POST":
-        ancho = float(request.POST.get("ancho_tablero"))
-        alto = float(request.POST.get("alto_tablero"))
-        piezas_texto = request.POST.get("piezas")
+        piezas_texto = request.POST.get("piezas") or ""
+
+        unidad_resultado = request.POST.get('unidad_medida', 'cm')
+        if not unidad_resultado:
+            unidad_resultado = 'cm'
+
+        permitir_rotacion = request.POST.get('permitir_rotacion', 'true').lower() == 'true'
+
+        ancho_usuario = float(request.POST.get("ancho_tablero"))
+        alto_usuario = float(request.POST.get("alto_tablero"))
+        ancho_cm = convertir_a_cm(ancho_usuario, unidad_resultado)
+        alto_cm = convertir_a_cm(alto_usuario, unidad_resultado)
 
         piezas = []
         piezas_con_nombre = []
@@ -1233,30 +1301,55 @@ def resultado_view(request, pk=None):
             partes = linea.split(",")
             if len(partes) == 4:  # Con nombre
                 nombre, w, h, c = partes
-                piezas.append((float(w), float(h), int(c)))
+                wf, hf = float(w), float(h)
+                cn = int(c)
+                nombre = nombre.strip()
+                w_cm = convertir_a_cm(wf, unidad_resultado)
+                h_cm = convertir_a_cm(hf, unidad_resultado)
+                if not pieza_cabe_en_tablero(w_cm, h_cm, ancho_cm, alto_cm, permitir_rotacion):
+                    simbolo = obtener_simbolo_unidad(unidad_resultado)
+                    sug = ''
+                    if not permitir_rotacion and pieza_cabe_en_tablero(w_cm, h_cm, ancho_cm, alto_cm, True):
+                        sug = (
+                            ' Prueba activar «Rotación automática»: con rotación sí cabe como una sola pieza.'
+                        )
+                    messages.error(
+                        request,
+                        f"❌ La pieza «{nombre}» ({wf}×{hf} {simbolo}) NO CABE en el tablero "
+                        f"({ancho_usuario}×{alto_usuario} {simbolo}).{sug}"
+                    )
+                    return redirect('cutless:index')
+                piezas.append((w_cm, h_cm, cn))
                 piezas_con_nombre.append({
-                    'nombre': nombre.strip(),
-                    'ancho': float(w),
-                    'alto': float(h),
-                    'cantidad': int(c)
+                    'nombre': nombre,
+                    'ancho': wf,
+                    'alto': hf,
+                    'cantidad': cn
                 })
             else:  # Sin nombre
                 w, h, c = partes
-                piezas.append((float(w), float(h), int(c)))
+                wf, hf = float(w), float(h)
+                cn = int(c)
+                lbl = f"Pieza {len(piezas_con_nombre) + 1}"
+                w_cm = convertir_a_cm(wf, unidad_resultado)
+                h_cm = convertir_a_cm(hf, unidad_resultado)
+                if not pieza_cabe_en_tablero(w_cm, h_cm, ancho_cm, alto_cm, permitir_rotacion):
+                    simbolo = obtener_simbolo_unidad(unidad_resultado)
+                    messages.error(
+                        request,
+                        f"❌ La pieza {lbl} ({wf}×{hf} {simbolo}) NO CABE en el tablero "
+                        f"({ancho_usuario}×{alto_usuario} {simbolo})."
+                    )
+                    return redirect('cutless:index')
+                piezas.append((w_cm, h_cm, cn))
                 piezas_con_nombre.append({
-                    'nombre': 'Pieza',
-                    'ancho': float(w),
-                    'alto': float(h),
-                    'cantidad': int(c)
+                    'nombre': lbl,
+                    'ancho': wf,
+                    'alto': hf,
+                    'cantidad': cn
                 })
 
-        # Obtener unidad (asumir cm para datos antiguos o del POST)
-        unidad_resultado = request.POST.get('unidad_medida', 'cm')
-        if not unidad_resultado:
-            unidad_resultado = 'cm'
-        
         # Obtener parámetros de rotación y margen de corte (valores por defecto para compatibilidad)
-        permitir_rotacion = request.POST.get('permitir_rotacion', 'true').lower() == 'true'
         margen_corte_str = request.POST.get('margen_corte', '') or '3'
         margen_corte_mm = float(margen_corte_str)  # Siempre en mm, default 3
         margen_corte_cm = margen_corte_mm / 10.0  # Convertir de mm a cm
@@ -1289,21 +1382,33 @@ def resultado_view(request, pk=None):
         # Extraer nombres de piezas para colores consistentes
         nombres_piezas = [p['nombre'] for p in piezas_con_nombre]
         
-        # Generar TODAS las imágenes con info de desperdicio
+        # Generar TODAS las imágenes con info de desperdicio (piezas y tablero en cm)
         imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(
-            piezas, ancho, alto, unidad_resultado,
+            piezas, ancho_cm, alto_cm, unidad_resultado,
             permitir_rotacion=permitir_rotacion,
             margen_corte=margen_corte_cm,
             nombres_piezas=nombres_piezas
         )
+
+        ncol = info_desperdicio.get('num_piezas_colocadas') or 0
+        nsol = info_desperdicio.get('num_piezas_solicitadas') or 0
+        if nsol > 0 and ncol == 0:
+            warn = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad_resultado)
+            messages.error(request, warn or '❌ No se pudo colocar ninguna pieza en el tablero.')
+            return redirect('cutless:index')
+
+        warn_omitidas = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad_resultado)
+        if warn_omitidas:
+            messages.warning(request, warn_omitidas)
+
         imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
         
         num_tableros = len(imagenes_base64)
 
         optimizacion = Optimizacion.objects.create(
             usuario=request.user,
-            ancho_tablero=ancho,
-            alto_tablero=alto,
+            ancho_tablero=ancho_cm,
+            alto_tablero=alto_cm,
             unidad_medida=unidad_resultado,
             piezas=piezas_texto,
             aprovechamiento_total=aprovechamiento,
@@ -3345,9 +3450,10 @@ def comparar_optimizaciones(request):
                 if optimizacion.num_tableros and optimizacion.num_tableros > 0:
                     return optimizacion.num_tableros
                 
-                # Si no está guardado, calcularlo desde las piezas
+                # Si no está guardado, calcularlo desde las piezas (tuplas ancho×alto×cantidad en cm)
                 try:
-                    piezas_list = []
+                    piezas_para_grafico = []
+                    unidad = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
                     for linea in optimizacion.piezas.splitlines():
                         if linea.strip():
                             partes = linea.split(',')
@@ -3357,26 +3463,24 @@ def comparar_optimizaciones(request):
                                 alto_idx = 2 if len(partes) >= 4 else 1
                                 ancho = float(partes[ancho_idx])
                                 alto = float(partes[alto_idx])
-                                # Convertir a cm si es necesario
-                                unidad = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
-                                ancho_cm = convertir_a_cm(ancho, unidad)
-                                alto_cm = convertir_a_cm(alto, unidad)
-                                for _ in range(cantidad):
-                                    piezas_list.append((ancho_cm, alto_cm))
-                    
-                    if piezas_list:
-                        # Usar la función generar_grafico para calcular num_tableros
+                                piezas_para_grafico.append((
+                                    convertir_a_cm(ancho, unidad),
+                                    convertir_a_cm(alto, unidad),
+                                    cantidad,
+                                ))
+
+                    if piezas_para_grafico:
                         margen = getattr(optimizacion, 'margen_corte', 0.3) or 0.3
                         permitir_rot = getattr(optimizacion, 'permitir_rotacion', True)
-                        resultado = generar_grafico(
-                            piezas_list,
+                        imagenes_calc, _, _ = generar_grafico(
+                            piezas_para_grafico,
                             optimizacion.ancho_tablero,
                             optimizacion.alto_tablero,
                             unidad='cm',
                             permitir_rotacion=permitir_rot,
                             margen_corte=margen
                         )
-                        return len(resultado['imagenes'])
+                        return len(imagenes_calc)
                 except Exception:
                     pass
                 
