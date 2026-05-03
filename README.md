@@ -14,7 +14,7 @@ Sistema web para optimizar el corte de tableros de madera utilizando el algoritm
 ```bash
 # Si tienes el proyecto en un repositorio
 git clone <url-del-repositorio>
-cd optimizador_materiales/opti
+cd optimizador_materiales/cut
 
 # O simplemente copia la carpeta 'opti' a tu nuevo PC
 ```
@@ -69,7 +69,7 @@ Tras iniciar sesión, la app principal responde en: `http://127.0.0.1:8000/cutle
 ## Estructura del Proyecto
 
 ```
-opti/
+cut/
 ├── manage.py              # Script de gestión de Django
 ├── requirements.txt       # Dependencias del proyecto
 ├── db.sqlite3            # Base de datos (se crea automáticamente)
