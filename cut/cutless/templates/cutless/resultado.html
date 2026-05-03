@@ -1,0 +1,417 @@
+{% extends 'cutless/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'cutless/css/resultado.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+    <h2 class="text-center mb-0 flex-grow-1">Resultado del Plan de Corte</h2>
+    <div class="d-flex gap-2 align-items-center">
+      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+              onclick="iniciarTutorialSeccion('resultado')" 
+              title="Ayuda sobre resultado de optimización">
+        ❓ Ayuda
+      </button>
+    </div>
+  </div>
+  
+  <!-- Resumen general -->
+  <div class="row mt-4 fade-in">
+    <div class="col-md-4 mb-3">
+      <div class="card text-center 
+           {% if optimizacion.aprovechamiento_total < 30 %}bg-danger text-white
+           {% elif optimizacion.aprovechamiento_total < 60 %}bg-warning text-white
+           {% else %}bg-success text-white{% endif %}"
+           style="transition: transform 0.3s ease;">
+        <div class="card-body">
+          <h5 class="card-title mb-3">📈 Aprovechamiento</h5>
+          <h2 class="mb-0" style="font-weight: 700;">{{ optimizacion.aprovechamiento_total|floatformat:2 }}%</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card text-center bg-info text-white" style="transition: transform 0.3s ease;">
+        <div class="card-body">
+          <h5 class="card-title mb-3">📐 Área Utilizada</h5>
+          <h2 class="mb-0" style="font-weight: 700;">{{ info_desperdicio.area_usada_total }} {{ simbolo_area|default:"cm²" }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card text-center bg-warning text-dark" style="transition: transform 0.3s ease;">
+        <div class="card-body">
+          <h5 class="card-title mb-3">⚠️ Desperdicio Total</h5>
+          <h2 class="mb-0" style="font-weight: 700;">{{ info_desperdicio.desperdicio_total }} {{ simbolo_area|default:"cm²" }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="text-center mt-4 mb-4">
+    <p class="lead mb-0">
+      Total de tableros generados: <strong class="badge bg-primary" style="font-size: 1.1rem; padding: 0.5rem 1rem;">{{ num_tableros }}</strong>
+    </p>
+  </div>
+  
+  <!-- Sección de Costos -->
+  {% if costo_total or precio_tablero or mano_obra %}
+  <div class="row mt-4 fade-in">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">💰 Información de Costos</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            {% if optimizacion.material %}
+            <div class="col-md-6 mb-3">
+              <div class="d-flex align-items-center">
+                <span class="me-2" style="font-size: 1.2rem;">📦</span>
+                <div>
+                  <strong>Material:</strong><br>
+                  <span class="text-muted">{{ optimizacion.material.nombre }}</span>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            {% if precio_tablero %}
+            <div class="col-md-6 mb-3">
+              <div class="d-flex align-items-center">
+                <span class="me-2" style="font-size: 1.2rem;">💵</span>
+                <div>
+                  <strong>Precio por tablero:</strong><br>
+                  <span class="text-muted">${{ precio_tablero|floatformat:0 }}</span>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            {% if precio_tablero %}
+            <div class="col-md-6 mb-3">
+              <div class="d-flex align-items-center">
+                <span class="me-2" style="font-size: 1.2rem;">📊</span>
+                <div>
+                  <strong>Costo de material ({{ num_tableros }} tableros):</strong><br>
+                  <span class="text-muted">${{ costo_material|floatformat:0|default:"0" }}</span>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            {% if mano_obra %}
+            <div class="col-md-6 mb-3">
+              <div class="d-flex align-items-center">
+                <span class="me-2" style="font-size: 1.2rem;">👷</span>
+                <div>
+                  <strong>Mano de obra:</strong><br>
+                  <span class="text-muted">${{ mano_obra|floatformat:0 }}</span>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            {% if costo_total %}
+            <div class="col-md-12 mt-3 pt-3 border-top">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h4 class="text-success mb-0">
+                    <strong>💰 Costo Total:</strong>
+                  </h4>
+                </div>
+                <div>
+                  <h3 class="text-success mb-0" style="font-weight: 700;">
+                    ${{ costo_total|floatformat:0 }}
+                  </h3>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            {% if costo_total %}
+            <div class="mt-4 text-center">
+              <a href="{% url 'cutless:crear_presupuesto' %}?optimizacion={{ optimizacion.pk }}" class="btn btn-primary btn-lg">
+                💰 Crear Presupuesto
+              </a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  
+  <hr>
+  
+  <!-- Tabla de desperdicio por tablero -->
+  <h4 class="mt-4 fade-in">Detalle por Tablero</h4>
+  <div class="card fade-in">
+  <table class="table table-striped table-hover mb-0">
+    <thead class="table-dark">
+      <tr>
+        <th>Tablero</th>
+        <th>Piezas</th>
+        <th>Área Usada</th>
+        <th>Desperdicio</th>
+        <th>Aprovechamiento</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for info in info_desperdicio.info_tableros %}
+      <tr>
+        <td><strong>Tablero {{ info.numero }}</strong></td>
+        <td>{{ info.num_piezas }}</td>
+        <td>{{ info.area_usada }} {{ simbolo_area|default:"cm²" }}</td>
+        <td>{{ info.desperdicio }} {{ simbolo_area|default:"cm²" }}</td>
+        <td>
+          <div class="progress">
+            <div class="progress-bar 
+                 {% if info.porcentaje_uso < 30 %}bg-danger
+                 {% elif info.porcentaje_uso < 60 %}bg-warning
+                 {% else %}bg-success{% endif %}" 
+                 role="progressbar" 
+                 style="width: {{ info.porcentaje_uso }}%" 
+                 aria-valuenow="{{ info.porcentaje_uso }}" 
+                 aria-valuemin="0" aria-valuemax="100">
+              {{ info.porcentaje_uso }}%
+            </div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  
+  <hr>
+  
+  <!-- Mostrar TODOS los tableros -->
+  <h4 class="mt-4 fade-in">Tableros Generados</h4>
+  <div class="row fade-in">
+    {% for item in tableros_con_imagenes %}
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header text-center bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Tablero {{ item.numero }} de {{ num_tableros }}</h5>
+          <a href="{% url 'cutless:descargar_png_tablero' optimizacion.id item.numero %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" data-carga-texto="Generando imagen..." 
+             class="btn btn-sm btn-light" 
+             title="Descargar imagen PNG">
+            PNG
+          </a>
+        </div>
+        <div class="card-body text-center">
+          <img src="data:image/png;base64,{{ item.imagen }}" 
+               alt="Tablero {{ item.numero }}" 
+               class="img-fluid" 
+               style="cursor: pointer;"
+               onclick="abrirModalTablero({{ item.numero }}, {{ num_tableros }}, '{{ item.imagen }}', '{{ item.info.porcentaje_uso }}', '{{ item.info.desperdicio }}', '{{ simbolo_area|default:"cm²" }}')">
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  
+  <hr>
+  
+  <!-- Botones para descargar PDF y Excel -->
+  <div class="text-center mt-4 fade-in">
+    {% if pdf_path %}
+    <a href="/media/{{ pdf_path }}" class="btn btn-success btn-lg me-2" download data-carga-texto="Descargando PDF...">
+       Descargar PDF 
+    </a>
+    {% endif %}
+    <a href="{% url 'cutless:descargar_excel' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-primary btn-lg me-2" data-carga-texto="Generando archivo Excel...">
+       Descargar Excel
+    </a>
+    <a href="{% url 'cutless:imprimir_plan_corte' optimizacion.id %}" class="btn btn-info btn-lg" target="_blank">
+       🖨️ Imprimir Plan de Corte
+    </a>
+  </div>
+  
+  <!-- Botón para volver -->
+  <div class="text-center mt-4 mb-5 fade-in">
+    <a href="{% url 'cutless:index' %}" class="btn btn-secondary btn-lg me-2">
+      Volver al Optimizador
+    </a>
+    <a href="{% url 'cutless:historial' %}" class="btn btn-info btn-lg">
+      Ver Historial
+    </a>
+  </div>
+</div>
+
+<!-- Modal para tableros en pantalla completa -->
+<div class="modal fade" id="modalTablero" tabindex="-1" aria-labelledby="modalTableroLabel" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="modalTableroLabel">Tablero 1 de 1 - FFD</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center modal-grafico-body">
+        <div class="row h-100">
+          <div class="col-10">
+            <div id="modalTableroContenido" class="d-flex align-items-center justify-content-center modal-imagen-contenido">
+              <!-- La imagen se cargará aquí -->
+            </div>
+          </div>
+          <div class="col-2 d-flex flex-column justify-content-center align-items-center zoom-controls">
+            <label for="zoomSliderTablero" class="text-white mb-2 zoom-label">Zoom</label>
+            <input type="range" 
+                   class="form-range zoom-slider" 
+                   id="zoomSliderTablero" 
+                   min="30" 
+                   max="200" 
+                   value="100" 
+                   step="5">
+            <span id="zoomValueTablero" class="text-white mt-2 zoom-value">100%</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer bg-dark text-white">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" onclick="resetearZoomTablero()">🔍 Resetear Zoom</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Variables globales para el zoom del modal de tableros
+let modalTableroZoomLevel = 1;
+let modalTableroIsDragging = false;
+let modalTableroStartX, modalTableroStartY;
+let modalTableroTranslateX = 0, modalTableroTranslateY = 0;
+
+function abrirModalTablero(numero, total, imagenBase64, porcentajeUso, desperdicio, simboloArea) {
+    const modal = new bootstrap.Modal(document.getElementById('modalTablero'));
+    const titulo = document.getElementById('modalTableroLabel');
+    const contenido = document.getElementById('modalTableroContenido');
+    
+    titulo.textContent = `Tablero ${numero} de ${total} - FFD`;
+    contenido.innerHTML = '';
+    
+    // Crear contenedor para la imagen
+    const contenedorImagen = document.createElement('div');
+    contenedorImagen.style.position = 'relative';
+    contenedorImagen.style.display = 'inline-block';
+    
+    // Crear etiqueta con información
+    const label = document.createElement('div');
+    label.className = 'text-white mb-3';
+    label.style.fontSize = '1.2rem';
+    label.innerHTML = `<strong>Uso: ${parseFloat(porcentajeUso).toFixed(2)}% | Desperdicio: ${parseFloat(desperdicio).toFixed(1)} ${simboloArea}</strong>`;
+    
+    // Crear imagen
+    const img = document.createElement('img');
+    img.src = `data:image/png;base64,${imagenBase64}`;
+    img.alt = `Tablero ${numero}`;
+    img.style.maxHeight = '80vh';
+    img.style.maxWidth = '90vw';
+    img.style.objectFit = 'contain';
+    img.style.border = '2px solid #444';
+    img.style.borderRadius = '8px';
+    img.style.cursor = 'grab';
+    
+    contenedorImagen.appendChild(label);
+    contenedorImagen.appendChild(img);
+    contenido.appendChild(contenedorImagen);
+    
+    // Resetear zoom al abrir
+    modalTableroZoomLevel = 1;
+    modalTableroTranslateX = 0;
+    modalTableroTranslateY = 0;
+    contenido.style.transform = 'scale(1) translate(0px, 0px)';
+    contenido.style.transformOrigin = 'center center';
+    
+    modal.show();
+}
+
+function resetearZoomTablero() {
+    const contenido = document.getElementById('modalTableroContenido');
+    const zoomSlider = document.getElementById('zoomSliderTablero');
+    if (contenido && zoomSlider) {
+        modalTableroZoomLevel = 1;
+        modalTableroTranslateX = 0;
+        modalTableroTranslateY = 0;
+        zoomSlider.value = 100;
+        contenido.style.transform = 'scale(1) translate(0px, 0px)';
+        document.getElementById('zoomValueTablero').textContent = '100%';
+    }
+}
+
+// Configurar slider de zoom cuando el modal se muestra
+document.getElementById('modalTablero').addEventListener('shown.bs.modal', function() {
+    const contenido = document.getElementById('modalTableroContenido');
+    const zoomSlider = document.getElementById('zoomSliderTablero');
+    
+    // Resetear valores
+    modalTableroZoomLevel = 1;
+    modalTableroTranslateX = 0;
+    modalTableroTranslateY = 0;
+    zoomSlider.value = 100;
+    contenido.style.transform = 'scale(1) translate(0px, 0px)';
+    contenido.style.transformOrigin = 'center center';
+    contenido.style.cursor = 'grab';
+    
+    zoomSlider.oninput = function() {
+        const zoomPercent = parseInt(this.value);
+        modalTableroZoomLevel = zoomPercent / 100;
+        contenido.style.transform = `scale(${modalTableroZoomLevel}) translate(${modalTableroTranslateX}px, ${modalTableroTranslateY}px)`;
+        document.getElementById('zoomValueTablero').textContent = zoomPercent + '%';
+        
+        // Cambiar cursor según el zoom
+        if (modalTableroZoomLevel > 1) {
+            contenido.style.cursor = 'grab';
+        } else {
+            contenido.style.cursor = 'default';
+        }
+    };
+});
+
+// Eventos de arrastre solo en el contenido de imágenes
+document.addEventListener('mousedown', function(e) {
+    const contenido = document.getElementById('modalTableroContenido');
+    const modal = document.getElementById('modalTablero');
+    
+    // Solo si el modal está visible
+    if (!modal.classList.contains('show')) return;
+    
+    // No activar arrastre si se hace click en el slider o sus controles
+    if (e.target.closest('.zoom-controls')) {
+        return;
+    }
+    
+    if (contenido && contenido.contains(e.target) && modalTableroZoomLevel > 1) {
+        modalTableroIsDragging = true;
+        modalTableroStartX = e.clientX;
+        modalTableroStartY = e.clientY;
+        contenido.style.cursor = 'grabbing';
+        e.preventDefault();
+    }
+});
+
+document.addEventListener('mousemove', function(e) {
+    const contenido = document.getElementById('modalTableroContenido');
+    if (modalTableroIsDragging && contenido && modalTableroZoomLevel > 1) {
+        const dx = (e.clientX - modalTableroStartX) / modalTableroZoomLevel;
+        const dy = (e.clientY - modalTableroStartY) / modalTableroZoomLevel;
+        modalTableroTranslateX += dx;
+        modalTableroTranslateY += dy;
+        contenido.style.transform = `scale(${modalTableroZoomLevel}) translate(${modalTableroTranslateX}px, ${modalTableroTranslateY}px)`;
+        modalTableroStartX = e.clientX;
+        modalTableroStartY = e.clientY;
+    }
+});
+
+document.addEventListener('mouseup', function() {
+    const contenido = document.getElementById('modalTableroContenido');
+    if (modalTableroIsDragging && contenido) {
+        modalTableroIsDragging = false;
+        if (modalTableroZoomLevel > 1) {
+            contenido.style.cursor = 'grab';
+        } else {
+            contenido.style.cursor = 'default';
+        }
+    }
+});
+</script>
+{% endblock %}

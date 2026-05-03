@@ -1,0 +1,157 @@
+{% extends 'cutless/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'cutless/css/historial.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+    <h2 class="text-center mb-0 flex-grow-1">📦 Biblioteca de Materiales</h2>
+    <div class="d-flex gap-2 align-items-center">
+      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+              onclick="iniciarTutorialSeccion('materiales')" 
+              title="Ayuda sobre materiales">
+        ❓ Ayuda
+      </button>
+      <a href="{% url 'cutless:crear_material' %}" class="btn btn-primary">
+        ➕ Agregar Material
+      </a>
+    </div>
+  </div>
+
+  <!-- Búsqueda -->
+  <div class="search-filters fade-in mb-4">
+    <form method="GET" action="{% url 'cutless:lista_materiales' %}">
+      <div class="row">
+        <div class="col-md-6">
+          <input type="text" 
+                 class="form-control" 
+                 name="busqueda" 
+                 placeholder="Buscar por nombre..."
+                 value="{{ busqueda }}">
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-outline-primary w-100">🔍 Buscar</button>
+        </div>
+        {% if busqueda %}
+        <div class="col-md-2">
+          <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary w-100">Limpiar</a>
+        </div>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Materiales del Usuario -->
+  <div class="fade-in">
+    <h4 class="mb-3">Mis Materiales</h4>
+    {% if materiales_usuario %}
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Dimensiones</th>
+            <th>Precio</th>
+            <th>Área</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for material in materiales_usuario %}
+          <tr>
+            <td>
+              <strong>{{ material.nombre }}</strong>
+              {% if material.descripcion %}
+                <br><small class="text-muted">{{ material.descripcion|truncatewords:10 }}</small>
+              {% endif %}
+            </td>
+            <td>
+              {{ material.ancho }} × {{ material.alto }} {{ material.get_unidad_medida_display }}
+            </td>
+            <td>
+              {% if material.precio %}
+                ${{ material.precio|floatformat:0 }}
+              {% else %}
+                <span class="text-muted">Sin precio</span>
+              {% endif %}
+            </td>
+            <td>{{ material.get_area|floatformat:2 }} cm²</td>
+            <td>
+              <a href="{% url 'cutless:editar_material' material.pk %}" class="btn btn-sm btn-primary">✏️ Editar</a>
+              {% if not material.es_predefinido %}
+              <a href="{% url 'cutless:eliminar_material' material.pk %}" class="btn btn-sm btn-danger">🗑️ Eliminar</a>
+              {% else %}
+              <span class="badge bg-info">Sistema</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="card fade-in text-center card-empty-state">
+      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;">📦</div>
+      <h4 class="mb-3">No tienes materiales</h4>
+      <p class="mb-4" style="max-width: 500px; margin: 0 auto;">
+        Aún no has creado materiales personalizados. Crea tu primer material para comenzar a usarlo en tus optimizaciones.
+      </p>
+      <a href="{% url 'cutless:crear_material' %}" class="btn btn-primary btn-lg">
+        ➕ Crear Primer Material
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Materiales Predefinidos del Sistema -->
+  {% if materiales_sistema %}
+  <div class="fade-in mt-5">
+    <h4 class="mb-3">📚 Materiales Predefinidos</h4>
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Dimensiones</th>
+            <th>Precio</th>
+            <th>Área</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for material in materiales_sistema %}
+          <tr>
+            <td>
+              <strong>{{ material.nombre }}</strong>
+              {% if material.descripcion %}
+                <br><small class="text-muted">{{ material.descripcion|truncatewords:10 }}</small>
+              {% endif %}
+            </td>
+            <td>
+              {{ material.ancho }} × {{ material.alto }} {{ material.get_unidad_medida_display }}
+            </td>
+            <td>
+              {% if material.precio %}
+                ${{ material.precio|floatformat:0 }}
+              {% else %}
+                <span class="text-muted">Sin precio</span>
+              {% endif %}
+            </td>
+            <td>{{ material.get_area|floatformat:2 }} cm²</td>
+            <td>
+              <a href="{% url 'cutless:editar_material' material.pk %}" class="btn btn-sm btn-primary">✏️ Editar</a>
+              <span class="badge bg-info">Sistema</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+

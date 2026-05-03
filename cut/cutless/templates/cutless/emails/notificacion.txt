@@ -1,0 +1,20 @@
+﻿Hola {{ usuario.username }},
+
+{{ titulo }}
+
+{{ mensaje }}
+
+{% if tipo == 'optimizacion_completada' %}
+Tu optimización ha sido completada exitosamente.
+{% elif tipo == 'presupuesto_creado' %}
+Se ha creado un nuevo presupuesto.
+{% elif tipo == 'proyecto_creado' %}
+Se ha creado un nuevo proyecto.
+{% elif tipo == 'error' %}
+Ha ocurrido un error en el proceso.
+{% endif %}
+
+---
+CutLess - Sistema de Optimización de Cortes
+Este es un mensaje automático, por favor no respondas.
+

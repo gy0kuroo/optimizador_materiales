@@ -1,0 +1,620 @@
+{% extends 'cutless/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'cutless/css/historial.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+    <h2 class="text-center mb-0 flex-grow-1">Historial de Optimizaciones </h2>
+    <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+            onclick="iniciarTutorialSeccion('historial')" 
+            title="Ayuda sobre el historial">
+      ❓ Ayuda
+    </button>
+  </div>
+
+  <!-- Filtros y Búsqueda -->
+  <div class="search-filters fade-in">
+    <h5 class="mb-3">Buscar y Filtrar</h5>
+    <form method="GET" action="{% url 'cutless:historial' %}" id="filtros-form">
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label for="nombre_pieza" class="form-label">Nombre de Pieza</label>
+          <input type="text" 
+                 class="form-control" 
+                 id="nombre_pieza" 
+                 name="nombre_pieza" 
+                 placeholder="Ej: Puerta, Cajón, Estante..."
+                 value="{{ nombre_pieza }}">
+        </div>
+        <div class="col-md-2 mb-3">
+          <label for="fecha_desde" class="form-label">Fecha Desde</label>
+          <input type="date" 
+                 class="form-control" 
+                 id="fecha_desde" 
+                 name="fecha_desde" 
+                 value="{{ fecha_desde }}">
+        </div>
+        <div class="col-md-2 mb-3">
+          <label for="fecha_hasta" class="form-label">Fecha Hasta</label>
+          <input type="date" 
+                 class="form-control" 
+                 id="fecha_hasta" 
+                 name="fecha_hasta" 
+                 value="{{ fecha_hasta }}">
+        </div>
+        <div class="col-md-2 mb-3">
+          <label for="ordenar_por" class="form-label">Ordenar por</label>
+          <select class="form-control" id="ordenar_por" name="ordenar_por">
+            <option value="fecha_desc" {% if ordenar_por == 'fecha_desc' %}selected{% endif %}>Fecha (Más recientes )</option>
+            <option value="fecha_asc" {% if ordenar_por == 'fecha_asc' %}selected{% endif %}>Fecha (Más antiguas )</option>
+            <option value="aprovechamiento_desc" {% if ordenar_por == 'aprovechamiento_desc' %}selected{% endif %}>Aprovechamiento (Mayor a menor)</option>
+            <option value="aprovechamiento_asc" {% if ordenar_por == 'aprovechamiento_asc' %}selected{% endif %}>Aprovechamiento (Menor a mayor)</option>
+          </select>
+        </div>
+        <div class="col-md-2 mb-3 d-flex align-items-end">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="solo_favoritos" name="solo_favoritos" value="true" {% if solo_favoritos == 'true' %}checked{% endif %}>
+            <label class="form-check-label" for="solo_favoritos">
+              ⭐ Solo Favoritos
+            </label>
+          </div>
+        </div>
+        <div class="col-md-2 mb-3 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary w-100">Buscar</button>
+        </div>
+      </div>
+      {% if nombre_pieza or fecha_desde or fecha_hasta or solo_favoritos == 'true' %}
+      <div class="mt-2">
+        <a href="{% url 'cutless:historial' %}?ordenar_por={{ ordenar_por }}" class="btn btn-limpiar-filtros">
+          Limpiar Filtros
+        </a>
+        {% if nombre_pieza %}
+          <span class="filter-badge">Pieza: {{ nombre_pieza }}</span>
+        {% endif %}
+        {% if fecha_desde %}
+          <span class="filter-badge">Desde: {{ fecha_desde }}</span>
+        {% endif %}
+        {% if fecha_hasta %}
+          <span class="filter-badge">Hasta: {{ fecha_hasta }}</span>
+        {% endif %}
+        {% if solo_favoritos == 'true' %}
+          <span class="filter-badge">⭐ Solo Favoritos</span>
+        {% endif %}
+      </div>
+      <!-- Indicador de resultados filtrados -->
+      <div class="mt-3 results-info">
+        <span class="results-count">
+          📋 Mostrando <strong>{{ optimizaciones_con_piezas|length }}</strong> de <strong>{{ total_sin_filtro }}</strong> optimizaciones
+        </span>
+      </div>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Lista de Optimizaciones -->
+  {% if optimizaciones_con_piezas %}
+    <form method="POST" action="{% url 'cutless:borrar_seleccion' %}" id="form-borrar-seleccion" data-tipo="seleccion">
+      {% csrf_token %}
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="select-todos-btn">Seleccionar todos</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect-todos-btn">Deseleccionar todos</button>
+        </div>
+        <button type="submit" class="btn btn-danger" id="btn-borrar-seleccion" disabled>
+          Borrar seleccionadas
+        </button>
+      </div>
+      <div class="row">
+      {% for item in optimizaciones_con_piezas %}
+        {% with optimizacion=item.optimizacion piezas=item.piezas %}
+        <div class="col-md-6 col-lg-4 mb-4 fade-in">
+          <div class="optimizacion-card">
+            {% if optimizacion.imagen %}
+              <div class="chart-container chart-container-clickable" 
+                   onclick="abrirModalImagen('{{ optimizacion.imagen.url }}', {{ optimizacion.id }}, '{{ item.numero }}')">
+                <img src="{{ optimizacion.imagen.url }}" 
+                     class="card-img-top chart-thumbnail" 
+                     alt="Optimización #{{ item.numero }}">                <div class="chart-overlay">
+                  <span class="chart-hint">🔍 Click para ver en pantalla completa</span>
+                </div>
+              </div>
+            {% endif %}
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="form-check">
+                  <input class="form-check-input optimizacion-select" type="checkbox" 
+                         name="seleccion" 
+                         id="check-opt-{{ optimizacion.id }}" 
+                         value="{{ optimizacion.id }}">
+                  <label class="form-check-label" for="check-opt-{{ optimizacion.id }}">
+                    Optimización #{{ item.numero }}
+                  </label>
+                </div>
+                <button type="button" 
+                        class="btn btn-sm p-0 border-0 bg-transparent favorito-btn align-self-center" 
+                        data-optimizacion-id="{{ optimizacion.id }}"
+                        data-favorito-url="{% url 'cutless:toggle_favorito' optimizacion.id %}"
+                        data-favorito="{{ optimizacion.favorito|yesno:'true,false' }}"
+                        title="{% if optimizacion.favorito %}Quitar de favoritos{% else %}Marcar como favorito{% endif %}"
+                        class="favorito-btn-inline">
+                  {% if optimizacion.favorito %}
+                    <span class="favorito-icon favorito-icon-active">⭐</span>
+                  {% else %}
+                    <span class="favorito-icon favorito-icon-inactive">☆</span>
+                  {% endif %}
+                </button>
+              </div>
+              <p class="card-text">
+                <strong>Fecha:</strong> {{ optimizacion.fecha|date:"d/m/Y" }}<br>
+                <strong>Hora:</strong> {{ optimizacion.fecha|date:"H:i" }} (Chile)<br>
+                <strong>Tablero:</strong> {{ item.ancho_mostrar }} × {{ item.alto_mostrar }} {{ item.unidad_medida }}<br>
+                <strong>Aprovechamiento:</strong> 
+                <span class="badge 
+                     {% if optimizacion.aprovechamiento_total < 30 %}bg-danger
+                     {% elif optimizacion.aprovechamiento_total < 60 %}bg-warning
+                     {% else %}bg-success{% endif %}">
+                  {{ optimizacion.aprovechamiento_total|floatformat:2 }}%
+                </span>
+              </p>
+              
+              <!-- Lista de piezas -->
+              {% if piezas %}
+              <details class="mb-2">
+                <summary class="piezas-summary">
+                  Ver Piezas ({{ piezas|length }})
+                </summary>
+                <div class="mt-2 piezas-details">
+                  {% for pieza in piezas %}
+                    <div>• <strong>{{ pieza.nombre }}</strong>: {{ pieza.ancho }}×{{ pieza.alto }}cm (x{{ pieza.cantidad }})</div>
+                  {% endfor %}
+                </div>
+              </details>
+              {% endif %}
+              
+              <div class="action-buttons mt-3 d-flex gap-2 align-items-center">
+                <!-- Botones principales: Editar y Duplicar -->
+                <a href="{% url 'cutless:editar_optimizacion' optimizacion.id %}" 
+                   class="btn-action btn-edit flex-fill"
+                   title="Editar esta optimización">
+                   Editar
+                </a>
+                <a href="{% url 'cutless:duplicar_optimizacion' optimizacion.id %}?ordenar_por={{ ordenar_por }}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}" 
+                   class="btn-action btn-duplicar flex-fill" 
+                   title="Duplicar esta optimización">
+                  <span class="icon"></span> Duplicar
+                </a>
+                
+                <!-- Menú desplegable para acciones secundarias -->
+                <div class="dropdown">
+                  <button class="btn btn-action btn-mas-opciones flex-fill" 
+                          type="button" 
+                          id="dropdownMenuButton{{ optimizacion.id }}" 
+                          data-bs-toggle="dropdown" 
+                          aria-expanded="false"
+                          title="Más opciones">
+                    <span class="icon"></span> Más opciones
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ optimizacion.id }}">
+                    <li>
+                      <a class="dropdown-item" href="{% url 'cutless:calcular_tiempo_corte' optimizacion.id %}">
+                         Calcular Tiempo
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{% url 'cutless:descargar_png' optimizacion.id %}" data-carga-texto="Generando imagen...">
+                         Descargar PNG
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{% url 'cutless:descargar_pdf' optimizacion.id %}?ordenar_por={{ ordenar_por }}" data-carga-texto="Descargando PDF...">
+                          Descargar PDF
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{% url 'cutless:descargar_excel' optimizacion.id %}?ordenar_por={{ ordenar_por }}" data-carga-texto="Generando archivo Excel...">
+                          Descargar Excel
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{% url 'cutless:imprimir_plan_corte' optimizacion.id %}" target="_blank">
+                           Imprimir Plan de Corte
+                      </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                      <a href="{% url 'cutless:borrar_optimizacion' optimizacion.id %}" class="dropdown-item text-danger delete-button">
+                        Eliminar
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endwith %}
+      {% endfor %}
+      </div>
+    </form>
+
+    <!-- Paginador -->
+    {% if paginator.num_pages > 1 %}
+    <nav aria-label="Paginación de historial">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Primera">
+              <span aria-hidden="true">&laquo;&laquo;</span>
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Anterior">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&laquo;&laquo;</span></li>
+          <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+        {% endif %}
+
+        {% for num in paginator.page_range %}
+          {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+          {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item"><a class="page-link" href="?page={{ num }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}">{{ num }}</a></li>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Siguiente">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ paginator.num_pages }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Última">
+              <span aria-hidden="true">&raquo;&raquo;</span>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+          <li class="page-item disabled"><span class="page-link">&raquo;&raquo;</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+    <!-- Fin paginador -->
+  {% else %}
+    <div class="card fade-in text-center card-empty-state">
+      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;">📋</div>
+      <h4 class="mb-3">No hay optimizaciones</h4>
+      <p class="mb-4" style="max-width: 500px; margin: 0 auto;">
+        {% if nombre_pieza or fecha_desde or fecha_hasta %}
+          No se encontraron optimizaciones con los filtros aplicados.
+          <br>
+          <a href="{% url 'cutless:historial' %}" class="mt-2 d-inline-block">Ver todas las optimizaciones</a>
+        {% else %}
+          Aún no tienes optimizaciones guardadas. Crea tu primera optimización para comenzar.
+        {% endif %}
+      </p>
+      <a href="{% url 'cutless:index' %}" class="btn btn-primary btn-lg">
+        ➕ Crear Nueva Optimización
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+    <!-- Modal para imágenes en pantalla completa -->
+    <div class="modal fade" id="modalImagen" tabindex="-1" aria-labelledby="modalImagenLabel" aria-hidden="true">
+      <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title" id="modalImagenLabel">Tableros en Pantalla Completa</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center modal-grafico-body">
+            <div class="row h-100">
+              <div class="col-10">
+                <div id="modalImagenContenido" class="d-flex align-items-center justify-content-center gap-3 modal-imagen-contenido">
+                  <!-- Las imágenes se cargarán aquí lado a lado -->
+                </div>
+              </div>
+              <div class="col-2 d-flex flex-column justify-content-center align-items-center zoom-controls">
+                <label for="zoomSliderImagen" class="text-white mb-2 zoom-label">Zoom</label>
+                <input type="range" 
+                       class="form-range zoom-slider" 
+                       id="zoomSliderImagen" 
+                       min="30" 
+                       max="200" 
+                       value="100" 
+                       step="5">
+                <span id="zoomValueImagen" class="text-white mt-2 zoom-value">100%</span>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer bg-dark text-white">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="button" class="btn btn-primary" onclick="resetearZoomImagen()">🔍 Resetear Zoom</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<script>
+function abrirModalImagen(urlImagen, optimizacionId, optimizacionNumero) {
+    const modal = new bootstrap.Modal(document.getElementById('modalImagen'));
+    const contenido = document.getElementById('modalImagenContenido');
+    const titulo = document.getElementById('modalImagenLabel');
+    
+    // Limpiar contenido anterior
+    contenido.innerHTML = '<div class="text-white">Cargando tableros...</div>';
+    
+    // Cargar todas las imágenes de la optimización via AJAX
+    fetch(`/cutless/api/tableros/${optimizacionId}/`)
+        .then(response => response.json())
+        .then(data => {
+            contenido.innerHTML = '';
+            
+            const numeroAMostrar = optimizacionNumero || optimizacionId;
+            if (data.imagenes && data.imagenes.length > 0) {
+                titulo.textContent = `Tableros (${data.imagenes.length}) - Optimización #${numeroAMostrar}`;
+                
+                data.imagenes.forEach((imgBase64, idx) => {
+                    const contenedorImagen = document.createElement('div');
+                    contenedorImagen.className = 'tablero-modal-item';
+                    contenedorImagen.style.flex = '0 0 auto';
+                    contenedorImagen.style.textAlign = 'center';
+                    
+                    const label = document.createElement('div');
+                    label.className = 'text-white mb-2';
+                    label.innerHTML = `<strong>Tablero ${idx + 1} de ${data.imagenes.length}</strong>`;
+                    
+                    const img = document.createElement('img');
+                    img.src = `data:image/png;base64,${imgBase64}`;
+                    img.alt = `Tablero ${idx + 1}`;
+                    img.style.maxHeight = '80vh';
+                    img.style.maxWidth = data.imagenes.length > 1 ? '45vw' : '90vw';
+                    img.style.objectFit = 'contain';
+                    img.style.border = '2px solid #444';
+                    img.style.borderRadius = '8px';
+                    
+                    contenedorImagen.appendChild(label);
+                    contenedorImagen.appendChild(img);
+                    contenido.appendChild(contenedorImagen);
+                });
+            } else {
+                // Fallback: mostrar imagen guardada
+                titulo.textContent = `Tablero - Optimización #${optimizacionId}`;
+                const img = document.createElement('img');
+                img.src = urlImagen;
+                img.alt = `Optimización #${optimizacionId}`;
+                img.style.maxHeight = '85vh';
+                img.style.maxWidth = '90vw';
+                img.style.objectFit = 'contain';
+                contenido.appendChild(img);
+            }
+        })
+        .catch(error => {
+            // En caso de error, mostrar la imagen guardada
+            contenido.innerHTML = '';
+            const numeroAMostrar = optimizacionNumero || optimizacionId;
+            titulo.textContent = `Tablero - Optimización #${numeroAMostrar}`;
+            const img = document.createElement('img');
+            img.src = urlImagen;
+            img.alt = `Optimización #${optimizacionId}`;
+            img.style.maxHeight = '85vh';
+            img.style.maxWidth = '90vw';
+            img.style.objectFit = 'contain';
+            contenido.appendChild(img);
+        });
+    
+    modal.show();
+}
+
+function resetearZoomImagen() {
+    const contenido = document.getElementById('modalImagenContenido');
+    const zoomSlider = document.getElementById('zoomSliderImagen');
+    if (contenido && zoomSlider) {
+        modalZoomLevel = 1;
+        modalTranslateX = 0;
+        modalTranslateY = 0;
+        zoomSlider.value = 100;
+        contenido.style.transform = 'scale(1) translate(0px, 0px)';
+        document.getElementById('zoomValueImagen').textContent = '100%';
+    }
+}
+
+// Variables globales para el arrastre y zoom
+let modalZoomLevel = 1;
+let modalIsDragging = false;
+let modalStartX, modalStartY;
+let modalTranslateX = 0, modalTranslateY = 0;
+
+// Configurar slider de zoom cuando el modal se muestra
+document.getElementById('modalImagen').addEventListener('shown.bs.modal', function() {
+    const zoomSlider = document.getElementById('zoomSliderImagen');
+    const contenido = document.getElementById('modalImagenContenido');
+    
+    // Resetear valores
+    modalZoomLevel = 1;
+    modalTranslateX = 0;
+    modalTranslateY = 0;
+    zoomSlider.value = 100;
+    contenido.style.transform = 'scale(1) translate(0px, 0px)';
+    contenido.style.transformOrigin = 'center center';
+    contenido.style.cursor = 'grab';
+    
+    zoomSlider.oninput = function() {
+        const zoomPercent = parseInt(this.value);
+        modalZoomLevel = zoomPercent / 100;
+        contenido.style.transform = `scale(${modalZoomLevel}) translate(${modalTranslateX}px, ${modalTranslateY}px)`;
+        document.getElementById('zoomValueImagen').textContent = zoomPercent + '%';
+    };
+});
+
+// Eventos de arrastre solo en el contenido de imágenes
+document.addEventListener('mousedown', function(e) {
+    const contenido = document.getElementById('modalImagenContenido');
+    
+    // No activar arrastre si se hace click en el slider o sus controles
+    if (e.target.closest('.zoom-controls')) {
+        return;
+    }
+    
+    if (contenido && contenido.contains(e.target)) {
+        modalIsDragging = true;
+        modalStartX = e.clientX;
+        modalStartY = e.clientY;
+        contenido.style.cursor = 'grabbing';
+        e.preventDefault();
+    }
+});
+
+document.addEventListener('mousemove', function(e) {
+    if (!modalIsDragging) return;
+    const contenido = document.getElementById('modalImagenContenido');
+    if (contenido) {
+        const dx = (e.clientX - modalStartX) / modalZoomLevel;
+        const dy = (e.clientY - modalStartY) / modalZoomLevel;
+        modalStartX = e.clientX;
+        modalStartY = e.clientY;
+        modalTranslateX += dx;
+        modalTranslateY += dy;
+        contenido.style.transform = `scale(${modalZoomLevel}) translate(${modalTranslateX}px, ${modalTranslateY}px)`;
+    }
+});
+
+document.addEventListener('mouseup', function() {
+    if (modalIsDragging) {
+        modalIsDragging = false;
+        const contenido = document.getElementById('modalImagenContenido');
+        if (contenido) contenido.style.cursor = 'grab';
+    }
+});
+
+// Función para obtener el token CSRF de las cookies
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Funcionalidad AJAX para favoritos
+document.addEventListener('DOMContentLoaded', function() {
+    const favoritoButtons = document.querySelectorAll('.favorito-btn');
+    
+    favoritoButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const optimizacionId = this.getAttribute('data-optimizacion-id');
+            const favoritoUrl = this.getAttribute('data-favorito-url');
+            const icon = this.querySelector('.favorito-icon');
+            const buttonElement = this;
+            
+            // Deshabilitar el botón mientras se procesa
+            buttonElement.disabled = true;
+            buttonElement.style.opacity = '0.6';
+            
+            // Obtener token CSRF
+            const csrftoken = getCookie('csrftoken');
+            
+            // Crear FormData para enviar el CSRF token
+            const formData = new FormData();
+            formData.append('csrfmiddlewaretoken', csrftoken);
+            
+            // Hacer petición AJAX usando la URL del atributo data
+            const url = favoritoUrl + '?ajax=true';
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrftoken
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Actualizar el estado visual
+                    if (data.favorito) {
+                        icon.textContent = '⭐';
+                        icon.style.color = '#ffc107';
+                        buttonElement.setAttribute('data-favorito', 'true');
+                        buttonElement.setAttribute('title', 'Quitar de favoritos');
+                    } else {
+                        icon.textContent = '☆';
+                        icon.style.color = '#ccc';
+                        buttonElement.setAttribute('data-favorito', 'false');
+                        buttonElement.setAttribute('title', 'Marcar como favorito');
+                    }
+                } else {
+                    if (window.cutlessAlerta) {
+                        window.cutlessAlerta({ titulo: 'Error', mensaje: 'Error: ' + (data.message || 'Operación no completada.') });
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                if (window.cutlessAlerta) {
+                    window.cutlessAlerta({ titulo: 'Error', mensaje: 'Error al actualizar favorito. Por favor, recarga la página.' });
+                } else {
+                    alert('Error al actualizar favorito. Por favor, recarga la página.');
+                }
+            })
+            .finally(() => {
+                // Rehabilitar el botón
+                buttonElement.disabled = false;
+                buttonElement.style.opacity = '1';
+            });
+        });
+
+        const selectTodosBtn = document.getElementById('select-todos-btn');
+        const deselectTodosBtn = document.getElementById('deselect-todos-btn');
+        const checkboxes = document.querySelectorAll('.optimizacion-select');
+        const btnBorrarSeleccion = document.getElementById('btn-borrar-seleccion');
+
+        function actualizarEstadoBotonBorrar() {
+            const algunosSeleccionados = Array.from(checkboxes).some(chk => chk.checked);
+            btnBorrarSeleccion.disabled = !algunosSeleccionados;
+        }
+
+        selectTodosBtn.addEventListener('click', function() {
+            checkboxes.forEach(chk => chk.checked = true);
+            actualizarEstadoBotonBorrar();
+        });
+
+        deselectTodosBtn.addEventListener('click', function() {
+            checkboxes.forEach(chk => chk.checked = false);
+            actualizarEstadoBotonBorrar();
+        });
+
+        checkboxes.forEach(chk => {
+            chk.addEventListener('change', actualizarEstadoBotonBorrar);
+        });
+    });
+});
+</script>
+
+{% endblock %}
+

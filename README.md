@@ -1,4 +1,4 @@
-# OptiCut - Optimizador de Cortes de Madera
+# CutLess - Optimizador de Cortes de Madera
 
 Sistema web para optimizar el corte de tableros de madera utilizando el algoritmo First Fit Decreasing (FFD).
 
@@ -64,7 +64,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-El proyecto estará disponible en: `http://127.0.0.1:8000/`
+Tras iniciar sesión, la app principal responde en: `http://127.0.0.1:8000/cutless/` (las URLs antiguas `/opticut/...` redirigen a `/cutless/...`).
 
 ## Estructura del Proyecto
 
@@ -73,11 +73,12 @@ opti/
 ├── manage.py              # Script de gestión de Django
 ├── requirements.txt       # Dependencias del proyecto
 ├── db.sqlite3            # Base de datos (se crea automáticamente)
-├── opti/                 # Configuración del proyecto
+├── cutless_project/      # Configuración Django (settings, URLs raíz, WSGI/ASGI)
 │   ├── settings.py       # Configuración de Django
-│   ├── urls.py          # URLs principales
-│   └── wsgi.py          # Configuración WSGI
-├── opticut/             # App principal (optimizador)
+│   ├── urls.py          # URLs principales (app bajo /cutless/)
+│   ├── wsgi.py
+│   └── asgi.py
+├── opticut/             # App principal (optimizador; nombre de módulo interno)
 │   ├── models.py        # Modelos de datos
 │   ├── views.py         # Vistas (lógica de negocio)
 │   ├── forms.py         # Formularios

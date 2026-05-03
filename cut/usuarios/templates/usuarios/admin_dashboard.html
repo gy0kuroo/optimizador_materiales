@@ -1,0 +1,75 @@
+{% extends 'cutless/base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mt-4">Administración de Usuarios</h2>
+<p>Solo accesible para administradores.</p>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <h5 class="card-title">Crear usuario</h5>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="mb-3">
+        <label for="id_rol" class="form-label">Rol</label>
+        <select id="id_rol" name="rol" class="form-select">
+          <option value="usuario">Usuario</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-success" name="crear_usuario">Crear usuario</button>
+    </form>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="admin-user-table table table-striped table-hover">
+    <thead>
+      <tr>
+        <th>Usuario</th>
+        <th>Email</th>
+        <th>Rol</th>
+        <th>Staff</th>
+        <th>Activo</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in usuarios %}
+      <tr>
+        <td>{{ u.username }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.perfil.rol|default:'usuario' }}</td>
+        <td>{{ u.is_staff|yesno:'Sí,No' }}</td>
+        <td>{{ u.is_active|yesno:'Sí,No' }}</td>
+        <td>
+          {% if u != request.user %}
+            <a href="{% url 'usuarios:editar_usuario' u.pk %}" class="btn btn-info btn-sm me-1 admin-action-btn">Editar</a>
+            <form method="post" action="{% url 'usuarios:actualizar_rol' u.pk %}" class="d-inline">
+              {% csrf_token %}
+              <select name="rol" class="form-select form-select-sm d-inline w-auto me-1 rol-select-inline">
+                <option value="usuario" {% if u.perfil.rol == 'usuario' %}selected{% endif %}>Usuario</option>
+                <option value="admin" {% if u.perfil.rol == 'admin' %}selected{% endif %}>Admin</option>
+              </select>
+              <button type="submit" class="btn btn-primary btn-sm admin-action-btn">Actualizar rol</button>
+            </form>
+            <form method="post" action="{% url 'usuarios:eliminar_usuario' u.pk %}" class="d-inline" data-cutless-mensaje="¿Eliminar al usuario «{{ u.username }}»? Esta acción no se puede deshacer.">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-sm admin-action-btn">Eliminar</button>
+            </form>
+          {% else %}
+            <span class="text-muted">Tu cuenta</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6">No hay usuarios registrados.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

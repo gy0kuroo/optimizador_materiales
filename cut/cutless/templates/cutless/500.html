@@ -1,0 +1,34 @@
+{% extends 'cutless/base.html' %}
+{% load static %}
+
+{% block title %}Error del servidor - CutLess{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+      <div class="card fade-in">
+        <div class="card-body py-5">
+          <div class="mb-4" style="font-size: 5rem;">⚠️</div>
+          <h1 class="display-4 mb-3">Error del servidor</h1>
+          <p class="lead mb-4">
+            Ocurrió un error inesperado. Por favor, intenta nuevamente más tarde.
+          </p>
+          <div class="alert alert-warning">
+            <strong>💡 Sugerencia:</strong> Si el problema persiste, intenta recargar la página o contacta al administrador del sistema.
+          </div>
+          <div class="mt-4">
+            <a href="{% url 'cutless:index' %}" class="btn btn-primary btn-lg me-2">
+              🏠 Ir al Inicio
+            </a>
+            <button onclick="window.location.reload()" class="btn btn-outline-secondary btn-lg">
+              🔄 Recargar Página
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
