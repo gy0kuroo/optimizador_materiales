@@ -10,6 +10,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.dates as mdates
 import matplotlib.patches as patches
+from matplotlib.gridspec import GridSpec
 import matplotlib.pyplot as plt
 from PIL import Image
 from reportlab.lib.pagesizes import A4
@@ -232,6 +233,112 @@ def _normalizar_rects_libres(rects, eps=1e-5):
         r = _fuse_adjacent_free_rects(r, eps)
         r = _merge_free_rects(r)
     return r
+
+
+def _unpack_posicion_grafico(pos_data, idx_fallback):
+    """Normaliza cualquier formato de tupla ``posiciones``."""
+    nombre_pieza = f'Pieza {idx_fallback + 1}'
+    rotada = False
+    x, y, w, h = pos_data[:4]
+    if len(pos_data) >= 8:
+        x, y, w, h, rotada, w_orig, h_orig, nombre_pieza = pos_data[:8]
+    elif len(pos_data) == 7:
+        x, y, w, h, rotada, w_orig, h_orig = pos_data
+    elif len(pos_data) == 5:
+        x, y, w, h, rotada = pos_data[:5]
+        w_orig, h_orig = w, h
+    else:
+        w_orig, h_orig = w, h
+    nombre = (str(nombre_pieza).strip() or nombre_pieza) or f'Pieza {idx_fallback + 1}'
+    return float(x), float(y), float(w), float(h), rotada, float(w_orig), float(h_orig), nombre
+
+
+def _tipo_pieza_visual_key(pos_data, idx_fallback):
+    """Clave estable: mismo nombre + medidas solicitadas ⇒ mismo color."""
+    _, _, _, _, _, wo, ho, nombre = _unpack_posicion_grafico(pos_data, idx_fallback)
+    return (nombre, round(wo, 6), round(ho, 6))
+
+
+def _catalogo_tipos_piezas_visual(tableros):
+    seen = set()
+    for tb in tableros:
+        for ji, pd in enumerate(tb['posiciones']):
+            seen.add(_tipo_pieza_visual_key(pd, ji))
+    return sorted(seen, key=lambda t: (t[0].lower(), t[1], t[2]))
+
+
+def _paleta_tipos_visual(n):
+    """Colores suficientemente distintos; se cicla si hay muchos tipos."""
+    base = [
+        '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2',
+        '#E74C3C', '#3498DB', '#27AE60', '#9B59B6', '#1ABC9C', '#F39C12', '#5DADE2', '#AF7AC5',
+        '#DC7633', '#48C9B0', '#EC7063', '#52BE80', '#839192', '#C39BD3',
+    ]
+    out = []
+    i = 0
+    while len(out) < n:
+        out.append(base[i % len(base)])
+        i += 1
+    return out
+
+
+def _dibujar_leyenda_tipos_piezas(ax_leg, catalogo_ord, numero_por_tipo, color_por_tipo, unidad):
+    ax_leg.axis('off')
+    n = len(catalogo_ord)
+    if n == 0:
+        ax_leg.set_xlim(0, 1)
+        ax_leg.set_ylim(0, 1)
+        return
+
+    simbolo = obtener_simbolo_unidad(unidad)
+    rh = 24
+    top_pad = 14
+    total_h = n * rh + top_pad + 8
+    ax_leg.set_xlim(0, 100)
+    ax_leg.set_ylim(0, total_h)
+
+    ax_leg.text(
+        4, total_h - 4, 'Tipos de pieza',
+        fontsize=11, fontweight='bold', va='top', color='#111',
+    )
+
+    for i, key in enumerate(catalogo_ord):
+        nombre_t, wc, hc = key
+        num_t = numero_por_tipo[key]
+        clr = color_por_tipo[key]
+        wd = round(convertir_desde_cm(wc, unidad), 1)
+        hd = round(convertir_desde_cm(hc, unidad), 1)
+        row_top = total_h - top_pad - i * rh
+        row_bottom = row_top - rh
+        y_cent = row_bottom + rh / 2
+
+        rh_bar = rh - 8
+        ax_leg.add_patch(patches.Rectangle(
+            (6, row_bottom + 4),
+            16,
+            rh_bar,
+            linewidth=1.15,
+            edgecolor='#2c3e50',
+            facecolor=clr,
+            alpha=0.9,
+        ))
+        texto_n = nombre_t[:38] + ('…' if len(nombre_t) > 38 else '')
+        linea = f'{num_t}.  {texto_n}\n     {wd}×{hd} {simbolo}'
+        ax_leg.text(
+            26, y_cent, linea,
+            fontsize=9, va='center', ha='left', linespacing=1.3,
+            color='#111',
+        )
+
+
+def _numero_interior_pieza(num_tipo, w_placed_cm, h_placed_cm, ancho_tb_cm, alto_tb_cm):
+    """Devuelve (texto o None, fontsize)."""
+    min_tab = max(min(ancho_tb_cm, alto_tb_cm), 1e-9)
+    rel = min(w_placed_cm, h_placed_cm) / min_tab
+    if rel < 0.035:
+        return None, None
+    fs = max(6, min(15, min_tab / 8 + rel * 48))
+    return str(num_tipo), fs
 
 
 def mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad='cm'):
@@ -469,14 +576,25 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                 'num_piezas': len(tablero['posiciones'])
             })
     
-    # Paso 4: Generar imágenes
+    # Paso 4: Leyenda/colores consistentes entre tableros (nombre + medidas solicitadas)
+    catalogo_ord = _catalogo_tipos_piezas_visual(tableros)
+    numero_por_tipo = {k: i + 1 for i, k in enumerate(catalogo_ord)}
+    paleta_visual = _paleta_tipos_visual(len(catalogo_ord))
+    color_por_tipo = {k: paleta_visual[j] for j, k in enumerate(catalogo_ord)}
+
+    # Generar imágenes
     imagenes_base64 = []
-    
+
     for i, tablero in enumerate(tableros, start=1):
         posiciones = tablero['posiciones']
         info = info_tableros[i-1]
-        
-        fig, ax = plt.subplots(figsize=(10, 10))
+
+        fig = plt.figure(figsize=(12.5, 9.8))
+        gs = GridSpec(1, 2, figure=fig, width_ratios=[1, 0.36], wspace=0.12)
+        ax = fig.add_subplot(gs[0, 0])
+        ax_leg = fig.add_subplot(gs[0, 1])
+        fig.subplots_adjust(left=0.05, right=0.96, top=0.91, bottom=0.06)
+
         ax.set_xlim(0, ancho_tablero)
         ax.set_ylim(0, alto_tablero)
         ax.invert_yaxis()
@@ -521,84 +639,42 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
         
         # Dibujar piezas
         if modo_plan_corte:
-            # Modo plan de corte: blanco y negro, solo medidas y nombre de pieza
             for idx, pos_data in enumerate(posiciones):
-                # Manejar diferentes formatos de posiciones
-                if len(pos_data) >= 8:
-                    x, y, w, h, rotada, w_orig, h_orig, nombre_pieza = pos_data
-                elif len(pos_data) == 7:
-                    x, y, w, h, rotada, w_orig, h_orig = pos_data
-                    nombre_pieza = f'Pieza {idx+1}'
-                elif len(pos_data) == 5:
-                    x, y, w, h, rotada = pos_data
-                    w_orig, h_orig = w, h
-                    nombre_pieza = f'Pieza {idx+1}'
-                else:
-                    x, y, w, h = pos_data
-                    rotada = False
-                    w_orig, h_orig = w, h
-                    nombre_pieza = f'Pieza {idx+1}'
-                
-                # Rectángulo blanco con borde negro
-                rect = patches.Rectangle((x, y), w, h, linewidth=1.5,
-                                         edgecolor='black', facecolor='white', alpha=1.0)
-                ax.add_patch(rect)
-                
-                # Mostrar dimensiones en negro
-                w_orig_mostrar = round(convertir_desde_cm(w_orig, unidad), 1)
-                h_orig_mostrar = round(convertir_desde_cm(h_orig, unidad), 1)
-                
-                # Texto incluye nombre de la pieza + dimensiones
-                texto_dimensiones = f'{nombre_pieza}\n{w_orig_mostrar}×{h_orig_mostrar}'
-                if rotada:
-                    texto_dimensiones += '\n(ROTADA 90°)'
-                
-                ax.text(x + w/2, y + h/2, texto_dimensiones,
-                       ha='center', va='center', fontsize=7,
-                       fontweight='bold', color='black',
-                       bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
-                                edgecolor='black', linewidth=0.5, alpha=0.9))
+                x, y, w, h, rotada, _wo, _ho, _nom = _unpack_posicion_grafico(pos_data, idx)
+                key_tv = _tipo_pieza_visual_key(pos_data, idx)
+                num_t = numero_por_tipo[key_tv]
+                clr = color_por_tipo[key_tv]
+                ax.add_patch(patches.Rectangle(
+                    (x, y), w, h, linewidth=2.8, edgecolor=clr,
+                    facecolor='white', alpha=1.0,
+                ))
+                texto_n, psz = _numero_interior_pieza(num_t, w, h, ancho_tablero, alto_tablero)
+                if texto_n:
+                    ax.text(
+                        x + w / 2, y + h / 2,
+                        texto_n,
+                        fontsize=psz, ha='center', va='center', fontweight='bold',
+                        color='#1a1f2c',
+                    )
         else:
-            # Modo normal: colores y más información
-            colores = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2']
-            
             for idx, pos_data in enumerate(posiciones):
-                # Manejar diferentes formatos de posiciones
-                if len(pos_data) >= 8:
-                    x, y, w, h, rotada, w_orig, h_orig, nombre_pieza = pos_data
-                elif len(pos_data) == 7:
-                    x, y, w, h, rotada, w_orig, h_orig = pos_data
-                    nombre_pieza = f'Pieza {idx+1}'
-                elif len(pos_data) == 5:
-                    x, y, w, h, rotada = pos_data
-                    w_orig, h_orig = w, h
-                    nombre_pieza = f'Pieza {idx+1}'
-                else:
-                    x, y, w, h = pos_data
-                    rotada = False
-                    w_orig, h_orig = w, h
-                    nombre_pieza = f'Pieza {idx+1}'
-                
-                color = colores[idx % len(colores)]
-                
-                rect = patches.Rectangle((x, y), w, h, linewidth=2,
-                                         edgecolor='darkblue', facecolor=color, alpha=0.7)
-                ax.add_patch(rect)
-                
-                # Mostrar dimensiones
-                w_orig_mostrar = round(convertir_desde_cm(w_orig, unidad), 1)
-                h_orig_mostrar = round(convertir_desde_cm(h_orig, unidad), 1)
-                
-                # Mostrar dimensiones con indicador de rotación y nombre
-                texto_dimensiones = f'{nombre_pieza}\n{w_orig_mostrar}×{h_orig_mostrar}'
-                if rotada:
-                    texto_dimensiones += '\n(ROTADA 90°)'
-                
-                ax.text(x + w/2, y + h/2, texto_dimensiones,
-                       ha='center', va='center', fontsize=8, 
-                       fontweight='bold', color='white',
-                       bbox=dict(boxstyle='round,pad=0.3', facecolor='darkgreen' if rotada else 'black', alpha=0.8))
-            
+                x, y, w, h, rotada, _wo, _ho, _nom = _unpack_posicion_grafico(pos_data, idx)
+                key_tv = _tipo_pieza_visual_key(pos_data, idx)
+                clr = color_por_tipo[key_tv]
+                num_t = numero_por_tipo[key_tv]
+                ax.add_patch(patches.Rectangle(
+                    (x, y), w, h, linewidth=2,
+                    edgecolor='#263238', facecolor=clr, alpha=0.78,
+                ))
+                texto_n, psz = _numero_interior_pieza(num_t, w, h, ancho_tablero, alto_tablero)
+                if texto_n:
+                    ax.text(
+                        x + w / 2, y + h / 2,
+                        texto_n,
+                        fontsize=psz, ha='center', va='center', fontweight='bold',
+                        color='#102027',
+                    )
+
             # Información detallada (solo en modo normal)
             area_usada_mostrar = round(info['area_usada'] * factor_area, 2)
             info_text = (f"Piezas: {info['num_piezas']}\n"
@@ -607,7 +683,9 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
             ax.text(ancho_tablero * 0.02, alto_tablero * 0.98, info_text,
                    fontsize=9, verticalalignment='top',
                    bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.9))
-        
+
+        _dibujar_leyenda_tipos_piezas(ax_leg, catalogo_ord, numero_por_tipo, color_por_tipo, unidad)
+
         buf = io.BytesIO()
         fig.savefig(buf, format="png", dpi=120, bbox_inches='tight', facecolor='white')
         plt.close(fig)
