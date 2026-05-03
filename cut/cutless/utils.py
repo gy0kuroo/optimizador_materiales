@@ -626,7 +626,53 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
         'num_piezas_colocadas': num_piezas_colocadas,
     }
 
-def generar_pdf(optimizacion, imagenes_base64, numero_lista=None):
+
+def _info_desperdicio_desde_optimizacion(optimizacion):
+    """Regenera el dict info_desperdicio de generar_grafico desde datos guardados en BD."""
+    unidad_opt = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
+    piezas = []
+    nombres_piezas = []
+    for linea in (optimizacion.piezas or '').splitlines():
+        linea = linea.strip()
+        if not linea:
+            continue
+        partes = [p.strip() for p in linea.split(',')]
+        try:
+            if len(partes) == 4:
+                nombre, w, h, c_s = partes
+                nombres_piezas.append(nombre)
+                piezas.append((
+                    convertir_a_cm(float(w), unidad_opt),
+                    convertir_a_cm(float(h), unidad_opt),
+                    int(c_s),
+                ))
+            elif len(partes) == 3:
+                w, h, c_s = partes
+                nombres_piezas.append(f"Pieza {len(nombres_piezas) + 1}")
+                piezas.append((
+                    convertir_a_cm(float(w), unidad_opt),
+                    convertir_a_cm(float(h), unidad_opt),
+                    int(c_s),
+                ))
+        except (ValueError, TypeError):
+            continue
+    if not piezas:
+        return None
+    permitir_rotacion = getattr(optimizacion, 'permitir_rotacion', True)
+    margen_corte = getattr(optimizacion, 'margen_corte', 0.3) or 0.3
+    _, _, info = generar_grafico(
+        piezas,
+        optimizacion.ancho_tablero,
+        optimizacion.alto_tablero,
+        unidad_opt,
+        permitir_rotacion=permitir_rotacion,
+        margen_corte=margen_corte,
+        nombres_piezas=nombres_piezas if nombres_piezas else None,
+    )
+    return info
+
+
+def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdicio=None):
     """
     Genera UN SOLO PDF con todos los tableros, cada uno en su propia página.
     
@@ -635,6 +681,8 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None):
         imagenes_base64: Lista de imágenes en base64
         numero_lista: Número de la lista en el historial (opcional). Si se proporciona,
                      se usará en el nombre del archivo en lugar del ID.
+        info_desperdicio: Dict igual al tercer retorno de generar_grafico (areas en cm²).
+                         Si es None, se regenera desde la optimización guardada (más costoso).
     """
     if isinstance(imagenes_base64, str):
         imagenes_base64 = [imagenes_base64] if imagenes_base64 else []
@@ -831,8 +879,6 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None):
     margen_mm = round(margen_cm * 10, 1)  # Convertir de cm a mm
     c.drawString(2.5*cm, y_pos, f"• Margen de corte (kerf): {margen_mm} mm")
     
-    # Tabla de desperdicio por tablero (si hay información disponible)
-    # Esto se calculará desde las imágenes generadas, pero por ahora usamos datos básicos
     y_pos -= 30
     c.setFont("Helvetica-Bold", 12)
     c.drawString(2*cm, y_pos, "Resumen por Tablero:")
@@ -847,19 +893,32 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None):
     c.line(2*cm, y_pos, width - 2*cm, y_pos)
     y_pos -= 12
     c.setFont("Helvetica", 9)
-    
-    # Calcular info de tableros desde las piezas (aproximado)
-    # En una implementación completa, esto vendría de info_desperdicio
+
+    if info_desperdicio is None:
+        info_desperdicio = _info_desperdicio_desde_optimizacion(optimizacion) or {}
+    info_tableros = info_desperdicio.get('info_tableros') or []
+
     for i in range(len(imagenes_base64)):
         if y_pos < 100:
             c.showPage()
             y_pos = height - 50
-        # Información básica - en producción esto vendría de info_desperdicio
         c.drawString(2.5*cm, y_pos, f"Tablero {i+1}")
-        c.drawString(5*cm, y_pos, "-")  # Se calcularía desde las posiciones
-        c.drawString(8*cm, y_pos, "-")  # Se calcularía desde las posiciones
-        c.drawString(12*cm, y_pos, "-")  # Se calcularía desde las posiciones
-        c.drawString(16*cm, y_pos, "-")  # Se calcularía desde las posiciones
+        if i < len(info_tableros):
+            row = info_tableros[i]
+            n_p = row.get('num_piezas', 0)
+            au = round(float(row['area_usada']) * factor_area, 2)
+            dp = round(float(row['desperdicio']) * factor_area, 2)
+            pct = row.get('porcentaje_uso')
+            c.drawString(5*cm, y_pos, str(n_p))
+            c.drawString(8*cm, y_pos, f"{au} {simbolo_area}")
+            c.drawString(12*cm, y_pos, f"{dp} {simbolo_area}")
+            if pct is not None:
+                c.drawString(16*cm, y_pos, f"{float(pct):.2f}%")
+            else:
+                c.drawString(16*cm, y_pos, "-")
+        else:
+            for col_x in (5*cm, 8*cm, 12*cm, 16*cm):
+                c.drawString(col_x, y_pos, "-")
         y_pos -= 12
 
     # === PÁGINAS SIGUIENTES: Un tablero por página ===

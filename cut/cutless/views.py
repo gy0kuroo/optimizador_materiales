@@ -281,7 +281,12 @@ def index(request):
             
             # Generar UN SOLO PDF con todos los tableros usando el número de lista correcto
             try:
-                pdf_path = generar_pdf(optimizacion, imagenes_base64, numero_lista=numero_lista)
+                pdf_path = generar_pdf(
+                    optimizacion,
+                    imagenes_base64,
+                    numero_lista=numero_lista,
+                    info_desperdicio=info_desperdicio,
+                )
             except Exception as e:
                 messages.warning(request, f"⚠️ PDF no generado: {str(e)}")
                 pdf_path = None
@@ -621,7 +626,12 @@ def editar_optimizacion(request, pk):
                 numero_lista = total_optimizaciones
             
             try:
-                pdf_path = generar_pdf(optimizacion, imagenes_base64, numero_lista=numero_lista)
+                pdf_path = generar_pdf(
+                    optimizacion,
+                    imagenes_base64,
+                    numero_lista=numero_lista,
+                    info_desperdicio=info_desperdicio,
+                )
             except Exception as e:
                 messages.warning(request, f"⚠️ PDF no generado: {str(e)}")
                 pdf_path = None
@@ -1021,7 +1031,12 @@ def descargar_pdf(request, pk):
     )
     
     # Generar UN SOLO PDF con todas las imágenes (usando número de lista)
-    pdf_path = generar_pdf(optimizacion, imagenes_base64, numero_lista=numero_lista)
+    pdf_path = generar_pdf(
+        optimizacion,
+        imagenes_base64,
+        numero_lista=numero_lista,
+        info_desperdicio=info_desperdicio,
+    )
     
     full_path = os.path.join(settings.MEDIA_ROOT, pdf_path)
     return FileResponse(open(full_path, "rb"), as_attachment=True, filename=os.path.basename(full_path))
@@ -1259,7 +1274,12 @@ def resultado_view(request, pk=None):
         # Generar PDF si es necesario
         pdf_path = None
         try:
-            pdf_path = generar_pdf(optimizacion, imagenes_base64, numero_lista=numero_lista)
+            pdf_path = generar_pdf(
+                optimizacion,
+                imagenes_base64,
+                numero_lista=numero_lista,
+                info_desperdicio=info_desperdicio,
+            )
         except Exception as e:
             pass  # No es crítico si falla el PDF
         
@@ -1439,7 +1459,12 @@ def resultado_view(request, pk=None):
             numero_lista = total_optimizaciones
 
         # Generar UN SOLO PDF con todas las imágenes usando el número de lista correcto
-        pdf_path = generar_pdf(optimizacion, imagenes_base64, numero_lista=numero_lista)
+        pdf_path = generar_pdf(
+            optimizacion,
+            imagenes_base64,
+            numero_lista=numero_lista,
+            info_desperdicio=info_desperdicio,
+        )
         optimizacion.pdf = pdf_path
         optimizacion.save()
         
