@@ -1,0 +1,11 @@
+# Re-export all views for urls.py compatibility
+from .common import *  # noqa: F401,F403
+from .optimization import *  # noqa: F401,F403
+from .historial import *  # noqa: F401,F403
+from .exports import *  # noqa: F401,F403
+from .analytics import *  # noqa: F401,F403
+from .materials import *  # noqa: F401,F403
+from .clients import *  # noqa: F401,F403
+from .budgets import *  # noqa: F401,F403
+from .projects import *  # noqa: F401,F403
+from .plantillas import *  # noqa: F401,F403

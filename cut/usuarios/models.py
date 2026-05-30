@@ -67,18 +67,6 @@ class PerfilUsuario(models.Model):
         help_text="Unidad de medida que se usará por defecto en nuevas optimizaciones"
     )
     
-    # Algoritmo de optimización predeterminado
-    algoritmo_predeterminado = models.CharField(
-        max_length=20,
-        choices=[
-            ('ffd', 'First Fit Decreasing (FFD)'),
-            ('best_fit', 'Best Fit'),
-            ('first_fit', 'First Fit'),
-        ],
-        default='ffd',
-        help_text="Algoritmo de optimización que se usará por defecto"
-    )
-    
     # Margen de corte predeterminado (en cm)
     margen_corte_predeterminado = models.DecimalField(
         max_digits=5,

@@ -76,6 +76,52 @@ def convertir_desde_cm(valor_cm, unidad_destino):
     return round(valor_cm * factor, 2)
 
 
+def parsear_piezas_desde_texto(texto_piezas, unidad_medida='cm'):
+    """
+    Parsea líneas de piezas guardadas en Optimizacion o Plantilla.
+
+    Formatos soportados:
+    - nombre,ancho,alto,cantidad
+    - ancho,alto,cantidad (legacy, sin nombre)
+
+    Returns:
+        Lista de dicts con claves: nombre, ancho, alto, cantidad, ancho_cm, alto_cm
+    """
+    piezas = []
+    if not texto_piezas:
+        return piezas
+
+    for linea in texto_piezas.splitlines():
+        linea = linea.strip()
+        if not linea:
+            continue
+        partes = [p.strip() for p in linea.split(',')]
+        try:
+            if len(partes) == 4:
+                nombre, ancho_s, alto_s, cant_s = partes
+            elif len(partes) == 3:
+                nombre = f'Pieza {len(piezas) + 1}'
+                ancho_s, alto_s, cant_s = partes
+            else:
+                continue
+
+            ancho = float(ancho_s)
+            alto = float(alto_s)
+            cantidad = int(cant_s)
+            piezas.append({
+                'nombre': (nombre or f'Pieza {len(piezas) + 1}').strip(),
+                'ancho': ancho,
+                'alto': alto,
+                'cantidad': cantidad,
+                'ancho_cm': convertir_a_cm(ancho, unidad_medida),
+                'alto_cm': convertir_a_cm(alto, unidad_medida),
+            })
+        except (ValueError, TypeError):
+            continue
+
+    return piezas
+
+
 def obtener_simbolo_unidad(unidad):
     """
     Retorna el símbolo de la unidad para mostrar.
@@ -282,17 +328,20 @@ def _paleta_tipos_visual(n):
     return out
 
 
-def _dibujar_leyenda_tipos_piezas(ax_leg, catalogo_ord, numero_por_tipo, color_por_tipo, unidad):
+def _dibujar_leyenda_tipos_piezas(ax_leg, catalogo_ord, numero_por_tipo, color_por_tipo, unidad, cantidad_por_tipo):
     ax_leg.axis('off')
-    n = len(catalogo_ord)
+    entries = [k for k in catalogo_ord if cantidad_por_tipo.get(k, 0) > 0]
+    n = len(entries)
     if n == 0:
         ax_leg.set_xlim(0, 1)
         ax_leg.set_ylim(0, 1)
         return
 
     simbolo = obtener_simbolo_unidad(unidad)
-    rh = 24
-    top_pad = 14
+    fs = 8
+    lh = 11
+    rh = 66
+    top_pad = 16
     total_h = n * rh + top_pad + 8
     ax_leg.set_xlim(0, 100)
     ax_leg.set_ylim(0, total_h)
@@ -302,33 +351,45 @@ def _dibujar_leyenda_tipos_piezas(ax_leg, catalogo_ord, numero_por_tipo, color_p
         fontsize=11, fontweight='bold', va='top', color='#111',
     )
 
-    for i, key in enumerate(catalogo_ord):
+    for i, key in enumerate(entries):
         nombre_t, wc, hc = key
         num_t = numero_por_tipo[key]
         clr = color_por_tipo[key]
+        cantidad = cantidad_por_tipo[key]
         wd = round(convertir_desde_cm(wc, unidad), 1)
         hd = round(convertir_desde_cm(hc, unidad), 1)
         row_top = total_h - top_pad - i * rh
-        row_bottom = row_top - rh
-        y_cent = row_bottom + rh / 2
+        y = row_top - 4
 
-        rh_bar = rh - 8
+        texto_n = nombre_t[:32] + ('…' if len(nombre_t) > 32 else '')
+        lineas = [
+            f'Número: {num_t}',
+            f'Nombre: {texto_n}',
+            f'Medidas: {wd} × {hd} {simbolo}',
+            f'Cantidad de piezas: {cantidad}',
+        ]
+        for j, linea in enumerate(lineas):
+            ax_leg.text(
+                4, y - j * lh, linea,
+                fontsize=fs, va='top', ha='left', color='#111',
+            )
+
+        color_y = y - len(lineas) * lh
+        ax_leg.text(4, color_y, 'Color:', fontsize=fs, va='top', ha='left', color='#111')
         ax_leg.add_patch(patches.Rectangle(
-            (6, row_bottom + 4),
-            16,
-            rh_bar,
-            linewidth=1.15,
+            (24, color_y - 7.5),
+            10,
+            8,
+            linewidth=1,
             edgecolor='#2c3e50',
             facecolor=clr,
             alpha=0.9,
         ))
-        texto_n = nombre_t[:38] + ('…' if len(nombre_t) > 38 else '')
-        linea = f'{num_t}.  {texto_n}\n     {wd}×{hd} {simbolo}'
-        ax_leg.text(
-            26, y_cent, linea,
-            fontsize=9, va='center', ha='left', linespacing=1.3,
-            color='#111',
-        )
+        ax_leg.text(38, color_y, clr.upper(), fontsize=fs, va='top', ha='left', color='#444')
+
+        if i < n - 1:
+            sep_y = row_top - rh + 4
+            ax_leg.plot([4, 96], [sep_y, sep_y], color='#ddd', linewidth=0.8)
 
 
 def _numero_interior_pieza(num_tipo, w_placed_cm, h_placed_cm, ancho_tb_cm, alto_tb_cm):
@@ -590,7 +651,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
         info = info_tableros[i-1]
 
         fig = plt.figure(figsize=(12.5, 9.8))
-        gs = GridSpec(1, 2, figure=fig, width_ratios=[1, 0.36], wspace=0.12)
+        gs = GridSpec(1, 2, figure=fig, width_ratios=[1, 0.44], wspace=0.10)
         ax = fig.add_subplot(gs[0, 0])
         ax_leg = fig.add_subplot(gs[0, 1])
         fig.subplots_adjust(left=0.05, right=0.96, top=0.91, bottom=0.06)
@@ -684,7 +745,15 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                    fontsize=9, verticalalignment='top',
                    bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.9))
 
-        _dibujar_leyenda_tipos_piezas(ax_leg, catalogo_ord, numero_por_tipo, color_por_tipo, unidad)
+        cantidad_por_tipo_tablero = {}
+        for ji, pd in enumerate(posiciones):
+            key_tv = _tipo_pieza_visual_key(pd, ji)
+            cantidad_por_tipo_tablero[key_tv] = cantidad_por_tipo_tablero.get(key_tv, 0) + 1
+
+        _dibujar_leyenda_tipos_piezas(
+            ax_leg, catalogo_ord, numero_por_tipo, color_por_tipo,
+            unidad, cantidad_por_tipo_tablero,
+        )
 
         buf = io.BytesIO()
         fig.savefig(buf, format="png", dpi=120, bbox_inches='tight', facecolor='white')
@@ -708,34 +777,15 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
 def _info_desperdicio_desde_optimizacion(optimizacion):
     """Regenera el dict info_desperdicio de generar_grafico desde datos guardados en BD."""
     unidad_opt = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
-    piezas = []
-    nombres_piezas = []
-    for linea in (optimizacion.piezas or '').splitlines():
-        linea = linea.strip()
-        if not linea:
-            continue
-        partes = [p.strip() for p in linea.split(',')]
-        try:
-            if len(partes) == 4:
-                nombre, w, h, c_s = partes
-                nombres_piezas.append(nombre)
-                piezas.append((
-                    convertir_a_cm(float(w), unidad_opt),
-                    convertir_a_cm(float(h), unidad_opt),
-                    int(c_s),
-                ))
-            elif len(partes) == 3:
-                w, h, c_s = partes
-                nombres_piezas.append(f"Pieza {len(nombres_piezas) + 1}")
-                piezas.append((
-                    convertir_a_cm(float(w), unidad_opt),
-                    convertir_a_cm(float(h), unidad_opt),
-                    int(c_s),
-                ))
-        except (ValueError, TypeError):
-            continue
-    if not piezas:
+    piezas_parseadas = parsear_piezas_desde_texto(optimizacion.piezas, unidad_opt)
+    if not piezas_parseadas:
         return None
+
+    piezas = [
+        (p['ancho_cm'], p['alto_cm'], p['cantidad'])
+        for p in piezas_parseadas
+    ]
+    nombres_piezas = [p['nombre'] for p in piezas_parseadas]
     permitir_rotacion = getattr(optimizacion, 'permitir_rotacion', True)
     margen_corte = getattr(optimizacion, 'margen_corte', 0.3) or 0.3
     _, _, info = generar_grafico(
@@ -768,11 +818,8 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
     if not imagenes_base64:
         return None
     
-    # Usar número de lista si está disponible, sino usar el ID
-    if numero_lista is not None:
-        filename = f"optimizacion_{optimizacion.usuario.username}_{numero_lista}.pdf"
-    else:
-        filename = f"optimizacion_{optimizacion.usuario.username}_{optimizacion.id}.pdf"
+    numero = numero_lista if numero_lista is not None else optimizacion.id
+    filename = f"optimizacion_{numero}.pdf"
     filepath = os.path.join(settings.MEDIA_ROOT, "pdfs", filename)
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
 

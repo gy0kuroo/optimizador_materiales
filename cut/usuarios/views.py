@@ -223,7 +223,6 @@ def perfil(request):
 
                 # Guardar otras preferencias en sesión para consistencia (también en JS localStorage)
                 request.session['unidad_medida_predeterminada'] = perfil.unidad_medida_predeterminada
-                request.session['algoritmo_predeterminado'] = perfil.algoritmo_predeterminado
                 request.session['tamanio_fuente'] = perfil.tamanio_fuente
 
                 messages.success(request, 'Perfil actualizado exitosamente.')
@@ -303,7 +302,6 @@ def configuracion_sistema(request):
 
                 # Sincronizar preferencias de configuración de sistema a sesión
                 request.session['unidad_medida_predeterminada'] = perfil.unidad_medida_predeterminada
-                request.session['algoritmo_predeterminado'] = perfil.algoritmo_predeterminado
                 request.session['tamanio_fuente'] = perfil.tamanio_fuente
                 request.session['tema_preferido'] = perfil.tema_preferido
 

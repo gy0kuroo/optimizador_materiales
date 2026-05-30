@@ -168,18 +168,6 @@ class PerfilForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-control', 'data-pref-key': 'unidad_medida_predeterminada'})
     )
     
-    algoritmo_predeterminado = forms.ChoiceField(
-        label="Algoritmo de optimización predeterminado",
-        choices=[
-            ('ffd', 'First Fit Decreasing (FFD)'),
-            ('best_fit', 'Best Fit'),
-            ('first_fit', 'First Fit'),
-        ],
-        required=True,
-        help_text="Algoritmo que se usará por defecto (actualmente solo FFD está implementado)",
-        widget=forms.Select(attrs={'class': 'form-control', 'data-pref-key': 'algoritmo_predeterminado'})
-    )
-    
     margen_corte_predeterminado = forms.DecimalField(
         label="Margen de corte predeterminado (mm)",
         required=False,  # Cambiado a False para poder detectar cuando está vacío
@@ -258,7 +246,6 @@ class PerfilForm(forms.ModelForm):
             'timeout_sesion', 
             'tema_preferido',
             'unidad_medida_predeterminada',
-            'algoritmo_predeterminado',
             # 'margen_corte_predeterminado' - EXCLUIDO: se maneja completamente manualmente
             'rotacion_automatica_predeterminada',
             'notificaciones_email',
@@ -298,9 +285,6 @@ class PerfilForm(forms.ModelForm):
                 if unidad == 'pulgadas':
                     unidad = 'in'
                 self.fields['unidad_medida_predeterminada'].initial = unidad
-                
-                # Algoritmo predeterminado - siempre tiene un valor (default='ffd')
-                self.fields['algoritmo_predeterminado'].initial = instance.algoritmo_predeterminado
                 
                 # Margen de corte predeterminado - siempre tiene un valor (default=0.3 cm = 3 mm)
                 # CORREGIDO: Convertir de cm (BD) a mm (formulario) para mostrar

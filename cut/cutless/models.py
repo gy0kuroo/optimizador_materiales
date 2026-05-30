@@ -106,6 +106,30 @@ class Optimizacion(models.Model):
         default=0,
         help_text="Número de tableros utilizados (calculado automáticamente)"
     )
+    area_usada_total = models.FloatField(
+        null=True,
+        blank=True,
+        help_text="Área total utilizada en cm² (snapshot al generar resultado)"
+    )
+    desperdicio_total = models.FloatField(
+        null=True,
+        blank=True,
+        help_text="Desperdicio total en cm² (snapshot al generar resultado)"
+    )
+    resultado_generado = models.BooleanField(
+        default=False,
+        help_text="Indica si las imágenes y estadísticas del resultado están persistidas"
+    )
+    resultado_generado_en = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Fecha en que se persistió el resultado completo"
+    )
+    resultado_extra = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Metadatos extra del resultado (piezas no colocadas, totales, etc.)"
+    )
 
     def __str__(self):
         return f"Optimización de {self.usuario.username} ({self.fecha.strftime('%d/%m/%Y %H:%M')})"
@@ -144,6 +168,30 @@ class Optimizacion(models.Model):
         blank=True,
         help_text="Proyecto al que pertenece esta optimización (opcional)"
     )
+
+
+class TableroOptimizacion(models.Model):
+    """Imagen y estadísticas de un tablero dentro de una optimización."""
+    optimizacion = models.ForeignKey(
+        Optimizacion,
+        on_delete=models.CASCADE,
+        related_name='tableros',
+    )
+    numero = models.PositiveSmallIntegerField()
+    imagen = models.ImageField(upload_to='optimizaciones/tableros/')
+    area_usada = models.FloatField(help_text="Área usada en cm²")
+    desperdicio = models.FloatField(help_text="Desperdicio en cm²")
+    porcentaje_uso = models.FloatField(help_text="Porcentaje de aprovechamiento del tablero")
+    num_piezas = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Tablero de optimización"
+        verbose_name_plural = "Tableros de optimización"
+        ordering = ['numero']
+        unique_together = [['optimizacion', 'numero']]
+
+    def __str__(self):
+        return f"Tablero {self.numero} — Optimización #{self.optimizacion_id}"
 
 
 class Cliente(models.Model):
@@ -275,8 +323,7 @@ class Presupuesto(models.Model):
     )
     numero = models.CharField(
         max_length=50,
-        unique=True,
-        help_text="Número único del presupuesto (ej: PRE-2025-001)"
+        help_text="Número del presupuesto, único por usuario (ej: PRE-2025-0001)"
     )
     precio_tablero = models.DecimalField(
         max_digits=10,
@@ -310,6 +357,7 @@ class Presupuesto(models.Model):
         verbose_name = "Presupuesto"
         verbose_name_plural = "Presupuestos"
         ordering = ['-fecha_creacion']
+        unique_together = [['usuario', 'numero']]
     
     def __str__(self):
         return f"Presupuesto {self.numero} - {self.cliente.nombre if self.cliente else 'Sin cliente'}"
@@ -345,33 +393,32 @@ class Presupuesto(models.Model):
     @staticmethod
     def generar_numero_presupuesto(usuario=None):
         """
-        Genera un número único de presupuesto en formato PRE-YYYY-NNNN
+        Genera un número de presupuesto en formato PRE-YYYY-NNNN.
+        La secuencia es independiente por usuario.
         Ejemplo: PRE-2025-0001
-        Si se proporciona un usuario, solo busca entre sus presupuestos.
         """
+        from django.db import transaction
         from django.utils import timezone
+
         año_actual = timezone.now().year
-        
-        # Buscar el último presupuesto del año actual
-        query = Presupuesto.objects.filter(
-            numero__startswith=f'PRE-{año_actual}-'
-        )
-        if usuario:
-            query = query.filter(usuario=usuario)
-        ultimo_presupuesto = query.order_by('-numero').first()
-        
-        if ultimo_presupuesto:
-            # Extraer el número secuencial
-            try:
-                numero_secuencial = int(ultimo_presupuesto.numero.split('-')[-1])
-                nuevo_numero = numero_secuencial + 1
-            except (ValueError, IndexError):
+        prefijo = f'PRE-{año_actual}-'
+
+        with transaction.atomic():
+            query = Presupuesto.objects.filter(numero__startswith=prefijo)
+            if usuario:
+                query = query.filter(usuario=usuario)
+            ultimo_presupuesto = query.select_for_update().order_by('-numero').first()
+
+            if ultimo_presupuesto:
+                try:
+                    numero_secuencial = int(ultimo_presupuesto.numero.split('-')[-1])
+                    nuevo_numero = numero_secuencial + 1
+                except (ValueError, IndexError):
+                    nuevo_numero = 1
+            else:
                 nuevo_numero = 1
-        else:
-            nuevo_numero = 1
-        
-        # Formatear con ceros a la izquierda (4 dígitos)
-        return f'PRE-{año_actual}-{nuevo_numero:04d}'
+
+            return f'{prefijo}{nuevo_numero:04d}'
 
 
 class Plantilla(models.Model):
@@ -432,15 +479,13 @@ class Plantilla(models.Model):
     
     def get_piezas_list(self):
         """Retorna la lista de piezas parseada"""
-        piezas_list = []
-        for linea in self.piezas.splitlines():
-            if linea.strip():
-                partes = linea.split(',')
-                if len(partes) == 4:
-                    piezas_list.append({
-                        'nombre': partes[0].strip(),
-                        'ancho': float(partes[1].strip()),
-                        'alto': float(partes[2].strip()),
-                        'cantidad': int(partes[3].strip())
-                    })
-        return piezas_list
+        from .utils import parsear_piezas_desde_texto
+        return [
+            {
+                'nombre': p['nombre'],
+                'ancho': p['ancho'],
+                'alto': p['alto'],
+                'cantidad': p['cantidad'],
+            }
+            for p in parsear_piezas_desde_texto(self.piezas)
+        ]

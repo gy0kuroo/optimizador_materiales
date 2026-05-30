@@ -2,6 +2,30 @@
 
 /* El width dinámico del progress bar se mantiene inline porque es un valor dinámico de Django */
 
+.progress-utilization {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 140px;
+}
+
+.progress-utilization .progress {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.progress-utilization-label {
+    min-width: 4.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.progress-utilization .progress-bar-min {
+    min-width: 4px;
+}
+
 /* Mejorar contraste de barras de progreso según aprovechamiento */
 .progress-bar.bg-danger {
     background-color: #dc3545 !important;

@@ -364,16 +364,6 @@
         </div>
 
         <div class="config-field">
-          <label for="{{ perfil_form.algoritmo_predeterminado.id_for_label }}">
-            🧮 {{ perfil_form.algoritmo_predeterminado.label }}
-          </label>
-          {{ perfil_form.algoritmo_predeterminado }}
-          {% if perfil_form.algoritmo_predeterminado.errors %}
-            <div class="error-text">{{ perfil_form.algoritmo_predeterminado.errors.0 }}</div>
-          {% endif %}
-        </div>
-
-        <div class="config-field">
           <label for="{{ perfil_form.margen_corte_predeterminado.id_for_label }}">
             ✂️ {{ perfil_form.margen_corte_predeterminado.label }}
           </label>

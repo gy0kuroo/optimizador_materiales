@@ -1,5 +1,5 @@
 {% extends 'cutless/base.html' %}
-{% load static %}
+{% load static l10n %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'cutless/css/resultado.css' %}">
@@ -28,7 +28,7 @@
            style="transition: transform 0.3s ease;">
         <div class="card-body">
           <h5 class="card-title mb-3">📈 Aprovechamiento</h5>
-          <h2 class="mb-0" style="font-weight: 700;">{{ optimizacion.aprovechamiento_total|floatformat:2 }}%</h2>
+          <h2 class="mb-0" style="font-weight: 700;">{{ optimizacion.aprovechamiento_total|stringformat:".2f" }}%</h2>
         </div>
       </div>
     </div>
@@ -36,15 +36,19 @@
       <div class="card text-center bg-info text-white" style="transition: transform 0.3s ease;">
         <div class="card-body">
           <h5 class="card-title mb-3">📐 Área Utilizada</h5>
-          <h2 class="mb-0" style="font-weight: 700;">{{ info_desperdicio.area_usada_total }} {{ simbolo_area|default:"cm²" }}</h2>
+          <h2 class="mb-0" style="font-weight: 700;">{{ info_desperdicio.area_usada_total|stringformat:".1f" }} {{ simbolo_area|default:"cm²" }}</h2>
         </div>
       </div>
     </div>
     <div class="col-md-4 mb-3">
-      <div class="card text-center bg-warning text-dark" style="transition: transform 0.3s ease;">
+      <div class="card text-center 
+           {% if optimizacion.aprovechamiento_total < 30 %}bg-danger text-white
+           {% elif optimizacion.aprovechamiento_total < 60 %}bg-warning text-white
+           {% else %}bg-success text-white{% endif %}"
+           style="transition: transform 0.3s ease;">
         <div class="card-body">
           <h5 class="card-title mb-3">⚠️ Desperdicio Total</h5>
-          <h2 class="mb-0" style="font-weight: 700;">{{ info_desperdicio.desperdicio_total }} {{ simbolo_area|default:"cm²" }}</h2>
+          <h2 class="mb-0" style="font-weight: 700;">{{ info_desperdicio.desperdicio_total|stringformat:".1f" }} {{ simbolo_area|default:"cm²" }}</h2>
         </div>
       </div>
     </div>
@@ -160,20 +164,32 @@
       <tr>
         <td><strong>Tablero {{ info.numero }}</strong></td>
         <td>{{ info.num_piezas }}</td>
-        <td>{{ info.area_usada }} {{ simbolo_area|default:"cm²" }}</td>
-        <td>{{ info.desperdicio }} {{ simbolo_area|default:"cm²" }}</td>
+        <td>{{ info.area_usada|stringformat:".1f" }} {{ simbolo_area|default:"cm²" }}</td>
+        <td class="fw-semibold
+            {% if info.porcentaje_uso < 30 %}text-danger
+            {% elif info.porcentaje_uso < 60 %}text-warning-emphasis
+            {% else %}text-success{% endif %}">
+          {{ info.desperdicio|stringformat:".1f" }} {{ simbolo_area|default:"cm²" }}
+        </td>
         <td>
-          <div class="progress">
-            <div class="progress-bar 
-                 {% if info.porcentaje_uso < 30 %}bg-danger
-                 {% elif info.porcentaje_uso < 60 %}bg-warning
-                 {% else %}bg-success{% endif %}" 
-                 role="progressbar" 
-                 style="width: {{ info.porcentaje_uso }}%" 
-                 aria-valuenow="{{ info.porcentaje_uso }}" 
-                 aria-valuemin="0" aria-valuemax="100">
-              {{ info.porcentaje_uso }}%
+          <div class="progress-utilization">
+            <div class="progress">
+              <div class="progress-bar 
+                   {% if info.porcentaje_uso < 30 %}bg-danger
+                   {% elif info.porcentaje_uso < 60 %}bg-warning
+                   {% else %}bg-success{% endif %}{% if info.porcentaje_uso > 0 %} progress-bar-min{% endif %}" 
+                   role="progressbar" 
+                   style="width: {{ info.porcentaje_uso|unlocalize }}%" 
+                   aria-valuenow="{{ info.porcentaje_uso|unlocalize }}" 
+                   aria-valuemin="0" aria-valuemax="100">
+              </div>
             </div>
+            <span class="progress-utilization-label
+                 {% if info.porcentaje_uso < 30 %}text-danger
+                 {% elif info.porcentaje_uso < 60 %}text-warning-emphasis
+                 {% else %}text-success{% endif %}">
+              {{ info.porcentaje_uso|stringformat:".2f" }}%
+            </span>
           </div>
         </td>
       </tr>
@@ -203,7 +219,7 @@
                alt="Tablero {{ item.numero }}" 
                class="img-fluid" 
                style="cursor: pointer;"
-               onclick="abrirModalTablero({{ item.numero }}, {{ num_tableros }}, '{{ item.imagen }}', '{{ item.info.porcentaje_uso }}', '{{ item.info.desperdicio }}', '{{ simbolo_area|default:"cm²" }}')">
+               onclick="abrirModalTablero({{ item.numero }}, {{ num_tableros }}, '{{ item.imagen }}', '{{ item.info.porcentaje_uso|unlocalize }}', '{{ item.info.desperdicio|unlocalize }}', '{{ simbolo_area|default:"cm²" }}')">
         </div>
       </div>
     </div>
@@ -214,11 +230,9 @@
   
   <!-- Botones para descargar PDF y Excel -->
   <div class="text-center mt-4 fade-in">
-    {% if pdf_path %}
-    <a href="/media/{{ pdf_path }}" class="btn btn-success btn-lg me-2" download data-carga-texto="Descargando PDF...">
+    <a href="{% url 'cutless:descargar_pdf' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-success btn-lg me-2" data-carga-texto="Descargando PDF...">
        Descargar PDF 
     </a>
-    {% endif %}
     <a href="{% url 'cutless:descargar_excel' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-primary btn-lg me-2" data-carga-texto="Generando archivo Excel...">
        Descargar Excel
     </a>
