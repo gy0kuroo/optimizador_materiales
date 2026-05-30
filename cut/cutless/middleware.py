@@ -4,8 +4,7 @@ Alerta al usuario si las migraciones no han sido ejecutadas.
 """
 
 import logging
-from django.core.exceptions import OperationalError
-from django.db import connection
+from django.db import connection, OperationalError
 
 logger = logging.getLogger(__name__)
 

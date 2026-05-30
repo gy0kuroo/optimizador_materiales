@@ -27,7 +27,7 @@ class Command(BaseCommand):
         tables = cursor.fetchall()
         table_names = [t[0] for t in tables]
         
-        required_tables = ['auth_user', 'cutless_material', 'usuarios_usuarioextendido']
+        required_tables = ['auth_user', 'cutless_material', 'usuarios_perfilusuario']
         missing = [t for t in required_tables if t not in table_names]
         
         return missing
