@@ -2,6 +2,8 @@
 
 Sistema web Django para optimizar el corte de tableros (madera, melamina, etc.) usando el algoritmo **FFD (First Fit Decreasing)** con colocación en rectángulos libres (BSSF).
 
+> ⚡ **¿Primera vez?** Lee [GUIA_RAPIDA.md](GUIA_RAPIDA.md) para una instalación rápida paso a paso.
+
 ## Requisitos previos
 
 - Python 3.10 o superior (probado con 3.13)
@@ -36,11 +38,36 @@ pip install -r requirements.txt
 
 Dependencias principales: Django 5.2, matplotlib, reportlab, Pillow, openpyxl.
 
-### 4. Base de datos
+### 4. Inicializar la base de datos
+
+⚠️ **¡IMPORTANTE!** Este paso es crítico y debe ejecutarse siempre después de instalar o clonar el proyecto.
+
+#### Opción A: Script automático (RECOMENDADO)
+
+```bash
+python setup_project.py
+```
+
+Este script:
+- ✅ Verifica si la BD está inicializada
+- ✅ Ejecuta todas las migraciones
+- ✅ Ofrece crear un superuser
+
+#### Opción B: Comandos manuales
 
 ```bash
 python manage.py migrate
 python manage.py createsuperuser   # opcional
+```
+
+#### Verificar el estado:
+
+```bash
+# Solo verificar
+python manage.py check_database
+
+# Verificar y reparar automáticamente
+python manage.py check_database --fix
 ```
 
 ### 5. Ejecutar el servidor
@@ -53,6 +80,28 @@ python manage.py runserver
 - **App principal (requiere sesión):** `http://127.0.0.1:8000/cutless/`
 
 Las URLs antiguas `/opticut/...` redirigen a `/cutless/...`.
+
+## Solución de Problemas
+
+### Error: "no such table: auth_user"
+
+Este error significa que las migraciones no se han ejecutado. Solución:
+
+```bash
+# Opción 1: Script automático
+python setup_project.py
+
+# Opción 2: Comando de reparación
+python manage.py check_database --fix
+
+# Opción 3: Migraciones manuales
+python manage.py migrate
+```
+
+Luego reinicia el servidor:
+```bash
+python manage.py runserver
+```
 
 ## Estructura del proyecto
 
