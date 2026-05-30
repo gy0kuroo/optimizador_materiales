@@ -1,7 +1,5 @@
 /* Estilos específicos para la página Resultado */
 
-/* El width dinámico del progress bar se mantiene inline porque es un valor dinámico de Django */
-
 .progress-utilization {
     display: flex;
     align-items: center;
@@ -26,110 +24,62 @@
     min-width: 4px;
 }
 
-/* Mejorar contraste de barras de progreso según aprovechamiento */
 .progress-bar.bg-danger {
-    background-color: #dc3545 !important;
-    color: #ffffff;
+    background-color: var(--accent-danger) !important;
+    color: var(--text-on-accent);
 }
 
 .progress-bar.bg-warning {
-    background-color: #ffc107 !important;
-    color: #000000;
+    background-color: var(--accent-warning) !important;
+    color: var(--text-on-warning);
     font-weight: 600;
 }
 
 .progress-bar.bg-success {
-    background-color: #198754 !important;
-    color: #ffffff;
+    background-color: var(--accent-success) !important;
+    color: var(--text-on-accent);
 }
 
-/* Mejorar contraste de tarjetas de resumen */
-/* Tarjeta verde (aprovechamiento bueno > 60%) */
-.card.bg-success {
-    background: linear-gradient(135deg, #198754 0%, #146c43 100%) !important;
+/* Compatibilidad con clases Bootstrap en tarjetas métricas */
+.card.bg-success,
+.metric-card.bg-success {
+    background: var(--gradient-success) !important;
+    color: var(--text-on-accent) !important;
+}
+
+.card.bg-danger,
+.metric-card.bg-danger {
+    background: var(--gradient-danger) !important;
+    color: var(--text-on-accent) !important;
+}
+
+.card.bg-info,
+.metric-card.bg-info {
+    background: var(--gradient-info) !important;
+    color: var(--text-on-accent) !important;
+}
+
+.card.bg-warning,
+.metric-card.bg-warning {
+    background: var(--gradient-warning) !important;
+    color: var(--text-on-warning) !important;
 }
 
 .card.bg-success .card-body,
 .card.bg-success .card-title,
 .card.bg-success h2,
-.card.bg-success h5 {
-    color: #ffffff !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-.card.bg-success .card-body * {
-    color: #ffffff !important;
-}
-
-/* Tarjeta roja (aprovechamiento muy bajo < 30%) */
-.card.bg-danger {
-    background: linear-gradient(135deg, #dc3545 0%, #b02a3c 100%) !important;
-}
-
+.card.bg-success h5,
 .card.bg-danger .card-body,
 .card.bg-danger .card-title,
 .card.bg-danger h2,
-.card.bg-danger h5 {
-    color: #ffffff !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.card.bg-danger .card-body * {
-    color: #ffffff !important;
-}
-
-.card.bg-info {
-    background: linear-gradient(135deg, #0dcaf0 0%, #0a4ac0 100%) !important;
-}
-
+.card.bg-danger h5,
 .card.bg-info .card-body,
 .card.bg-info .card-title,
 .card.bg-info h2,
-.card.bg-info h5 {
-    color: #ffffff !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+.card.bg-info h5,
+.card.bg-warning .card-body,
+.card.bg-warning .card-title,
+.card.bg-warning h2,
+.card.bg-warning h5 {
+    color: inherit !important;
 }
-
-.card.bg-info .card-body * {
-    color: #ffffff !important;
-}
-
-/* Tarjeta amarilla/naranja (aprovechamiento medio 30-60% o desperdicio) - texto blanco para consistencia */
-div.card.bg-warning,
-div.card.bg-warning.text-center {
-    background: linear-gradient(135deg, #ff9800 0%, #f59f00 100%) !important;
-    color: #ffffff !important;
-}
-
-div.card.bg-warning .card-body,
-div.card.bg-warning.text-center .card-body {
-    color: #ffffff !important;
-}
-
-div.card.bg-warning .card-body *,
-div.card.bg-warning.text-center .card-body *,
-div.card.bg-warning .card-title,
-div.card.bg-warning.text-center .card-title,
-div.card.bg-warning h2,
-div.card.bg-warning.text-center h2,
-div.card.bg-warning h5,
-div.card.bg-warning.text-center h5,
-div.card.bg-warning .card-body h2,
-div.card.bg-warning.text-center .card-body h2,
-div.card.bg-warning .card-body h5,
-div.card.bg-warning.text-center .card-body h5 {
-    color: #ffffff !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-}
-
-div.card.bg-warning .card-title,
-div.card.bg-warning h2,
-div.card.bg-warning .card-body h2,
-div.card.bg-warning.text-center .card-title,
-div.card.bg-warning.text-center h2,
-div.card.bg-warning.text-center .card-body h2 {
-    font-weight: 700 !important;
-    color: #ffffff !important;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
-}
-

@@ -6,23 +6,25 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-center mb-0 flex-grow-1">➕ Crear Nuevo Proyecto</h2>
-    <div class="d-flex gap-2 align-items-center">
-      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Crear proyecto</h1>
+      <p class="page-lead">Define un proyecto y asócialo a un cliente.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
               onclick="iniciarTutorialSeccion('crear_proyecto')" 
-              title="Ayuda sobre crear proyecto">
-        ❓ Ayuda
+              title="Ayuda">
+        Ayuda
       </button>
-      <a href="{% url 'cutless:lista_proyectos' %}" class="btn btn-secondary">
-        ← Volver a Proyectos
+      <a href="{% url 'cutless:lista_proyectos' %}" class="btn btn-outline-secondary">
+        Volver
       </a>
     </div>
-  </div>
+  </header>
   
-  <div class="card fade-in">
-    <div class="card-header bg-primary text-white">
+<div class="card fade-in">
+    <div class="card-header card-header-section">
       <h4 class="mb-0">Información del Proyecto</h4>
     </div>
     <div class="card-body">
@@ -166,13 +168,12 @@
           </div>
         </div>
         
-        <div class="d-flex justify-content-between">
-          <a href="{% url 'cutless:lista_proyectos' %}" class="btn btn-secondary">Cancelar</a>
-          <button type="submit" class="btn btn-primary">💾 Crear Proyecto</button>
+        <div class="form-action-bar">
+          <a href="{% url 'cutless:lista_proyectos' %}" class="btn btn-outline-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-primary btn-lg">Crear proyecto</button>
         </div>
       </form>
     </div>
   </div>
-</div>
 {% endblock %}
 

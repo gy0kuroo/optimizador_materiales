@@ -289,6 +289,9 @@ def configuracion_sistema(request):
             if not post_data.get('tema_preferido') or post_data.get('tema_preferido') == '':
                 post_data['tema_preferido'] = perfil.tema_preferido if perfil.tema_preferido else 'auto'
 
+            if not post_data.get('tamanio_fuente') or post_data.get('tamanio_fuente') == '':
+                post_data['tamanio_fuente'] = perfil.tamanio_fuente or 'normal'
+
             # Asegurar campos de información personal
             if not post_data.get('username'):
                 post_data['username'] = request.user.username
@@ -308,7 +311,12 @@ def configuracion_sistema(request):
                 messages.success(request, 'Configuración del sistema actualizada exitosamente.')
                 return redirect('usuarios:configuracion_sistema')
             else:
-                messages.error(request, 'Por favor corrige los errores en el formulario.')
+                primer_error = next(iter(perfil_form.errors.values()), None)
+                detalle = primer_error[0] if primer_error else None
+                mensaje = 'Por favor corrige los errores en el formulario.'
+                if detalle:
+                    mensaje = f'{mensaje} {detalle}'
+                messages.error(request, mensaje)
                 if settings.DEBUG:
                     import logging
                     logger = logging.getLogger(__name__)

@@ -18,6 +18,8 @@
     
     <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{% static 'cutless/css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'cutless/css/palette.css' %}">
+    <link rel="stylesheet" href="{% static 'cutless/css/ui.css' %}">
     <link rel="stylesheet" href="{% static 'cutless/css/accessibility.css' %}">
     
     {% block extra_css %}{% endblock %}
@@ -45,8 +47,8 @@
                             <a class="nav-link" href="{% url 'cutless:index' %}" title="Ir a la página principal del optimizador">🏠 Inicio</a>
                             <a class="nav-link" href="{% url 'usuarios:admin_dashboard' %}" title="Ir al panel de administración de usuarios">🛡️ Admin Dashboard</a>
                         {% else %}
-                            <a class="nav-link" href="{% url 'cutless:index' %}" title="Ir a la página principal del optimizador">🏠 Inicio</a>
-                            <a class="nav-link" href="{% url 'cutless:historial' %}" title="Ver historial de optimizaciones">📋 Historial</a>
+                            <a class="nav-link{% if request.resolver_match.url_name == 'index' %} active{% endif %}" href="{% url 'cutless:index' %}" title="Ir a la página principal del optimizador">🏠 Inicio</a>
+                            <a class="nav-link{% if request.resolver_match.url_name == 'historial' %} active{% endif %}" href="{% url 'cutless:historial' %}" title="Ver historial de optimizaciones">📋 Historial</a>
                         {% endif %}
                         <div class="dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -106,7 +108,7 @@
     </nav>
     
     <!-- Contenido Principal -->
-    <div class="container">
+    <div class="container app-main">
         {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -130,7 +132,7 @@
                 </div>
                 <div class="modal-body" id="cutlessModalDialogoCuerpo"></div>
                 <div class="modal-footer flex-nowrap">
-                    <button type="button" class="btn btn-secondary flex-grow-1 flex-sm-grow-0" id="cutlessModalDialogoCancel">Cancelar</button>
+                    <button type="button" class="btn btn-outline-secondary flex-grow-1 flex-sm-grow-0" id="cutlessModalDialogoCancel">Cancelar</button>
                     <button type="button" class="btn btn-primary flex-grow-1 flex-sm-grow-0" id="cutlessModalDialogoOk">Aceptar</button>
                 </div>
             </div>
@@ -960,7 +962,7 @@
                     <p class="mb-0"><small class="text-muted">Puedes acceder al tutorial en cualquier momento desde el botón "❓ Ayuda" en el menú superior.</small></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="marcarTutorialCompletado(); bootstrap.Modal.getInstance(document.getElementById('modalBienvenida')).hide();">
+                    <button type="button" class="btn btn-outline-secondary" onclick="marcarTutorialCompletado(); bootstrap.Modal.getInstance(document.getElementById('modalBienvenida')).hide();">
                         Omitir
                     </button>
                     <button type="button" class="btn btn-primary" onclick="iniciarTutorial();">

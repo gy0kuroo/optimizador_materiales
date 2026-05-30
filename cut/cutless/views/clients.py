@@ -1,43 +1,13 @@
-# Imports estándar de Python
-import base64
-import os
-from datetime import timedelta
 from decimal import Decimal
 
-# Imports de Django
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.core.files.base import ContentFile
-from django.db.models import Avg, Count, Sum, Max, Min, Q
-from django.forms import formset_factory
-from django.http import FileResponse, HttpResponseForbidden
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import Http404
-from django.utils import timezone
 
-# Imports del proyecto
-from django.conf import settings
-from ..forms import TableroForm, PiezaForm, MaterialForm, ClienteForm, PresupuestoForm, ProyectoForm, PlantillaForm
-from ..models import Optimizacion, Material, Cliente, Presupuesto, Proyecto, Plantilla
-from ..utils import (
-    convertir_a_cm, convertir_desde_cm, generar_excel, generar_grafico,
-    generar_grafico_aprovechamiento, generar_grafico_desperdicio, generar_pdf,
-    generar_excel_resumen_desperdicio, generar_pdf_resumen_desperdicio,
-    mensaje_advertencia_piezas_no_colocadas, obtener_simbolo_area, obtener_simbolo_unidad,
-    parsear_piezas_desde_texto,
-    pieza_cabe_en_tablero,
-)
-from ..utils_notificaciones import enviar_notificacion
-from ..services import (
-    calcular_numero_lista,
-    persistir_resultado_optimizacion,
-    obtener_resultado_optimizacion,
-    preparar_contexto_resultado,
-    pdf_path_para_template,
-    respuesta_png_tablero,
-    respuesta_pdf_optimizacion,
-)
-from .common import _materiales_data_json_index, requiere_permiso
+from ..forms import ClienteForm
+from ..models import Cliente, Optimizacion, Proyecto
+
+
 def historial_cliente(request, pk):
     """
     Muestra el historial de optimizaciones y proyectos de un cliente.

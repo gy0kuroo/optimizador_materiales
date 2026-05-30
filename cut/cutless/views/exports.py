@@ -1,44 +1,28 @@
-# Imports estándar de Python
-import base64
-import os
-from datetime import timedelta
 from decimal import Decimal
 
-# Imports de Django
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.core.files.base import ContentFile
-from django.db.models import Avg, Count, Sum, Max, Min, Q
-from django.forms import formset_factory
-from django.http import FileResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import Http404
-from django.utils import timezone
 
-# Imports del proyecto
-from django.conf import settings
-from ..forms import TableroForm, PiezaForm, MaterialForm, ClienteForm, PresupuestoForm, ProyectoForm, PlantillaForm
-from ..models import Optimizacion, Material, Cliente, Presupuesto, Proyecto, Plantilla
-from ..utils import (
-    convertir_a_cm, convertir_desde_cm, generar_excel, generar_grafico,
-    generar_grafico_aprovechamiento, generar_grafico_desperdicio, generar_pdf,
-    generar_excel_resumen_desperdicio, generar_pdf_resumen_desperdicio,
-    mensaje_advertencia_piezas_no_colocadas, obtener_simbolo_area, obtener_simbolo_unidad,
-    parsear_piezas_desde_texto,
-    pieza_cabe_en_tablero,
-)
-from ..utils_notificaciones import enviar_notificacion
+from ..models import Optimizacion
 from ..services import (
     calcular_numero_lista,
+    convertir_info_desperdicio_unidad,
     nombre_descarga_excel,
-    persistir_resultado_optimizacion,
     obtener_resultado_optimizacion,
-    preparar_contexto_resultado,
-    pdf_path_para_template,
     respuesta_png_tablero,
     respuesta_pdf_optimizacion,
 )
-from .common import _materiales_data_json_index, requiere_permiso
+from ..utils import (
+    convertir_a_cm,
+    convertir_desde_cm,
+    generar_excel,
+    generar_grafico,
+    obtener_simbolo_area,
+    obtener_simbolo_unidad,
+    parsear_piezas_desde_texto,
+)
+
+
 def descargar_excel(request, pk):
     """
     Descarga un archivo Excel con la información detallada de la optimización.
@@ -65,19 +49,9 @@ def descargar_excel(request, pk):
         persistir_si_falta=True,
     )
 
-    factor_area = convertir_desde_cm(1, unidad_opt) ** 2
-    info_desperdicio_convertida = {
-        'area_usada_total': round(info_desperdicio['area_usada_total'] * factor_area, 2),
-        'desperdicio_total': round(info_desperdicio['desperdicio_total'] * factor_area, 2),
-        'info_tableros': [
-            {
-                **info,
-                'area_usada': round(info['area_usada'] * factor_area, 2),
-                'desperdicio': round(info['desperdicio'] * factor_area, 2),
-            }
-            for info in info_desperdicio['info_tableros']
-        ]
-    }
+    info_desperdicio_convertida = convertir_info_desperdicio_unidad(
+        info_desperdicio, unidad_opt, optimizacion,
+    )
 
     excel_buffer = generar_excel(optimizacion, info_desperdicio_convertida, piezas_con_nombre, numero_lista)
 
@@ -88,6 +62,7 @@ def descargar_excel(request, pk):
     )
     response['Content-Disposition'] = f'attachment; filename="{nombre_descarga_excel(numero_lista, optimizacion)}"'
     return response
+
 
 def api_tableros_optimizacion(request, pk):
     """
@@ -178,32 +153,12 @@ def imprimir_plan_corte(request, pk):
     
     num_tableros = len(imagenes_base64)
     
-    # Convertir áreas a la unidad del usuario
     simbolo_area = obtener_simbolo_area(unidad)
     simbolo_unidad = obtener_simbolo_unidad(unidad)
-    factor_lineal = convertir_desde_cm(1, unidad)
-    factor_area = factor_lineal ** 2
-    
-    area_usada_mostrar = round(info_desperdicio['area_usada_total'] * factor_area, 2)
-    desperdicio_mostrar = round(info_desperdicio['desperdicio_total'] * factor_area, 2)
-    
-    # Convertir info de tableros
-    info_tableros_convertida = []
-    for info in info_desperdicio['info_tableros']:
-        area_usada_tab = round(info['area_usada'] * factor_area, 2)
-        desperdicio_tab = round(info['desperdicio'] * factor_area, 2)
-        info_tableros_convertida.append({
-            **info,
-            'area_usada': area_usada_tab,
-            'desperdicio': desperdicio_tab,
-        })
-    
-    info_desperdicio_mostrar = {
-        **info_desperdicio,
-        'area_usada_total': area_usada_mostrar,
-        'desperdicio_total': desperdicio_mostrar,
-        'info_tableros': info_tableros_convertida,
-    }
+    info_desperdicio_mostrar = convertir_info_desperdicio_unidad(
+        info_desperdicio, unidad, optimizacion,
+    )
+    info_tableros_convertida = info_desperdicio_mostrar['info_tableros']
     
     # Combinar imágenes con información de tableros
     tableros_con_imagenes = []

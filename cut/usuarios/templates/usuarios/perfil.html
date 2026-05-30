@@ -6,19 +6,22 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Configuración de perfil</h1>
+      <p class="page-lead">Gestiona tu información personal y preferencias de la aplicación.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
+              onclick="iniciarTutorialSeccion('perfil')" 
+              title="Ayuda sobre perfil">
+        Ayuda
+      </button>
+    </div>
+  </header>
   <div class="row justify-content-center">
     <div class="col-md-8 col-lg-7">
-      <div class="auth-card fade-in">
-        <div class="auth-card-header bg-primary-custom position-relative">
-          <h2 class="text-center mb-0">⚙️ Configuración de Perfil</h2>
-          <p class="text-center text-muted mt-2 mb-0">Gestiona tu información personal y preferencias</p>
-          <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion position-absolute top-0 end-0 m-2" 
-                  onclick="iniciarTutorialSeccion('perfil')" 
-                  title="Ayuda sobre perfil">
-            ❓ Ayuda
-          </button>
-        </div>
+      <div class="auth-card auth-card--plain fade-in">
         <div class="auth-card-body">
 
           <!-- Pestañas -->
@@ -200,7 +203,6 @@
       </div>
     </div>
   </div>
-</div>
 
 {% endblock %}
 

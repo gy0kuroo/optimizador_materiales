@@ -1,25 +1,22 @@
-# CutLess - Optimizador de Cortes de Madera
+# CutLess - Optimizador de Cortes de Tableros
 
-Sistema web para optimizar el corte de tableros de madera utilizando el algoritmo First Fit Decreasing (FFD).
+Sistema web Django para optimizar el corte de tableros (madera, melamina, etc.) usando el algoritmo **FFD (First Fit Decreasing)** con colocación en rectángulos libres (BSSF).
 
-## Requisitos Previos
+## Requisitos previos
 
-- Python 3.8 o superior
-- pip (gestor de paquetes de Python)
+- Python 3.10 o superior (probado con 3.13)
+- pip
 
 ## Instalación
 
 ### 1. Clonar o copiar el proyecto
 
 ```bash
-# Si tienes el proyecto en un repositorio
 git clone <url-del-repositorio>
 cd optimizador_materiales/cut
-
-# O simplemente copia la carpeta 'opti' a tu nuevo PC
 ```
 
-### 2. Crear un entorno virtual (recomendado)
+### 2. Entorno virtual (recomendado)
 
 ```bash
 # Windows
@@ -37,114 +34,106 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Esto instalará automáticamente:
-- Django 5.2.8
-- matplotlib 3.9.2 (y sus dependencias como numpy)
-- reportlab 4.2.5
-- Pillow 11.0.0
-- sqlparse 0.5.1
-- tzdata 2024.2
+Dependencias principales: Django 5.2, matplotlib, reportlab, Pillow, openpyxl.
 
-### 4. Configurar la base de datos
+### 4. Base de datos
 
 ```bash
-# Crear las migraciones
-python manage.py makemigrations
-
-# Aplicar las migraciones
 python manage.py migrate
-
-# Crear un superusuario (opcional, para acceder al panel de administración)
-python manage.py createsuperuser
+python manage.py createsuperuser   # opcional
 ```
 
-### 5. Ejecutar el servidor de desarrollo
+### 5. Ejecutar el servidor
 
 ```bash
 python manage.py runserver
 ```
 
-Tras iniciar sesión, la app principal responde en: `http://127.0.0.1:8000/cutless/` (las URLs antiguas `/opticut/...` redirigen a `/cutless/...`).
+- **Login:** `http://127.0.0.1:8000/usuarios/login/`
+- **App principal (requiere sesión):** `http://127.0.0.1:8000/cutless/`
 
-## Estructura del Proyecto
+Las URLs antiguas `/opticut/...` redirigen a `/cutless/...`.
+
+## Estructura del proyecto
 
 ```
 cut/
-├── manage.py              # Script de gestión de Django
-├── requirements.txt       # Dependencias del proyecto
-├── db.sqlite3            # Base de datos (se crea automáticamente)
-├── cutless_project/      # Configuración Django (settings, URLs raíz, WSGI/ASGI)
-│   ├── settings.py       # Configuración de Django
-│   ├── urls.py          # URLs principales (app bajo /cutless/)
-│   ├── wsgi.py
-│   └── asgi.py
-├── opticut/             # App principal (optimizador; nombre de módulo interno)
-│   ├── models.py        # Modelos de datos
-│   ├── views.py         # Vistas (lógica de negocio)
-│   ├── forms.py         # Formularios
-│   ├── utils.py         # Utilidades (generación de gráficos y PDFs)
-│   ├── templates/       # Plantillas HTML
-│   └── static/          # Archivos estáticos (CSS, JS, imágenes)
-└── usuarios/            # App de usuarios
-    ├── models.py        # Modelo de perfil de usuario
-    ├── views.py         # Vistas de autenticación
-    └── templates/       # Plantillas de login/registro
+├── manage.py
+├── requirements.txt
+├── db.sqlite3                 # SQLite (desarrollo)
+├── cutless_project/         # Settings, URLs raíz, WSGI
+├── cutless/                   # App principal
+│   ├── models.py              # Optimizacion, TableroOptimizacion, Material, Cliente, etc.
+│   ├── forms.py
+│   ├── utils.py               # Algoritmo FFD, gráficos, PDF/Excel
+│   ├── services/
+│   │   └── optimization.py    # Persistencia y descargas de resultados
+│   ├── views/                 # Vistas divididas por módulo
+│   │   ├── optimization.py    # Index, resultado, editar, duplicar
+│   │   ├── historial.py
+│   │   ├── exports.py         # PDF, Excel, PNG
+│   │   ├── analytics.py       # Estadísticas, costos
+│   │   ├── materials.py
+│   │   ├── clients.py
+│   │   ├── budgets.py
+│   │   ├── projects.py
+│   │   └── plantillas.py
+│   ├── templates/cutless/
+│   ├── static/cutless/
+│   ├── migrations/
+│   └── tests.py
+├── usuarios/                  # Login, registro, perfil, permisos
+└── media/                     # PDFs, imágenes de tableros (generados)
 ```
 
 ## Características
 
-- ✅ Optimización de cortes usando algoritmo FFD
-- ✅ Soporte para múltiples unidades (cm, m, pulgadas, pies)
-- ✅ Generación de gráficos visuales de los cortes
-- ✅ Exportación a PDF con todos los tableros
-- ✅ Descarga de imágenes PNG individuales
-- ✅ Historial de optimizaciones
-- ✅ Sistema de favoritos
-- ✅ Estadísticas y análisis
-- ✅ Cálculo de tiempo de corte
-- ✅ Sistema de tutorial interactivo
-- ✅ Modo claro/oscuro
+- Optimización FFD + rectángulos libres, con rotación opcional y margen de corte (kerf)
+- Unidades: cm, m, mm, pulgadas (`in`), pies
+- Piezas con nombre (`nombre,ancho,alto,cantidad`) o formato legacy (`ancho,alto,cantidad`)
+- Gráficos por tablero con leyenda detallada (número, nombre, medidas, cantidad, color)
+- **Persistencia de resultados:** tableros, estadísticas y PDF guardados en BD/archivos
+- Exportación: PDF, Excel y PNG (`optimizacion_N.ext` según número en historial)
+- Historial, favoritos, estadísticas, tiempo de corte estimado
+- Materiales, clientes, presupuestos, proyectos y plantillas
+- Modo claro/oscuro, tutorial, notificaciones
 
-## Solución de Problemas
+## Tests
 
-### Error al instalar dependencias
+```bash
+python manage.py test cutless.tests
+```
 
-Si encuentras errores al instalar, asegúrate de tener:
-- Python 3.8 o superior
-- pip actualizado: `python -m pip install --upgrade pip`
+## Solución de problemas
 
 ### Error con matplotlib en Windows
 
-Si tienes problemas con matplotlib en Windows, puede ser necesario instalar Visual C++ Redistributable:
-- Descarga desde: https://aka.ms/vs/17/release/vc_redist.x64.exe
+Puede requerir [Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe).
 
-### Error de migraciones
+### Recrear base de datos
 
-Si la base de datos no existe o hay errores:
 ```bash
-# Eliminar la base de datos antigua (si existe)
-rm db.sqlite3  # Linux/Mac
-del db.sqlite3  # Windows
-
-# Recrear desde cero
-python manage.py makemigrations
+# Windows
+del db.sqlite3
 python manage.py migrate
 ```
 
-### Problemas con archivos estáticos
+### Archivos estáticos en producción
 
-Si los estilos CSS no se cargan:
 ```bash
 python manage.py collectstatic
 ```
 
-## Notas Importantes
+### Acceso sin sesión
 
-- El proyecto usa SQLite por defecto (base de datos en archivo)
-- Los archivos generados (PDFs, imágenes) se guardan en la carpeta `media/`
-- El `SECRET_KEY` en `settings.py` es para desarrollo. En producción, usa variables de entorno.
+Todas las rutas bajo `/cutless/` requieren login. Si accedes sin autenticarte, se redirige a `/usuarios/login/`.
 
-## Soporte
+## Notas
 
-Para más información o problemas, revisa la documentación de Django: https://docs.djangoproject.com/
+- SQLite por defecto; en producción usar PostgreSQL/MySQL y variables de entorno para `SECRET_KEY` y `DEBUG`.
+- Los archivos generados viven en `media/` (`pdfs/`, `optimizaciones/tableros/`).
+- Registros antiguos sin resultado persistido se regeneran al abrir el resultado o descargar.
 
+## Documentación
+
+- Django: https://docs.djangoproject.com/

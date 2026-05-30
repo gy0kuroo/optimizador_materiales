@@ -1,0 +1,11 @@
+<header class="page-header fade-in"{% if page_intro_title %} data-intro-title="{{ page_intro_title }}" data-intro="{{ page_intro }}"{% endif %}>
+  <div class="page-header__text">
+    <h1 class="page-title">{{ page_title }}</h1>
+    {% if page_lead %}<p class="page-lead">{{ page_lead }}</p>{% endif %}
+  </div>
+  {% if page_actions %}
+  <div class="page-header__actions">
+    {{ page_actions }}
+  </div>
+  {% endif %}
+</header>

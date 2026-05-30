@@ -64,43 +64,7 @@ details summary::-webkit-details-marker {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* Mejorar contraste de texto en tarjetas de colores */
-.stats-card.bg-primary {
-    background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%) !important;
-}
-
-.stats-card.bg-primary .stats-title,
-.stats-card.bg-primary h2 {
-    color: #ffffff;
-}
-
-.stats-card.bg-success {
-    background: linear-gradient(135deg, #198754 0%, #146c43 100%) !important;
-}
-
-.stats-card.bg-success .stats-title,
-.stats-card.bg-success h2 {
-    color: #ffffff;
-}
-
-.stats-card.bg-info {
-    background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%) !important;
-}
-
-.stats-card.bg-info .stats-title,
-.stats-card.bg-info h2 {
-    color: #ffffff;
-}
-
-.stats-card.bg-warning {
-    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
-}
-
-.stats-card.bg-warning .stats-title,
-.stats-card.bg-warning h2 {
-    color: #000000;
-    text-shadow: none;
-}
+/* Colores de tarjetas: definidos en palette.css (.metric-card--*) */
 
 .stats-card-center {
     padding: 3rem;
@@ -150,7 +114,7 @@ details summary::-webkit-details-marker {
 
 /* Estilos para modal de gráfico */
 .modal-grafico-body {
-    background-color: #f8f9fa;
+    background-color: var(--bg-secondary);
     overflow: hidden;
     padding: 0;
     min-height: calc(100vh - 120px);
@@ -245,7 +209,7 @@ details summary::-webkit-details-marker {
 
 details summary {
     cursor: pointer;
-    color: #007bff;
+    color: var(--accent-primary);
 }
 
 details .mt-2 {

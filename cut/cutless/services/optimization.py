@@ -7,13 +7,11 @@ from django.http import FileResponse
 from django.utils import timezone
 
 from ..models import Optimizacion, TableroOptimizacion
-from ..utils import (
-    convertir_desde_cm,
-    generar_grafico,
-    generar_pdf,
-    obtener_simbolo_area,
-    parsear_piezas_desde_texto,
-)
+from ..exports.pdf import generar_pdf
+from ..packing import normalizar_info_desperdicio
+from ..pieces import parsear_piezas_desde_texto
+from ..render import generar_grafico
+from ..units import convertir_desde_cm, obtener_simbolo_area
 
 
 def _media_root():
@@ -165,7 +163,7 @@ def _info_desperdicio_desde_modelo(optimizacion):
         })
 
     extra = optimizacion.resultado_extra or {}
-    return {
+    return normalizar_info_desperdicio({
         'area_usada_total': optimizacion.area_usada_total or 0,
         'desperdicio_total': optimizacion.desperdicio_total or 0,
         'info_tableros': info_tableros,
@@ -173,7 +171,7 @@ def _info_desperdicio_desde_modelo(optimizacion):
         'piezas_no_colocadas': extra.get('piezas_no_colocadas', []),
         'num_piezas_solicitadas': extra.get('num_piezas_solicitadas', 0),
         'num_piezas_colocadas': extra.get('num_piezas_colocadas', 0),
-    }
+    })
 
 
 def _regenerar_grafico(optimizacion):
@@ -197,6 +195,11 @@ def _regenerar_grafico(optimizacion):
 
 def persistir_resultado_optimizacion(optimizacion, imagenes_base64, info_desperdicio, aprovechamiento, numero_lista=None):
     """Guarda tableros, estadísticas y PDF tras generar_grafico."""
+    info_desperdicio = normalizar_info_desperdicio(
+        info_desperdicio,
+        area_usada_total=getattr(optimizacion, 'area_usada_total', None),
+        desperdicio_total=getattr(optimizacion, 'desperdicio_total', None),
+    )
     optimizacion.tableros.all().delete()
 
     info_tableros = info_desperdicio.get('info_tableros') or []
@@ -259,6 +262,7 @@ def obtener_resultado_optimizacion(optimizacion, numero_lista=None, persistir_si
             return imagenes, optimizacion.aprovechamiento_total, info
 
     imagenes, aprovechamiento, info = _regenerar_grafico(optimizacion)
+    info = normalizar_info_desperdicio(info)
     if persistir_si_falta and imagenes:
         persistir_resultado_optimizacion(
             optimizacion,
@@ -270,11 +274,33 @@ def obtener_resultado_optimizacion(optimizacion, numero_lista=None, persistir_si
     return imagenes, aprovechamiento, info
 
 
+def convertir_info_desperdicio_unidad(info_desperdicio, unidad, optimizacion=None):
+    """Convierte áreas de cm² a la unidad del usuario."""
+    info = normalizar_info_desperdicio(
+        info_desperdicio,
+        area_usada_total=getattr(optimizacion, 'area_usada_total', None) if optimizacion else None,
+        desperdicio_total=getattr(optimizacion, 'desperdicio_total', None) if optimizacion else None,
+    )
+    factor_area = convertir_desde_cm(1, unidad) ** 2
+    return {
+        **info,
+        'area_usada_total': round(info['area_usada_total'] * factor_area, 2),
+        'desperdicio_total': round(info['desperdicio_total'] * factor_area, 2),
+        'info_tableros': [
+            {
+                **tablero,
+                'area_usada': round(tablero.get('area_usada', 0) * factor_area, 2),
+                'desperdicio': round(tablero.get('desperdicio', 0) * factor_area, 2),
+            }
+            for tablero in info['info_tableros']
+        ],
+    }
+
+
 def preparar_contexto_resultado(optimizacion, imagenes_base64, info_desperdicio, piezas_parseadas=None):
     """Construye el contexto de visualización para resultado.html."""
     unidad = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
     simbolo_area = obtener_simbolo_area(unidad)
-    factor_area = convertir_desde_cm(1, unidad) ** 2
 
     if piezas_parseadas is None:
         piezas_parseadas = parsear_piezas_desde_texto(optimizacion.piezas, unidad)
@@ -289,20 +315,10 @@ def preparar_contexto_resultado(optimizacion, imagenes_base64, info_desperdicio,
         for p in piezas_parseadas
     ]
 
-    info_tableros_convertida = []
-    for info in info_desperdicio.get('info_tableros', []):
-        info_tableros_convertida.append({
-            **info,
-            'area_usada': round(info['area_usada'] * factor_area, 2),
-            'desperdicio': round(info['desperdicio'] * factor_area, 2),
-        })
-
-    info_desperdicio_mostrar = {
-        **info_desperdicio,
-        'area_usada_total': round(info_desperdicio['area_usada_total'] * factor_area, 2),
-        'desperdicio_total': round(info_desperdicio['desperdicio_total'] * factor_area, 2),
-        'info_tableros': info_tableros_convertida,
-    }
+    info_desperdicio_mostrar = convertir_info_desperdicio_unidad(
+        info_desperdicio, unidad, optimizacion,
+    )
+    info_tableros_convertida = info_desperdicio_mostrar['info_tableros']
 
     tableros_con_imagenes = []
     for imagen, info in zip(imagenes_base64, info_tableros_convertida):

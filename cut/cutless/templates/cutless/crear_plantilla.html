@@ -6,22 +6,24 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-center mb-0 flex-grow-1">➕ Crear Nueva Plantilla</h2>
-    <div class="d-flex gap-2 align-items-center">
-      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Crear plantilla</h1>
+      <p class="page-lead">Guarda un conjunto de piezas para reutilizar.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
               onclick="iniciarTutorialSeccion('crear_plantilla')" 
-              title="Ayuda sobre crear plantilla">
-        ❓ Ayuda
+              title="Ayuda">
+        Ayuda
       </button>
-      <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-secondary">
-        ← Volver a Plantillas
+      <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary">
+        Volver
       </a>
     </div>
-  </div>
+  </header>
   
-  {% if optimizacion %}
+{% if optimizacion %}
   <div class="alert alert-info fade-in mb-4">
     <strong>ℹ️ Optimización seleccionada:</strong> Tablero {{ optimizacion.ancho_tablero }}×{{ optimizacion.alto_tablero }} cm 
     ({{ optimizacion.aprovechamiento_total|floatformat:1 }}% aprovechamiento)
@@ -30,7 +32,7 @@
   {% endif %}
   
   <div class="card fade-in">
-    <div class="card-header bg-primary text-white">
+    <div class="card-header card-header-section">
       <h4 class="mb-0">Información de la Plantilla</h4>
     </div>
     <div class="card-body">
@@ -161,13 +163,12 @@
           </div>
         </div>
         
-        <div class="d-flex justify-content-between">
-          <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-secondary">Cancelar</a>
-          <button type="submit" class="btn btn-primary">💾 Crear Plantilla</button>
+        <div class="form-action-bar">
+          <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-primary btn-lg">Crear plantilla</button>
         </div>
       </form>
     </div>
   </div>
-</div>
 {% endblock %}
 

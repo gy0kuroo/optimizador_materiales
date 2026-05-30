@@ -16,20 +16,43 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <h2 class="text-center mb-4" data-intro-title="Optimizador de Cortes" data-intro="Aquí puedes crear nuevas optimizaciones de corte ingresando las dimensiones del tablero y las piezas que necesitas."></h2>
+  <header class="page-header fade-in" data-intro-title="Optimizador de Cortes" data-intro="Aquí puedes crear nuevas optimizaciones de corte ingresando las dimensiones del tablero y las piezas que necesitas.">
+    <div class="page-header__text">
+      <h1 class="page-title">Nueva optimización</h1>
+      <p class="page-lead">Define el tablero, agrega las piezas a cortar y obtén el plan de corte optimizado en segundos.</p>
+    </div>
+    <div class="page-header__actions">
+      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary">Ver historial</a>
+    </div>
+  </header>
+
+  <div class="workflow-steps fade-in" aria-label="Pasos del proceso">
+    <div class="workflow-step workflow-step--1">
+      <span class="workflow-step__num">1</span>
+      <span>Dimensiones del tablero</span>
+    </div>
+    <div class="workflow-step workflow-step--2">
+      <span class="workflow-step__num">2</span>
+      <span>Piezas a cortar</span>
+    </div>
+    <div class="workflow-step workflow-step--3">
+      <span class="workflow-step__num">3</span>
+      <span>Calcular optimización</span>
+    </div>
+  </div>
   
   <form method="post" action="{% url 'cutless:index' %}" id="optimizacion-form" onsubmit="mostrarIndicadorCarga('Procesando optimización... Esto puede tardar unos segundos.');">
     {% csrf_token %}
     
     <!-- Sección: Dimensiones del Tablero -->
     <div class="card mb-4 fade-in" data-intro-title="Dimensiones del Tablero" data-intro="Ingresa el ancho y alto del tablero de madera. Puedes elegir la unidad de medida que prefieras (cm, m, pulgadas o pies).">
-      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">Dimensiones del Tablero</h4>
-        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion" 
+      <div class="card-header card-header-step card-header-step-primary text-white">
+        <span class="step-badge" aria-hidden="true">1</span>
+        <h4 class="card-header-title">Dimensiones del tablero</h4>
+        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion ms-auto" 
                 onclick="iniciarTutorialSeccion('tablero')" 
                 title="Ayuda sobre dimensiones del tablero">
-          ❓Ayuda
+          Ayuda
         </button>
       </div>
       <div class="card-body">
@@ -117,12 +140,13 @@
 
     <!-- Sección: Piezas a Cortar -->
     <div class="card mb-4 fade-in">
-      <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">Piezas a Cortar</h4>
-        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion" 
+      <div class="card-header card-header-step card-header-step-success text-white">
+        <span class="step-badge" aria-hidden="true">2</span>
+        <h4 class="card-header-title">Piezas a cortar</h4>
+        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion ms-auto" 
                 onclick="iniciarTutorialSeccion('piezas')" 
                 title="Ayuda sobre piezas a cortar">
-          ❓Ayuda
+          Ayuda
         </button>
       </div>
       <div class="card-body">
@@ -165,8 +189,8 @@
           {% endfor %}
         </div>
 
-        <button type="button" id="add-pieza" class="btn btn-outline-success btn-lg" style="font-size: 1rem; padding: 0.875rem 1.75rem; min-height: 45px;">
-          ➕ Agregar otra pieza
+        <button type="button" id="add-pieza" class="btn btn-outline-success">
+          Agregar otra pieza
         </button>
       </div>
     </div>
@@ -174,8 +198,8 @@
     {% if user.is_authenticated and user.perfil.puede_ver_historial_costos %}
     <!-- Sección: Costos (Opcional) (oculto por defecto) -->
     <div class="card mb-4 fade-in">
-      <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">💰 Costos (Opcional)</h4>
+      <div class="card-header card-header-step card-header-step-info text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0 card-header-title">Costos (opcional)</h4>
         <button id="btnCostosToggle" class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#costosCollapse" aria-expanded="false" aria-controls="costosCollapse">
           <span id="costosToggleIcon">+</span> Mostrar
         </button>
@@ -259,16 +283,16 @@
       </div>
     </div>    {% endif %}
     <!-- Botón de envío -->
-    <div class="text-center fade-in">
-      <button type="submit" class="btn btn-primary btn-lg" style="font-size: 1.125rem; padding: 1rem 2rem; font-weight: 600; min-height: 50px; box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);">
-        🚀 Calcular Optimización
+    <div class="form-action-bar fade-in">
+      <button type="submit" class="btn btn-primary btn-lg btn-cta-primary">
+        Calcular optimización
       </button>
-      <a href="{% url 'cutless:historial' %}" class="btn btn-secondary btn-lg ms-3" style="font-size: 1rem; padding: 0.875rem 1.75rem; min-height: 50px;">
-        📋 Ver Historial
+      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary btn-lg">
+        Ver historial
       </a>
+      <p class="form-action-hint">Revisa las medidas antes de calcular. Puedes agregar tantas piezas como necesites.</p>
     </div>
   </form>
-</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

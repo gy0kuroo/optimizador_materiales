@@ -6,23 +6,25 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
-    <h2 class="text-center mb-0 flex-grow-1">📋 Biblioteca de Plantillas</h2>
-    <div class="d-flex gap-2 align-items-center">
-      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Biblioteca de plantillas</h1>
+      <p class="page-lead">Guarda conjuntos de piezas frecuentes para reutilizarlos rápido.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
               onclick="iniciarTutorialSeccion('plantillas')" 
               title="Ayuda sobre plantillas">
-        ❓ Ayuda
+        Ayuda
       </button>
       <a href="{% url 'cutless:crear_plantilla' %}" class="btn btn-primary">
-        ➕ Crear Plantilla
+        Crear plantilla
       </a>
     </div>
-  </div>
+  </header>
 
   <!-- Filtros -->
-  <div class="search-filters fade-in mb-4">
+  <div class="search-filters filters-panel fade-in mb-4">
     <form method="GET" action="{% url 'cutless:lista_plantillas' %}">
       <div class="row">
         <div class="col-md-4">
@@ -63,7 +65,7 @@
       {% for plantilla in plantillas_usuario %}
       <div class="col-md-6 col-lg-4 mb-4">
         <div class="card h-100">
-          <div class="card-header bg-primary text-white">
+          <div class="card-header card-header-section">
             <h5 class="mb-0">{{ plantilla.nombre }}</h5>
             <small>{{ plantilla.get_categoria_display }}</small>
           </div>
@@ -106,7 +108,7 @@
       {% for plantilla in plantillas_sistema %}
       <div class="col-md-6 col-lg-4 mb-4">
         <div class="card h-100">
-          <div class="card-header bg-info text-white">
+          <div class="card-header card-header-section">
             <h5 class="mb-0">{{ plantilla.nombre }}</h5>
             <small>{{ plantilla.get_categoria_display }}</small>
             <span class="badge bg-light text-dark ms-2">Sistema</span>
@@ -129,6 +131,5 @@
     </div>
   </div>
   {% endif %}
-</div>
 {% endblock %}
 

@@ -6,23 +6,25 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
-    <h2 class="text-center mb-0 flex-grow-1">➕ Agregar Optimizaciones al Proyecto</h2>
-    <div class="d-flex gap-2 align-items-center">
-      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
-              onclick="iniciarTutorialSeccion('agregar_optimizaciones')" 
-              title="Ayuda sobre agregar optimizaciones">
-        ❓ Ayuda
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Agregar optimizaciones al proyecto</h1>
+      <p class="page-lead">Selecciona optimizaciones para vincular al proyecto.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
+              onclick="iniciarTutorialSeccion('agregar_optimizaciones_proyecto')" 
+              title="Ayuda">
+        Ayuda
       </button>
-      <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-secondary">
-        ← Volver al Proyecto
+      <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-outline-secondary">
+        Volver
       </a>
     </div>
-  </div>
+  </header>
 
-  <div class="card mb-4 fade-in">
-    <div class="card-header bg-info text-white">
+<div class="card mb-4 fade-in">
+    <div class="card-header card-header-section">
       <h4 class="mb-0">Proyecto: {{ proyecto.nombre }}</h4>
     </div>
     <div class="card-body">
@@ -32,7 +34,7 @@
 
   {% if optimizaciones_disponibles %}
   <div class="card fade-in">
-    <div class="card-header bg-primary text-white">
+    <div class="card-header card-header-section">
       <h4 class="mb-0">Optimizaciones Disponibles</h4>
     </div>
     <div class="card-body">
@@ -89,7 +91,7 @@
         </div>
 
         <div class="d-flex justify-content-between mt-4">
-          <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-secondary">Cancelar</a>
+          <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-outline-secondary">Cancelar</a>
           <button type="submit" class="btn btn-primary">✅ Agregar Optimizaciones Seleccionadas</button>
         </div>
       </form>
@@ -100,7 +102,6 @@
     <p class="mb-0">No hay optimizaciones disponibles para agregar a este proyecto. Todas tus optimizaciones ya están asociadas a este proyecto o no tienes optimizaciones creadas.</p>
   </div>
   {% endif %}
-</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

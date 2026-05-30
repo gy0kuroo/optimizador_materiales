@@ -32,7 +32,7 @@
 }
 
 .stats-label {
-  color: #6c757d;
+  color: var(--text-secondary);
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -45,8 +45,8 @@
 }
 
 .cost-table thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--gradient-primary);
+  color: var(--text-on-accent);
 }
 
 .cost-table thead th {
@@ -63,7 +63,7 @@
 }
 
 .cost-table tbody tr:hover {
-  background-color: #f8f9fa;
+  background-color: var(--bg-secondary);
 }
 
 .cost-table tbody td {
@@ -80,12 +80,12 @@
 
 .material-info {
   font-size: 0.85rem;
-  color: #6c757d;
+  color: var(--text-secondary);
 }
 
 /* Contenedor de gráfico */
 .chart-container {
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -93,7 +93,7 @@
 
 /* Tarjeta de filtros */
 .filter-card {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -101,7 +101,7 @@
 
 .avg-cost {
   font-size: 1.1rem;
-  color: #495057;
+  color: var(--text-primary);
   margin-top: 0.5rem;
 }
 

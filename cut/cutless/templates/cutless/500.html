@@ -4,8 +4,7 @@
 {% block title %}Error del servidor - CutLess{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
+  <div class="row justify-content-center auth-page">
     <div class="col-md-8 text-center">
       <div class="card fade-in">
         <div class="card-body py-5">
@@ -15,20 +14,18 @@
             Ocurrió un error inesperado. Por favor, intenta nuevamente más tarde.
           </p>
           <div class="alert alert-warning">
-            <strong>💡 Sugerencia:</strong> Si el problema persiste, intenta recargar la página o contacta al administrador del sistema.
+            <strong>Sugerencia:</strong> Si el problema persiste, intenta recargar la página o contacta al administrador del sistema.
           </div>
-          <div class="mt-4">
-            <a href="{% url 'cutless:index' %}" class="btn btn-primary btn-lg me-2">
-              🏠 Ir al Inicio
+          <div class="form-action-bar mt-4">
+            <a href="{% url 'cutless:index' %}" class="btn btn-primary btn-lg">
+              Ir al inicio
             </a>
             <button onclick="window.location.reload()" class="btn btn-outline-secondary btn-lg">
-              🔄 Recargar Página
+              Recargar página
             </button>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 {% endblock %}
-

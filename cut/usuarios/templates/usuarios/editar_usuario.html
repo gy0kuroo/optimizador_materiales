@@ -79,12 +79,19 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4 mb-4">
-    <h2>Editar usuario {{ usuario_obj.username }}</h2>
-    <p>Modifica el nombre, email, contraseña y permisos del usuario.</p>
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Editar usuario {{ usuario_obj.username }}</h1>
+      <p class="page-lead">Modifica datos, contraseña y permisos del usuario.</p>
+    </div>
+    <div class="page-header__actions">
+      <a href="{% url 'usuarios:admin_dashboard' %}" class="btn btn-outline-secondary">Volver</a>
+    </div>
+  </header>
+
 
     <div class="card">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header card-header-section">
             <h4 class="mb-0">Información del Usuario</h4>
         </div>
         <div class="card-body">
@@ -121,11 +128,10 @@
                 </div>
 
                 <div class="d-flex justify-content-between mt-4">
-                    <a href="{% url 'usuarios:admin_dashboard' %}" class="btn btn-secondary">Volver al Dashboard</a>
+                    <a href="{% url 'usuarios:admin_dashboard' %}" class="btn btn-outline-secondary">Volver al Dashboard</a>
                     <button type="submit" class="btn btn-primary">💾 Guardar cambios</button>
                 </div>
             </form>
         </div>
     </div>
-</div>
 {% endblock %}

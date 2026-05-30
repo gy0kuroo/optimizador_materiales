@@ -6,30 +6,34 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
-    <h2 class="text-center mb-0 flex-grow-1">Estadísticas y Análisis</h2>
-    <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
-            onclick="iniciarTutorialSeccion('estadisticas')" 
-            title="Ayuda sobre estadísticas">
-      ❓ Ayuda
-    </button>
-  </div>
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Estadísticas y análisis</h1>
+      <p class="page-lead">Visualiza tendencias de aprovechamiento y desperdicio en el tiempo.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
+              onclick="iniciarTutorialSeccion('estadisticas')" 
+              title="Ayuda sobre estadísticas">
+        Ayuda
+      </button>
+    </div>
+  </header>
   
   <!-- Selector de Período -->
   <div class="card mb-4 fade-in">
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="card-title mb-0">Seleccionar Período</h5>
+        <h5 class="card-title mb-0">Seleccionar período</h5>
         {% if total_optimizaciones > 0 %}
         <div class="btn-group">
           <a href="{% url 'cutless:exportar_excel_desperdicio' %}?periodo={{ periodo }}" 
              class="btn btn-success btn-sm">
-            📊 Exportar Excel
+            Exportar Excel
           </a>
           <a href="{% url 'cutless:exportar_pdf_desperdicio' %}?periodo={{ periodo }}" 
              class="btn btn-danger btn-sm">
-            📄 Exportar PDF
+            Exportar PDF
           </a>
         </div>
         {% endif %}
@@ -50,33 +54,33 @@
     <!-- Resumen de Estadísticas -->
     <div class="row mb-4 fade-in">
       <div class="col-md-3 mb-3">
-        <div class="card text-center bg-primary text-white stats-card">
+        <div class="card text-center stats-card metric-card metric-card--primary">
           <div class="card-body">
-            <h5 class="card-title stats-title">Total Optimizaciones</h5>
+            <h5 class="card-title stats-title">Total optimizaciones</h5>
             <h2>{{ total_optimizaciones }}</h2>
           </div>
         </div>
       </div>
       <div class="col-md-3 mb-3">
-        <div class="card text-center bg-success text-white stats-card">
+        <div class="card text-center stats-card metric-card metric-card--success">
           <div class="card-body">
-            <h5 class="card-title stats-title">Aprovechamiento Promedio</h5>
+            <h5 class="card-title stats-title">Aprovechamiento promedio</h5>
             <h2>{{ promedio_aprovechamiento }}%</h2>
           </div>
         </div>
       </div>
       <div class="col-md-3 mb-3">
-        <div class="card text-center bg-info text-white stats-card">
+        <div class="card text-center stats-card metric-card metric-card--info">
           <div class="card-body">
-            <h5 class="card-title stats-title">Mejor Aprovechamiento</h5>
+            <h5 class="card-title stats-title">Mejor aprovechamiento</h5>
             <h2>{{ max_aprovechamiento }}%</h2>
           </div>
         </div>
       </div>
       <div class="col-md-3 mb-3">
-        <div class="card text-center bg-warning text-white stats-card">
+        <div class="card text-center stats-card metric-card metric-card--warning">
           <div class="card-body">
-            <h5 class="card-title stats-title">Desperdicio Promedio</h5>
+            <h5 class="card-title stats-title">Desperdicio promedio</h5>
             <h2>{{ promedio_desperdicio }}%</h2>
           </div>
         </div>
@@ -87,7 +91,7 @@
     <div class="row mb-4 fade-in">
       <div class="col-md-6 mb-4">
         <div class="card">
-          <div class="card-header bg-success text-white">
+          <div class="card-header card-header-section">
             <h5 class="mb-0">Gráfico de Aprovechamiento</h5>
           </div>
           <div class="card-body">
@@ -110,7 +114,7 @@
       
       <div class="col-md-6 mb-4">
         <div class="card">
-          <div class="card-header bg-danger text-white">
+          <div class="card-header card-header-section card-header-section--danger">
             <h5 class="mb-0">Gráfico de Desperdicio</h5>
           </div>
           <div class="card-body">
@@ -136,7 +140,7 @@
     <div class="modal fade" id="modalGrafico" tabindex="-1" aria-labelledby="modalGraficoLabel" aria-hidden="true">
       <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
-          <div class="modal-header bg-dark text-white">
+          <div class="modal-header modal-header-app">
             <h5 class="modal-title" id="modalGraficoLabel">Gráfico en Pantalla Completa</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -160,8 +164,8 @@
               </div>
             </div>
           </div>
-          <div class="modal-footer bg-dark text-white">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <div class="modal-footer modal-footer-app">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
             <button type="button" class="btn btn-primary" onclick="resetearZoom()">🔍 Resetear Zoom</button>
           </div>
         </div>
@@ -170,7 +174,7 @@
     
     <!-- Top Optimizaciones -->
     <div class="card fade-in">
-      <div class="card-header bg-dark text-white">
+      <div class="card-header card-header-section">
         <h5 class="mb-0">Top 10 Mejores Optimizaciones</h5>
       </div>
       <div class="card-body">
@@ -241,22 +245,20 @@
         {% endif %}
       </p>
       <a href="{% url 'cutless:index' %}" class="btn btn-primary btn-lg">
-        ➕ Crear Nueva Optimización
+        Ir al optimizador
       </a>
     </div>
   {% endif %}
   
   <!-- Botón para volver -->
-  <div class="text-center mt-4 mb-5 fade-in">
-    <a href="{% url 'cutless:index' %}" class="btn btn-secondary btn-lg me-2">
-      Volver al Optimizador
+  <div class="form-action-bar fade-in">
+    <a href="{% url 'cutless:index' %}" class="btn btn-outline-secondary btn-lg">
+      Ir al optimizador
     </a>
-    <a href="{% url 'cutless:historial' %}" class="btn btn-info btn-lg">
-      Ver Historial
+    <a href="{% url 'cutless:historial' %}" class="btn btn-outline-primary btn-lg">
+      Ver historial
     </a>
   </div>
-</div>
-
 
 <script>
 // Datos de gráficos en alta resolución

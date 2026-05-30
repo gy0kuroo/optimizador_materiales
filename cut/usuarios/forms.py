@@ -388,13 +388,19 @@ class PerfilForm(forms.ModelForm):
         return margen_mm
     
     def save(self, commit=True):
-        # Guardar los valores originales ANTES de que super().save() los modifique
+        # Valores originales solo para margen/unidad (NO refresh_from_db: borraría
+        # los booleanos en False ya aplicados en is_valid()/_post_clean).
         valor_original_cm = None
         valor_original_unidad = None
         if self.instance and self.instance.pk:
-            self.instance.refresh_from_db()
-            valor_original_cm = self.instance.margen_corte_predeterminado
-            valor_original_unidad = self.instance.unidad_medida_predeterminada
+            originales = (
+                self.instance.__class__.objects.filter(pk=self.instance.pk)
+                .values('margen_corte_predeterminado', 'unidad_medida_predeterminada')
+                .first()
+            )
+            if originales:
+                valor_original_cm = originales['margen_corte_predeterminado']
+                valor_original_unidad = originales['unidad_medida_predeterminada']
         
         # Guardar el valor del POST directamente (en mm) antes de que Django lo procese
         # Como el campo está excluido del Meta, necesitamos obtenerlo del data del formulario

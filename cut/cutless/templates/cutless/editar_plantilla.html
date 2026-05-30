@@ -6,29 +6,31 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-center mb-0 flex-grow-1">✏️ Editar Plantilla: {{ plantilla.nombre }}</h2>
-    <div class="d-flex gap-2 align-items-center">
-      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Editar plantilla</h1>
+      <p class="page-lead">{{ plantilla.nombre }}</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
               onclick="iniciarTutorialSeccion('editar_plantilla')" 
-              title="Ayuda sobre editar plantilla">
-        ❓ Ayuda
+              title="Ayuda">
+        Ayuda
       </button>
-      <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-secondary">
-        ← Volver a Plantillas
+      <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary">
+        Volver
       </a>
     </div>
-  </div>
+  </header>
   
-  {% if plantilla.es_predefinida %}
+{% if plantilla.es_predefinida %}
   <div class="alert alert-info fade-in">
     <strong>ℹ️ Plantilla Predefinida:</strong> Esta es una plantilla del sistema. Puedes editarla para personalizarla.
   </div>
   {% endif %}
   
   <div class="card fade-in">
-    <div class="card-header bg-primary text-white">
+    <div class="card-header card-header-section">
       <h4 class="mb-0">Información de la Plantilla</h4>
     </div>
     <div class="card-body">
@@ -149,13 +151,12 @@
           </div>
         </div>
         
-        <div class="d-flex justify-content-between">
-          <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-secondary">Cancelar</a>
-          <button type="submit" class="btn btn-primary">💾 Guardar Cambios</button>
+        <div class="form-action-bar">
+          <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary">Cancelar</a>
+          <button type="submit" class="btn btn-primary btn-lg">Guardar cambios</button>
         </div>
       </form>
     </div>
   </div>
-</div>
 {% endblock %}
 

@@ -4,8 +4,7 @@
 {% block title %}Página no encontrada - CutLess{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <div class="row justify-content-center">
+  <div class="row justify-content-center auth-page">
     <div class="col-md-8 text-center">
       <div class="card fade-in">
         <div class="card-body py-5">
@@ -15,20 +14,18 @@
             Lo sentimos, la página que estás buscando no existe o ha sido movida.
           </p>
           <div class="alert alert-info">
-            <strong>💡 Sugerencia:</strong> Verifica que la URL sea correcta o regresa a la página principal.
+            <strong>Sugerencia:</strong> Verifica que la URL sea correcta o regresa a la página principal.
           </div>
-          <div class="mt-4">
-            <a href="{% url 'cutless:index' %}" class="btn btn-primary btn-lg me-2">
-              🏠 Ir al Inicio
+          <div class="form-action-bar mt-4">
+            <a href="{% url 'cutless:index' %}" class="btn btn-primary btn-lg">
+              Ir al inicio
             </a>
             <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary btn-lg">
-              📋 Ver Historial
+              Ver historial
             </a>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 {% endblock %}
-

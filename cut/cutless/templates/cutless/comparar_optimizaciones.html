@@ -6,25 +6,27 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
-    <h2 class="text-center mb-0 flex-grow-1">⚖️ Comparar Optimizaciones</h2>
-    <div class="d-flex gap-2 align-items-center">
-      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Comparar optimizaciones</h1>
+      <p class="page-lead">Analiza dos planes de corte lado a lado.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
               onclick="iniciarTutorialSeccion('comparar')" 
-              title="Ayuda sobre comparación">
-        ❓ Ayuda
+              title="Ayuda">
+        Ayuda
       </button>
-      <a href="{% url 'cutless:index' %}" class="btn btn-secondary">
-        ← Volver al Inicio
+      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary">
+        Ver historial
       </a>
     </div>
-  </div>
+  </header>
 
-  <!-- Selector de Optimizaciones -->
+<!-- Selector de Optimizaciones -->
   {% if not optimizacion1 or not optimizacion2 %}
   <div class="card mb-4 fade-in">
-    <div class="card-header bg-primary text-white">
+    <div class="card-header card-header-section">
       <h4 class="mb-0">Seleccionar Optimizaciones para Comparar</h4>
     </div>
     <div class="card-body">
@@ -67,7 +69,7 @@
     <!-- Optimización 1 -->
     <div class="col-md-6 mb-4">
       <div class="card h-100">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header card-header-section">
           <h4 class="mb-0">Optimización #1</h4>
           <small>{{ optimizacion1.fecha|date:"d/m/Y H:i" }}</small>
         </div>
@@ -100,7 +102,7 @@
     <!-- Optimización 2 -->
     <div class="col-md-6 mb-4">
       <div class="card h-100">
-        <div class="card-header bg-success text-white">
+        <div class="card-header card-header-section">
           <h4 class="mb-0">Optimización #2</h4>
           <small>{{ optimizacion2.fecha|date:"d/m/Y H:i" }}</small>
         </div>
@@ -133,7 +135,7 @@
 
   <!-- Tabla Comparativa -->
   <div class="card mb-4 fade-in">
-    <div class="card-header bg-info text-white">
+    <div class="card-header card-header-section">
       <h4 class="mb-0">Comparación Detallada</h4>
     </div>
     <div class="card-body">
@@ -192,10 +194,9 @@
     </div>
   </div>
 
-  <div class="text-center mb-4">
-    <a href="{% url 'cutless:comparar_optimizaciones' %}" class="btn btn-secondary">Comparar Otras Optimizaciones</a>
+  <div class="form-action-bar mb-4">
+    <a href="{% url 'cutless:comparar_optimizaciones' %}" class="btn btn-outline-secondary">Comparar otras optimizaciones</a>
   </div>
   {% endif %}
-</div>
 {% endblock %}
 

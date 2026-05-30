@@ -6,19 +6,24 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
-    <h2 class="text-center mb-0 flex-grow-1">Historial de Optimizaciones </h2>
-    <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
-            onclick="iniciarTutorialSeccion('historial')" 
-            title="Ayuda sobre el historial">
-      ❓ Ayuda
-    </button>
-  </div>
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Historial de optimizaciones</h1>
+      <p class="page-lead">Consulta, filtra y reutiliza tus planes de corte anteriores.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
+              onclick="iniciarTutorialSeccion('historial')" 
+              title="Ayuda sobre el historial">
+        Ayuda
+      </button>
+      <a href="{% url 'cutless:index' %}" class="btn btn-primary">Ir al optimizador</a>
+    </div>
+  </header>
 
   <!-- Filtros y Búsqueda -->
-  <div class="search-filters fade-in">
-    <h5 class="mb-3">Buscar y Filtrar</h5>
+  <div class="search-filters filters-panel fade-in">
+    <h5 class="filters-panel__title">Buscar y filtrar</h5>
     <form method="GET" action="{% url 'cutless:historial' %}" id="filtros-form">
       <div class="row">
         <div class="col-md-3 mb-3">
@@ -302,17 +307,16 @@
         {% endif %}
       </p>
       <a href="{% url 'cutless:index' %}" class="btn btn-primary btn-lg">
-        ➕ Crear Nueva Optimización
+        Crear optimización
       </a>
     </div>
   {% endif %}
-</div>
 
     <!-- Modal para imágenes en pantalla completa -->
     <div class="modal fade" id="modalImagen" tabindex="-1" aria-labelledby="modalImagenLabel" aria-hidden="true">
       <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
-          <div class="modal-header bg-dark text-white">
+          <div class="modal-header modal-header-app">
             <h5 class="modal-title" id="modalImagenLabel">Tableros en Pantalla Completa</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -336,8 +340,8 @@
               </div>
             </div>
           </div>
-          <div class="modal-footer bg-dark text-white">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <div class="modal-footer modal-footer-app">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
             <button type="button" class="btn btn-primary" onclick="resetearZoomImagen()">🔍 Resetear Zoom</button>
           </div>
         </div>

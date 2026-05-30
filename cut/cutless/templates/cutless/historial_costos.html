@@ -7,25 +7,24 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
-    <h2 class="text-center mb-0 flex-grow-1">💰 Historial de Costos</h2>
-    <div class="d-flex gap-2 align-items-center">
-      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
-              onclick="iniciarTutorialSeccion('costos')" 
-              title="Ayuda sobre historial de costos">
-        ❓ Ayuda
-      </button>
-      {% if optimizaciones_con_costo %}
-      <a href="{% url 'cutless:historial_costos' %}?export=excel{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}" 
-         class="btn btn-outline-success btn-sm">
-        📊 Exportar Excel
-      </a>
-      {% endif %}
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Historial de costos</h1>
+      <p class="page-lead">Consulta el detalle de costos de tus optimizaciones.</p>
     </div>
-  </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
+              onclick="iniciarTutorialSeccion('historial_costos')" 
+              title="Ayuda">
+        Ayuda
+      </button>
+      <a href="{% url 'cutless:index' %}" class="btn btn-outline-secondary">
+        Ir al optimizador
+      </a>
+    </div>
+  </header>
 
-  <!-- Filtros Mejorados -->
+<!-- Filtros Mejorados -->
   <div class="filter-card fade-in">
     <form method="GET" action="{% url 'cutless:historial_costos' %}">
       <div class="row g-3 align-items-end">
@@ -244,5 +243,4 @@
     </div>
   </div>
   {% endif %}
-</div>
 {% endblock %}

@@ -6,23 +6,25 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
-    <h2 class="text-center mb-0 flex-grow-1">📁 Gestión de Proyectos</h2>
-    <div class="d-flex gap-2 align-items-center">
-      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Gestión de proyectos</h1>
+      <p class="page-lead">Agrupa optimizaciones por proyecto y haz seguimiento del avance.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
               onclick="iniciarTutorialSeccion('proyectos')" 
               title="Ayuda sobre proyectos">
-        ❓ Ayuda
+        Ayuda
       </button>
       <a href="{% url 'cutless:crear_proyecto' %}" class="btn btn-primary">
-        ➕ Crear Proyecto
+        Crear proyecto
       </a>
     </div>
-  </div>
+  </header>
 
   <!-- Filtros -->
-  <div class="search-filters fade-in mb-4">
+  <div class="search-filters filters-panel fade-in mb-4">
     <form method="GET" action="{% url 'cutless:lista_proyectos' %}">
       <div class="row">
         <div class="col-md-4">
@@ -130,6 +132,5 @@
     {% endif %}
   </div>
   {% endif %}
-</div>
 {% endblock %}
 

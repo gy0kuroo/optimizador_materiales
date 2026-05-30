@@ -6,49 +6,52 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
-    <h2 class="text-center mb-0 flex-grow-1">Resultado del Plan de Corte</h2>
-    <div class="d-flex gap-2 align-items-center">
-      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Resultado del plan de corte</h1>
+      <p class="page-lead">
+        {% if numero_lista %}Optimización #{{ numero_lista }} · {% endif %}
+        {{ num_tableros }} tablero{{ num_tableros|pluralize }} · {{ optimizacion.aprovechamiento_total|stringformat:".1f" }}% de aprovechamiento
+      </p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
               onclick="iniciarTutorialSeccion('resultado')" 
               title="Ayuda sobre resultado de optimización">
-        ❓ Ayuda
+        Ayuda
       </button>
     </div>
-  </div>
+  </header>
   
   <!-- Resumen general -->
-  <div class="row mt-4 fade-in">
+  <div class="row fade-in">
     <div class="col-md-4 mb-3">
-      <div class="card text-center 
-           {% if optimizacion.aprovechamiento_total < 30 %}bg-danger text-white
-           {% elif optimizacion.aprovechamiento_total < 60 %}bg-warning text-white
-           {% else %}bg-success text-white{% endif %}"
-           style="transition: transform 0.3s ease;">
+      <div class="card text-center metric-card
+           {% if optimizacion.aprovechamiento_total < 30 %}metric-card--danger
+           {% elif optimizacion.aprovechamiento_total < 60 %}metric-card--warning
+           {% else %}metric-card--success{% endif %}">
         <div class="card-body">
-          <h5 class="card-title mb-3">📈 Aprovechamiento</h5>
-          <h2 class="mb-0" style="font-weight: 700;">{{ optimizacion.aprovechamiento_total|stringformat:".2f" }}%</h2>
+          <h5 class="card-title mb-3">Aprovechamiento</h5>
+          <p class="metric-value">{{ optimizacion.aprovechamiento_total|stringformat:".2f" }}%</p>
         </div>
       </div>
     </div>
     <div class="col-md-4 mb-3">
-      <div class="card text-center bg-info text-white" style="transition: transform 0.3s ease;">
+      <div class="card text-center metric-card metric-card--info">
         <div class="card-body">
-          <h5 class="card-title mb-3">📐 Área Utilizada</h5>
-          <h2 class="mb-0" style="font-weight: 700;">{{ info_desperdicio.area_usada_total|stringformat:".1f" }} {{ simbolo_area|default:"cm²" }}</h2>
+          <h5 class="card-title mb-3">Área utilizada</h5>
+          <p class="metric-value">{{ info_desperdicio.area_usada_total|stringformat:".1f" }} <small>{{ simbolo_area|default:"cm²" }}</small></p>
         </div>
       </div>
     </div>
     <div class="col-md-4 mb-3">
-      <div class="card text-center 
-           {% if optimizacion.aprovechamiento_total < 30 %}bg-danger text-white
-           {% elif optimizacion.aprovechamiento_total < 60 %}bg-warning text-white
-           {% else %}bg-success text-white{% endif %}"
-           style="transition: transform 0.3s ease;">
+      <div class="card text-center metric-card
+           {% if optimizacion.aprovechamiento_total < 30 %}metric-card--danger
+           {% elif optimizacion.aprovechamiento_total < 60 %}metric-card--warning
+           {% else %}metric-card--success{% endif %}">
         <div class="card-body">
-          <h5 class="card-title mb-3">⚠️ Desperdicio Total</h5>
-          <h2 class="mb-0" style="font-weight: 700;">{{ info_desperdicio.desperdicio_total|stringformat:".1f" }} {{ simbolo_area|default:"cm²" }}</h2>
+          <h5 class="card-title mb-3">Desperdicio total</h5>
+          <p class="metric-value">{{ info_desperdicio.desperdicio_total|stringformat:".1f" }} <small>{{ simbolo_area|default:"cm²" }}</small></p>
         </div>
       </div>
     </div>
@@ -56,7 +59,7 @@
   
   <div class="text-center mt-4 mb-4">
     <p class="lead mb-0">
-      Total de tableros generados: <strong class="badge bg-primary" style="font-size: 1.1rem; padding: 0.5rem 1rem;">{{ num_tableros }}</strong>
+      Total de tableros generados: <strong class="badge badge-accent-primary" style="font-size: 1.1rem; padding: 0.5rem 1rem;">{{ num_tableros }}</strong>
     </p>
   </div>
   
@@ -65,7 +68,7 @@
   <div class="row mt-4 fade-in">
     <div class="col-12">
       <div class="card">
-        <div class="card-header bg-success text-white">
+        <div class="card-header card-header-section">
           <h5 class="mb-0">💰 Información de Costos</h5>
         </div>
         <div class="card-body">
@@ -206,7 +209,7 @@
     {% for item in tableros_con_imagenes %}
     <div class="col-md-6 mb-4">
       <div class="card">
-        <div class="card-header text-center bg-primary text-white d-flex justify-content-between align-items-center">
+        <div class="card-header text-center card-header-step-primary d-flex justify-content-between align-items-center">
           <h5 class="mb-0">Tablero {{ item.numero }} de {{ num_tableros }}</h5>
           <a href="{% url 'cutless:descargar_png_tablero' optimizacion.id item.numero %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" data-carga-texto="Generando imagen..." 
              class="btn btn-sm btn-light" 
@@ -228,35 +231,30 @@
   
   <hr>
   
-  <!-- Botones para descargar PDF y Excel -->
-  <div class="text-center mt-4 fade-in">
-    <a href="{% url 'cutless:descargar_pdf' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-success btn-lg me-2" data-carga-texto="Descargando PDF...">
-       Descargar PDF 
+  <div class="result-actions fade-in">
+    <a href="{% url 'cutless:descargar_pdf' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-success btn-lg" data-carga-texto="Descargando PDF...">
+      Descargar PDF
     </a>
-    <a href="{% url 'cutless:descargar_excel' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-primary btn-lg me-2" data-carga-texto="Generando archivo Excel...">
-       Descargar Excel
+    <a href="{% url 'cutless:descargar_excel' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-primary btn-lg" data-carga-texto="Generando archivo Excel...">
+      Descargar Excel
     </a>
-    <a href="{% url 'cutless:imprimir_plan_corte' optimizacion.id %}" class="btn btn-info btn-lg" target="_blank">
-       🖨️ Imprimir Plan de Corte
+    <a href="{% url 'cutless:imprimir_plan_corte' optimizacion.id %}" class="btn btn-outline-primary btn-lg" target="_blank">
+      Imprimir plan de corte
     </a>
-  </div>
-  
-  <!-- Botón para volver -->
-  <div class="text-center mt-4 mb-5 fade-in">
-    <a href="{% url 'cutless:index' %}" class="btn btn-secondary btn-lg me-2">
-      Volver al Optimizador
+    <span class="w-100 d-block text-center text-muted small mt-1 mb-1">— o —</span>
+    <a href="{% url 'cutless:index' %}" class="btn btn-outline-secondary btn-lg">
+      Ir al optimizador
     </a>
-    <a href="{% url 'cutless:historial' %}" class="btn btn-info btn-lg">
-      Ver Historial
+    <a href="{% url 'cutless:historial' %}" class="btn btn-outline-primary btn-lg">
+      Ver historial
     </a>
   </div>
-</div>
 
 <!-- Modal para tableros en pantalla completa -->
 <div class="modal fade" id="modalTablero" tabindex="-1" aria-labelledby="modalTableroLabel" aria-hidden="true">
   <div class="modal-dialog modal-fullscreen">
     <div class="modal-content">
-      <div class="modal-header bg-dark text-white">
+      <div class="modal-header modal-header-app">
         <h5 class="modal-title" id="modalTableroLabel">Tablero 1 de 1 - FFD</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -280,8 +278,8 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer bg-dark text-white">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      <div class="modal-footer modal-footer-app">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
         <button type="button" class="btn btn-primary" onclick="resetearZoomTablero()">🔍 Resetear Zoom</button>
       </div>
     </div>

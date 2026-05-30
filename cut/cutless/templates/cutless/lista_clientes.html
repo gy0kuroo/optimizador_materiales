@@ -6,23 +6,25 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
-    <h2 class="text-center mb-0 flex-grow-1">👥 Gestión de Clientes</h2>
-    <div class="d-flex gap-2 align-items-center">
-      <button type="button" class="btn btn-sm btn-outline-info btn-ayuda-seccion" 
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Gestión de clientes</h1>
+      <p class="page-lead">Organiza clientes y vincúlalos a proyectos y presupuestos.</p>
+    </div>
+    <div class="page-header__actions">
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
               onclick="iniciarTutorialSeccion('clientes')" 
               title="Ayuda sobre clientes">
-        ❓ Ayuda
+        Ayuda
       </button>
       <a href="{% url 'cutless:crear_cliente' %}" class="btn btn-primary">
-        ➕ Agregar Cliente
+        Agregar cliente
       </a>
     </div>
-  </div>
+  </header>
 
   <!-- Búsqueda -->
-  <div class="search-filters fade-in mb-4">
+  <div class="search-filters filters-panel fade-in mb-4">
     <form method="GET" action="{% url 'cutless:lista_clientes' %}">
       <div class="row">
         <div class="col-md-6">
@@ -81,7 +83,7 @@
             <span class="badge bg-primary">{{ cliente.get_total_optimizaciones }}</span>
           </td>
           <td>
-            <a href="{% url 'cutless:historial_cliente' cliente.pk %}" class="btn btn-sm btn-info" title="Ver historial">
+            <a href="{% url 'cutless:historial_cliente' cliente.pk %}" class="btn btn-sm btn-outline-primary" title="Ver historial">
               📊 Historial
             </a>
             <a href="{% url 'cutless:editar_cliente' cliente.pk %}" class="btn btn-sm btn-success">✏️ Editar</a>
@@ -118,6 +120,5 @@
     {% endif %}
   </div>
   {% endif %}
-</div>
 {% endblock %}
 

@@ -3,8 +3,13 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-<h2 class="mt-4">Administración de Usuarios</h2>
-<p>Solo accesible para administradores.</p>
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Administración de usuarios</h1>
+      <p class="page-lead">Crea cuentas y gestiona permisos del sistema.</p>
+    </div>
+  </header>
+
 
 <div class="card mb-4">
   <div class="card-body">
@@ -46,7 +51,7 @@
         <td>{{ u.is_active|yesno:'Sí,No' }}</td>
         <td>
           {% if u != request.user %}
-            <a href="{% url 'usuarios:editar_usuario' u.pk %}" class="btn btn-info btn-sm me-1 admin-action-btn">Editar</a>
+            <a href="{% url 'usuarios:editar_usuario' u.pk %}" class="btn btn-outline-primary btn-sm me-1 admin-action-btn">Editar</a>
             <form method="post" action="{% url 'usuarios:actualizar_rol' u.pk %}" class="d-inline">
               {% csrf_token %}
               <select name="rol" class="form-select form-select-sm d-inline w-auto me-1 rol-select-inline">

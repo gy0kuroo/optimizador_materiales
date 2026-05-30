@@ -10,25 +10,28 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-center mb-0 flex-grow-1">Editar Optimización #{{ optimizacion.id }}</h2>
-    <a href="{% url 'cutless:historial' %}" class="btn btn-secondary">
-      ← Volver al Historial
-    </a>
-  </div>
+  <header class="page-header fade-in">
+    <div class="page-header__text">
+      <h1 class="page-title">Editar optimización #{{ optimizacion.id }}</h1>
+      <p class="page-lead">Modifica tablero y piezas, luego recalcula el plan de corte.</p>
+    </div>
+    <div class="page-header__actions">
+      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary">Ver historial</a>
+    </div>
+  </header>
   
-  <form method="post" action="{% url 'cutless:editar_optimizacion' optimizacion.id %}" id="optimizacion-form">
+<form method="post" action="{% url 'cutless:editar_optimizacion' optimizacion.id %}" id="optimizacion-form">
     {% csrf_token %}
     
     <!-- Sección: Dimensiones del Tablero -->
     <div class="card mb-4 fade-in">
-      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">Dimensiones del Tablero</h4>
-        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion" 
+      <div class="card-header card-header-step card-header-step-primary text-white">
+        <span class="step-badge" aria-hidden="true">1</span>
+        <h4 class="card-header-title">Dimensiones del tablero</h4>
+        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion ms-auto" 
                 onclick="iniciarTutorialSeccion('tablero')" 
                 title="Ayuda sobre dimensiones del tablero">
-          ❓
+          Ayuda
         </button>
       </div>
       <div class="card-body">
@@ -91,7 +94,7 @@
 
     <!-- Sección: Costos (Opcional) -->
     <div class="card mb-4 fade-in">
-      <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+      <div class="card-header card-header-step card-header-step-info text-white d-flex justify-content-between align-items-center">
         <h4 class="mb-0">💰 Costos (Opcional)</h4>
         <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion" 
                 onclick="iniciarTutorialSeccion('costos')" 
@@ -161,8 +164,9 @@
 
     <!-- Sección: Piezas a Cortar -->
     <div class="card mb-4 fade-in">
-      <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">Piezas a Cortar</h4>
+      <div class="card-header card-header-step card-header-step-success text-white">
+        <span class="step-badge" aria-hidden="true">2</span>
+        <h4 class="card-header-title">Piezas a cortar</h4>
         <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion" 
                 onclick="iniciarTutorialSeccion('piezas')" 
                 title="Ayuda sobre piezas a cortar">
@@ -216,16 +220,11 @@
     </div>
 
     <!-- Botón de envío -->
-    <div class="text-center fade-in">
-      <button type="submit" class="btn btn-primary btn-lg">
-        Actualizar Optimización
-      </button>
-      <a href="{% url 'cutless:historial' %}" class="btn btn-secondary btn-lg">
-        Cancelar
-      </a>
+    <div class="form-action-bar fade-in">
+      <button type="submit" class="btn btn-primary btn-lg btn-cta-primary">Actualizar optimización</button>
+      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary btn-lg">Cancelar</a>
     </div>
   </form>
-</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
