@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'cutless.middleware.DatabaseHealthCheckMiddleware',  # Verificar BD
 ]
 
 ROOT_URLCONF = 'cutless_project.urls'
