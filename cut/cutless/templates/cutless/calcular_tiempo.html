@@ -29,17 +29,17 @@
         </div>
         <div class="card-body">
           <div class="mb-4">
-            <h5>📋 Información de la Optimización</h5>
+            <h5>Información de la Optimización</h5>
             <p class="mb-1"><strong>Optimización #{{ optimizacion.id }}</strong></p>
-            <p class="mb-1"><strong>📐 Tablero:</strong> {{ ancho_mostrar }} × {{ alto_mostrar }} {{ unidad_medida }}</p>
-            <p class="mb-1"><strong>📊 Aprovechamiento:</strong> {{ optimizacion.aprovechamiento_total|floatformat:2 }}%</p>
-            <p class="mb-1"><strong>📅 Fecha:</strong> {{ optimizacion.fecha|date:"d/m/Y H:i" }}</p>
+            <p class="mb-1"><strong>Tablero:</strong> {{ ancho_mostrar }} × {{ alto_mostrar }} {{ unidad_medida }}</p>
+            <p class="mb-1"><strong>Aprovechamiento:</strong> {{ optimizacion.aprovechamiento_total|floatformat:2 }}%</p>
+            <p class="mb-1"><strong>Fecha:</strong> {{ optimizacion.fecha|date:"d/m/Y H:i" }}</p>
           </div>
 
           <hr>
 
           <div class="mb-4">
-            <h5>📊 Resumen de Piezas</h5>
+            <h5>Resumen de Piezas</h5>
             <div class="row">
               <div class="col-md-4">
                 <div class="card bg-light">
@@ -71,7 +71,7 @@
           <hr>
 
           <div class="mb-4">
-            <h5>⏱️ Tiempo Estimado de Corte</h5>
+            <h5>Tiempo Estimado de Corte</h5>
             <div class="alert alert-info">
               <h4 class="alert-heading">Tiempo Total Estimado</h4>
               <p class="mb-0 tiempo-total">
@@ -83,7 +83,7 @@
           </div>
 
           <div class="mb-4">
-            <h5>📝 Desglose de Tiempos</h5>
+            <h5>Desglose de Tiempos</h5>
             <table class="table table-striped">
               <thead>
                 <tr>
@@ -94,17 +94,17 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>⏱️ Tiempo de Corte</td>
+                  <td>Tiempo de Corte</td>
                   <td class="text-end">{{ tiempo_corte_minutos|floatformat:2 }} minutos</td>
                   <td class="text-end">{{ porcentaje_corte }}%</td>
                 </tr>
                 <tr>
-                  <td>🔧 Tiempo de Setup (Preparación)</td>
+                  <td>Tiempo de Setup (Preparación)</td>
                   <td class="text-end">{{ tiempo_setup_total|floatformat:2 }} minutos</td>
                   <td class="text-end">{{ porcentaje_setup }}%</td>
                 </tr>
                 <tr>
-                  <td>🛠️ Tiempo de Cambio de Herramienta</td>
+                  <td>Tiempo de Cambio de Herramienta</td>
                   <td class="text-end">{{ tiempo_cambio_total|floatformat:2 }} minutos</td>
                   <td class="text-end">{{ porcentaje_cambio }}%</td>
                 </tr>
@@ -118,7 +118,7 @@
           </div>
 
           <div class="mb-4">
-            <h5>📏 Parámetros Utilizados</h5>
+            <h5>Parámetros Utilizados</h5>
             <div class="row">
               <div class="col-md-4">
                 <div class="card">
@@ -151,7 +151,7 @@
           </div>
 
           <div class="mb-4">
-            <h5>📐 Información Técnica</h5>
+            <h5>Información Técnica</h5>
             <p><strong>Perímetro Total a Cortar:</strong> {{ perimetro_total|floatformat:2 }} cm</p>
             <p class="text-muted"><small>Este valor representa la suma de todos los perímetros de las piezas a cortar.</small></p>
           </div>

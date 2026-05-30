@@ -62,7 +62,7 @@
   <div class="card mb-4 fade-in">
     <div class="card-header card-header-section d-flex justify-content-between align-items-center">
       <h4 class="mb-0">Optimizaciones Asociadas ({{ presupuesto.optimizaciones.count }})</h4>
-      <a href="{% url 'cutless:agregar_optimizaciones_presupuesto' presupuesto.pk %}" class="btn btn-sm btn-light">➕ Agregar Más</a>
+      <a href="{% url 'cutless:agregar_optimizaciones_presupuesto' presupuesto.pk %}" class="btn btn-sm btn-light">Agregar Más</a>
     </div>
     <div class="card-body">
       {% if presupuesto.optimizaciones.all %}

@@ -35,7 +35,7 @@
                  value="{{ busqueda }}">
         </div>
         <div class="col-md-2">
-          <button type="submit" class="btn btn-outline-primary w-100">🔍 Buscar</button>
+          <button type="submit" class="btn btn-outline-primary w-100">Buscar</button>
         </div>
         {% if busqueda %}
         <div class="col-md-2">
@@ -82,9 +82,9 @@
             </td>
             <td>{{ material.get_area|floatformat:2 }} cm²</td>
             <td>
-              <a href="{% url 'cutless:editar_material' material.pk %}" class="btn btn-sm btn-primary">✏️ Editar</a>
+              <a href="{% url 'cutless:editar_material' material.pk %}" class="btn btn-sm btn-primary"> Editar</a>
               {% if not material.es_predefinido %}
-              <a href="{% url 'cutless:eliminar_material' material.pk %}" class="btn btn-sm btn-danger">🗑️ Eliminar</a>
+              <a href="{% url 'cutless:eliminar_material' material.pk %}" class="btn btn-sm btn-danger"> Eliminar</a>
               {% else %}
               <span class="badge bg-info">Sistema</span>
               {% endif %}
@@ -96,13 +96,13 @@
     </div>
     {% else %}
     <div class="card fade-in text-center card-empty-state">
-      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;">📦</div>
+      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;"></div>
       <h4 class="mb-3">No tienes materiales</h4>
       <p class="mb-4" style="max-width: 500px; margin: 0 auto;">
         Aún no has creado materiales personalizados. Crea tu primer material para comenzar a usarlo en tus optimizaciones.
       </p>
       <a href="{% url 'cutless:crear_material' %}" class="btn btn-primary btn-lg">
-        ➕ Crear Primer Material
+         Crear Primer Material
       </a>
     </div>
     {% endif %}
@@ -111,7 +111,7 @@
   <!-- Materiales Predefinidos del Sistema -->
   {% if materiales_sistema %}
   <div class="fade-in mt-5">
-    <h4 class="mb-3">📚 Materiales Predefinidos</h4>
+    <h4 class="mb-3"> Materiales Predefinidos</h4>
     <div class="table-responsive">
       <table class="table table-hover">
         <thead>
@@ -144,7 +144,7 @@
             </td>
             <td>{{ material.get_area|floatformat:2 }} cm²</td>
             <td>
-              <a href="{% url 'cutless:editar_material' material.pk %}" class="btn btn-sm btn-primary">✏️ Editar</a>
+              <a href="{% url 'cutless:editar_material' material.pk %}" class="btn btn-sm btn-primary"> Editar</a>
               <span class="badge bg-info">Sistema</span>
             </td>
           </tr>

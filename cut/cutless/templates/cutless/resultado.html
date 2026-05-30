@@ -69,14 +69,14 @@
     <div class="col-12">
       <div class="card">
         <div class="card-header card-header-section">
-          <h5 class="mb-0">💰 Información de Costos</h5>
+          <h5 class="mb-0"> Información de Costos</h5>
         </div>
         <div class="card-body">
           <div class="row">
             {% if optimizacion.material %}
             <div class="col-md-6 mb-3">
               <div class="d-flex align-items-center">
-                <span class="me-2" style="font-size: 1.2rem;">📦</span>
+                <span class="me-2" style="font-size: 1.2rem;"></span>
                 <div>
                   <strong>Material:</strong><br>
                   <span class="text-muted">{{ optimizacion.material.nombre }}</span>
@@ -87,7 +87,7 @@
             {% if precio_tablero %}
             <div class="col-md-6 mb-3">
               <div class="d-flex align-items-center">
-                <span class="me-2" style="font-size: 1.2rem;">💵</span>
+                <span class="me-2" style="font-size: 1.2rem;"></span>
                 <div>
                   <strong>Precio por tablero:</strong><br>
                   <span class="text-muted">${{ precio_tablero|floatformat:0 }}</span>
@@ -98,7 +98,7 @@
             {% if precio_tablero %}
             <div class="col-md-6 mb-3">
               <div class="d-flex align-items-center">
-                <span class="me-2" style="font-size: 1.2rem;">📊</span>
+                <span class="me-2" style="font-size: 1.2rem;"></span>
                 <div>
                   <strong>Costo de material ({{ num_tableros }} tableros):</strong><br>
                   <span class="text-muted">${{ costo_material|floatformat:0|default:"0" }}</span>
@@ -109,7 +109,7 @@
             {% if mano_obra %}
             <div class="col-md-6 mb-3">
               <div class="d-flex align-items-center">
-                <span class="me-2" style="font-size: 1.2rem;">👷</span>
+                <span class="me-2" style="font-size: 1.2rem;"></span>
                 <div>
                   <strong>Mano de obra:</strong><br>
                   <span class="text-muted">${{ mano_obra|floatformat:0 }}</span>
@@ -122,7 +122,7 @@
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   <h4 class="text-success mb-0">
-                    <strong>💰 Costo Total:</strong>
+                    <strong> Costo Total:</strong>
                   </h4>
                 </div>
                 <div>
@@ -136,7 +136,7 @@
             {% if costo_total %}
             <div class="mt-4 text-center">
               <a href="{% url 'cutless:crear_presupuesto' %}?optimizacion={{ optimizacion.pk }}" class="btn btn-primary btn-lg">
-                💰 Crear Presupuesto
+                 Crear Presupuesto
               </a>
             </div>
             {% endif %}

@@ -84,7 +84,7 @@
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li><h6 class="dropdown-header">Configuración de Perfil</h6></li>
-                                <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">👤 Mi Perfil</a></li>
+                                <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">Mi Perfil</a></li>
                                 {% if user.is_authenticated and user.is_superuser or user.is_authenticated and user.perfil.rol == 'admin' %}
                                     <li><a class="dropdown-item" href="{% url 'usuarios:admin_dashboard' %}">Admin Dashboard</a></li>
                                     <li><hr class="dropdown-divider"></li>
@@ -259,7 +259,7 @@
                 // Tutorial en página principal
                 pasos.push(
                     {
-                        title: '👋 ¡Bienvenido a CutLess!',
+                        title: '¡Bienvenido a CutLess!',
                         intro: 'Este tutorial te guiará paso a paso para usar el sistema de optimización de cortes.',
                         element: document.querySelector('h2') || document.body
                     },
@@ -282,17 +282,17 @@
             } else if (path.includes('mis-optimizaciones')) {
                 pasos.push(
                     {
-                        title: '📋 Historial de Optimizaciones',
+                        title: 'Historial de Optimizaciones',
                         intro: 'Aquí puedes ver todas tus optimizaciones guardadas. Puedes filtrar, buscar y ordenar según tus necesidades.',
                         element: document.querySelector('h2') || document.body
                     },
                     {
-                        title: '🔍 Buscar y Filtrar',
+                        title: 'Buscar y Filtrar',
                         intro: 'Usa estos filtros para encontrar optimizaciones específicas por nombre de pieza, fecha o aprovechamiento.',
                         element: document.querySelector('.search-filters') || document.body
                     },
                     {
-                        title: '⭐ Favoritos',
+                        title: 'Favoritos',
                         intro: 'Haz clic en la estrella para marcar optimizaciones importantes como favoritas. Luego puedes filtrar para ver solo tus favoritos.',
                         element: document.querySelector('.favorito-btn') || document.body
                     },
@@ -950,16 +950,16 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="modalBienvenidaLabel">👋 ¡Bienvenido a CutLess!</h5>
+                    <h5 class="modal-title" id="modalBienvenidaLabel">¡Bienvenido a CutLess!</h5>
                 </div>
                 <div class="modal-body">
-                    <p class="lead">¡Hola, <strong>{{ user.username }}</strong>! 👋</p>
+                    <p class="lead">¡Hola, <strong>{{ user.username }}</strong>! </p>
                     <p>CutLess es un sistema diseñado para ayudarte a optimizar el corte de madera y reducir el desperdicio de material.</p>
                     <div class="alert alert-info">
                         <h6 class="alert-heading">¿Primera vez aquí?</h6>
                         <p class="mb-0">Te recomendamos seguir el tutorial interactivo para conocer todas las funcionalidades del sistema.</p>
                     </div>
-                    <p class="mb-0"><small class="text-muted">Puedes acceder al tutorial en cualquier momento desde el botón "❓ Ayuda" en el menú superior.</small></p>
+                    <p class="mb-0"><small class="text-muted">Puedes acceder al tutorial en cualquier momento desde el botón "Ayuda" en el menú superior.</small></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" onclick="marcarTutorialCompletado(); bootstrap.Modal.getInstance(document.getElementById('modalBienvenida')).hide();">

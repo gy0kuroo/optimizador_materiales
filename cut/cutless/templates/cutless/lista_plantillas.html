@@ -46,7 +46,7 @@
           </select>
         </div>
         <div class="col-md-2">
-          <button type="submit" class="btn btn-outline-primary w-100">🔍 Buscar</button>
+          <button type="submit" class="btn btn-outline-primary w-100">Buscar</button>
         </div>
         {% if busqueda or categoria_filtro %}
         <div class="col-md-2">
@@ -78,9 +78,9 @@
             <p class="mb-0"><strong>Rotación:</strong> {% if plantilla.permitir_rotacion %}Sí{% else %}No{% endif %}</p>
           </div>
           <div class="card-footer">
-            <a href="{% url 'cutless:usar_plantilla' plantilla.pk %}" class="btn btn-success btn-sm">✅ Usar</a>
-            <a href="{% url 'cutless:editar_plantilla' plantilla.pk %}" class="btn btn-primary btn-sm">✏️ Editar</a>
-            <a href="{% url 'cutless:eliminar_plantilla' plantilla.pk %}" class="btn btn-danger btn-sm">🗑️ Eliminar</a>
+            <a href="{% url 'cutless:usar_plantilla' plantilla.pk %}" class="btn btn-success btn-sm">Usar</a>
+            <a href="{% url 'cutless:editar_plantilla' plantilla.pk %}" class="btn btn-primary btn-sm">Editar</a>
+            <a href="{% url 'cutless:eliminar_plantilla' plantilla.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
           </div>
         </div>
       </div>
@@ -88,13 +88,13 @@
     </div>
     {% else %}
     <div class="card fade-in text-center card-empty-state">
-      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;">📋</div>
+      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;"></div>
       <h4 class="mb-3">No tienes plantillas creadas</h4>
       <p class="mb-4" style="max-width: 500px; margin: 0 auto;">
         Aún no has creado plantillas personalizadas. Crea tu primera plantilla para guardar configuraciones de optimización que uses frecuentemente.
       </p>
       <a href="{% url 'cutless:crear_plantilla' %}" class="btn btn-primary btn-lg">
-        ➕ Crear Primera Plantilla
+        Crear Primera Plantilla
       </a>
     </div>
     {% endif %}

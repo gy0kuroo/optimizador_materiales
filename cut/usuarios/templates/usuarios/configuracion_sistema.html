@@ -354,7 +354,7 @@
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="tab-funcionalidades-link" data-bs-toggle="tab" data-bs-target="#tabFuncionalidades" type="button" role="tab" aria-controls="tabFuncionalidades" aria-selected="false">
-        🧩 Funcionalidades del sistema
+        Funcionalidades del sistema
       </button>
     </li>
   </ul>
@@ -374,14 +374,14 @@
     <!-- Sistema -->
     <div class="config-section">
       <div class="config-section-title">
-        <span>🔧</span>
+        <span></span>
         <h5>Sistema</h5>
       </div>
 
       <div class="config-grid">
         <div class="config-field">
           <label for="{{ perfil_form.unidad_medida_predeterminada.id_for_label }}">
-            📏 {{ perfil_form.unidad_medida_predeterminada.label }}
+            {{ perfil_form.unidad_medida_predeterminada.label }}
           </label>
           {{ perfil_form.unidad_medida_predeterminada }}
           {% if perfil_form.unidad_medida_predeterminada.errors %}
@@ -391,7 +391,7 @@
 
         <div class="config-field">
           <label for="{{ perfil_form.margen_corte_predeterminado.id_for_label }}">
-            ✂️ {{ perfil_form.margen_corte_predeterminado.label }}
+            {{ perfil_form.margen_corte_predeterminado.label }}
           </label>
           {{ perfil_form.margen_corte_predeterminado }}
           {% if perfil_form.margen_corte_predeterminado.errors %}
@@ -404,7 +404,7 @@
         <div class="config-toggle">
           {{ perfil_form.rotacion_automatica_predeterminada }}
           <label class="config-toggle-label" for="{{ perfil_form.rotacion_automatica_predeterminada.id_for_label }}">
-            <strong>🔄 {{ perfil_form.rotacion_automatica_predeterminada.label }}</strong>
+            <strong>{{ perfil_form.rotacion_automatica_predeterminada.label }}</strong>
           </label>
         </div>
         {% if perfil_form.rotacion_automatica_predeterminada.errors %}
@@ -416,7 +416,7 @@
     <!-- Notificaciones -->
     <div class="config-section">
       <div class="config-section-title">
-        <span>🔔</span>
+        <span></span>
         <h5>Notificaciones</h5>
       </div>
 
@@ -424,7 +424,7 @@
         <div class="config-toggle">
           {{ perfil_form.notificaciones_email }}
           <label class="config-toggle-label" for="{{ perfil_form.notificaciones_email.id_for_label }}">
-            <strong>📧 {{ perfil_form.notificaciones_email.label }}</strong>
+            <strong>{{ perfil_form.notificaciones_email.label }}</strong>
           </label>
         </div>
         {% if perfil_form.notificaciones_email.errors %}
@@ -436,7 +436,7 @@
         <div class="config-toggle">
           {{ perfil_form.notificaciones_pantalla }}
           <label class="config-toggle-label" for="{{ perfil_form.notificaciones_pantalla.id_for_label }}">
-            <strong>🖥️ {{ perfil_form.notificaciones_pantalla.label }}</strong>
+            <strong>{{ perfil_form.notificaciones_pantalla.label }}</strong>
           </label>
         </div>
         {% if perfil_form.notificaciones_pantalla.errors %}
@@ -446,7 +446,7 @@
 
       <div class="config-field">
         <label for="{{ perfil_form.email_notificaciones.id_for_label }}">
-          📧 {{ perfil_form.email_notificaciones.label }}
+          {{ perfil_form.email_notificaciones.label }}
         </label>
         {{ perfil_form.email_notificaciones }}
         {% if perfil_form.email_notificaciones.errors %}
@@ -458,7 +458,7 @@
     <!-- Tipos de Notificaciones -->
     <div class="config-section">
       <div class="config-section-title">
-        <span>📢</span>
+        <span></span>
         <h5>Tipos de Notificaciones</h5>
       </div>
 
@@ -466,7 +466,7 @@
         <div class="config-toggle">
           {{ perfil_form.notificar_optimizacion_completada }}
           <label class="config-toggle-label" for="{{ perfil_form.notificar_optimizacion_completada.id_for_label }}">
-            <strong>✅ {{ perfil_form.notificar_optimizacion_completada.label }}</strong>
+            <strong>{{ perfil_form.notificar_optimizacion_completada.label }}</strong>
           </label>
         </div>
         {% if perfil_form.notificar_optimizacion_completada.errors %}
@@ -478,7 +478,7 @@
         <div class="config-toggle">
           {{ perfil_form.notificar_presupuesto_creado }}
           <label class="config-toggle-label" for="{{ perfil_form.notificar_presupuesto_creado.id_for_label }}">
-            <strong>📄 {{ perfil_form.notificar_presupuesto_creado.label }}</strong>
+            <strong>{{ perfil_form.notificar_presupuesto_creado.label }}</strong>
           </label>
         </div>
         {% if perfil_form.notificar_presupuesto_creado.errors %}
@@ -490,7 +490,7 @@
         <div class="config-toggle">
           {{ perfil_form.notificar_proyecto_creado }}
           <label class="config-toggle-label" for="{{ perfil_form.notificar_proyecto_creado.id_for_label }}">
-            <strong>📁 {{ perfil_form.notificar_proyecto_creado.label }}</strong>
+            <strong>{{ perfil_form.notificar_proyecto_creado.label }}</strong>
           </label>
         </div>
         {% if perfil_form.notificar_proyecto_creado.errors %}
@@ -518,7 +518,7 @@
 
     <div class="config-section">
       <div class="config-section-title">
-        <span>🧩</span>
+        <span></span>
         <h5>Funcionalidades del sistema</h5>
       </div>
       <p class="text-muted mb-3" style="font-size: 0.95rem;">

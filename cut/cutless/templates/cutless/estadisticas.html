@@ -102,7 +102,7 @@
                      alt="Gráfico de Aprovechamiento" 
                      class="img-fluid chart-thumbnail">
                 <div class="chart-overlay">
-                  <span class="chart-hint">🔍 Click para ver en pantalla completa</span>
+                  <span class="chart-hint">Click para ver en pantalla completa</span>
                 </div>
               </div>
             {% else %}
@@ -125,7 +125,7 @@
                      alt="Gráfico de Desperdicio" 
                      class="img-fluid chart-thumbnail">
                 <div class="chart-overlay">
-                  <span class="chart-hint">🔍 Click para ver en pantalla completa</span>
+                  <span class="chart-hint">Click para ver en pantalla completa</span>
                 </div>
               </div>
             {% else %}
@@ -233,7 +233,7 @@
     
   {% else %}
       <div class="card fade-in text-center card-empty-state">
-      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;">📊</div>
+      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;"></div>
       <h4 class="mb-3">No hay datos</h4>
       <p class="mb-4" style="max-width: 500px; margin: 0 auto;">
         {% if periodo != 'todos' %}
@@ -277,9 +277,9 @@ function abrirModalGrafico(tipo) {
     
     // Establecer título
     if (tipo === 'aprovechamiento') {
-        titulo.textContent = '📊 Gráfico de Aprovechamiento - Pantalla Completa';
+        titulo.textContent = 'Gráfico de Aprovechamiento - Pantalla Completa';
     } else {
-        titulo.textContent = '📉 Gráfico de Desperdicio - Pantalla Completa';
+        titulo.textContent = 'Gráfico de Desperdicio - Pantalla Completa';
     }
     
     // Crear contenedor para el gráfico con capacidad de arrastre

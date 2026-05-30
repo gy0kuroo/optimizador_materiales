@@ -98,8 +98,8 @@
           <td>{{ proyecto.fecha_creacion|date:"d/m/Y" }}</td>
           <td>
             <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-sm btn-primary"> Ver</a>
-            <a href="{% url 'cutless:editar_proyecto' proyecto.pk %}" class="btn btn-sm btn-success">✏️ Editar</a>
-            <a href="{% url 'cutless:eliminar_proyecto' proyecto.pk %}" class="btn btn-sm btn-danger">🗑️ Eliminar</a>
+            <a href="{% url 'cutless:editar_proyecto' proyecto.pk %}" class="btn btn-sm btn-success">Editar</a>
+            <a href="{% url 'cutless:eliminar_proyecto' proyecto.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
           </td>
         </tr>
         {% endfor %}
@@ -108,7 +108,7 @@
   </div>
   {% else %}
   <div class="card fade-in text-center card-empty-state">
-    <div class="mb-4" style="font-size: 4rem; opacity: 0.3;">📁</div>
+    <div class="mb-4" style="font-size: 4rem; opacity: 0.3;"></div>
     <h4 class="mb-3">
       {% if busqueda or estado_filtro %}
         No se encontraron proyectos
@@ -127,7 +127,7 @@
     </p>
     {% if not busqueda and not estado_filtro %}
     <a href="{% url 'cutless:crear_proyecto' %}" class="btn btn-primary btn-lg">
-      ➕ Crear Primer Proyecto
+       Crear Primer Proyecto
     </a>
     {% endif %}
   </div>
