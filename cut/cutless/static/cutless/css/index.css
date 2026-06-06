@@ -1,79 +1,670 @@
-/* Estilos para la página principal de optimización */
+/* =============================================================
+   CutLess — index.css
+   Página: Nueva Optimización
+   Público: 40-50 años. Tipografía grande, alto contraste,
+   acciones claras, iconos contextuales.
+   ============================================================= */
 
-.pieza-form {
-    transition: all 0.3s ease;
-    padding: 1.5rem !important; /* Aumentado para mejor espaciado */
-    margin-bottom: 1.5rem !important;
+/* ══════════════════════════════════════════════════════════════
+   PAGE HEADER
+   ══════════════════════════════════════════════════════════════ */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--cl-space-lg);
+  margin-bottom: var(--cl-space-xl);
+  padding-bottom: var(--cl-space-lg);
+  border-bottom: 3px solid var(--cl-walnut);
+  flex-wrap: wrap;
 }
 
-.pieza-form:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+.page-header__text { flex: 1; min-width: 260px; }
+
+.page-title {
+  font-family: var(--cl-font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--cl-text-primary);
+  margin-bottom: var(--cl-space-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--cl-space-sm);
 }
 
-/* Mejorar legibilidad del texto de ayuda */
-.form-text.text-muted {
-    color: #495057; /* Más oscuro para mejor contraste */
-    font-size: 1rem; /* Aumentado de 0.875rem */
-    line-height: 1.6;
-    margin-top: 0.5rem;
-    display: block;
+/* Línea azul decorativa antes del título */
+.page-title::before {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 1em;
+  background: var(--cl-blue);
+  border-radius: 3px;
+  flex-shrink: 0;
 }
 
-[data-theme="dark"] .form-text.text-muted {
-    color: #adb5bd !important;
-    opacity: 0.9;
+.page-lead {
+  font-size: 1.1rem;
+  color: var(--cl-text-secondary);
+  margin: 0;
+  max-width: 580px;
+  line-height: 1.6;
 }
 
-/* Asegurar que las etiquetas sean legibles */
-label {
-    font-size: var(--font-size-label) !important;
-    font-weight: var(--font-weight-semibold) !important;
-    color: var(--text-primary) !important;
-    margin-bottom: 0.75rem !important;
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--cl-space-sm);
+  padding-top: var(--cl-space-xs);
 }
 
-[data-theme="dark"] label {
-    color: var(--text-primary) !important;
+/* ══════════════════════════════════════════════════════════════
+   WORKFLOW STEPS — barra de progreso numerada
+   ══════════════════════════════════════════════════════════════ */
+.workflow-steps {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: var(--cl-space-xl);
+  border-radius: var(--cl-radius-md);
+  overflow: hidden;
+  border: 2px solid var(--cl-border);
+  box-shadow: var(--cl-shadow-sm);
 }
 
-/* Estilos para botón de eliminar pieza */
-.remove-pieza {
-    display: none;
-    font-size: var(--font-size-base) !important;
-    padding: 0.625rem 1.25rem !important;
-    min-height: 44px;
+.workflow-step {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--cl-space-md);
+  padding: var(--cl-space-md) var(--cl-space-lg);
+  background: var(--cl-bg-card);
+  font-family: var(--cl-font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--cl-text-muted);
+  border-right: 2px solid var(--cl-border);
+  position: relative;
+  transition: var(--cl-transition);
 }
 
-.pieza-form:not(:only-child) .remove-pieza {
-    display: block;
+.workflow-step:last-child { border-right: none; }
+
+/* Triángulo separador */
+.workflow-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0; height: 0;
+  border-top: 18px solid transparent;
+  border-bottom: 18px solid transparent;
+  border-left: 12px solid var(--cl-border);
+  z-index: 2;
 }
 
-/* Mejorar visibilidad de botón principal */
-.btn-primary.btn-lg {
-    font-size: 1.125rem !important;
-    padding: 1rem 2rem !important;
-    font-weight: 600 !important;
-    min-height: 50px;
-    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3) !important;
+.workflow-step__num {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--cl-font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  border: 2px solid currentColor;
+  transition: var(--cl-transition);
 }
 
-/* Mejorar visibilidad de secciones */
-.card-header h4 {
-    font-size: var(--font-size-xl) !important;
-    font-weight: var(--font-weight-bold) !important;
+/* Paso 1 — Tablero (Walnut) */
+.workflow-step--1 { color: var(--cl-walnut); }
+.workflow-step--1 .workflow-step__num {
+  background: var(--cl-walnut);
+  color: var(--cl-ash-white);
+  border-color: var(--cl-walnut);
 }
 
-/* Mejorar espaciado en formularios de piezas */
-.pieza-form .form-control,
-.pieza-form .form-select {
-    margin-bottom: 1rem;
+/* Paso 2 — Piezas (Blue) */
+.workflow-step--2 { color: var(--cl-blue); }
+.workflow-step--2 .workflow-step__num {
+  background: var(--cl-blue);
+  color: #fff;
+  border-color: var(--cl-blue);
 }
 
-/* Mejorar visibilidad de botones de ayuda */
+/* Paso 3 — Calcular (Cobalt) */
+.workflow-step--3 { color: var(--cl-cobalt); }
+.workflow-step--3 .workflow-step__num {
+  background: var(--cl-cobalt);
+  color: #fff;
+  border-color: var(--cl-cobalt);
+}
+
+[data-theme="dark"] .workflow-step {
+  background: var(--cl-bg-surface);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CARDS DE SECCIÓN
+   ══════════════════════════════════════════════════════════════ */
+.card {
+  background: var(--cl-bg-card);
+  border: 1.5px solid var(--cl-border);
+  border-radius: var(--cl-radius-lg);
+  box-shadow: var(--cl-shadow-sm);
+  overflow: hidden;
+  transition: box-shadow .25s ease;
+}
+
+.card:focus-within {
+  box-shadow: var(--cl-shadow-md);
+  border-color: var(--cl-border-strong);
+}
+
+/* ── Card Headers de pasos ─────────────────────────────────── */
+.card-header-step {
+  display: flex;
+  align-items: center;
+  gap: var(--cl-space-md);
+  padding: var(--cl-space-md) var(--cl-space-lg);
+  border-bottom: none;
+}
+
+/* Paso 1: Walnut oscuro con texto claro */
+.card-header-step-primary {
+  background: var(--cl-walnut);
+  color: var(--cl-ash-white);
+}
+
+/* Paso 2: Blue eléctrico */
+.card-header-step-success {
+  background: var(--cl-blue);
+  color: #fff;
+}
+
+/* Costos: Cobalt */
+.card-header-step-info {
+  background: var(--cl-cobalt);
+  color: #fff;
+}
+
+.step-badge {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.18);
+  border: 2px solid rgba(255,255,255,.45);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--cl-font-display);
+  font-size: 1.2rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.card-header-title {
+  font-family: var(--cl-font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: inherit;
+  margin: 0;
+  flex: 1;
+}
+
+/* Ícono delante del título de cada sección */
+.card-header-step-primary .card-header-title::before { content: '🪵 '; }
+.card-header-step-success  .card-header-title::before { content: '📐 '; }
+.card-header-step-info     .card-header-title::before { content: '💰 '; }
+
 .btn-ayuda-seccion {
-    font-size: 1.125rem !important;
-    padding: 0.625rem 0.875rem !important;
-    min-width: 44px;
-    min-height: 44px;
+  font-family: var(--cl-font-display);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  background: rgba(255,255,255,.15);
+  color: rgba(255,255,255,.9);
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: var(--cl-radius-sm);
+  padding: 5px 12px;
+  transition: var(--cl-transition);
+  white-space: nowrap;
+}
+.btn-ayuda-seccion:hover {
+  background: rgba(255,255,255,.28);
+  color: #fff;
+  border-color: rgba(255,255,255,.5);
 }
 
+/* ── Card body ─────────────────────────────────────────────── */
+.card-body {
+  padding: var(--cl-space-xl) var(--cl-space-lg);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FORMULARIO — TABLERO
+   ══════════════════════════════════════════════════════════════ */
+
+/* Etiquetas grandes y claras */
+.card-body label,
+.card-body .form-label,
+.card-body .fw-bold {
+  font-family: var(--cl-font-display);
+  font-size: 1rem !important;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--cl-walnut);
+  margin-bottom: 6px;
+  display: block;
+}
+
+[data-theme="dark"] .card-body label,
+[data-theme="dark"] .card-body .form-label,
+[data-theme="dark"] .card-body .fw-bold {
+  color: var(--cl-olive-pale);
+}
+
+/* Inputs grandes y legibles */
+.card-body .form-control,
+.card-body .form-select,
+.card-body select {
+  font-size: 1.05rem !important;
+  padding: 12px 16px !important;
+  border: 2px solid var(--cl-border) !important;
+  border-radius: var(--cl-radius-sm) !important;
+  background: var(--cl-bg-card) !important;
+  color: var(--cl-text-primary) !important;
+  transition: border-color .18s, box-shadow .18s;
+  height: auto !important;
+}
+
+.card-body .form-control:focus,
+.card-body .form-select:focus,
+.card-body select:focus {
+  border-color: var(--cl-blue) !important;
+  box-shadow: 0 0 0 3px rgba(69,88,231,.18) !important;
+  outline: none !important;
+}
+
+/* Texto de ayuda visible */
+.card-body .form-text,
+.card-body small.text-muted {
+  font-size: .9rem !important;
+  color: var(--cl-text-muted) !important;
+  margin-top: 5px;
+  display: block;
+  line-height: 1.5;
+}
+
+/* ── Tableros predefinidos (dinámico JS) ───────────────────── */
+#medidas-pred-container {
+  margin-bottom: var(--cl-space-lg);
+}
+
+#medidas-pred-container label {
+  font-family: var(--cl-font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--cl-walnut);
+  margin-bottom: 6px;
+}
+
+/* El dropdown que genera medidas-pred.js */
+#tableros-dropdown,
+#medidas-pred-container .dropdown-toggle,
+#medidas-pred-container button {
+  font-family: var(--cl-font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  padding: 12px 18px;
+  border: 2px solid var(--cl-border) !important;
+  background: var(--cl-bg-card) !important;
+  color: var(--cl-text-secondary) !important;
+  border-radius: var(--cl-radius-sm) !important;
+  width: 100%;
+  text-align: left;
+  transition: var(--cl-transition);
+}
+
+#tableros-dropdown:hover,
+#medidas-pred-container .dropdown-toggle:hover {
+  border-color: var(--cl-olive) !important;
+  background: var(--cl-ash-light) !important;
+}
+
+/* ── Dimensiones en grid 2 columnas ──────────────────────── */
+
+/* Fila de inputs de dimensiones: ancho + alto uno al lado del otro */
+.row .col-md-6,
+.row .col-md-3,
+.row .col-md-12 {
+  margin-bottom: var(--cl-space-md);
+}
+
+/* ── Checkbox: Permitir rotación ────────────────────────── */
+.form-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cl-space-sm);
+  background: var(--cl-bg-surface);
+  border: 2px solid var(--cl-border);
+  border-radius: var(--cl-radius-md);
+  padding: var(--cl-space-md) var(--cl-space-lg);
+  cursor: pointer;
+  transition: var(--cl-transition);
+}
+
+.form-check:hover {
+  border-color: var(--cl-blue);
+  background: var(--cl-info-bg);
+}
+
+.form-check-input {
+  width: 22px !important;
+  height: 22px !important;
+  margin-top: 2px;
+  flex-shrink: 0;
+  border: 2px solid var(--cl-border-strong) !important;
+  border-radius: 4px !important;
+  cursor: pointer;
+}
+
+.form-check-input:checked {
+  background-color: var(--cl-blue) !important;
+  border-color: var(--cl-blue) !important;
+}
+
+.form-check-label {
+  font-family: var(--cl-font-display) !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--cl-text-primary) !important;
+  cursor: pointer;
+  display: block;
+}
+
+/* Sobreescribir el color walnut para el label del checkbox */
+.form-check .form-check-label {
+  color: var(--cl-text-primary) !important;
+  text-transform: uppercase;
+}
+
+.form-check small.text-muted {
+  margin-top: 3px !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECCIÓN PIEZAS
+   ══════════════════════════════════════════════════════════════ */
+.pieza-form {
+  background: var(--cl-bg-surface) !important;
+  border: 2px solid var(--cl-border) !important;
+  border-radius: var(--cl-radius-md) !important;
+  padding: var(--cl-space-lg) !important;
+  margin-bottom: var(--cl-space-md) !important;
+  transition: border-color .2s ease, box-shadow .2s ease;
+  position: relative;
+}
+
+.pieza-form:focus-within {
+  border-color: var(--cl-blue) !important;
+  box-shadow: 0 0 0 3px rgba(69,88,231,.10) !important;
+}
+
+/* Número de pieza */
+.pieza-form h5 {
+  font-family: var(--cl-font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--cl-walnut);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--cl-space-xs);
+}
+
+[data-theme="dark"] .pieza-form h5 {
+  color: var(--cl-olive-pale);
+}
+
+.pieza-form h5::before {
+  content: '📦';
+  font-size: 1rem;
+}
+
+/* Encabezado de cada pieza */
+.pieza-form .d-flex.justify-content-between {
+  margin-bottom: var(--cl-space-md) !important;
+  padding-bottom: var(--cl-space-sm);
+  border-bottom: 1px solid var(--cl-border);
+}
+
+/* Botón eliminar pieza */
+.remove-pieza {
+  font-family: var(--cl-font-display) !important;
+  font-size: .72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 6px 14px !important;
+  border-radius: var(--cl-radius-sm) !important;
+  background: transparent !important;
+  color: var(--cl-danger) !important;
+  border: 2px solid var(--cl-danger) !important;
+  transition: var(--cl-transition);
+}
+
+.remove-pieza:hover {
+  background: var(--cl-danger) !important;
+  color: #fff !important;
+}
+
+.remove-pieza-hidden { display: none !important; }
+
+/* Botón "Agregar otra pieza" */
+#add-pieza {
+  font-family: var(--cl-font-display) !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: 12px 24px !important;
+  border-radius: var(--cl-radius-sm) !important;
+  background: transparent !important;
+  color: var(--cl-blue) !important;
+  border: 2px solid var(--cl-blue) !important;
+  display: flex;
+  align-items: center;
+  gap: var(--cl-space-sm);
+  transition: var(--cl-transition);
+  margin-top: var(--cl-space-sm);
+}
+
+#add-pieza::before { content: '+'; font-size: 1.3rem; font-weight: 800; }
+
+#add-pieza:hover {
+  background: var(--cl-blue) !important;
+  color: #fff !important;
+  box-shadow: var(--cl-shadow-blue);
+  transform: translateY(-1px);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECCIÓN COSTOS (collapse)
+   ══════════════════════════════════════════════════════════════ */
+#btnCostosToggle {
+  font-family: var(--cl-font-display) !important;
+  font-size: .75rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  background: rgba(255,255,255,.15) !important;
+  color: rgba(255,255,255,.9) !important;
+  border: 1px solid rgba(255,255,255,.3) !important;
+  border-radius: var(--cl-radius-sm) !important;
+  padding: 5px 14px !important;
+  transition: var(--cl-transition);
+}
+
+#btnCostosToggle:hover {
+  background: rgba(255,255,255,.28) !important;
+}
+
+/* Tip dentro del collapse */
+.card-body .alert-info {
+  background: var(--cl-info-bg);
+  border-left: 4px solid var(--cl-blue);
+  border-radius: var(--cl-radius-md);
+  font-size: .95rem;
+  color: var(--cl-cobalt);
+  padding: var(--cl-space-md) var(--cl-space-lg);
+}
+
+[data-theme="dark"] .card-body .alert-info {
+  background: rgba(69,88,231,.12);
+  color: var(--cl-blue-light);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BARRA DE ACCIÓN FINAL
+   ══════════════════════════════════════════════════════════════ */
+.form-action-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--cl-space-md);
+  padding: var(--cl-space-lg) var(--cl-space-xl);
+  background: var(--cl-bg-card);
+  border: 2px solid var(--cl-border);
+  border-top: 4px solid var(--cl-walnut);
+  border-radius: var(--cl-radius-lg);
+  box-shadow: var(--cl-shadow-md);
+  margin-top: var(--cl-space-lg);
+}
+
+/* CTA principal — grande, azul, imposible de ignorar */
+.btn-cta-primary {
+  font-family: var(--cl-font-display) !important;
+  font-size: 1.2rem !important;
+  font-weight: 800 !important;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  padding: 16px 36px !important;
+  background: var(--cl-blue) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: var(--cl-radius-sm) !important;
+  box-shadow: var(--cl-shadow-blue);
+  display: flex;
+  align-items: center;
+  gap: var(--cl-space-sm);
+  transition: all .2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-cta-primary::before {
+  content: '⚡';
+  font-size: 1.1rem;
+}
+
+.btn-cta-primary:hover {
+  background: var(--cl-blue-dim) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(69,88,231,.5) !important;
+}
+
+.btn-cta-primary:active { transform: translateY(0); }
+
+/* Texto de ayuda en la barra */
+.form-action-hint {
+  font-size: .9rem;
+  color: var(--cl-text-muted);
+  margin: 0;
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: var(--cl-space-xs);
+}
+
+.form-action-hint::before {
+  content: 'ℹ️';
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ERRORES DE FORMULARIO
+   ══════════════════════════════════════════════════════════════ */
+.text-danger {
+  font-size: .9rem;
+  color: var(--cl-danger) !important;
+  margin-top: 5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.text-danger::before { content: '⚠ '; }
+
+/* ══════════════════════════════════════════════════════════════
+   ANIMACIÓN DE ENTRADA
+   ══════════════════════════════════════════════════════════════ */
+.fade-in {
+  animation: clFadeUp .4s ease both;
+}
+
+.page-header.fade-in   { animation-delay: .00s; }
+.workflow-steps.fade-in { animation-delay: .06s; }
+.card.fade-in:nth-of-type(1) { animation-delay: .10s; }
+.card.fade-in:nth-of-type(2) { animation-delay: .16s; }
+.card.fade-in:nth-of-type(3) { animation-delay: .22s; }
+.form-action-bar.fade-in     { animation-delay: .28s; }
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .workflow-steps {
+    flex-direction: column;
+    border-radius: var(--cl-radius-md);
+  }
+
+  .workflow-step {
+    border-right: none;
+    border-bottom: 1px solid var(--cl-border);
+  }
+
+  .workflow-step:last-child { border-bottom: none; }
+
+  .workflow-step:not(:last-child)::after { display: none; }
+
+  .page-header { flex-direction: column; gap: var(--cl-space-md); }
+  .page-header__actions { width: 100%; }
+  .page-header__actions .btn { width: 100%; justify-content: center; }
+
+  .form-action-bar { flex-direction: column; align-items: stretch; padding: var(--cl-space-lg); }
+  .btn-cta-primary { width: 100%; justify-content: center; }
+
+  .card-body { padding: var(--cl-space-lg) var(--cl-space-md); }
+}
+
+@media (max-width: 576px) {
+  .page-title { font-size: 1.8rem; }
+  .page-lead  { font-size: 1rem; }
+}

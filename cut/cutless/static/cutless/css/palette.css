@@ -1,169 +1,124 @@
-/* ============================================
-   CutLess — Paleta centralizada y utilidades
-   Depende de tokens en main.css (:root)
-   ============================================ */
+/* =============================================================
+   CutLess — palette.css
+   Sistema de tokens de color. Estilo: Industrial / Robusto
+   Paleta: Deep Walnut · Olive Wood · Ash Grey · Full Spectrum Blue · True Cobalt
+   ============================================================= */
 
 :root {
-    /* Bootstrap 5 — sincronizar con nuestra paleta */
-    --bs-primary: var(--accent-primary);
-    --bs-primary-rgb: 13, 110, 253;
-    --bs-success: var(--accent-success);
-    --bs-success-rgb: 25, 135, 84;
-    --bs-danger: var(--accent-danger);
-    --bs-danger-rgb: 220, 53, 69;
-    --bs-warning: var(--accent-warning);
-    --bs-warning-rgb: 255, 193, 7;
-    --bs-info: var(--accent-info);
-    --bs-info-rgb: 13, 202, 240;
-    --bs-body-bg: var(--bg-primary);
-    --bs-body-color: var(--text-primary);
-    --bs-border-color: var(--border-color);
+  /* ── Paleta primaria ─────────────────────────────────────── */
+  --cl-walnut:       #4E2D01;   /* Deep Walnut   — base oscura */
+  --cl-olive:        #7D6344;   /* Olive Wood    — madera media */
+  --cl-ash:          #B7B8AB;   /* Ash Grey      — neutro claro */
+  --cl-blue:         #4558E7;   /* Full Spectrum Blue — acento primario */
+  --cl-cobalt:       #1E287B;   /* True Cobalt   — acento profundo */
+
+  /* ── Extensiones tonales ─────────────────────────────────── */
+  --cl-walnut-dark:  #2E1A00;
+  --cl-walnut-mid:   #6B3E0A;
+  --cl-olive-light:  #A08060;
+  --cl-olive-pale:   #C4AE92;
+  --cl-ash-dark:     #7A7B72;
+  --cl-ash-light:    #D8D9D0;
+  --cl-ash-white:    #F0F0EA;
+  --cl-blue-light:   #6B7BFF;
+  --cl-blue-dim:     #2E3DA0;
+  --cl-cobalt-deep:  #111650;
+
+  /* ── Superficie / fondo (modo claro, base industrial) ────── */
+  --cl-bg-base:      #F4F3EE;   /* Lino crudo */
+  --cl-bg-surface:   #ECEAE2;   /* Superficie principal */
+  --cl-bg-card:      #FFFFFF;
+  --cl-bg-sidebar:   #2E1A00;   /* Walnut profundo */
+  --cl-bg-nav:       #1C1008;   /* Casi negro madera */
+
+  /* ── Texto ───────────────────────────────────────────────── */
+  --cl-text-primary:   #1C1008;
+  --cl-text-secondary: #5A4535;
+  --cl-text-muted:     #8A7A6A;
+  --cl-text-on-dark:   #F0F0EA;
+  --cl-text-on-blue:   #FFFFFF;
+  --cl-text-label:     #4E2D01;
+
+  /* ── Bordes ──────────────────────────────────────────────── */
+  --cl-border:         #C8C5B8;
+  --cl-border-strong:  #9A8060;
+  --cl-border-accent:  #4558E7;
+
+  /* ── Estado: éxito / aviso / error / info ────────────────── */
+  --cl-success:        #2D7A3A;
+  --cl-success-bg:     #E6F5E9;
+  --cl-warning:        #A06800;
+  --cl-warning-bg:     #FFF3CD;
+  --cl-danger:         #C0392B;
+  --cl-danger-bg:      #FDECEA;
+  --cl-info:           #4558E7;
+  --cl-info-bg:        #EEF0FD;
+
+  /* ── Sombras ─────────────────────────────────────────────── */
+  --cl-shadow-sm:   0 1px 3px rgba(28,16,8,.12), 0 1px 2px rgba(28,16,8,.08);
+  --cl-shadow-md:   0 4px 12px rgba(28,16,8,.14), 0 2px 6px rgba(28,16,8,.08);
+  --cl-shadow-lg:   0 8px 24px rgba(28,16,8,.18), 0 4px 10px rgba(28,16,8,.10);
+  --cl-shadow-blue: 0 4px 16px rgba(69,88,231,.30);
+
+  /* ── Radios ──────────────────────────────────────────────── */
+  --cl-radius-sm:   4px;
+  --cl-radius-md:   8px;
+  --cl-radius-lg:   12px;
+  --cl-radius-xl:   18px;
+  --cl-radius-pill: 999px;
+
+  /* ── Espaciado base ──────────────────────────────────────── */
+  --cl-space-xs:  4px;
+  --cl-space-sm:  8px;
+  --cl-space-md:  16px;
+  --cl-space-lg:  24px;
+  --cl-space-xl:  40px;
+  --cl-space-2xl: 64px;
+
+  /* ── Transiciones ────────────────────────────────────────── */
+  --cl-transition:       all .18s ease;
+  --cl-transition-slow:  all .35s cubic-bezier(.4,0,.2,1);
+
+  /* ── Tipografía ──────────────────────────────────────────── */
+  --cl-font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --cl-font-body:    'Barlow', 'Trebuchet MS', sans-serif;
+  --cl-font-mono:    'JetBrains Mono', 'Courier New', monospace;
+
+  --cl-fs-xs:   .72rem;
+  --cl-fs-sm:   .85rem;
+  --cl-fs-base: 1rem;
+  --cl-fs-md:   1.1rem;
+  --cl-fs-lg:   1.3rem;
+  --cl-fs-xl:   1.6rem;
+  --cl-fs-2xl:  2rem;
+  --cl-fs-3xl:  2.6rem;
+
+  /* ── Navbar ──────────────────────────────────────────────── */
+  --cl-nav-height: 58px;
 }
 
+/* ── Modo oscuro ──────────────────────────────────────────── */
 [data-theme="dark"] {
-    --bs-primary-rgb: 77, 171, 247;
-    --bs-success-rgb: 81, 207, 102;
-    --bs-danger-rgb: 255, 107, 107;
-    --bs-warning-rgb: 255, 212, 59;
-    --bs-info-rgb: 116, 192, 252;
+  --cl-bg-base:      #120C04;
+  --cl-bg-surface:   #1C1008;
+  --cl-bg-card:      #251508;
+  --cl-bg-nav:       #0D0804;
+
+  --cl-text-primary:   #F0EEE8;
+  --cl-text-secondary: #C4AE92;
+  --cl-text-muted:     #8A7A6A;
+  --cl-text-label:     #C4AE92;
+
+  --cl-border:         #3A2A1A;
+  --cl-border-strong:  #5A4535;
+
+  --cl-bg-card:  #1F1208;
+  --cl-shadow-sm: 0 1px 3px rgba(0,0,0,.4);
+  --cl-shadow-md: 0 4px 12px rgba(0,0,0,.5);
+  --cl-shadow-lg: 0 8px 24px rgba(0,0,0,.6);
+
+  --cl-success-bg: #0D2E14;
+  --cl-warning-bg: #2A1C00;
+  --cl-danger-bg:  #2A0A08;
+  --cl-info-bg:    #0E1240;
 }
-
-/* --- Tarjetas métricas (estadísticas, resumen) --- */
-.metric-card--primary {
-    background: var(--gradient-primary) !important;
-    color: var(--text-on-accent) !important;
-    border: none !important;
-}
-
-.metric-card--success {
-    background: var(--gradient-success) !important;
-    color: var(--text-on-accent) !important;
-    border: none !important;
-}
-
-.metric-card--info {
-    background: var(--gradient-info) !important;
-    color: var(--text-on-accent) !important;
-    border: none !important;
-}
-
-.metric-card--warning {
-    background: var(--gradient-warning) !important;
-    color: var(--text-on-warning) !important;
-    border: none !important;
-}
-
-.metric-card--danger {
-    background: var(--gradient-danger) !important;
-    color: var(--text-on-accent) !important;
-    border: none !important;
-}
-
-.metric-card--primary .stats-title,
-.metric-card--success .stats-title,
-.metric-card--info .stats-title,
-.metric-card--danger .stats-title,
-.metric-card--primary .card-title,
-.metric-card--success .card-title,
-.metric-card--info .card-title,
-.metric-card--danger .card-title {
-    color: inherit;
-    opacity: 0.95;
-}
-
-/* --- Modales de la app --- */
-.modal-header-app,
-.modal-footer-app {
-    background: var(--nav-bg) !important;
-    color: var(--nav-text) !important;
-    border-color: var(--border-color) !important;
-}
-
-.modal-header-app .btn-close {
-    filter: invert(1) grayscale(100%) brightness(200%);
-}
-
-/* Botones outline sobre pie de modal oscuro */
-.modal-footer-app .btn-outline-secondary {
-    color: var(--nav-text);
-    border-color: rgba(255, 255, 255, 0.55);
-    background: transparent;
-}
-
-.modal-footer-app .btn-outline-secondary:hover:not(:disabled),
-.modal-footer-app .btn-outline-secondary:focus-visible:not(:disabled) {
-    background: rgba(255, 255, 255, 0.18);
-    color: var(--nav-text) !important;
-    border-color: var(--nav-text);
-}
-
-.modal-footer-app .btn-primary,
-.modal-footer-app .btn-info {
-    font-weight: var(--font-weight-semibold);
-}
-
-/* --- Badges semánticos --- */
-.badge-accent-primary {
-    background: var(--accent-primary) !important;
-    color: var(--text-on-accent) !important;
-}
-
-.badge-accent-success {
-    background: var(--accent-success) !important;
-    color: var(--text-on-accent) !important;
-}
-
-.badge-accent-warning {
-    background: var(--accent-warning) !important;
-    color: var(--text-on-warning) !important;
-}
-
-.badge-accent-danger {
-    background: var(--accent-danger) !important;
-    color: var(--text-on-accent) !important;
-}
-
-.badge-accent-info {
-    background: var(--accent-info) !important;
-    color: var(--text-on-accent) !important;
-}
-
-/* Aprovechamiento dinámico (historial, listas) */
-.badge-aprovechamiento-alto {
-    background: var(--accent-success) !important;
-    color: var(--text-on-accent) !important;
-}
-
-.badge-aprovechamiento-medio {
-    background: var(--accent-warning) !important;
-    color: var(--text-on-warning) !important;
-}
-
-.badge-aprovechamiento-bajo {
-    background: var(--accent-danger) !important;
-    color: var(--text-on-accent) !important;
-}
-
-/* --- Texto semántico --- */
-.text-accent-primary { color: var(--accent-primary) !important; }
-.text-accent-success { color: var(--accent-success) !important; }
-.text-accent-info { color: var(--accent-info-hover) !important; }
-.text-accent-danger { color: var(--accent-danger) !important; }
-.text-accent-warning { color: var(--accent-warning) !important; }
-
-/* --- Tablas con encabezado de marca --- */
-.table-head-brand thead {
-    background: var(--gradient-primary);
-    color: var(--text-on-accent);
-}
-
-.table-head-brand thead th {
-    border: none;
-    color: var(--text-on-accent);
-}
-
-/* --- Bordes de stats (historial costos) --- */
-.stats-card-border-primary { border-left: 4px solid var(--accent-primary) !important; }
-.stats-card-border-success { border-left: 4px solid var(--accent-success) !important; }
-.stats-card-border-info { border-left: 4px solid var(--accent-info) !important; }
-.stats-card-border-warning { border-left: 4px solid var(--accent-warning) !important; }
