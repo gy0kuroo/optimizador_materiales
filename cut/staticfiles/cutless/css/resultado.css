@@ -1,0 +1,85 @@
+/* Estilos específicos para la página Resultado */
+
+.progress-utilization {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 140px;
+}
+
+.progress-utilization .progress {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.progress-utilization-label {
+    min-width: 4.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.progress-utilization .progress-bar-min {
+    min-width: 4px;
+}
+
+.progress-bar.bg-danger {
+    background-color: var(--accent-danger) !important;
+    color: var(--text-on-accent);
+}
+
+.progress-bar.bg-warning {
+    background-color: var(--accent-warning) !important;
+    color: var(--text-on-warning);
+    font-weight: 600;
+}
+
+.progress-bar.bg-success {
+    background-color: var(--accent-success) !important;
+    color: var(--text-on-accent);
+}
+
+/* Compatibilidad con clases Bootstrap en tarjetas métricas */
+.card.bg-success,
+.metric-card.bg-success {
+    background: var(--gradient-success) !important;
+    color: var(--text-on-accent) !important;
+}
+
+.card.bg-danger,
+.metric-card.bg-danger {
+    background: var(--gradient-danger) !important;
+    color: var(--text-on-accent) !important;
+}
+
+.card.bg-info,
+.metric-card.bg-info {
+    background: var(--gradient-info) !important;
+    color: var(--text-on-accent) !important;
+}
+
+.card.bg-warning,
+.metric-card.bg-warning {
+    background: var(--gradient-warning) !important;
+    color: var(--text-on-warning) !important;
+}
+
+.card.bg-success .card-body,
+.card.bg-success .card-title,
+.card.bg-success h2,
+.card.bg-success h5,
+.card.bg-danger .card-body,
+.card.bg-danger .card-title,
+.card.bg-danger h2,
+.card.bg-danger h5,
+.card.bg-info .card-body,
+.card.bg-info .card-title,
+.card.bg-info h2,
+.card.bg-info h5,
+.card.bg-warning .card-body,
+.card.bg-warning .card-title,
+.card.bg-warning h2,
+.card.bg-warning h5 {
+    color: inherit !important;
+}

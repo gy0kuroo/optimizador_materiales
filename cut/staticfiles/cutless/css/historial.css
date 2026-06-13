@@ -1,0 +1,431 @@
+/* Estilos específicos para la página Historial de Optimizaciones */
+
+.badge {
+    padding: 0.35em 0.65em;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+}
+
+/* Estilos para filtros y búsqueda - más visibles para adultos mayores */
+.search-filters {
+    background: var(--bg-secondary, #f8f9fa);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color, #dee2e6);
+}
+
+/* Botón Limpiar Filtros - muy visible para adultos mayores */
+.btn-limpiar-filtros {
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    border: 2px solid var(--accent-danger);
+    border-radius: 8px;
+    color: var(--accent-danger);
+    background-color: var(--card-bg);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px var(--accent-danger-muted);
+}
+
+.btn-limpiar-filtros:hover {
+    background-color: var(--accent-danger);
+    color: var(--text-on-accent);
+    border-color: var(--accent-danger);
+    box-shadow: 0 4px 8px var(--accent-danger-muted);
+    text-decoration: none;
+}
+
+.filter-badge {
+    display: inline-block;
+    background: var(--gradient-primary);
+    color: var(--text-on-accent);
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    box-shadow: 0 2px 4px var(--accent-primary-muted);
+}
+
+.results-info {
+    background: var(--accent-info-muted);
+    border: 1px solid var(--accent-info-border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    display: inline-block;
+}
+
+.results-count {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.results-count strong {
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+details summary {
+    user-select: none;
+}
+
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Estilos para gráficos clicables */
+.chart-container {
+    position: relative;
+    transition: transform 0.2s;
+}
+
+.chart-container-clickable {
+    cursor: pointer;
+}
+
+.chart-container:hover {
+    transform: scale(1.02);
+}
+
+.chart-thumbnail {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 200px;
+    object-fit: cover;
+}
+
+.chart-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.chart-container:hover .chart-overlay {
+    opacity: 1;
+}
+
+.chart-hint {
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+/* Estilos para modal de imagen */
+.modal-grafico-body {
+    background-color: #f8f9fa;
+    overflow: auto;
+    padding: 0;
+    min-height: calc(100vh - 120px);
+}
+
+.modal-imagen-contenido {
+    min-height: 100%;
+    flex-wrap: nowrap;
+    transform-origin: center center;
+}
+
+.modal-grafico-body .row {
+    height: 100%;
+    margin: 0;
+}
+
+.modal-grafico-body .col-10 {
+    overflow: auto;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zoom-controls {
+    background: linear-gradient(180deg, rgba(33, 37, 41, 0.95) 0%, rgba(52, 58, 64, 0.95) 100%);
+    padding: 1rem 0.5rem;
+    border-left: 2px solid rgba(0, 123, 255, 0.5);
+    min-width: 100px;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.zoom-controls input[type="range"] {
+    cursor: pointer;
+    width: 300px;
+    height: 8px;
+    margin: 80px 0;
+}
+
+.zoom-controls label {
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.zoom-controls #zoomValueImagen {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-top: 1rem;
+}
+
+.modal-grafico-contenido {
+    display: inline-block;
+    max-width: 100%;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: visible;
+}
+
+#modalImagenContenido {
+    width: 100%;
+    text-align: center;
+    position: relative;
+}
+
+#modalImagenContenido img {
+    max-width: 100%;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+    cursor: grab;
+    transition: transform 0.2s ease-out;
+    display: block;
+    margin: 0 auto;
+    user-select: none;
+    -webkit-user-drag: none;
+    touch-action: none;
+    object-fit: contain;
+}
+
+#modalImagenContenido img:active {
+    cursor: grabbing;
+}
+
+/* Estilos para favoritos */
+.favorito-btn {
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0.25rem 0.5rem;
+}
+
+.favorito-btn:hover:not(:disabled) {
+    transform: scale(1.3);
+}
+
+.favorito-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.favorito-icon {
+    transition: transform 0.2s, color 0.2s;
+    display: inline-block;
+    line-height: 1;
+    font-size: 1.5rem;
+    vertical-align: middle;
+}
+
+.favorito-icon-active {
+    color: var(--accent-warning);
+}
+
+.favorito-icon-inactive {
+    color: var(--text-secondary);
+}
+
+.favorito-btn-inline {
+    line-height: 1.5;
+    margin-top: 0;
+}
+
+.favorito-btn:hover:not(:disabled) .favorito-icon {
+    transform: scale(1.2);
+}
+
+/* Asegurar que el contenedor del título y favorito esté alineado */
+.d-flex.justify-content-between.align-items-center {
+    align-items: center !important;
+}
+
+.btn-tiempo {
+    background-color: var(--accent-info-hover) !important;
+    color: var(--text-on-accent) !important;
+    border-color: var(--accent-info-hover) !important;
+}
+
+.btn-tiempo:hover {
+    background-color: var(--accent-info) !important;
+    border-color: var(--accent-info) !important;
+    color: var(--text-on-accent) !important;
+}
+
+.btn-png {
+    background-color: var(--accent-success) !important;
+    color: var(--text-on-accent) !important;
+    border-color: var(--accent-success) !important;
+}
+
+.btn-png:hover {
+    background-color: var(--accent-success-hover) !important;
+    border-color: var(--accent-success-hover) !important;
+    color: var(--text-on-accent) !important;
+}
+
+.btn-mas-opciones {
+    background: var(--text-secondary) !important;
+    color: var(--text-on-accent) !important;
+    border: none !important;
+    box-shadow: 0 2px 6px var(--shadow);
+    position: relative;
+}
+
+.btn-mas-opciones:hover,
+.btn-mas-opciones:focus-visible {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+    box-shadow: 0 4px 10px var(--shadow-hover);
+    transform: translateY(-1px);
+}
+
+.btn-mas-opciones[data-bs-toggle="dropdown"]::after {
+    content: '';
+    display: inline-block;
+    margin-left: 0.5rem;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid currentColor;
+    vertical-align: middle;
+    transition: transform 0.2s ease;
+}
+
+.btn-mas-opciones[data-bs-toggle="dropdown"][aria-expanded="true"]::after {
+    transform: rotate(180deg);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.action-buttons .btn-action {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+}
+
+.dropdown-menu {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.dropdown-item:hover {
+    background-color: var(--bg-secondary);
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: var(--accent-danger-muted);
+    color: var(--accent-danger) !important;
+}
+
+/* Estilos para detalles de piezas */
+details summary {
+    cursor: pointer;
+    color: var(--accent-primary);
+    font-weight: 600;
+}
+
+details .mt-2 {
+    font-size: 0.9rem;
+}
+
+/* Estilos para mensaje sin optimizaciones */
+.card-empty-state {
+    padding: 3rem;
+}
+
+/* Estilos para detalles de piezas */
+.piezas-summary {
+    cursor: pointer;
+    color: var(--accent-primary);
+    font-weight: 600;
+}
+
+.piezas-details {
+    font-size: 0.9rem;
+}
+
+/* Estilos para formulario de eliminar */
+.delete-form-inline {
+    display: inline;
+}
+
+.delete-button {
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    padding: 0.25rem 1rem;
+}
+
+/* Estilos para controles de zoom */
+.zoom-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 0.9rem;
+}
+
+.zoom-slider {
+    width: 200px;
+    transform: rotate(-90deg);
+    margin: 50px 0;
+}
+
+.zoom-value {
+    font-size: 0.85rem;
+}
+
+/* Estilos para zoom controls inline */
+.zoom-controls label[style*="writing-mode"] {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-size: 0.9rem;
+}
+
+.zoom-controls input[type="range"][style*="transform"] {
+    width: 200px;
+    transform: rotate(-90deg);
+    margin: 50px 0;
+}
+
+.zoom-controls span[style*="font-size"] {
+    font-size: 0.85rem;
+}
+

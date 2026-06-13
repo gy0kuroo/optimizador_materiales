@@ -17,41 +17,59 @@
 
 {% block content %}
   <header class="page-header fade-in" data-intro-title="Optimizador de Cortes" data-intro="Aquí puedes crear nuevas optimizaciones de corte ingresando las dimensiones del tablero y las piezas que necesitas.">
+    <div class="page-header__icon">
+      <img src="{% static 'cutless/icons/sierra-mesa.png' %}" alt="" class="cl-icon cl-icon--page" onerror="this.style.display='none'">
+    </div>
     <div class="page-header__text">
       <h1 class="page-title">Nueva optimización</h1>
       <p class="page-lead">Define el tablero, agrega las piezas a cortar y obtén el plan de corte optimizado en segundos.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary">Ver historial</a>
+      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary">
+        <img src="{% static 'cutless/icons/historial.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
+        Ver historial
+      </a>
     </div>
   </header>
 
   <div class="workflow-steps fade-in" aria-label="Pasos del proceso">
     <div class="workflow-step workflow-step--1">
-      <span class="workflow-step__num">1</span>
+      <span class="workflow-step__num">
+        <img src="{% static 'cutless/icons/tablero.svg' %}" alt="" class="cl-icon cl-icon--step" onerror="this.outerHTML='1'">
+      </span>
       <span>Dimensiones del tablero</span>
     </div>
     <div class="workflow-step workflow-step--2">
-      <span class="workflow-step__num">2</span>
+      <span class="workflow-step__num">
+        <img src="{% static 'cutless/icons/pieza.svg' %}" alt="" class="cl-icon cl-icon--step" onerror="this.outerHTML='2'">
+      </span>
       <span>Piezas a cortar</span>
     </div>
     <div class="workflow-step workflow-step--3">
-      <span class="workflow-step__num">3</span>
+      <span class="workflow-step__num">
+        <img src="{% static 'cutless/icons/calcular.svg' %}" alt="" class="cl-icon cl-icon--step" onerror="this.outerHTML='3'">
+      </span>
       <span>Calcular optimización</span>
     </div>
   </div>
-  
+
   <form method="post" action="{% url 'cutless:index' %}" id="optimizacion-form" onsubmit="mostrarIndicadorCarga('Procesando optimización... Esto puede tardar unos segundos.');">
     {% csrf_token %}
-    
+
     <!-- Sección: Dimensiones del Tablero -->
     <div class="card mb-4 fade-in" data-intro-title="Dimensiones del Tablero" data-intro="Ingresa el ancho y alto del tablero de madera. Puedes elegir la unidad de medida que prefieras (cm, m, pulgadas o pies).">
       <div class="card-header card-header-step card-header-step-primary text-white">
-        <span class="step-badge" aria-hidden="true">1</span>
-        <h4 class="card-header-title">Dimensiones del tablero</h4>
-        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion ms-auto" 
-                onclick="iniciarTutorialSeccion('tablero')" 
+        <span class="step-badge" aria-hidden="true">
+          <img src="{% static 'cutless/icons/tablero.svg' %}" alt="" class="cl-icon cl-icon--badge" onerror="this.outerHTML='1'">
+        </span>
+        <h4 class="card-header-title">
+          <img src="{% static 'cutless/icons/tablero-outline.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
+          Dimensiones del tablero
+        </h4>
+        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion ms-auto"
+                onclick="iniciarTutorialSeccion('tablero')"
                 title="Ayuda sobre dimensiones del tablero">
+          <img src="{% static 'cutless/icons/ayuda.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
           Ayuda
         </button>
       </div>
@@ -74,12 +92,15 @@
         </div>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="ancho_tablero" id="label_ancho" class="fw-bold">Ancho del tablero <span id="unidad_ancho">(cm)</span></label>
-            <input type="number" 
-                   name="ancho" 
-                   id="ancho_tablero" 
-                   class="form-control" 
-                   placeholder="Ej: 122" 
+            <label for="ancho_tablero" id="label_ancho" class="fw-bold">
+              <img src="{% static 'cutless/icons/ancho.svg' %}" alt="" class="cl-icon cl-icon--label" onerror="this.style.display='none'">
+              Ancho del tablero <span id="unidad_ancho">(cm)</span>
+            </label>
+            <input type="number"
+                   name="ancho"
+                   id="ancho_tablero"
+                   class="form-control"
+                   placeholder="Ej: 122"
                    step="0.01"
                    value="{{ tablero_form.ancho.value|default:'' }}">
             <small class="form-text text-muted">{{ tablero_form.ancho.help_text }}</small>
@@ -88,12 +109,15 @@
             {% endif %}
           </div>
           <div class="col-md-6 mb-3">
-            <label for="alto_tablero" id="label_alto" class="fw-bold">Alto del tablero <span id="unidad_alto">(cm)</span></label>
-            <input type="number" 
-                   name="alto" 
-                   id="alto_tablero" 
-                   class="form-control" 
-                   placeholder="Ej: 244" 
+            <label for="alto_tablero" id="label_alto" class="fw-bold">
+              <img src="{% static 'cutless/icons/alto.png' %}" alt="" class="cl-icon cl-icon--label" onerror="this.style.display='none'">
+              Alto del tablero <span id="unidad_alto">(cm)</span>
+            </label>
+            <input type="number"
+                   name="alto"
+                   id="alto_tablero"
+                   class="form-control"
+                   placeholder="Ej: 244"
                    step="0.01"
                    value="{{ tablero_form.alto.value|default:'' }}">
             <small class="form-text text-muted">{{ tablero_form.alto.help_text }}</small>
@@ -106,24 +130,28 @@
         <div class="row mt-3">
           <div class="col-md-6 mb-3">
             <div class="form-check">
-              <input type="checkbox" 
-                     name="permitir_rotacion" 
-                     id="{{ tablero_form.permitir_rotacion.id_for_label }}" 
+              <input type="checkbox"
+                     name="permitir_rotacion"
+                     id="{{ tablero_form.permitir_rotacion.id_for_label }}"
                      class="form-check-input"
                      {% if tablero_form.permitir_rotacion.value %}checked{% endif %}>
               <label class="form-check-label" for="{{ tablero_form.permitir_rotacion.id_for_label }}">
+                <img src="{% static 'cutless/icons/rotacion.svg' %}" alt="" class="cl-icon cl-icon--label" onerror="this.style.display='none'">
                 {{ tablero_form.permitir_rotacion.label }}
               </label>
               <small class="form-text text-muted d-block">{{ tablero_form.permitir_rotacion.help_text }}</small>
             </div>
           </div>
           <div class="col-md-6 mb-3">
-            <label for="{{ tablero_form.margen_corte.id_for_label }}">{{ tablero_form.margen_corte.label }} <span class="unidad-margen">(mm)</span></label>
-            <input type="number" 
-                   name="margen_corte" 
-                   id="margen_corte" 
-                   class="form-control" 
-                   placeholder="3" 
+            <label for="{{ tablero_form.margen_corte.id_for_label }}">
+              <img src="{% static 'cutless/icons/margen.png' %}" alt="" class="cl-icon cl-icon--label" onerror="this.style.display='none'">
+              {{ tablero_form.margen_corte.label }} <span class="unidad-margen">(mm)</span>
+            </label>
+            <input type="number"
+                   name="margen_corte"
+                   id="margen_corte"
+                   class="form-control"
+                   placeholder="3"
                    step="0.1"
                    min="0"
                    max="10"
@@ -141,27 +169,37 @@
     <!-- Sección: Piezas a Cortar -->
     <div class="card mb-4 fade-in">
       <div class="card-header card-header-step card-header-step-success text-white">
-        <span class="step-badge" aria-hidden="true">2</span>
-        <h4 class="card-header-title">Piezas a cortar</h4>
-        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion ms-auto" 
-                onclick="iniciarTutorialSeccion('piezas')" 
+        <span class="step-badge" aria-hidden="true">
+          <img src="{% static 'cutless/icons/pieza.svg' %}" alt="" class="cl-icon cl-icon--badge" onerror="this.outerHTML='2'">
+        </span>
+        <h4 class="card-header-title">
+          <img src="{% static 'cutless/icons/regla.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
+          Piezas a cortar
+        </h4>
+        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion ms-auto"
+                onclick="iniciarTutorialSeccion('piezas')"
                 title="Ayuda sobre piezas a cortar">
+          <img src="{% static 'cutless/icons/ayuda.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
           Ayuda
         </button>
       </div>
       <div class="card-body">
         {{ pieza_formset.management_form }}
-        
+
         <div id="pieza-container">
           {% for form in pieza_formset %}
           <div class="pieza-form border rounded p-3 mb-3 bg-light">
             <div class="d-flex justify-content-between align-items-center mb-2">
-              <h5 class="mb-0">Pieza #<span class="pieza-numero">{{ forloop.counter }}</span></h5>
+              <h5 class="mb-0">
+                <img src="{% static 'cutless/icons/pieza-outline.svg' %}" alt="" class="cl-icon cl-icon--mini" onerror="this.style.display='none'">
+                Pieza #<span class="pieza-numero">{{ forloop.counter }}</span>
+              </h5>
               <button type="button" class="btn btn-danger btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %}">
+                <img src="{% static 'cutless/icons/eliminar.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
                 Eliminar
               </button>
             </div>
-            
+
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label for="{{ form.nombre.id_for_label }}" class="fw-bold">{{ form.nombre.label }}</label>
@@ -181,7 +219,7 @@
                 {{ form.cantidad }}
               </div>
             </div>
-            
+
             {% if form.errors %}
               <div class="alert alert-danger mt-2">{{ form.errors }}</div>
             {% endif %}
@@ -190,6 +228,7 @@
         </div>
 
         <button type="button" id="add-pieza" class="btn btn-outline-success">
+          <img src="{% static 'cutless/icons/agregar.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
           Agregar otra pieza
         </button>
       </div>
@@ -199,7 +238,10 @@
     <!-- Sección: Costos (Opcional) (oculto por defecto) -->
     <div class="card mb-4 fade-in">
       <div class="card-header card-header-step card-header-step-info text-white d-flex justify-content-between align-items-center">
-        <h4 class="mb-0 card-header-title">Costos (opcional)</h4>
+        <h4 class="mb-0 card-header-title">
+          <img src="{% static 'cutless/icons/costos.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
+          Costos (opcional)
+        </h4>
         <button id="btnCostosToggle" class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#costosCollapse" aria-expanded="false" aria-controls="costosCollapse">
           <span id="costosToggleIcon">+</span> Mostrar
         </button>
@@ -216,16 +258,17 @@
               {% endif %}
               <div class="mt-2">
                 <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-sm btn-outline-primary" target="_blank">
-                   Gestionar Materiales
+                  <img src="{% static 'cutless/icons/material.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
+                  Gestionar Materiales
                 </a>
               </div>
             </div>
             <div class="col-md-3 mb-3">
               <label for="{{ tablero_form.precio_tablero.id_for_label }}">{{ tablero_form.precio_tablero.label }}</label>
-              <input type="number" 
-                     name="precio_tablero" 
-                     id="precio_tablero" 
-                     class="form-control" 
+              <input type="number"
+                     name="precio_tablero"
+                     id="precio_tablero"
+                     class="form-control"
                      step="0.01"
                      min="0"
                      value="{{ tablero_form.precio_tablero.value|default:'' }}">
@@ -236,10 +279,10 @@
             </div>
             <div class="col-md-3 mb-3">
               <label for="{{ tablero_form.mano_obra.id_for_label }}">{{ tablero_form.mano_obra.label }}</label>
-              <input type="number" 
-                     name="mano_obra" 
-                     id="mano_obra" 
-                     class="form-control" 
+              <input type="number"
+                     name="mano_obra"
+                     id="mano_obra"
+                     class="form-control"
                      step="0.01"
                      min="0"
                      value="{{ tablero_form.mano_obra.value|default:'' }}">
@@ -273,7 +316,7 @@
           </div>
           <div class="alert alert-info mb-0 mt-3">
             <div class="d-flex align-items-start">
-              <span class="me-2" style="font-size: 1.2rem;"></span>
+              <img src="{% static 'cutless/icons/tip.svg' %}" alt="" class="cl-icon cl-icon--alert me-2" onerror="this.style.display='none'">
               <div>
                 <strong>Tip:</strong> Selecciona un material de tu biblioteca para llenar automáticamente el precio. El costo total se calculará después de la optimización.
               </div>
@@ -285,12 +328,17 @@
     <!-- Botón de envío -->
     <div class="form-action-bar fade-in">
       <button type="submit" class="btn btn-primary btn-lg btn-cta-primary">
+        <img src="{% static 'cutless/icons/calcular.svg' %}" alt="" class="cl-icon cl-icon--cta" onerror="this.style.display='none'">
         Calcular optimización
       </button>
       <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary btn-lg">
+        <img src="{% static 'cutless/icons/historial.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
         Ver historial
       </a>
-      <p class="form-action-hint">Revisa las medidas antes de calcular. Puedes agregar tantas piezas como necesites.</p>
+      <p class="form-action-hint">
+        <img src="{% static 'cutless/icons/info.svg' %}" alt="" class="cl-icon cl-icon--hint" onerror="this.style.display='none'">
+        Revisa las medidas antes de calcular. Puedes agregar tantas piezas como necesites.
+      </p>
     </div>
   </form>
 
@@ -299,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('pieza-container');
     const addButton = document.getElementById('add-pieza');
     const totalFormsInput = document.querySelector('input[name$="-TOTAL_FORMS"]');
-    
+
     let formCount = parseInt(totalFormsInput.value);
 
     // Función para actualizar números de piezas
@@ -307,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.pieza-numero').forEach((elem, index) => {
             elem.textContent = index + 1;
         });
-        
+
         // Mostrar/ocultar botones de eliminar
         const removeBtns = document.querySelectorAll('.remove-pieza');
         const totalPiezas = document.querySelectorAll('.pieza-form').length;
@@ -332,14 +380,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const template = container.children[0].cloneNode(true);
-        
+
         // Limpiar valores
         template.querySelectorAll('input, select, textarea').forEach(input => {
             const name = input.name.replace(/-\d+-/, `-${formCount}-`);
             const id = input.id.replace(/-\d+-/, `-${formCount}-`);
             input.name = name;
             input.id = id;
-            
+
             if (input.type !== 'hidden') {
                 input.value = '';
                 if (input.name.includes('cantidad')) {
@@ -417,12 +465,12 @@ function obtenerSimboloUnidad(unidad) {
 function actualizarOpcionesMaterial() {
     const unidadSelector = document.getElementById('unidad_medida_selector');
     const materialSelect = document.getElementById('material_select');
-    
+
     if (!unidadSelector || !materialSelect || !window.materialData) return;
-    
+
     const unidad = unidadSelector.value;
     const simbolo = obtenerSimboloUnidad(unidad);
-    
+
     // Actualizar cada opción del selector
     Array.from(materialSelect.options).forEach(option => {
         if (option.value && window.materialData[option.value]) {
@@ -446,22 +494,22 @@ function actualizarLabelsUnidad() {
     const unidadSpan = document.getElementById('unidad_ancho');
     const unidadAltoSpan = document.getElementById('unidad_alto');
     const unidadesPiezas = document.querySelectorAll('.unidad-pieza');
-    
+
     const simbolo = obtenerSimboloUnidad(unidad);
     unidadSpan.textContent = `(${simbolo})`;
     unidadAltoSpan.textContent = `(${simbolo})`;
-    
+
     // Actualizar unidades de piezas también
     unidadesPiezas.forEach(span => {
         span.textContent = `(${simbolo})`;
     });
-    
+
     // Actualizar unidad del margen de corte - siempre muestra (mm)
     const unidadMargen = document.querySelector('.unidad-margen');
     if (unidadMargen) {
         unidadMargen.textContent = `(mm)`;
     }
-    
+
     // Actualizar opciones del selector de material
     actualizarOpcionesMaterial();
 }
@@ -472,12 +520,12 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() {
         actualizarLabelsUnidad();
     }, 200);
-    
+
     const selector = document.getElementById('unidad_medida_selector');
     if (selector) {
         selector.addEventListener('change', actualizarLabelsUnidad);
     }
-    
+
     // Actualizar unidades cuando se agregan nuevas piezas
     const addButton = document.getElementById('add-pieza');
     if (addButton) {
@@ -486,18 +534,18 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(actualizarLabelsUnidad, 100);
         });
     }
-    
+
     // Manejar selección de material para llenar precio y dimensiones automáticamente
     const materialSelect = document.getElementById('material_select');
     const precioTableroInput = document.getElementById('precio_tablero');
     const anchoTableroInput = document.getElementById('ancho_tablero');
     const altoTableroInput = document.getElementById('alto_tablero');
     const unidadMedidaSelector = document.getElementById('unidad_medida_selector');
-    
+
     // Variables para rastrear si el usuario ingresó medidas manualmente
     let medidasManuales = false;
     let ultimoMaterialSeleccionado = null;
-    
+
     // Detectar cuando el usuario ingresa medidas manualmente
     if (anchoTableroInput && altoTableroInput) {
         anchoTableroInput.addEventListener('input', function() {
@@ -507,15 +555,15 @@ document.addEventListener('DOMContentLoaded', function() {
             medidasManuales = true;
         });
     }
-    
+
     if (materialSelect && precioTableroInput) {
         // Función para actualizar precio y dimensiones cuando se selecciona un material
         function actualizarDesdeMaterial() {
             const selectedMaterialId = materialSelect.value;
-            
+
             if (selectedMaterialId && materialData[selectedMaterialId]) {
                 const material = materialData[selectedMaterialId];
-                
+
                 // Actualizar precio siempre que el material tenga precio
                 if (material.precio) {
                     precioTableroInput.value = material.precio;
@@ -523,22 +571,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Si el material no tiene precio, limpiar el campo
                     precioTableroInput.value = '';
                 }
-                
+
                 // Actualizar dimensiones solo si:
                 // 1. El material tiene dimensiones
                 // 2. NO se ingresaron medidas manualmente
                 // 3. O si se cambió de material (nuevo material seleccionado)
                 if (material.ancho && material.alto) {
                     const esNuevoMaterial = ultimoMaterialSeleccionado !== selectedMaterialId;
-                    
+
                     if (!medidasManuales || esNuevoMaterial) {
                         // Obtener unidad actual del selector
                         const unidadActual = unidadMedidaSelector ? unidadMedidaSelector.value : 'cm';
-                        
+
                         // Convertir dimensiones del material (que están en cm) a la unidad actual
                         const anchoConvertido = convertirDesdeCm(material.ancho, unidadActual);
                         const altoConvertido = convertirDesdeCm(material.alto, unidadActual);
-                        
+
                         // Actualizar campos de ancho y alto
                         if (anchoTableroInput) {
                             anchoTableroInput.value = anchoConvertido.toFixed(2);
@@ -546,12 +594,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (altoTableroInput) {
                             altoTableroInput.value = altoConvertido.toFixed(2);
                         }
-                        
+
                         // Si se cambió de material, resetear la bandera de medidas manuales
                         if (esNuevoMaterial) {
                             medidasManuales = false;
                         }
-                        
+
                         // Actualizar el dropdown de tableros predefinidos si existe
                         // Solo resetear si no hay un tablero seleccionado previamente
                         const dropdownButton = document.getElementById('tableros-dropdown');
@@ -560,21 +608,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                 }
-                
+
                 ultimoMaterialSeleccionado = selectedMaterialId;
             }
         }
-        
+
         // Event listener para cambios en el selector de material
         materialSelect.addEventListener('change', actualizarDesdeMaterial);
-        
+
         // Si hay un material preseleccionado, actualizar al cargar
         if (materialSelect.value) {
             ultimoMaterialSeleccionado = materialSelect.value;
             setTimeout(actualizarDesdeMaterial, 100);
             setTimeout(actualizarDesdeMaterial, 500);
         }
-        
+
         // Actualizar dimensiones cuando cambia la unidad de medida (si hay un material seleccionado)
         if (unidadMedidaSelector) {
             unidadMedidaSelector.addEventListener('change', function() {
@@ -585,18 +633,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
-    
-    // Debug: Verificar valores iniciales en consola (solo en desarrollo)
-    // Comentado para evitar logs innecesarios en producción
-    // if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    //     console.log('Valores iniciales del formulario:');
-    //     console.log('Unidad de medida:', document.getElementById('unidad_medida_selector')?.value);
-    //     console.log('Margen de corte:', document.getElementById('margen_corte')?.value);
-    //     console.log('Permitir rotación:', document.getElementById('permitir_rotacion')?.checked);
-    //     console.log('Material:', document.getElementById('material_select')?.value);
-    //     console.log('Precio tablero:', document.getElementById('precio_tablero')?.value);
-    //     console.log('Mano de obra:', document.getElementById('mano_obra')?.value);
-    // }
 });
 </script>
 {% endblock %}

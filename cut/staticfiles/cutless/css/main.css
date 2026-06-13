@@ -1,0 +1,351 @@
+/* =============================================================
+   CutLess — main.css
+   Reset · Tipografía · Layout global · Texturas industriales
+   ============================================================= */
+
+/* ── Fuentes (Google Fonts — se importan aquí o en el <head>) ─ */
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Reset base ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--cl-font-body);
+  font-size: var(--cl-fs-base);
+  color: var(--cl-text-primary);
+  background-color: var(--cl-bg-base);
+  line-height: 1.6;
+  min-height: 100vh;
+
+  /* Textura industrial sutil: grain sobre fondo lino */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+}
+
+[data-theme="dark"] body {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+}
+
+/* ── Tipografía global ────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--cl-font-display);
+  font-weight: 700;
+  color: var(--cl-text-primary);
+  letter-spacing: .02em;
+  line-height: 1.15;
+}
+
+h1 { font-size: var(--cl-fs-3xl); font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+h2 { font-size: var(--cl-fs-2xl); font-weight: 700; }
+h3 { font-size: var(--cl-fs-xl); }
+h4 { font-size: var(--cl-fs-lg); }
+h5 { font-size: var(--cl-fs-md); font-weight: 600; }
+h6 { font-size: var(--cl-fs-base); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+
+p { margin-bottom: var(--cl-space-md); }
+p:last-child { margin-bottom: 0; }
+
+a {
+  color: var(--cl-blue);
+  text-decoration: none;
+  transition: var(--cl-transition);
+}
+a:hover { color: var(--cl-blue-light); text-decoration: underline; }
+
+code, pre, .mono {
+  font-family: var(--cl-font-mono);
+  font-size: var(--cl-fs-sm);
+}
+
+/* ── Layout principal ─────────────────────────────────────── */
+.app-main {
+  padding-top: calc(var(--cl-nav-height) + var(--cl-space-lg));
+  padding-bottom: var(--cl-space-2xl);
+  max-width: 1280px;
+}
+
+/* Contenedor de página con separador industrial */
+.page-header {
+  margin-bottom: var(--cl-space-xl);
+  padding-bottom: var(--cl-space-md);
+  border-bottom: 3px solid var(--cl-walnut);
+  display: flex;
+  align-items: flex-end;
+  gap: var(--cl-space-md);
+}
+
+.page-header h1,
+.page-header h2 {
+  position: relative;
+}
+
+.page-header h2::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 1em;
+  background: var(--cl-blue);
+  margin-right: var(--cl-space-sm);
+  vertical-align: middle;
+  border-radius: 2px;
+}
+
+/* ── Cards ────────────────────────────────────────────────── */
+.cl-card {
+  background: var(--cl-bg-card);
+  border: 1px solid var(--cl-border);
+  border-radius: var(--cl-radius-md);
+  box-shadow: var(--cl-shadow-sm);
+  padding: var(--cl-space-lg);
+  transition: var(--cl-transition-slow);
+}
+
+.cl-card:hover {
+  box-shadow: var(--cl-shadow-md);
+  border-color: var(--cl-border-strong);
+}
+
+.cl-card--accent {
+  border-left: 4px solid var(--cl-blue);
+}
+
+.cl-card--walnut {
+  border-left: 4px solid var(--cl-walnut);
+}
+
+.cl-card-header {
+  font-family: var(--cl-font-display);
+  font-size: var(--cl-fs-lg);
+  font-weight: 700;
+  color: var(--cl-text-primary);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: var(--cl-space-md);
+  padding-bottom: var(--cl-space-sm);
+  border-bottom: 2px solid var(--cl-border);
+  display: flex;
+  align-items: center;
+  gap: var(--cl-space-sm);
+}
+
+/* ── Stat cards (métricas) ────────────────────────────────── */
+.cl-stat-card {
+  background: var(--cl-bg-card);
+  border: 1px solid var(--cl-border);
+  border-radius: var(--cl-radius-md);
+  padding: var(--cl-space-lg) var(--cl-space-lg);
+  box-shadow: var(--cl-shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.cl-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--cl-walnut), var(--cl-blue));
+}
+
+.cl-stat-label {
+  font-family: var(--cl-font-display);
+  font-size: var(--cl-fs-xs);
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--cl-text-muted);
+  margin-bottom: var(--cl-space-xs);
+}
+
+.cl-stat-value {
+  font-family: var(--cl-font-display);
+  font-size: var(--cl-fs-3xl);
+  font-weight: 800;
+  color: var(--cl-text-primary);
+  line-height: 1;
+}
+
+.cl-stat-unit {
+  font-size: var(--cl-fs-sm);
+  color: var(--cl-text-muted);
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+/* ── Tablas ───────────────────────────────────────────────── */
+.cl-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--cl-fs-sm);
+}
+
+.cl-table thead tr {
+  background: var(--cl-walnut);
+  color: var(--cl-text-on-dark);
+}
+
+.cl-table thead th {
+  font-family: var(--cl-font-display);
+  font-weight: 600;
+  font-size: var(--cl-fs-xs);
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  padding: var(--cl-space-sm) var(--cl-space-md);
+  border: none;
+  white-space: nowrap;
+}
+
+.cl-table tbody tr {
+  border-bottom: 1px solid var(--cl-border);
+  transition: var(--cl-transition);
+}
+
+.cl-table tbody tr:hover {
+  background: var(--cl-ash-light);
+}
+
+[data-theme="dark"] .cl-table tbody tr:hover {
+  background: rgba(78,45,1,.25);
+}
+
+.cl-table tbody td {
+  padding: var(--cl-space-sm) var(--cl-space-md);
+  color: var(--cl-text-secondary);
+  vertical-align: middle;
+}
+
+.cl-table tbody tr:last-child { border-bottom: none; }
+
+/* ── Alertas ──────────────────────────────────────────────── */
+.alert {
+  border: none;
+  border-left: 4px solid transparent;
+  border-radius: var(--cl-radius-md);
+  font-size: var(--cl-fs-sm);
+  padding: var(--cl-space-md) var(--cl-space-lg);
+  box-shadow: var(--cl-shadow-sm);
+}
+
+.alert-success {
+  background: var(--cl-success-bg);
+  border-left-color: var(--cl-success);
+  color: var(--cl-success);
+}
+
+.alert-danger {
+  background: var(--cl-danger-bg);
+  border-left-color: var(--cl-danger);
+  color: var(--cl-danger);
+}
+
+.alert-warning {
+  background: var(--cl-warning-bg);
+  border-left-color: var(--cl-warning);
+  color: var(--cl-warning);
+}
+
+.alert-info {
+  background: var(--cl-info-bg);
+  border-left-color: var(--cl-info);
+  color: var(--cl-info);
+}
+
+.alert-fade-out {
+  animation: alertFadeOut .5s ease forwards;
+}
+
+@keyframes alertFadeOut {
+  to { opacity: 0; transform: translateY(-6px); }
+}
+
+/* ── Badges ───────────────────────────────────────────────── */
+.cl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: var(--cl-radius-pill);
+  font-family: var(--cl-font-display);
+  font-size: var(--cl-fs-xs);
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.cl-badge--blue    { background: var(--cl-info-bg);    color: var(--cl-blue); }
+.cl-badge--walnut  { background: rgba(78,45,1,.10);    color: var(--cl-walnut); }
+.cl-badge--success { background: var(--cl-success-bg); color: var(--cl-success); }
+.cl-badge--warning { background: var(--cl-warning-bg); color: var(--cl-warning); }
+.cl-badge--danger  { background: var(--cl-danger-bg);  color: var(--cl-danger); }
+.cl-badge--muted   { background: var(--cl-ash-light);  color: var(--cl-text-muted); }
+
+/* ── Separadores con estilo ───────────────────────────────── */
+.cl-divider {
+  border: none;
+  border-top: 1px solid var(--cl-border);
+  margin: var(--cl-space-lg) 0;
+}
+
+.cl-divider--strong {
+  border-top: 2px solid var(--cl-walnut);
+}
+
+/* ── Utilities ────────────────────────────────────────────── */
+.cl-text-muted    { color: var(--cl-text-muted) !important; }
+.cl-text-primary  { color: var(--cl-text-primary) !important; }
+.cl-text-blue     { color: var(--cl-blue) !important; }
+.cl-text-walnut   { color: var(--cl-walnut) !important; }
+.cl-text-upper    { text-transform: uppercase; letter-spacing: .08em; }
+.cl-font-display  { font-family: var(--cl-font-display) !important; }
+.cl-font-mono     { font-family: var(--cl-font-mono) !important; }
+.cl-fw-bold       { font-weight: 700 !important; }
+.cl-fw-black      { font-weight: 800 !important; }
+
+/* ── Scrollbar personalizada ──────────────────────────────── */
+::-webkit-scrollbar       { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--cl-bg-surface); }
+::-webkit-scrollbar-thumb { background: var(--cl-olive); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cl-walnut); }
+
+/* ── Selección de texto ───────────────────────────────────── */
+::selection {
+  background: rgba(69,88,231,.25);
+  color: var(--cl-text-primary);
+}
+
+/* ── Focus ring accesible ─────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--cl-blue);
+  outline-offset: 3px;
+  border-radius: var(--cl-radius-sm);
+}
+
+/* ── Animaciones de entrada ───────────────────────────────── */
+@keyframes clFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes clFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.cl-anim-fade-up { animation: clFadeUp .35s ease both; }
+.cl-anim-fade-in { animation: clFadeIn .25s ease both; }
+
+/* Stagger automático para listas hijas */
+.cl-stagger > *:nth-child(1) { animation-delay: .04s; }
+.cl-stagger > *:nth-child(2) { animation-delay: .08s; }
+.cl-stagger > *:nth-child(3) { animation-delay: .12s; }
+.cl-stagger > *:nth-child(4) { animation-delay: .16s; }
+.cl-stagger > *:nth-child(5) { animation-delay: .20s; }
+.cl-stagger > *:nth-child(6) { animation-delay: .24s; }

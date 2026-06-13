@@ -1,0 +1,124 @@
+/* =============================================================
+   CutLess — palette.css
+   Sistema de tokens de color. Estilo: Industrial / Robusto
+   Paleta: Deep Walnut · Olive Wood · Ash Grey · Full Spectrum Blue · True Cobalt
+   ============================================================= */
+
+:root {
+  /* ── Paleta primaria ─────────────────────────────────────── */
+  --cl-walnut:       #4E2D01;   /* Deep Walnut   — base oscura */
+  --cl-olive:        #7D6344;   /* Olive Wood    — madera media */
+  --cl-ash:          #B7B8AB;   /* Ash Grey      — neutro claro */
+  --cl-blue:         #4558E7;   /* Full Spectrum Blue — acento primario */
+  --cl-cobalt:       #1E287B;   /* True Cobalt   — acento profundo */
+
+  /* ── Extensiones tonales ─────────────────────────────────── */
+  --cl-walnut-dark:  #2E1A00;
+  --cl-walnut-mid:   #6B3E0A;
+  --cl-olive-light:  #A08060;
+  --cl-olive-pale:   #C4AE92;
+  --cl-ash-dark:     #7A7B72;
+  --cl-ash-light:    #D8D9D0;
+  --cl-ash-white:    #F0F0EA;
+  --cl-blue-light:   #6B7BFF;
+  --cl-blue-dim:     #2E3DA0;
+  --cl-cobalt-deep:  #111650;
+
+  /* ── Superficie / fondo (modo claro, base industrial) ────── */
+  --cl-bg-base:      #F4F3EE;   /* Lino crudo */
+  --cl-bg-surface:   #ECEAE2;   /* Superficie principal */
+  --cl-bg-card:      #FFFFFF;
+  --cl-bg-sidebar:   #2E1A00;   /* Walnut profundo */
+  --cl-bg-nav:       #1C1008;   /* Casi negro madera */
+
+  /* ── Texto ───────────────────────────────────────────────── */
+  --cl-text-primary:   #1C1008;
+  --cl-text-secondary: #5A4535;
+  --cl-text-muted:     #8A7A6A;
+  --cl-text-on-dark:   #F0F0EA;
+  --cl-text-on-blue:   #FFFFFF;
+  --cl-text-label:     #4E2D01;
+
+  /* ── Bordes ──────────────────────────────────────────────── */
+  --cl-border:         #C8C5B8;
+  --cl-border-strong:  #9A8060;
+  --cl-border-accent:  #4558E7;
+
+  /* ── Estado: éxito / aviso / error / info ────────────────── */
+  --cl-success:        #2D7A3A;
+  --cl-success-bg:     #E6F5E9;
+  --cl-warning:        #A06800;
+  --cl-warning-bg:     #FFF3CD;
+  --cl-danger:         #C0392B;
+  --cl-danger-bg:      #FDECEA;
+  --cl-info:           #4558E7;
+  --cl-info-bg:        #EEF0FD;
+
+  /* ── Sombras ─────────────────────────────────────────────── */
+  --cl-shadow-sm:   0 1px 3px rgba(28,16,8,.12), 0 1px 2px rgba(28,16,8,.08);
+  --cl-shadow-md:   0 4px 12px rgba(28,16,8,.14), 0 2px 6px rgba(28,16,8,.08);
+  --cl-shadow-lg:   0 8px 24px rgba(28,16,8,.18), 0 4px 10px rgba(28,16,8,.10);
+  --cl-shadow-blue: 0 4px 16px rgba(69,88,231,.30);
+
+  /* ── Radios ──────────────────────────────────────────────── */
+  --cl-radius-sm:   4px;
+  --cl-radius-md:   8px;
+  --cl-radius-lg:   12px;
+  --cl-radius-xl:   18px;
+  --cl-radius-pill: 999px;
+
+  /* ── Espaciado base ──────────────────────────────────────── */
+  --cl-space-xs:  4px;
+  --cl-space-sm:  8px;
+  --cl-space-md:  16px;
+  --cl-space-lg:  24px;
+  --cl-space-xl:  40px;
+  --cl-space-2xl: 64px;
+
+  /* ── Transiciones ────────────────────────────────────────── */
+  --cl-transition:       all .18s ease;
+  --cl-transition-slow:  all .35s cubic-bezier(.4,0,.2,1);
+
+  /* ── Tipografía ──────────────────────────────────────────── */
+  --cl-font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --cl-font-body:    'Barlow', 'Trebuchet MS', sans-serif;
+  --cl-font-mono:    'JetBrains Mono', 'Courier New', monospace;
+
+  --cl-fs-xs:   .72rem;
+  --cl-fs-sm:   .85rem;
+  --cl-fs-base: 1rem;
+  --cl-fs-md:   1.1rem;
+  --cl-fs-lg:   1.3rem;
+  --cl-fs-xl:   1.6rem;
+  --cl-fs-2xl:  2rem;
+  --cl-fs-3xl:  2.6rem;
+
+  /* ── Navbar ──────────────────────────────────────────────── */
+  --cl-nav-height: 58px;
+}
+
+/* ── Modo oscuro ──────────────────────────────────────────── */
+[data-theme="dark"] {
+  --cl-bg-base:      #120C04;
+  --cl-bg-surface:   #1C1008;
+  --cl-bg-card:      #251508;
+  --cl-bg-nav:       #0D0804;
+
+  --cl-text-primary:   #F0EEE8;
+  --cl-text-secondary: #C4AE92;
+  --cl-text-muted:     #8A7A6A;
+  --cl-text-label:     #C4AE92;
+
+  --cl-border:         #3A2A1A;
+  --cl-border-strong:  #5A4535;
+
+  --cl-bg-card:  #1F1208;
+  --cl-shadow-sm: 0 1px 3px rgba(0,0,0,.4);
+  --cl-shadow-md: 0 4px 12px rgba(0,0,0,.5);
+  --cl-shadow-lg: 0 8px 24px rgba(0,0,0,.6);
+
+  --cl-success-bg: #0D2E14;
+  --cl-warning-bg: #2A1C00;
+  --cl-danger-bg:  #2A0A08;
+  --cl-info-bg:    #0E1240;
+}
