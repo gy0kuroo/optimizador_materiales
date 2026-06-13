@@ -59,9 +59,6 @@
     <!-- Sección: Dimensiones del Tablero -->
     <div class="card mb-4 fade-in" data-intro-title="Dimensiones del Tablero" data-intro="Ingresa el ancho y alto del tablero de madera. Puedes elegir la unidad de medida que prefieras (cm, m, pulgadas o pies).">
       <div class="card-header card-header-step card-header-step-primary text-white">
-        <span class="step-badge" aria-hidden="true">
-          <img src="{% static 'cutless/icons/tablero.svg' %}" alt="" class="cl-icon cl-icon--badge" onerror="this.outerHTML='1'">
-        </span>
         <h4 class="card-header-title">
           <img src="{% static 'cutless/icons/tablero-outline.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
           Dimensiones del tablero
@@ -169,11 +166,9 @@
     <!-- Sección: Piezas a Cortar -->
     <div class="card mb-4 fade-in">
       <div class="card-header card-header-step card-header-step-success text-white">
-        <span class="step-badge" aria-hidden="true">
-          <img src="{% static 'cutless/icons/pieza.svg' %}" alt="" class="cl-icon cl-icon--badge" onerror="this.outerHTML='2'">
-        </span>
+
         <h4 class="card-header-title">
-          <img src="{% static 'cutless/icons/regla.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
+          <img src="{% static 'cutless/icons/pieza.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
           Piezas a cortar
         </h4>
         <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion ms-auto"
@@ -191,7 +186,7 @@
           <div class="pieza-form border rounded p-3 mb-3 bg-light">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h5 class="mb-0">
-                <img src="{% static 'cutless/icons/pieza-outline.svg' %}" alt="" class="cl-icon cl-icon--mini" onerror="this.style.display='none'">
+                <img src="{% static 'cutless/icons/pieza-outline.png' %}" alt="" class="cl-icon cl-icon--mini" onerror="this.style.display='none'">
                 Pieza #<span class="pieza-numero">{{ forloop.counter }}</span>
               </h5>
               <button type="button" class="btn btn-danger btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %}">
