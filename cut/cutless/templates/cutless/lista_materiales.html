@@ -144,7 +144,9 @@
             </td>
             <td>{{ material.get_area|floatformat:2 }} cm²</td>
             <td>
+              {% if user.is_superuser or user.perfil.rol == "admin" %}
               <a href="{% url 'cutless:editar_material' material.pk %}" class="btn btn-sm btn-primary"> Editar</a>
+              {% endif %}
               <span class="badge bg-info">Sistema</span>
             </td>
           </tr>

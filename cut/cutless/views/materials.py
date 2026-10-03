@@ -1,6 +1,9 @@
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponseForbidden
+
+from usuarios.views import es_admin
 
 from ..forms import MaterialForm
 from ..models import Material, Optimizacion
@@ -58,6 +61,9 @@ def eliminar_material(request, pk):
         Q(pk=pk, usuario=request.user) | Q(pk=pk, es_predefinido=True)
     )
     
+    if material.es_predefinido and not es_admin(request.user):
+        return HttpResponseForbidden("Solo administradores pueden modificar materiales del sistema.")
+
     # Verificar que no esté en uso
     optimizaciones_usando = Optimizacion.objects.filter(material=material).count()
     if optimizaciones_usando > 0:
@@ -87,6 +93,9 @@ def editar_material(request, pk):
     # Permitir editar materiales del usuario o predefinidos
     material = get_object_or_404(Material, pk=pk)
     
+    if material.es_predefinido and not es_admin(request.user):
+        return HttpResponseForbidden("Solo administradores pueden modificar materiales del sistema.")
+
     # Verificar permisos: solo puede editar si es suyo o es predefinido
     if not material.es_predefinido and material.usuario != request.user:
         messages.error(request, "No tienes permiso para editar este material.")

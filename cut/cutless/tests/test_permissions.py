@@ -62,3 +62,55 @@ class PermisosVistaTests(TestCase):
         self.client.login(username='operario', password='test12345')
         response = self.client.get(reverse('cutless:exportar_excel_desperdicio'))
         self.assertRedirects(response, reverse('cutless:index'))
+
+
+class MaterialesCompartidosTests(TestCase):
+    def setUp(self):
+        from cutless.models import Material
+        self.usuario = User.objects.create_user('material_user')
+        self.otro = User.objects.create_user('material_other')
+        self.material = Material.objects.create(nombre='Sistema', ancho=122, alto=244, es_predefinido=True)
+        self.propio = Material.objects.create(nombre='Personal', ancho=122, alto=244, usuario=self.usuario)
+        self.ajeno = Material.objects.create(nombre='Ajeno', ancho=122, alto=244, usuario=self.otro)
+        self.client.force_login(self.usuario)
+        self.data = {'nombre': 'Modificado', 'ancho': 122, 'alto': 244, 'unidad_medida': 'cm'}
+
+    def test_usuario_no_puede_editar_material_compartido(self):
+        url = reverse('cutless:editar_material', args=[self.material.pk])
+        self.assertEqual(self.client.get(url).status_code, 403)
+        self.assertEqual(self.client.post(url, self.data).status_code, 403)
+        self.material.refresh_from_db()
+        self.assertEqual(self.material.nombre, 'Sistema')
+        self.assertNotContains(self.client.get(reverse('cutless:lista_materiales')), url)
+
+    def test_usuario_no_puede_eliminar_material_compartido(self):
+        response = self.client.post(reverse('cutless:eliminar_material', args=[self.material.pk]))
+        self.assertEqual(response.status_code, 403)
+        self.material.refresh_from_db()
+
+    def test_admin_y_superusuario_pueden_editar_compartidos(self):
+        for superuser in (False, True):
+            with self.subTest(superuser=superuser):
+                self.usuario.is_superuser = superuser
+                self.usuario.save()
+                self.usuario.perfil.rol = 'usuario' if superuser else 'admin'
+                self.usuario.perfil.save()
+                response = self.client.post(reverse('cutless:editar_material', args=[self.material.pk]), self.data)
+                self.assertEqual(response.status_code, 302)
+                self.material.refresh_from_db()
+                self.assertEqual(self.material.nombre, 'Modificado')
+                self.assertIsNone(self.material.usuario_id)
+
+    def test_usuario_puede_editar_y_eliminar_material_propio(self):
+        self.assertEqual(self.client.post(reverse('cutless:editar_material', args=[self.propio.pk]), self.data).status_code, 302)
+        self.propio.refresh_from_db()
+        self.assertEqual(self.propio.nombre, 'Modificado')
+        self.assertEqual(self.client.post(reverse('cutless:eliminar_material', args=[self.propio.pk])).status_code, 302)
+        from cutless.models import Material
+        self.assertFalse(Material.objects.filter(pk=self.propio.pk).exists())
+
+    def test_material_ajeno_no_se_modifica(self):
+        self.client.post(reverse('cutless:editar_material', args=[self.ajeno.pk]), self.data)
+        self.ajeno.refresh_from_db()
+        self.assertEqual(self.ajeno.nombre, 'Ajeno')
+        self.assertEqual(self.client.post(reverse('cutless:eliminar_material', args=[self.ajeno.pk])).status_code, 404)

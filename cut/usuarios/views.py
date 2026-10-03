@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.views.decorators.http import require_POST
 from .forms import RegistroForm, PerfilForm, UsuarioEdicionForm, PermisosUsuarioForm, CambiarPasswordForm
 from .models import PerfilUsuario
 
@@ -73,6 +74,7 @@ def admin_dashboard(request):
 
 @login_required
 @user_passes_test(es_admin)
+@require_POST
 def eliminar_usuario(request, pk):
     usuario = get_object_or_404(User, pk=pk)
     if usuario == request.user:
