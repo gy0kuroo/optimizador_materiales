@@ -179,7 +179,9 @@ def _regenerar_grafico(optimizacion):
     piezas_parseadas = parsear_piezas_desde_texto(optimizacion.piezas, unidad)
     piezas = [(p['ancho_cm'], p['alto_cm'], p['cantidad']) for p in piezas_parseadas]
     nombres = [p['nombre'] for p in piezas_parseadas]
-    margen = getattr(optimizacion, 'margen_corte', 0.3) or 0.3
+    margen = getattr(optimizacion, 'margen_corte', 0.3)
+    if margen is None:
+        margen = 0.3
     rotacion = getattr(optimizacion, 'permitir_rotacion', True)
 
     return generar_grafico(

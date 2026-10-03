@@ -114,7 +114,9 @@ def editar_optimizacion(request, pk):
                     "materiales_data": materiales_data,
                 })
             
-            margen_corte_mm = tablero_form.cleaned_data.get('margen_corte') or 3  # Siempre en mm, default 3
+            margen_corte_mm = tablero_form.cleaned_data.get('margen_corte')
+            if margen_corte_mm is None:
+                margen_corte_mm = 3  # Valor por defecto solo si el campo está vacío
             margen_corte_cm = margen_corte_mm / 10.0
             
             # Obtener datos de costos
@@ -363,7 +365,9 @@ def index(request):
                     "materiales_data": materiales_data
                 })
 
-            margen_corte_mm = tablero_form.cleaned_data.get('margen_corte') or 3  # Siempre en mm, default 3
+            margen_corte_mm = tablero_form.cleaned_data.get('margen_corte')
+            if margen_corte_mm is None:
+                margen_corte_mm = 3  # Valor por defecto solo si el campo está vacío
             # Convertir margen de corte de mm a cm (el sistema trabaja en cm)
             margen_corte_cm = margen_corte_mm / 10.0
 

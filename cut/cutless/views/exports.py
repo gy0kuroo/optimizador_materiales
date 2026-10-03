@@ -136,7 +136,9 @@ def imprimir_plan_corte(request, pk):
         nombres_piezas.append(nombre)
     
     # Obtener parámetros de la optimización
-    margen_corte = getattr(optimizacion, 'margen_corte', 0.3) or 0.3
+    margen_corte = getattr(optimizacion, 'margen_corte', 0.3)
+    if margen_corte is None:
+        margen_corte = 0.3
     permitir_rotacion = getattr(optimizacion, 'permitir_rotacion', True)
     
     # Regenerar gráfico en modo plan de corte (blanco y negro, solo medidas)

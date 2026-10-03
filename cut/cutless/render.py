@@ -291,7 +291,9 @@ def _info_desperdicio_desde_optimizacion(optimizacion):
     ]
     nombres_piezas = [p['nombre'] for p in piezas_parseadas]
     permitir_rotacion = getattr(optimizacion, 'permitir_rotacion', True)
-    margen_corte = getattr(optimizacion, 'margen_corte', 0.3) or 0.3
+    margen_corte = getattr(optimizacion, 'margen_corte', 0.3)
+    if margen_corte is None:
+        margen_corte = 0.3
     _, _, info = optimizar_corte(
         piezas,
         optimizacion.ancho_tablero,

@@ -571,7 +571,9 @@ def comparar_optimizaciones(request):
                                 ))
 
                     if piezas_para_grafico:
-                        margen = getattr(optimizacion, 'margen_corte', 0.3) or 0.3
+                        margen = getattr(optimizacion, 'margen_corte', 0.3)
+                        if margen is None:
+                            margen = 0.3
                         permitir_rot = getattr(optimizacion, 'permitir_rotacion', True)
                         imagenes_calc, _, _ = generar_grafico(
                             piezas_para_grafico,
