@@ -6,10 +6,11 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Primero exponer los datos de materiales globalmente -->
+<!-- Datos de materiales serializados de forma segura -->
+{{ materiales_data|json_script:"materiales-data" }}
 <script>
     // Hacer disponibles los datos de materiales globalmente ANTES de cargar medidas-pred.js
-    const materialData = {{ materiales_data_json|safe }};
+    const materialData = JSON.parse(document.getElementById('materiales-data').textContent);
     window.materialData = materialData;
 </script>
 <script src="{% static 'cutless/js/medidas-pred.js' %}"></script>

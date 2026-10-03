@@ -23,7 +23,7 @@ from ..utils import (
     obtener_simbolo_unidad,
     pieza_cabe_en_tablero,
 )
-from .common import _materiales_data_json_index
+from .common import _materiales_data_index
 
 
 def editar_optimizacion(request, pk):
@@ -31,6 +31,7 @@ def editar_optimizacion(request, pk):
     Permite editar una optimización existente.
     """
     optimizacion = get_object_or_404(Optimizacion, pk=pk, usuario=request.user)
+    materiales_data = _materiales_data_index(request.user)
     
     # Crear formset con solo 1 formulario extra vacío para edición
     PiezaFormSet = formset_factory(PiezaForm, extra=1, max_num=20, validate_max=True)
@@ -92,7 +93,8 @@ def editar_optimizacion(request, pk):
                             return render(request, "cutless/editar_optimizacion.html", {
                                 "tablero_form": tablero_form,
                                 "pieza_formset": pieza_formset,
-                                "optimizacion": optimizacion
+                                "optimizacion": optimizacion,
+                                "materiales_data": materiales_data,
                             })
                         
                         piezas.append((pieza_ancho_cm, pieza_alto_cm, cantidad))
@@ -108,7 +110,8 @@ def editar_optimizacion(request, pk):
                 return render(request, "cutless/editar_optimizacion.html", {
                     "tablero_form": tablero_form,
                     "pieza_formset": pieza_formset,
-                    "optimizacion": optimizacion
+                    "optimizacion": optimizacion,
+                    "materiales_data": materiales_data,
                 })
             
             margen_corte_mm = tablero_form.cleaned_data.get('margen_corte') or 3  # Siempre en mm, default 3
@@ -147,6 +150,7 @@ def editar_optimizacion(request, pk):
                     "tablero_form": tablero_form,
                     "pieza_formset": pieza_formset,
                     "optimizacion": optimizacion,
+                    "materiales_data": materiales_data,
                 })
 
             warn_omitidas = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad)
@@ -248,26 +252,11 @@ def editar_optimizacion(request, pk):
         # El formset automáticamente agregará 1 formulario vacío adicional
         pieza_formset = PiezaFormSet(initial=piezas_data)
         
-        # Preparar datos de materiales para JavaScript
-        import json
-        materiales_data = {}
-        for material in Material.objects.filter(
-            Q(usuario=request.user) | Q(es_predefinido=True)
-        ):
-            materiales_data[str(material.pk)] = {
-                'precio': float(material.precio) if material.precio else None,
-                'nombre': material.nombre,
-                'ancho': float(material.ancho) if material.ancho else None,
-                'alto': float(material.alto) if material.alto else None,
-                'unidad_medida': material.unidad_medida if material.unidad_medida else 'cm'
-            }
-        materiales_data_json = json.dumps(materiales_data)
-    
     return render(request, "cutless/editar_optimizacion.html", {
         "tablero_form": tablero_form,
         "pieza_formset": pieza_formset,
         "optimizacion": optimizacion,
-        "materiales_data_json": materiales_data_json
+        "materiales_data": materiales_data
     })
 
 def index(request):
@@ -344,7 +333,7 @@ def index(request):
                             return render(request, "cutless/index.html", {
                                 "tablero_form": tablero_form,
                                 "pieza_formset": pieza_formset,
-                                "materiales_data_json": _materiales_data_json_index(request.user),
+                                "materiales_data": _materiales_data_index(request.user),
                             })
                         
                         # Guardar piezas en cm para cálculos
@@ -360,7 +349,6 @@ def index(request):
             if not piezas:
                 messages.error(request, "❌ Debes agregar al menos una pieza con dimensiones válidas.")
                 # Preparar datos de materiales para JavaScript
-                import json
                 materiales_data = {}
                 for material in Material.objects.filter(
                     Q(usuario=request.user) | Q(es_predefinido=True)
@@ -369,11 +357,10 @@ def index(request):
                         'precio': float(material.precio) if material.precio else None,
                         'nombre': material.nombre
                     }
-                materiales_data_json = json.dumps(materiales_data)
                 return render(request, "cutless/index.html", {
                     "tablero_form": TableroForm(user=request.user),
                     "pieza_formset": pieza_formset,
-                    "materiales_data_json": materiales_data_json
+                    "materiales_data": materiales_data
                 })
 
             margen_corte_mm = tablero_form.cleaned_data.get('margen_corte') or 3  # Siempre en mm, default 3
@@ -419,7 +406,7 @@ def index(request):
                 return render(request, "cutless/index.html", {
                     "tablero_form": tablero_form,
                     "pieza_formset": pieza_formset,
-                    "materiales_data_json": _materiales_data_json_index(request.user),
+                    "materiales_data": _materiales_data_index(request.user),
                 })
 
             warn_omitidas = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad)
@@ -489,7 +476,6 @@ def index(request):
                 messages.error(request, "❌ Error en los datos de las piezas.")
             
             # Preparar datos de materiales para JavaScript (necesario cuando hay errores)
-            import json
             materiales_data = {}
             for material in Material.objects.filter(
                 Q(usuario=request.user) | Q(es_predefinido=True)
@@ -498,7 +484,6 @@ def index(request):
                     'precio': float(material.precio) if material.precio else None,
                     'nombre': material.nombre
                 }
-            materiales_data_json = json.dumps(materiales_data)
     else:
         # Preparar valores iniciales desde el perfil del usuario (solo optimización)
         initial_data = {}
@@ -550,7 +535,6 @@ def index(request):
         pieza_formset = PiezaFormSet()
         
         # Preparar datos de materiales para JavaScript
-        import json
         materiales_data = {}
         for material in Material.objects.filter(
             Q(usuario=request.user) | Q(es_predefinido=True)
@@ -562,12 +546,11 @@ def index(request):
                 'alto': float(material.alto) if material.alto else None,
                 'unidad_medida': material.unidad_medida if material.unidad_medida else 'cm'
             }
-        materiales_data_json = json.dumps(materiales_data)
 
     return render(request, "cutless/index.html", {
         "tablero_form": tablero_form,
         "pieza_formset": pieza_formset,
-        "materiales_data_json": materiales_data_json
+        "materiales_data": materiales_data
     })
 
 def resultado_view(request, pk=None):

@@ -81,7 +81,7 @@ La eliminación de materiales compartidos por administradores y el bloqueo de ma
 
 Los siguientes hallazgos de la revisión inicial aún no se han corregido:
 
-1. Asegurar la inserción de datos JSON de materiales en JavaScript.
+1. **Completado en la segunda etapa:** asegurar la inserción de datos JSON de materiales en JavaScript. Ver [CAMBIOS_JSON_SEGURO.md](CAMBIOS_JSON_SEGURO.md).
 2. Respetar el margen de corte cero en edición y regeneración de optimizaciones.
 3. Corregir las conversiones de áreas que usan factores lineales redondeados.
 4. Revisar la atomicidad de la persistencia de resultados y los archivos generados.

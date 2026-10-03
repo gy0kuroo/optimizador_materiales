@@ -160,7 +160,6 @@ def usar_plantilla(request, pk):
     })
     
     # Preparar datos de materiales para JavaScript
-    import json
     materiales_data = {}
     for material in Material.objects.filter(
         Q(usuario=request.user) | Q(es_predefinido=True)
@@ -169,14 +168,13 @@ def usar_plantilla(request, pk):
             'precio': float(material.precio) if material.precio else None,
             'nombre': material.nombre
         }
-    materiales_data_json = json.dumps(materiales_data)
     
     messages.info(request, f'📋 Plantilla "{plantilla.nombre}" cargada. Completa los datos y genera la optimización.')
     
     return render(request, 'cutless/index.html', {
         'tablero_form': tablero_form,
         'pieza_formset': pieza_formset,
-        'materiales_data_json': materiales_data_json,
+        'materiales_data': materiales_data,
         'plantilla_cargada': plantilla,
     })
 

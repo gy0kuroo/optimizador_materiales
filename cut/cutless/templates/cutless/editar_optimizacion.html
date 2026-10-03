@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ materiales_data|json_script:"materiales-data" }}
 <script src="{% static 'cutless/js/medidas-pred.js' %}"></script>
 {% endblock %}
 
@@ -355,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (materialSelect && precioTableroInput) {
         // Obtener precios de materiales desde el contexto de Django
-        const materialPrices = {{ materiales_data_json|safe }};
+        const materialPrices = JSON.parse(document.getElementById('materiales-data').textContent);
         
         materialSelect.addEventListener('change', function() {
             const selectedMaterialId = this.value;

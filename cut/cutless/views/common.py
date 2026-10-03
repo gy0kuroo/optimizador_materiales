@@ -45,9 +45,8 @@ def handler500(request):
     return render(request, 'cutless/500.html', status=500)
 
 
-def _materiales_data_json_index(user):
-    """JSON de materiales para la plantilla index (errores / reintentos)."""
-    import json
+def _materiales_data_index(user):
+    """Datos de materiales para serializar con json_script (errores / reintentos)."""
     materiales_data = {}
     filtro = Q(es_predefinido=True)
     if getattr(user, 'is_authenticated', False):
@@ -60,4 +59,4 @@ def _materiales_data_json_index(user):
             'alto': float(material.alto) if material.alto else None,
             'unidad_medida': material.unidad_medida if material.unidad_medida else 'cm',
         }
-    return json.dumps(materiales_data)
+    return materiales_data
