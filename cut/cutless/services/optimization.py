@@ -1,9 +1,13 @@
 import base64
+import io
+import logging
 import os
+from uuid import uuid4
 
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.http import FileResponse
+from django.db import transaction
 from django.utils import timezone
 
 from ..models import Optimizacion, TableroOptimizacion
@@ -12,6 +16,9 @@ from ..packing import normalizar_info_desperdicio
 from ..pieces import parsear_piezas_desde_texto
 from ..render import generar_grafico
 from ..units import convertir_desde_cm, obtener_factor_area_desde_cm2, obtener_simbolo_area
+
+
+logger = logging.getLogger(__name__)
 
 
 def _media_root():
@@ -50,34 +57,58 @@ def _ruta_pdf_en_disco(optimizacion):
     return None
 
 
-def _guardar_pdf_en_modelo(optimizacion, pdf_filepath):
-    pdf_filepath = _normalizar_ruta_absoluta(pdf_filepath)
-    if not pdf_filepath or not os.path.isfile(pdf_filepath):
-        return None
-    if optimizacion.pdf:
-        optimizacion.pdf.delete(save=False)
-    storage_name = f"opt_{optimizacion.pk}.pdf"
-    with open(pdf_filepath, 'rb') as pdf_file:
-        optimizacion.pdf.save(
-            storage_name,
-            ContentFile(pdf_file.read()),
-            save=True,
-        )
-    return pdf_filepath
+def _eliminar_archivos(archivos):
+    """Limpieza de archivos reemplazados o creados por una operación fallida."""
+    for storage, nombre in archivos:
+        if not nombre:
+            continue
+        try:
+            storage.delete(nombre)
+        except Exception:
+            logger.exception("No se pudo retirar el archivo %s", nombre)
+
+
+def _guardar_archivo(field, nombre, contenido, archivos_nuevos):
+    # Registrar el nombre antes de escribir permite retirar una escritura parcial.
+    ruta = field.field.generate_filename(field.instance, nombre)
+    archivos_nuevos.append((field.storage, ruta))
+    guardado = field.storage.save(ruta, ContentFile(contenido))
+    if guardado != ruta:
+        archivos_nuevos.append((field.storage, guardado))
+    field.name = guardado
+    field._committed = True
+
+
+def _crear_pdf(optimizacion, imagenes_base64, info_desperdicio, archivos_nuevos, numero_lista=None):
+    buffer = io.BytesIO()
+    resultado = generar_pdf(
+        optimizacion, imagenes_base64,
+        numero_lista=numero_lista if numero_lista is not None else optimizacion.pk,
+        info_desperdicio=info_desperdicio,
+        archivo_salida=buffer,
+    )
+    if resultado is None or not buffer.getvalue():
+        raise ValueError("No se generó el PDF de la optimización.")
+    _guardar_archivo(
+        optimizacion.pdf, f"opt_{optimizacion.pk}_{uuid4().hex}.pdf",
+        buffer.getvalue(), archivos_nuevos,
+    )
 
 
 def _generar_y_guardar_pdf(optimizacion, imagenes_base64, info_desperdicio, numero_lista=None):
-    lista = numero_lista if numero_lista is not None else optimizacion.pk
-    pdf_filepath = generar_pdf(
-        optimizacion,
-        imagenes_base64,
-        numero_lista=lista,
-        info_desperdicio=info_desperdicio,
-    )
-    pdf_filepath = _normalizar_ruta_absoluta(pdf_filepath)
-    if pdf_filepath and os.path.isfile(pdf_filepath):
-        _guardar_pdf_en_modelo(optimizacion, pdf_filepath)
-    return pdf_filepath
+    nuevos = []
+    try:
+        with transaction.atomic():
+            anterior = Optimizacion.objects.select_for_update().get(pk=optimizacion.pk)
+            antiguos = [(anterior.pdf.storage, anterior.pdf.name)] if anterior.pdf else []
+            _crear_pdf(optimizacion, imagenes_base64, info_desperdicio, nuevos, numero_lista)
+            optimizacion.save(update_fields=['pdf'])
+            transaction.on_commit(lambda: _eliminar_archivos(antiguos))
+    except Exception:
+        _eliminar_archivos(nuevos)
+        optimizacion.refresh_from_db()
+        raise
+    return _ruta_pdf_en_disco(optimizacion)
 
 
 def _numero_descarga(numero_lista, optimizacion):
@@ -196,57 +227,61 @@ def _regenerar_grafico(optimizacion):
 
 
 def persistir_resultado_optimizacion(optimizacion, imagenes_base64, info_desperdicio, aprovechamiento, numero_lista=None):
-    """Guarda tableros, estadísticas y PDF tras generar_grafico."""
-    info_desperdicio = normalizar_info_desperdicio(
-        info_desperdicio,
-        area_usada_total=getattr(optimizacion, 'area_usada_total', None),
-        desperdicio_total=getattr(optimizacion, 'desperdicio_total', None),
-    )
-    optimizacion.tableros.all().delete()
+    """Reemplaza el resultado completo; conserva el anterior si la operación falla."""
+    info = normalizar_info_desperdicio(info_desperdicio)
+    if not imagenes_base64 or len(imagenes_base64) != len(info['info_tableros']):
+        raise ValueError("Las imágenes no coinciden con los tableros del resultado.")
+    imagenes = [base64.b64decode(imagen, validate=True) for imagen in imagenes_base64]
+    nuevos = []
+    pk_original = optimizacion.pk
+    try:
+        with transaction.atomic():
+            if pk_original is None:
+                optimizacion.save()
+                antiguos = []
+            else:
+                anterior = Optimizacion.objects.select_for_update().get(pk=pk_original)
+                antiguos = [(campo.storage, campo.name) for campo in (anterior.imagen, anterior.pdf) if campo]
+                antiguos.extend((tb.imagen.storage, tb.imagen.name) for tb in anterior.tableros.all() if tb.imagen)
 
-    info_tableros = info_desperdicio.get('info_tableros') or []
-    for indice, imagen_b64 in enumerate(imagenes_base64):
-        info = info_tableros[indice] if indice < len(info_tableros) else {}
-        numero = info.get('numero', indice + 1)
-        tablero = TableroOptimizacion(
-            optimizacion=optimizacion,
-            numero=numero,
-            area_usada=info.get('area_usada', 0),
-            desperdicio=info.get('desperdicio', 0),
-            porcentaje_uso=info.get('porcentaje_uso', 0),
-            num_piezas=info.get('num_piezas', 0),
-        )
-        nombre = f"opt_{optimizacion.pk}_tablero_{numero}.png"
-        tablero.imagen.save(
-            nombre,
-            ContentFile(base64.b64decode(imagen_b64)),
-            save=True,
-        )
-
-    if imagenes_base64:
-        nombre_preview = f"opt_{optimizacion.pk}_preview.png"
-        optimizacion.imagen.save(
-            nombre_preview,
-            ContentFile(base64.b64decode(imagenes_base64[0])),
-            save=False,
-        )
-
-    optimizacion.aprovechamiento_total = aprovechamiento
-    optimizacion.area_usada_total = info_desperdicio.get('area_usada_total', 0)
-    optimizacion.desperdicio_total = info_desperdicio.get('desperdicio_total', 0)
-    optimizacion.num_tableros = len(imagenes_base64)
-    optimizacion.resultado_generado = True
-    optimizacion.resultado_generado_en = timezone.now()
-    optimizacion.resultado_extra = {
-        'piezas_no_colocadas': info_desperdicio.get('piezas_no_colocadas', []),
-        'num_piezas_solicitadas': info_desperdicio.get('num_piezas_solicitadas', 0),
-        'num_piezas_colocadas': info_desperdicio.get('num_piezas_colocadas', 0),
-    }
-
-    lista = numero_lista if numero_lista is not None else optimizacion.pk
-    _generar_y_guardar_pdf(optimizacion, imagenes_base64, info_desperdicio, numero_lista=lista)
-
-    optimizacion.save()
+            version = uuid4().hex
+            tableros = []
+            for imagen, datos in zip(imagenes, info['info_tableros']):
+                numero = datos['numero']
+                tablero = TableroOptimizacion(
+                    optimizacion=optimizacion, numero=numero,
+                    area_usada=datos.get('area_usada', 0), desperdicio=datos.get('desperdicio', 0),
+                    porcentaje_uso=datos.get('porcentaje_uso', 0), num_piezas=datos.get('num_piezas', 0),
+                )
+                _guardar_archivo(tablero.imagen, f"opt_{optimizacion.pk}_{version}_tablero_{numero}.png", imagen, nuevos)
+                tableros.append(tablero)
+            _guardar_archivo(optimizacion.imagen, f"opt_{optimizacion.pk}_{version}_preview.png", imagenes[0], nuevos)
+            optimizacion.aprovechamiento_total = aprovechamiento
+            optimizacion.area_usada_total = info['area_usada_total']
+            optimizacion.desperdicio_total = info['desperdicio_total']
+            optimizacion.num_tableros = len(imagenes)
+            optimizacion.resultado_generado = True
+            optimizacion.resultado_generado_en = timezone.now()
+            optimizacion.resultado_extra = {
+                clave: info[clave] for clave in ('piezas_no_colocadas', 'num_piezas_solicitadas', 'num_piezas_colocadas')
+            }
+            _crear_pdf(optimizacion, imagenes_base64, info, nuevos, numero_lista)
+            optimizacion.tableros.all().delete()
+            for tablero in tableros:
+                tablero.save()
+            optimizacion.save()
+            transaction.on_commit(lambda: _eliminar_archivos(antiguos))
+    except Exception:
+        _eliminar_archivos(nuevos)
+        if pk_original is not None:
+            optimizacion.refresh_from_db()
+        else:
+            optimizacion.pk = None
+            optimizacion._state.adding = True
+            optimizacion.imagen = ''
+            optimizacion.pdf = ''
+            optimizacion.resultado_generado = False
+        raise
     return optimizacion
 
 

@@ -79,12 +79,12 @@ La eliminación de materiales compartidos por administradores y el bloqueo de ma
 
 ## 4. Trabajo pendiente
 
-Los siguientes hallazgos de la revisión inicial aún no se han corregido:
+Estado de los hallazgos de la revisión inicial:
 
 1. **Completado en la segunda etapa:** asegurar la inserción de datos JSON de materiales en JavaScript. Ver [CAMBIOS_JSON_SEGURO.md](CAMBIOS_JSON_SEGURO.md).
 2. **Completado en la tercera etapa:** respetar el margen de corte cero. Ver [CAMBIOS_MARGEN_CERO.md](CAMBIOS_MARGEN_CERO.md).
 3. **Completado en la cuarta etapa:** corregir las conversiones de áreas. Ver [CAMBIOS_AREAS.md](CAMBIOS_AREAS.md).
-4. Revisar la atomicidad de la persistencia de resultados y los archivos generados.
+4. **Completado para fallos controlados en la quinta etapa:** persistencia de resultados. Ver alcance y límites en [CAMBIOS_PERSISTENCIA.md](CAMBIOS_PERSISTENCIA.md).
 5. Actualizar las instrucciones de instalación y comprobar visualmente el modo oscuro de los formularios de clientes.
 
 Esta documentación describe exclusivamente los cambios aplicados en la primera etapa; los puntos pendientes no forman parte de la validación anterior.

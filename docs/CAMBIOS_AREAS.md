@@ -75,4 +75,4 @@ La base de datos y los archivos generados locales quedan fuera de este commit.
 
 ## Siguiente prioridad
 
-Revisar la persistencia de resultados para evitar datos parciales y problemas con los archivos generados cuando falla una operación.
+La persistencia ante fallos controlados se corrigió en la quinta etapa: [CAMBIOS_PERSISTENCIA.md](CAMBIOS_PERSISTENCIA.md). La siguiente prioridad es separar la configuración de desarrollo y producción y revisar el acceso a archivos generados.

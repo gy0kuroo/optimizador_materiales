@@ -183,8 +183,6 @@ def editar_optimizacion(request, pk):
             optimizacion.num_tableros = num_tableros
             optimizacion.cliente = tablero_form.cleaned_data.get('cliente')
             optimizacion.proyecto = tablero_form.cleaned_data.get('proyecto')
-            optimizacion.save()
-
             numero_lista = calcular_numero_lista(request.user, optimizacion.id)
             persistir_resultado_optimizacion(
                 optimizacion,
@@ -429,7 +427,7 @@ def index(request):
                 for p in piezas_con_nombre
             ])
             
-            optimizacion = Optimizacion.objects.create(
+            optimizacion = Optimizacion(
                 usuario=request.user,
                 ancho_tablero=ancho,  # Guardado en cm
                 alto_tablero=alto,  # Guardado en cm
@@ -446,7 +444,7 @@ def index(request):
                 proyecto=proyecto_seleccionado
             )
 
-            numero_lista = calcular_numero_lista(request.user, optimizacion.id)
+            numero_lista = Optimizacion.objects.filter(usuario=request.user).count() + 1
             persistir_resultado_optimizacion(
                 optimizacion,
                 imagenes_base64,
@@ -704,7 +702,7 @@ def resultado_view(request, pk=None):
         
         num_tableros = len(imagenes_base64)
 
-        optimizacion = Optimizacion.objects.create(
+        optimizacion = Optimizacion(
             usuario=request.user,
             ancho_tablero=ancho_cm,
             alto_tablero=alto_cm,
@@ -719,7 +717,7 @@ def resultado_view(request, pk=None):
             num_tableros=num_tableros
         )
 
-        numero_lista = calcular_numero_lista(request.user, optimizacion.id)
+        numero_lista = Optimizacion.objects.filter(usuario=request.user).count() + 1
         persistir_resultado_optimizacion(
             optimizacion,
             imagenes_base64,

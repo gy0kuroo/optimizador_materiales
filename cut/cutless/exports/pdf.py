@@ -14,7 +14,7 @@ from ..packing import normalizar_info_desperdicio
 from ..render import _info_desperdicio_desde_optimizacion
 from ..units import convertir_a_cm, convertir_desde_cm, obtener_factor_area_desde_cm2, obtener_simbolo_area, obtener_simbolo_unidad
 
-def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdicio=None):
+def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdicio=None, archivo_salida=None):
     """
     Genera UN SOLO PDF con todos los tableros, cada uno en su propia página.
     
@@ -23,6 +23,7 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
         imagenes_base64: Lista de imágenes en base64
         numero_lista: Número de la lista en el historial (opcional). Si se proporciona,
                      se usará en el nombre del archivo en lugar del ID.
+        archivo_salida: Buffer opcional; evita crear un PDF temporal en MEDIA_ROOT.
         info_desperdicio: Dict igual al tercer retorno de generar_grafico (areas en cm²).
                          Si es None, se regenera desde la optimización guardada (más costoso).
     """
@@ -35,9 +36,10 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
     numero = numero_lista if numero_lista is not None else optimizacion.id
     filename = f"optimizacion_{numero}.pdf"
     filepath = os.path.join(settings.MEDIA_ROOT, "pdfs", filename)
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    if archivo_salida is None:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
-    c = canvas.Canvas(filepath, pagesize=A4)
+    c = canvas.Canvas(archivo_salida if archivo_salida is not None else filepath, pagesize=A4)
     width, height = A4
 
     # === PÁGINA 1: Información general ===
@@ -310,6 +312,8 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
     
     c.save()
     
+    if archivo_salida is not None:
+        return archivo_salida
     return os.path.join("pdfs", filename)
 
 def generar_pdf_presupuesto(presupuesto):
