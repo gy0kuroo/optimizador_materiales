@@ -1,188 +1,134 @@
-# CutLess - Optimizador de Cortes de Tableros
+# CutLess — Optimizador de cortes de tableros
 
-Sistema web Django para optimizar el corte de tableros (madera, melamina, etc.) usando el algoritmo **FFD (First Fit Decreasing)** con colocación en rectángulos libres (BSSF).
+Aplicación Django con optimización de cortes, rotación, margen de corte, historial, clientes, materiales, presupuestos, proyectos y exportación a PDF, Excel y PNG.
 
-> ⚡ **¿Primera vez?** Lee [GUIA_RAPIDA.md](GUIA_RAPIDA.md) para una instalación rápida paso a paso.
+## Instalación local en Windows
 
-## Requisitos previos
+Necesitas Python (entorno comprobado: 3.13), pip y Git. Desde PowerShell:
 
-- Python 3.10 o superior (probado con 3.13)
-- pip
-
-## Instalación
-
-### 1. Clonar o copiar el proyecto
-
-```bash
-git clone <url-del-repositorio>
-cd optimizador_materiales/cut
+```powershell
+git clone https://github.com/gy0kuroo/optimizador_materiales.git
+cd optimizador_materiales
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r cut/requirements.txt
+.\.venv\Scripts\python.exe cut/manage.py migrate
+.\.venv\Scripts\python.exe cut/manage.py check
+.\.venv\Scripts\python.exe cut/manage.py createsuperuser
+.\.venv\Scripts\python.exe cut/manage.py runserver
 ```
 
-### 2. Entorno virtual (recomendado)
+Si ya tienes el proyecto, abre la terminal en la carpeta que contiene este README y omite la clonación. Usar directamente el ejecutable del entorno evita activar scripts en PowerShell.
 
-```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
+Abre [CutLess](http://127.0.0.1:8000/) o [iniciar sesión](http://127.0.0.1:8000/usuarios/login/). La aplicación está en `/cutless/` y el administrador Django en `/admin/`. Ctrl+C detiene el servidor.
 
-# Linux/Mac
-python3 -m venv venv
-source venv/bin/activate
+`createsuperuser` solicita las credenciales que elijas; no hay contraseña predeterminada. Es opcional si ya tienes una cuenta. El repositorio puede incluir una base histórica: migrar conserva sus registros.
+
+Para inicializar el catálogo compartido, opcionalmente:
+
+```powershell
+.\.venv\Scripts\python.exe cut/manage.py crear_materiales_predefinidos
 ```
 
-### 3. Instalar dependencias
+Este comando crea materiales faltantes y puede actualizar sus descripciones.
 
-```bash
-pip install -r requirements.txt
+En Linux/macOS usa `python3 -m venv .venv` y sustituye `.\.venv\Scripts\python.exe` por `./.venv/bin/python`.
+
+## Configuración
+
+El modo predeterminado es desarrollo local. La clave se genera en `cut/.development_secret_key` y se reutiliza; no debe publicarse. Los datos locales usan `cut/db.sqlite3` y `cut/media/`.
+
+[.env.example](.env.example) enumera las variables, pero **no se carga automáticamente**. Define las variables antes de iniciar el servidor:
+
+```powershell
+$env:CUTLESS_ENV = "development"
+$env:CUTLESS_ALLOWED_HOSTS = "localhost,127.0.0.1"
+.\.venv\Scripts\python.exe cut/manage.py runserver
 ```
 
-Dependencias principales: Django 5.2, matplotlib, reportlab, Pillow, openpyxl.
+La [documentación de producción](docs/CAMBIOS_PRODUCCION.md) explica HTTPS, correo, hosts, proxy y almacenamiento privado. Sin SMTP el correo se imprime en consola. No expongas `media/` como carpeta pública: sus rutas requieren autorización.
 
-### 4. Inicializar la base de datos
+## Comprobaciones y solución de problemas
 
-⚠️ **¡IMPORTANTE!** Este paso es crítico y debe ejecutarse siempre después de instalar o clonar el proyecto.
+Si aparece `no such table`, detén el servidor, ejecuta `migrate` con el mismo entorno y configuración, y vuelve a iniciarlo. Conserva la base de datos.
 
-#### Opción A: Script automático (RECOMENDADO)
-
-```bash
-python setup_project.py
+```powershell
+.\.venv\Scripts\python.exe cut/manage.py showmigrations
+.\.venv\Scripts\python.exe cut/manage.py check_database
 ```
 
-Este script:
-- ✅ Verifica si la BD está inicializada
-- ✅ Ejecuta todas las migraciones
-- ✅ Ofrece crear un superuser
+`showmigrations` muestra las migraciones aplicadas. `check_database` comprueba tres tablas esenciales de SQLite; no valida todo el esquema ni los datos.
 
-#### Opción B: Comandos manuales
+Si falta una dependencia, repite la instalación con el ejecutable del entorno virtual. Para otro puerto usa `runserver 8001` y abre `http://127.0.0.1:8001/`.
 
-```bash
-python manage.py migrate
-python manage.py createsuperuser   # opcional
+## Pruebas con archivos aislados
+
+Desde la raíz del repositorio, con el servidor detenido:
+
+```powershell
+@'
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+sys.path.insert(0, str(Path("cut").resolve()))
+os.environ["DJANGO_SETTINGS_MODULE"] = "cutless_project.settings"
+with tempfile.TemporaryDirectory(prefix="cutless-tests-") as tmp:
+    os.environ["MPLCONFIGDIR"] = str(Path(tmp) / "matplotlib")
+    from django.conf import settings
+    settings.MEDIA_ROOT = str(Path(tmp) / "media")
+    import django
+    django.setup()
+    from django.test.utils import get_runner
+    failures = get_runner(settings)(verbosity=1).run_tests(
+        ["cutless.tests", "usuarios.tests"]
+    )
+raise SystemExit(bool(failures))
+'@ | .\.venv\Scripts\python.exe -B -
 ```
 
-#### Verificar el estado:
+Django usa una base de pruebas independiente. Los archivos generados quedan en una carpeta temporal que se elimina al terminar.
 
-```bash
-# Solo verificar
-python manage.py check_database
+## Estructura
 
-# Verificar y reparar automáticamente
-python manage.py check_database --fix
-```
-
-### 5. Ejecutar el servidor
-
-```bash
-python manage.py runserver
-```
-
-- **Login:** `http://127.0.0.1:8000/usuarios/login/`
-- **App principal (requiere sesión):** `http://127.0.0.1:8000/cutless/`
-
-Las URLs antiguas `/opticut/...` redirigen a `/cutless/...`.
-
-## Solución de Problemas
-
-### Error: "no such table: auth_user"
-
-Este error significa que las migraciones no se han ejecutado. Solución:
-
-```bash
-# Opción 1: Script automático
-python setup_project.py
-
-# Opción 2: Comando de reparación
-python manage.py check_database --fix
-
-# Opción 3: Migraciones manuales
-python manage.py migrate
-```
-
-Luego reinicia el servidor:
-```bash
-python manage.py runserver
-```
-
-## Estructura del proyecto
-
-```
+```text
+README.md
+.env.example
+docs/                         Documentación por cambio
 cut/
 ├── manage.py
 ├── requirements.txt
-├── db.sqlite3                 # SQLite (desarrollo)
-├── cutless_project/         # Settings, URLs raíz, WSGI
-├── cutless/                   # App principal
-│   ├── models.py              # Optimizacion, TableroOptimizacion, Material, Cliente, etc.
-│   ├── forms.py
-│   ├── utils.py               # Algoritmo FFD, gráficos, PDF/Excel
-│   ├── services/
-│   │   └── optimization.py    # Persistencia y descargas de resultados
-│   ├── views/                 # Vistas divididas por módulo
-│   │   ├── optimization.py    # Index, resultado, editar, duplicar
-│   │   ├── historial.py
-│   │   ├── exports.py         # PDF, Excel, PNG
-│   │   ├── analytics.py       # Estadísticas, costos
-│   │   ├── materials.py
-│   │   ├── clients.py
-│   │   ├── budgets.py
-│   │   ├── projects.py
-│   │   └── plantillas.py
-│   ├── templates/cutless/
-│   ├── static/cutless/
+├── cutless_project/          Configuración, entorno y rutas raíz
+├── cutless/
+│   ├── models.py
+│   ├── forms/                Formularios por módulo
+│   ├── views/                Vistas y acceso privado a archivos
+│   ├── services/             Optimización y persistencia
+│   ├── packing.py            Colocación de piezas
+│   ├── pieces.py
+│   ├── units.py
+│   ├── render.py             Gráficos
+│   ├── exports/              PDF y Excel
+│   ├── management/commands/
+│   ├── templates/
+│   ├── static/
 │   ├── migrations/
-│   └── tests.py
-├── usuarios/                  # Login, registro, perfil, permisos
-└── media/                     # PDFs, imágenes de tableros (generados)
+│   └── tests/
+├── usuarios/                 Cuentas, perfiles y permisos
+├── db.sqlite3                Datos locales
+└── media/                    Archivos generados
 ```
 
-## Características
+El margen se introduce en milímetros: 0 permite corte sin separación; el valor predeterminado es 3 mm. Las dimensiones usan la unidad seleccionada.
 
-- Optimización FFD + rectángulos libres, con rotación opcional y margen de corte (kerf)
-- Unidades: cm, m, mm, pulgadas (`in`), pies
-- Piezas con nombre (`nombre,ancho,alto,cantidad`) o formato legacy (`ancho,alto,cantidad`)
-- Gráficos por tablero con leyenda detallada (número, nombre, medidas, cantidad, color)
-- **Persistencia de resultados:** tableros, estadísticas y PDF guardados en BD/archivos
-- Exportación: PDF, Excel y PNG (`optimizacion_N.ext` según número en historial)
-- Historial, favoritos, estadísticas, tiempo de corte estimado
-- Materiales, clientes, presupuestos, proyectos y plantillas
-- Modo claro/oscuro, tutorial, notificaciones
+## Documentación de cambios
 
-## Tests
+- [Seguridad](docs/CAMBIOS_SEGURIDAD.md)
+- [JSON seguro](docs/CAMBIOS_JSON_SEGURO.md)
+- [Margen cero](docs/CAMBIOS_MARGEN_CERO.md)
+- [Áreas](docs/CAMBIOS_AREAS.md)
+- [Persistencia](docs/CAMBIOS_PERSISTENCIA.md)
+- [Producción y archivos privados](docs/CAMBIOS_PRODUCCION.md)
+- [Instalación](docs/CAMBIOS_INSTALACION.md)
 
-```bash
-python manage.py test cutless.tests
-```
-
-## Solución de problemas
-
-### Error con matplotlib en Windows
-
-Puede requerir [Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe).
-
-### Recrear base de datos
-
-```bash
-# Windows
-del db.sqlite3
-python manage.py migrate
-```
-
-### Archivos estáticos en producción
-
-```bash
-python manage.py collectstatic
-```
-
-### Acceso sin sesión
-
-Todas las rutas bajo `/cutless/` requieren login. Si accedes sin autenticarte, se redirige a `/usuarios/login/`.
-
-## Notas
-
-- SQLite por defecto; en producción usar PostgreSQL/MySQL y variables de entorno para `SECRET_KEY` y `DEBUG`.
-- Los archivos generados viven en `media/` (`pdfs/`, `optimizaciones/tableros/`).
-- Registros antiguos sin resultado persistido se regeneran al abrir el resultado o descargar.
-
-## Documentación
-
-- Django: https://docs.djangoproject.com/
+Git ignora nuevos datos locales, pero los archivos ya versionados siguen en seguimiento. Su retirada y revisión del historial quedan pendientes.
