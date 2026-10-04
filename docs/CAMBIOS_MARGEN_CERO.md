@@ -95,4 +95,4 @@ La base de datos y los archivos generados locales quedan fuera de este bloque.
 
 ## Siguiente prioridad
 
-Corregir las conversiones de áreas que emplean factores lineales previamente redondeados.
+Las conversiones de áreas se corrigieron en la cuarta etapa: [CAMBIOS_AREAS.md](CAMBIOS_AREAS.md). La siguiente prioridad es revisar la persistencia de resultados.

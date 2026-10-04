@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 from .packing import optimizar_corte, normalizar_info_desperdicio
 from .pieces import parsear_piezas_desde_texto
-from .units import convertir_desde_cm, obtener_simbolo_area, obtener_simbolo_unidad
+from .units import convertir_desde_cm, obtener_factor_area_desde_cm2, obtener_simbolo_area, obtener_simbolo_unidad
 
 def _unpack_posicion_grafico(pos_data, idx_fallback):
     """Normaliza cualquier formato de tupla ``posiciones``."""
@@ -179,8 +179,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
         # Convertir desperdicio para mostrar
         simbolo = obtener_simbolo_unidad(unidad)
         simbolo_area = obtener_simbolo_area(unidad)
-        factor_lineal = convertir_desde_cm(1, unidad)
-        factor_area = factor_lineal ** 2
+        factor_area = obtener_factor_area_desde_cm2(unidad)
         desperdicio_mostrar = round(info_tablero['desperdicio'] * factor_area, 2)
         
         # Título y configuración según modo

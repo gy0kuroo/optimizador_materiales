@@ -1,7 +1,7 @@
 """Generacion de reportes Excel."""
 import io
 
-from ..units import convertir_a_cm, convertir_desde_cm, obtener_simbolo_area, obtener_simbolo_unidad
+from ..units import convertir_a_cm, convertir_desde_cm, obtener_factor_area_desde_cm2, obtener_simbolo_area, obtener_simbolo_unidad
 
 def generar_excel(optimizacion, info_desperdicio, piezas_con_nombre, numero_lista=None):
     """
@@ -130,8 +130,7 @@ def generar_excel(optimizacion, info_desperdicio, piezas_con_nombre, numero_list
     # Datos de piezas
     unidad_opt = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
     simbolo_area = obtener_simbolo_area(unidad_opt)
-    factor_lineal = convertir_desde_cm(1, unidad_opt)
-    factor_area = factor_lineal ** 2
+    factor_area = obtener_factor_area_desde_cm2(unidad_opt)
     
     total_area_piezas = 0
     total_cantidad = 0

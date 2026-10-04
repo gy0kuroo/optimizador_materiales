@@ -50,6 +50,21 @@ def convertir_desde_cm(valor_cm, unidad_destino):
     factor = conversiones.get(unidad_destino, 1.0)
     return round(valor_cm * factor, 2)
 
+def obtener_factor_area_desde_cm2(unidad):
+    """Factor de cm² a la unidad², sin redondear el factor lineal."""
+    if unidad == 'pulgadas':
+        unidad = 'in'
+    centimetros_por_unidad = {
+        'cm': 1.0,
+        'm': 100.0,
+        'mm': 0.1,
+        'in': 2.54,
+        'ft': 30.48,
+    }
+    longitud_cm = centimetros_por_unidad.get(unidad, 1.0)
+    return 1.0 / (longitud_cm ** 2)
+
+
 def obtener_simbolo_unidad(unidad):
     """
     Retorna el símbolo de la unidad para mostrar.

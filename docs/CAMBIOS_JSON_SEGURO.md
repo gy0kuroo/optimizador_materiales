@@ -61,4 +61,4 @@ Agregar únicamente los archivos de este bloque. Los cambios locales de la base 
 
 ## Siguiente prioridad
 
-El margen de corte cero se corrigió en la tercera etapa: [CAMBIOS_MARGEN_CERO.md](CAMBIOS_MARGEN_CERO.md). La siguiente prioridad es corregir la conversión de áreas que emplea factores redondeados.
+El margen de corte cero se corrigió en la tercera etapa: [CAMBIOS_MARGEN_CERO.md](CAMBIOS_MARGEN_CERO.md). Las conversiones de áreas se corrigieron en la cuarta etapa: [CAMBIOS_AREAS.md](CAMBIOS_AREAS.md). La siguiente prioridad es revisar la persistencia de resultados.

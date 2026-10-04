@@ -12,7 +12,7 @@ from django.conf import settings
 
 from ..packing import normalizar_info_desperdicio
 from ..render import _info_desperdicio_desde_optimizacion
-from ..units import convertir_a_cm, convertir_desde_cm, obtener_simbolo_area, obtener_simbolo_unidad
+from ..units import convertir_a_cm, convertir_desde_cm, obtener_factor_area_desde_cm2, obtener_simbolo_area, obtener_simbolo_unidad
 
 def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdicio=None):
     """
@@ -168,8 +168,7 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
             
             # Convertir para mostrar
             simbolo_area = obtener_simbolo_area(optimizacion.unidad_medida)
-            factor_lineal = convertir_desde_cm(1, optimizacion.unidad_medida)
-            factor_area = factor_lineal ** 2
+            factor_area = obtener_factor_area_desde_cm2(optimizacion.unidad_medida)
             
             area_unit_mostrar = round(area_unit_cm2 * factor_area, 2)
             area_total_mostrar = round(area_total_cm2 * factor_area, 2)
@@ -198,8 +197,7 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
     y_pos -= 15
     c.setFont("Helvetica-Bold", 10)
     simbolo_area = obtener_simbolo_area(optimizacion.unidad_medida)
-    factor_lineal = convertir_desde_cm(1, optimizacion.unidad_medida)
-    factor_area = factor_lineal ** 2
+    factor_area = obtener_factor_area_desde_cm2(optimizacion.unidad_medida)
     total_area_mostrar = round(total_area_piezas * factor_area, 2)
     c.drawString(17.5*cm, y_pos, f"Total: {total_area_mostrar} {simbolo_area}")
     c.drawString(2.5*cm, y_pos, f"Total piezas: {total_cantidad_piezas}")

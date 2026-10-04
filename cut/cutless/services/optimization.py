@@ -11,7 +11,7 @@ from ..exports.pdf import generar_pdf
 from ..packing import normalizar_info_desperdicio
 from ..pieces import parsear_piezas_desde_texto
 from ..render import generar_grafico
-from ..units import convertir_desde_cm, obtener_simbolo_area
+from ..units import convertir_desde_cm, obtener_factor_area_desde_cm2, obtener_simbolo_area
 
 
 def _media_root():
@@ -283,7 +283,7 @@ def convertir_info_desperdicio_unidad(info_desperdicio, unidad, optimizacion=Non
         area_usada_total=getattr(optimizacion, 'area_usada_total', None) if optimizacion else None,
         desperdicio_total=getattr(optimizacion, 'desperdicio_total', None) if optimizacion else None,
     )
-    factor_area = convertir_desde_cm(1, unidad) ** 2
+    factor_area = obtener_factor_area_desde_cm2(unidad)
     return {
         **info,
         'area_usada_total': round(info['area_usada_total'] * factor_area, 2),
