@@ -2,6 +2,8 @@
 import base64
 import io
 import os
+from uuid import uuid4
+from decimal import Decimal
 
 from PIL import Image
 from reportlab.lib.pagesizes import A4
@@ -10,6 +12,7 @@ from reportlab.pdfgen import canvas
 
 from django.conf import settings
 
+from ..models import Optimizacion
 from ..packing import normalizar_info_desperdicio
 from ..render import _info_desperdicio_desde_optimizacion
 from ..units import convertir_a_cm, convertir_desde_cm, obtener_factor_area_desde_cm2, obtener_simbolo_area, obtener_simbolo_unidad
@@ -335,7 +338,7 @@ def generar_pdf_presupuesto(presupuesto):
     from reportlab.lib.enums import TA_CENTER, TA_RIGHT
     from django.utils import timezone
     
-    filename = f"presupuesto_{presupuesto.numero.replace('-', '_')}.pdf"
+    filename = f"presupuesto_{presupuesto.pk}_{uuid4().hex}.pdf"
     filepath = os.path.join(settings.MEDIA_ROOT, "presupuestos", filename)
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
     
@@ -492,7 +495,7 @@ def generar_pdf_presupuesto(presupuesto):
     data = [['Concepto', 'Cantidad', 'Precio Unitario', 'Subtotal']]
     
     # Calcular número de lista para cada optimización (basado en orden por fecha descendente)
-    todas_optimizaciones_usuario = Optimizacion.objects.filter(usuario=presupuesto.optimizaciones.first().usuario).order_by('-fecha')
+    todas_optimizaciones_usuario = Optimizacion.objects.filter(usuario=presupuesto.usuario).order_by('-fecha')
     total_optimizaciones_usuario = todas_optimizaciones_usuario.count()
     
     # Agregar fila por cada optimización

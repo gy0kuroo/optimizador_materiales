@@ -1,4 +1,7 @@
+import os
 from decimal import Decimal
+
+from django.conf import settings
 
 from django.contrib import messages
 from django.db.models import Q
@@ -184,7 +187,7 @@ def generar_pdf_presupuesto(request, pk):
     pdf_path = construir_pdf_presupuesto(presupuesto)
     
     if pdf_path:
-        presupuesto.pdf = pdf_path
+        presupuesto.pdf = os.path.relpath(pdf_path, settings.MEDIA_ROOT).replace(os.sep, '/')
         presupuesto.save()
         return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf', filename=f'presupuesto_{presupuesto.numero}.pdf')
     else:

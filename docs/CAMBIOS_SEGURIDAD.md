@@ -86,6 +86,7 @@ Estado de los hallazgos de la revisión inicial:
 3. **Completado en la cuarta etapa:** corregir las conversiones de áreas. Ver [CAMBIOS_AREAS.md](CAMBIOS_AREAS.md).
 4. **Completado para fallos controlados en la quinta etapa:** persistencia de resultados. Ver alcance y límites en [CAMBIOS_PERSISTENCIA.md](CAMBIOS_PERSISTENCIA.md).
 5. Actualizar las instrucciones de instalación y comprobar visualmente el modo oscuro de los formularios de clientes.
+6. **Preparado en la sexta etapa:** configuración por entorno y archivos privados. Ver alcance y pasos de despliegue pendientes en [CAMBIOS_PRODUCCION.md](CAMBIOS_PRODUCCION.md).
 
 Esta documentación describe exclusivamente los cambios aplicados en la primera etapa; los puntos pendientes no forman parte de la validación anterior.
 

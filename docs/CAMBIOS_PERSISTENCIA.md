@@ -82,4 +82,4 @@ La base de datos y los archivos generados locales quedan fuera del commit.
 
 ## Siguiente prioridad
 
-Separar la configuración de desarrollo y producción, sacar los secretos del código y revisar el acceso a los archivos generados. Después, actualizar las instrucciones de instalación y comprobar los formularios de clientes en modo oscuro.
+La configuración por entorno y el acceso privado a archivos se prepararon en la sexta etapa: [CAMBIOS_PRODUCCION.md](CAMBIOS_PRODUCCION.md). Quedan actualizar las instrucciones de instalación y comprobar los formularios de clientes en modo oscuro; el despliegue real requiere configurar la infraestructura.

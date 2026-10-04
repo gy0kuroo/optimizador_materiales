@@ -10,31 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from .environment import configuracion_entorno
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-e_q@w%t16!xyu5-koagdemt-47(r5q3m#at@d774k1m+*oom=z'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.18.13']
-#python manage.py runserver 0.0.0.0:8000
-
-# CSRF (Django 4+): debe incluir el origen exacto (esquema + host + puerto) desde el que envías POST.
-# Sin esto, login/admin pueden fallar al usar otra IP o nombre que no coincida con la cookie Referer.
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-    'http://192.168.18.13:8000',
-]
+# El desarrollo local es el modo predeterminado. Producción exige variables explícitas.
+globals().update(configuracion_entorno(BASE_DIR))
 
 # Application definition
 
@@ -88,7 +74,7 @@ WSGI_APPLICATION = 'cutless_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': Path(os.environ.get('CUTLESS_DB_PATH', BASE_DIR / 'db.sqlite3')),
     }
 }
 
@@ -155,21 +141,16 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 1800  # 30 minutos
 # Prevenir acceso a cookies de sesión desde JavaScript (protección XSS)
 SESSION_COOKIE_HTTPONLY = True
-# Solo enviar cookies de sesión sobre HTTPS en producción (descomentar en producción)
-# SESSION_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE se configura según CUTLESS_ENV en environment.py.
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'   # o str(BASE_DIR / 'media') según tu configuración
+MEDIA_ROOT = Path(os.environ.get('CUTLESS_MEDIA_ROOT', BASE_DIR / 'media'))
 
-# Configuración de Email (para recuperación de contraseña)
-# En desarrollo, los emails se mostrarán en la consola
-# En producción, configura estos valores con tu servidor SMTP
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para desarrollo
-# Para producción, usar:
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'  # o tu servidor SMTP
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'tu_email@gmail.com'
-# EMAIL_HOST_PASSWORD = 'tu_contraseña'
-# DEFAULT_FROM_EMAIL = 'CutLess <noreply@CutLess.com>'
+# SMTP opcional; sin host los mensajes se imprimen en consola para desarrollo.
+EMAIL_HOST = os.environ.get('CUTLESS_EMAIL_HOST', '')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' if EMAIL_HOST else 'django.core.mail.backends.console.EmailBackend'
+EMAIL_PORT = int(os.environ.get('CUTLESS_EMAIL_PORT', '587'))
+EMAIL_USE_TLS = bool(EMAIL_HOST)
+EMAIL_HOST_USER = os.environ.get('CUTLESS_EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('CUTLESS_EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('CUTLESS_DEFAULT_FROM_EMAIL', 'CutLess <noreply@localhost>')

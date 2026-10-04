@@ -56,3 +56,12 @@ ambiente*.txt
 Thumbs.db
 desktop.ini
 
+
+# Configuración privada y archivos generados del proyecto
+.env
+.env.*
+!.env.example
+.development_secret_key
+/cut/db.sqlite3*
+/cut/media/
+/cut/staticfiles/
