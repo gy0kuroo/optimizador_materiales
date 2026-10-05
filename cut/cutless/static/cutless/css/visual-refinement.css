@@ -1,0 +1,10 @@
+/* Navegación compartida: refinamiento de la marca y jerarquía. */
+.navbar-custom { background: var(--cl-walnut); border-bottom: 1px solid var(--cl-olive); box-shadow: 0 2px 10px rgba(78,45,1,.12); }
+.navbar-custom .navbar-brand { font-size: 1.35rem !important; font-weight: 600 !important; text-transform: none; letter-spacing: -.03em; }
+.brand-mark { flex-shrink: 0; color: var(--cl-ash-white); }
+.navbar-custom .navbar-greeting { font-size: .9rem; letter-spacing: normal; text-transform: none; color: var(--cl-ash-light); }
+.navbar-custom .nav-link { font-size: .95rem; letter-spacing: normal; text-transform: none; color: var(--cl-ash-white) !important; }
+.navbar-custom .nav-link.active { background: rgba(255,255,255,.12); }
+.navbar-custom .nav-link.active::after { display: none; }
+.navbar-custom .dropdown-item, .navbar-custom .dropdown-header { text-transform: none; letter-spacing: normal; }
+@media (max-width: 575px) { .navbar-custom .navbar-greeting { display: none; } }

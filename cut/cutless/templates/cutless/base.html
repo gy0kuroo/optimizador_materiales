@@ -21,23 +21,26 @@
     <link rel="stylesheet" href="{% static 'cutless/css/palette.css' %}">
     <link rel="stylesheet" href="{% static 'cutless/css/ui.css' %}">
     <link rel="stylesheet" href="{% static 'cutless/css/accessibility.css' %}">
+    <link rel="stylesheet" href="{% static 'cutless/css/visual-refinement.css' %}">
     
     {% block extra_css %}{% endblock %}
 </head>
-<body {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
+<body class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
+    {% block navigation %}
     <!-- Navegación -->
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container-fluid">
             <div class="d-flex align-items-center">
                 <a class="navbar-brand me-3" href="{% url 'cutless:index' %}">
-                    🪚 CutLess
+                    <svg class="brand-mark" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="2" y="2" width="24" height="24" rx="5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M16 3v22M16 14h9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+                    CutLess
                 </a>
                 {% if user.is_authenticated %}
                     <span class="navbar-greeting">Hola, {{ user.username }}</span>
                 {% endif %}
             </div>
             <button class="navbar-toggler navbar-toggler-custom" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegación">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -106,6 +109,7 @@
             </div>
         </div>
     </nav>
+    {% endblock %}
     
     <!-- Contenido Principal -->
     <div class="container app-main">

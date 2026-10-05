@@ -59,7 +59,7 @@
         });
         
         // Si hay un tablero seleccionado, actualizar el texto del botón también
-        if (dropdownButton && dropdownButton.textContent !== 'Seleccionar tablero predefinido...') {
+        if (dropdownButton && dropdownButton.textContent !== 'Elegir medidas habituales') {
             const selectedItem = document.querySelector('.dropdown-item.active') || 
                                 Array.from(document.querySelectorAll('.dropdown-item[data-medida]')).find(item => {
                                     const anchoInput = document.getElementById('ancho_tablero');
@@ -122,7 +122,7 @@
         // Crear label
         const label = document.createElement('label');
         label.className = 'form-label mb-2';
-        label.textContent = 'Tableros Predefinidos:';
+        label.textContent = 'Usar medidas habituales (opcional)';
         label.setAttribute('for', 'tableros-dropdown');
         container.appendChild(label);
         
@@ -137,7 +137,7 @@
         dropdownButton.setAttribute('data-bs-toggle', 'dropdown');
         dropdownButton.setAttribute('data-bs-auto-close', 'true');
         dropdownButton.setAttribute('aria-expanded', 'false');
-        dropdownButton.textContent = 'Seleccionar tablero predefinido...';
+        dropdownButton.textContent = 'Elegir medidas habituales';
         
         const dropdownMenu = document.createElement('ul');
         dropdownMenu.className = 'dropdown-menu w-100';
@@ -146,6 +146,10 @@
         dropdownWrapper.appendChild(dropdownButton);
         dropdownWrapper.appendChild(dropdownMenu);
         container.appendChild(dropdownWrapper);
+        const ayuda = document.createElement('p');
+        ayuda.className = 'form-text';
+        ayuda.textContent = 'Puedes elegir una medida habitual o escribir tus propias medidas abajo. Si hay un material coincidente, también se seleccionará y se actualizará su precio.';
+        container.appendChild(ayuda);
         
         // Inicializar Bootstrap Dropdown
         setTimeout(function() {
@@ -260,7 +264,7 @@
                 }
                 
                 if (!encontrado) {
-                dropdownButton.textContent = 'Seleccionar tablero predefinido...';
+                dropdownButton.textContent = 'Elegir medidas habituales';
                     dropdownButton.removeAttribute('data-tablero-seleccionado');
                 }
             }
@@ -297,7 +301,7 @@
                 }
                 
                 if (!encontrado) {
-                dropdownButton.textContent = 'Seleccionar tablero predefinido...';
+                dropdownButton.textContent = 'Elegir medidas habituales';
                     dropdownButton.removeAttribute('data-tablero-seleccionado');
                 }
             }

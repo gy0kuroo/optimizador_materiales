@@ -1,0 +1,15 @@
+/* Registro: composición compartida con login, lectura adaptada al formulario largo. */
+.register-page { font-size: 1.125rem; line-height: 1.6; }
+.register-shell { grid-template-columns: .9fr 1.1fr; }
+.register-page .login-form label { font-size: 1.125rem; }
+.register-page .login-intro, .register-page .login-register { font-size: 1.0625rem; }
+.register-help { color: var(--cl-text-secondary); font-size: 1rem; margin-top: 8px; line-height: 1.6; }
+.register-help ul { padding-left: 22px; margin: 8px 0 0; }
+.register-help li + li { margin-top: 4px; }
+.register-page .login-field-errors { font-size: 1rem; color: var(--cl-text-primary); }
+.register-page .login-submit { padding: 12px 16px; }
+@media (max-width: 767px) {
+  .register-shell { grid-template-columns: 1fr; }
+  .register-page .login-story { gap: 12px; }
+  .register-page .login-story h2 { margin-bottom: 12px; }
+}

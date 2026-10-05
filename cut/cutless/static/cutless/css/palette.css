@@ -80,7 +80,7 @@
   --cl-transition-slow:  all .35s cubic-bezier(.4,0,.2,1);
 
   /* ── Tipografía ──────────────────────────────────────────── */
-  --cl-font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --cl-font-display: 'Barlow', 'Trebuchet MS', sans-serif;
   --cl-font-body:    'Barlow', 'Trebuchet MS', sans-serif;
   --cl-font-mono:    'JetBrains Mono', 'Courier New', monospace;
 

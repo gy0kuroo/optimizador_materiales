@@ -1,67 +1,50 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block title %}Iniciar sesión · CutLess{% endblock %}
+{% block body_class %}login-page{% endblock %}
+{% block navigation %}{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'usuarios/css/login.css' %}">
+<link rel="stylesheet" href="{% static 'usuarios/css/login-redesign.css' %}">
 {% endblock %}
-
-{% block show_auth_buttons %}
-{% endblock %}
+{% block show_auth_buttons %}{% endblock %}
 
 {% block content %}
-  <header class="page-header page-header--center fade-in">
-    <div class="page-header__text">
-      <h1 class="page-title">Iniciar sesión</h1>
-      <p class="page-lead">Bienvenido de nuevo a CutLess</p>
+<div class="login-shell">
+  <section class="login-story" aria-labelledby="login-story-title">
+    <div class="login-brand">CutLess / Planificación de cortes</div>
+    <div>
+      <div class="login-eyebrow">Del tablero al proyecto</div>
+      <h2 id="login-story-title">Cada pieza cuenta.</h2>
+      <p>Organiza tus cortes, aprovecha el material y guarda cada proyecto en un mismo lugar.</p>
     </div>
-  </header>
-
-  <div class="row justify-content-center auth-page">
-    <div class="col-md-6 col-lg-5">
-      <div class="auth-card auth-card--plain fade-in">
-        <div class="auth-card-body">
-          <form method="post" class="auth-form">
-            {% csrf_token %}
-            
-            {% if form.errors %}
-              <div class="alert alert-danger">
-                <strong>Error:</strong> Por favor, corrige los siguientes errores.
-                {{ form.non_field_errors }}
-              </div>
-            {% endif %}
-            
-            <div class="form-group mb-3">
-              <label for="{{ form.username.id_for_label }}" class="form-label">
-                {{ form.username.label }}
-              </label>
-              {{ form.username }}
-              {% if form.username.errors %}
-                <div class="text-danger small mt-1">{{ form.username.errors }}</div>
-              {% endif %}
-            </div>
-            
-            <div class="form-group mb-4">
-              <label for="{{ form.password.id_for_label }}" class="form-label">
-                {{ form.password.label }}
-              </label>
-              {{ form.password }}
-              {% if form.password.errors %}
-                <div class="text-danger small mt-1">{{ form.password.errors }}</div>
-              {% endif %}
-            </div>
-            
-            <div class="text-center">
-              <button type="submit" class="btn btn-primary btn-lg btn-auth">
-                Entrar
-              </button>
-            </div>
-          </form>
-        </div>
-        <div class="auth-card-footer text-center">
-          <p class="mb-2">¿No tienes cuenta? <a href="{% url 'usuarios:registro' %}" class="auth-link">Regístrate aquí</a></p>
-          <p class="mb-0"><a href="{% url 'usuarios:recuperar_password' %}" class="auth-link">¿Olvidaste tu contraseña?</a></p>
-        </div>
+    <div>
+      <div class="login-plan" aria-hidden="true"><span></span><span></span><span></span></div>
+      <p class="login-story-footer">Planifica. Optimiza. Construye.</p>
+    </div>
+  </section>
+  <section class="login-panel" aria-labelledby="login-title">
+    <h1 id="login-title">Bienvenido de nuevo</h1>
+    <p class="login-intro">Inicia sesión para continuar con tus proyectos.</p>
+    <form method="post" class="login-form">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+      <div class="login-errors" role="alert">{{ form.non_field_errors }}</div>
+      {% endif %}
+      <div class="login-field">
+        <label for="{{ form.username.id_for_label }}">Usuario</label>
+        {{ form.username }}
+        {% if form.username.errors %}<div class="login-field-errors" role="alert">{{ form.username.errors }}</div>{% endif %}
       </div>
-    </div>
-  </div>
+      <div class="login-field">
+        <label for="{{ form.password.id_for_label }}">Contraseña</label>
+        {{ form.password }}
+        {% if form.password.errors %}<div class="login-field-errors" role="alert">{{ form.password.errors }}</div>{% endif %}
+      </div>
+      <a class="login-recovery" href="{% url 'usuarios:recuperar_password' %}">¿Olvidaste tu contraseña?</a>
+      <button type="submit" class="login-submit">Iniciar sesión</button>
+    </form>
+    <p class="login-register">¿Primera vez aquí? <a href="{% url 'usuarios:registro' %}">Crear una cuenta</a></p>
+  </section>
+</div>
 {% endblock %}

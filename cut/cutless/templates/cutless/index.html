@@ -1,8 +1,10 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
+{% block body_class %}dashboard-page{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'cutless/css/index.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/dashboard-refinement.css' %}?v=5">
 {% endblock %}
 
 {% block extra_js %}
@@ -13,7 +15,7 @@
     const materialData = JSON.parse(document.getElementById('materiales-data').textContent);
     window.materialData = materialData;
 </script>
-<script src="{% static 'cutless/js/medidas-pred.js' %}"></script>
+<script src="{% static 'cutless/js/medidas-pred.js' %}?v=2"></script>
 {% endblock %}
 
 {% block content %}
@@ -22,8 +24,8 @@
       <img src="{% static 'cutless/icons/sierra-mesa.png' %}" alt="" class="cl-icon cl-icon--page" onerror="this.style.display='none'">
     </div>
     <div class="page-header__text">
-      <h1 class="page-title">Nueva optimización</h1>
-      <p class="page-lead">Define el tablero, agrega las piezas a cortar y obtén el plan de corte optimizado en segundos.</p>
+      <h1 class="page-title">Plan de corte</h1>
+      <p class="page-lead">Introduce las medidas del tablero y las piezas que necesitas cortar.</p>
     </div>
     <div class="page-header__actions">
       <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary">
@@ -35,26 +37,20 @@
 
   <div class="workflow-steps fade-in" aria-label="Pasos del proceso">
     <div class="workflow-step workflow-step--1">
-      <span class="workflow-step__num">
-        <img src="{% static 'cutless/icons/tablero.svg' %}" alt="" class="cl-icon cl-icon--step" onerror="this.outerHTML='1'">
-      </span>
-      <span>Dimensiones del tablero</span>
+      <span class="workflow-step__num">1</span>
+      <span>Configura el tablero</span>
     </div>
     <div class="workflow-step workflow-step--2">
-      <span class="workflow-step__num">
-        <img src="{% static 'cutless/icons/pieza.svg' %}" alt="" class="cl-icon cl-icon--step" onerror="this.outerHTML='2'">
-      </span>
-      <span>Piezas a cortar</span>
+      <span class="workflow-step__num">2</span>
+      <span>Añade las piezas</span>
     </div>
     <div class="workflow-step workflow-step--3">
-      <span class="workflow-step__num">
-        <img src="{% static 'cutless/icons/calcular.svg' %}" alt="" class="cl-icon cl-icon--step" onerror="this.outerHTML='3'">
-      </span>
-      <span>Calcular optimización</span>
+      <span class="workflow-step__num">3</span>
+      <span>Genera el plan</span>
     </div>
   </div>
 
-  <form method="post" action="{% url 'cutless:index' %}" id="optimizacion-form" onsubmit="mostrarIndicadorCarga('Procesando optimización... Esto puede tardar unos segundos.');">
+  <form method="post" action="{% url 'cutless:index' %}" id="optimizacion-form" onsubmit="mostrarIndicadorCarga('Generando el plan de corte... Esto puede tardar unos segundos.');">
     {% csrf_token %}
 
     <!-- Sección: Dimensiones del Tablero -->
@@ -62,13 +58,13 @@
       <div class="card-header card-header-step card-header-step-primary text-white">
         <h4 class="card-header-title">
           <img src="{% static 'cutless/icons/tablero-outline.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
-          Dimensiones del tablero
+          1. Configura el tablero
         </h4>
         <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion ms-auto"
                 onclick="iniciarTutorialSeccion('tablero')"
                 title="Ayuda sobre dimensiones del tablero">
           <img src="{% static 'cutless/icons/ayuda.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
-          Ayuda
+          Cómo medir el tablero
         </button>
       </div>
       <div class="card-body">
@@ -80,7 +76,7 @@
               <div class="flex-grow-1">
                 {{ tablero_form.unidad_medida.label_tag }}
                 {{ tablero_form.unidad_medida }}
-                <small class="form-text text-muted">{{ tablero_form.unidad_medida.help_text }}</small>
+                <small class="form-text text-muted">Esta unidad se aplica al tablero y a las piezas.</small>
                 {% if tablero_form.unidad_medida.errors %}
                   <div class="text-danger">{{ tablero_form.unidad_medida.errors }}</div>
                 {% endif %}
@@ -101,7 +97,7 @@
                    placeholder="Ej: 122"
                    step="0.01"
                    value="{{ tablero_form.ancho.value|default:'' }}">
-            <small class="form-text text-muted">{{ tablero_form.ancho.help_text }}</small>
+            <small class="form-text text-muted">Medida horizontal del tablero completo.</small>
             {% if tablero_form.ancho.errors %}
               <div class="text-danger">{{ tablero_form.ancho.errors }}</div>
             {% endif %}
@@ -118,7 +114,7 @@
                    placeholder="Ej: 244"
                    step="0.01"
                    value="{{ tablero_form.alto.value|default:'' }}">
-            <small class="form-text text-muted">{{ tablero_form.alto.help_text }}</small>
+            <small class="form-text text-muted">Medida vertical del tablero completo.</small>
             {% if tablero_form.alto.errors %}
               <div class="text-danger">{{ tablero_form.alto.errors }}</div>
             {% endif %}
@@ -135,15 +131,15 @@
                      {% if tablero_form.permitir_rotacion.value %}checked{% endif %}>
               <label class="form-check-label" for="{{ tablero_form.permitir_rotacion.id_for_label }}">
                 <img src="{% static 'cutless/icons/rotacion.svg' %}" alt="" class="cl-icon cl-icon--label" onerror="this.style.display='none'">
-                {{ tablero_form.permitir_rotacion.label }}
+                Permitir girar las piezas
               </label>
-              <small class="form-text text-muted d-block">{{ tablero_form.permitir_rotacion.help_text }}</small>
+              <small class="form-text text-muted d-block">El cálculo puede girarlas 90°. Desactívalo si debes respetar la veta o el dibujo.</small>
             </div>
           </div>
           <div class="col-md-6 mb-3">
             <label for="{{ tablero_form.margen_corte.id_for_label }}">
               <img src="{% static 'cutless/icons/margen.png' %}" alt="" class="cl-icon cl-icon--label" onerror="this.style.display='none'">
-              {{ tablero_form.margen_corte.label }} <span class="unidad-margen">(mm)</span>
+              Ancho de corte de la sierra <span class="unidad-margen">(mm)</span>
             </label>
             <input type="number"
                    name="margen_corte"
@@ -154,7 +150,7 @@
                    min="0"
                    max="10"
                    value="{% if tablero_form.margen_corte.value %}{{ tablero_form.margen_corte.value }}{% elif tablero_form.margen_corte.initial %}{{ tablero_form.margen_corte.initial }}{% else %}3{% endif %}">
-            <small class="form-text text-muted">{{ tablero_form.margen_corte.help_text }}</small>
+            <small class="form-text text-muted">Ancho que consume la sierra en cada corte. Siempre en milímetros; 0 significa sin separación.</small>
             {% if tablero_form.margen_corte.errors %}
               <div class="text-danger">{{ tablero_form.margen_corte.errors }}</div>
             {% endif %}
@@ -170,16 +166,17 @@
 
         <h4 class="card-header-title">
           <img src="{% static 'cutless/icons/pieza.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
-          Piezas a cortar
+          2. Añade las piezas
         </h4>
         <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion ms-auto"
                 onclick="iniciarTutorialSeccion('piezas')"
-                title="Ayuda sobre piezas a cortar">
+                title="Cómo añadir piezas">
           <img src="{% static 'cutless/icons/ayuda.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
-          Ayuda
+          Cómo añadir piezas
         </button>
       </div>
       <div class="card-body">
+        <p class="form-text">Añade una fila por cada medida distinta y usa Cantidad para las piezas iguales.</p>
         {{ pieza_formset.management_form }}
 
         <div id="pieza-container">
@@ -188,7 +185,7 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h5 class="mb-0">
                 <img src="{% static 'cutless/icons/pieza-outline.png' %}" alt="" class="cl-icon cl-icon--mini" onerror="this.style.display='none'">
-                Pieza #<span class="pieza-numero">{{ forloop.counter }}</span>
+                Tipo de pieza <span class="pieza-numero">{{ forloop.counter }}</span>
               </h5>
               <button type="button" class="btn btn-danger btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %}">
                 <img src="{% static 'cutless/icons/eliminar.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
@@ -225,7 +222,7 @@
 
         <button type="button" id="add-pieza" class="btn btn-outline-success">
           <img src="{% static 'cutless/icons/agregar.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
-          Agregar otra pieza
+          Añadir otro tipo de pieza
         </button>
       </div>
     </div>
@@ -236,14 +233,15 @@
       <div class="card-header card-header-step card-header-step-info text-white d-flex justify-content-between align-items-center">
         <h4 class="mb-0 card-header-title">
           <img src="{% static 'cutless/icons/costos.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
-          Costos (opcional)
+          Costos y datos del proyecto (opcional)
         </h4>
         <button id="btnCostosToggle" class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#costosCollapse" aria-expanded="false" aria-controls="costosCollapse">
-          <span id="costosToggleIcon">+</span> Mostrar
+          <span id="costosToggleIcon">+</span> Añadir costos y datos
         </button>
       </div>
       <div id="costosCollapse" class="collapse">
         <div class="card-body">
+          <p class="form-text">Puedes generar el plan sin completar este apartado.</p>
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="{{ tablero_form.material.id_for_label }}">{{ tablero_form.material.label }}</label>
@@ -255,7 +253,7 @@
               <div class="mt-2">
                 <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-sm btn-outline-primary" target="_blank">
                   <img src="{% static 'cutless/icons/material.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
-                  Gestionar Materiales
+                  Gestionar materiales (otra pestaña)
                 </a>
               </div>
             </div>
@@ -295,7 +293,7 @@
                 <div class="text-danger">{{ tablero_form.cliente.errors }}</div>
               {% endif %}
               <small class="form-text text-muted">
-                <a href="{% url 'cutless:crear_cliente' %}" target="_blank">Crear nuevo cliente</a>
+                <a href="{% url 'cutless:crear_cliente' %}" target="_blank">Crear cliente (otra pestaña)</a>
               </small>
             </div>
             <div class="col-md-6 mb-3">
@@ -306,7 +304,7 @@
                 <div class="text-danger">{{ tablero_form.proyecto.errors }}</div>
               {% endif %}
               <small class="form-text text-muted">
-                <a href="{% url 'cutless:crear_proyecto' %}" target="_blank">Crear nuevo proyecto</a>
+                <a href="{% url 'cutless:crear_proyecto' %}" target="_blank">Crear proyecto (otra pestaña)</a>
               </small>
             </div>
           </div>
@@ -325,7 +323,7 @@
     <div class="form-action-bar fade-in">
       <button type="submit" class="btn btn-primary btn-lg btn-cta-primary">
         <img src="{% static 'cutless/icons/calcular.svg' %}" alt="" class="cl-icon cl-icon--cta" onerror="this.style.display='none'">
-        Calcular optimización
+        Generar plan de corte
       </button>
       <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary btn-lg">
         <img src="{% static 'cutless/icons/historial.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
@@ -333,7 +331,7 @@
       </a>
       <p class="form-action-hint">
         <img src="{% static 'cutless/icons/info.svg' %}" alt="" class="cl-icon cl-icon--hint" onerror="this.style.display='none'">
-        Revisa las medidas antes de calcular. Puedes agregar tantas piezas como necesites.
+        Cada fila describe un tipo de pieza. Indica en Cantidad cuántas piezas iguales necesitas. Puedes añadir hasta 20 tipos.
       </p>
     </div>
   </form>
@@ -368,9 +366,9 @@ document.addEventListener('DOMContentLoaded', function() {
     addButton.addEventListener('click', async function() {
         if (formCount >= 20) {
             if (window.cutlessAlerta) {
-                await window.cutlessAlerta({ titulo: 'Límite de piezas', mensaje: 'Máximo 20 piezas permitidas.' });
+                await window.cutlessAlerta({ titulo: 'Límite de tipos de pieza', mensaje: 'Puedes añadir hasta 20 tipos de pieza.' });
             } else {
-                alert('Máximo 20 piezas permitidas');
+                alert('Puedes añadir hasta 20 tipos de pieza.');
             }
             return;
         }
@@ -416,11 +414,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (btnCostosToggle && costosCollapse) {
         costosCollapse.addEventListener('shown.bs.collapse', function() {
-            btnCostosToggle.innerHTML = '&#x2212; Ocultar'; // menos
+            btnCostosToggle.innerHTML = '&#x2212; Ocultar costos y datos'; // menos
         });
 
         costosCollapse.addEventListener('hidden.bs.collapse', function() {
-            btnCostosToggle.innerHTML = '+ Mostrar';
+            btnCostosToggle.innerHTML = '+ Añadir costos y datos';
         });
     }
 

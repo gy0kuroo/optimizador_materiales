@@ -1,0 +1,49 @@
+/* Primera pasada del panel: mantener el flujo, reducir el ruido visual. */
+.dashboard-page .page-header { border-bottom: 1px solid var(--cl-border); align-items: center; margin-bottom: 24px; }
+.dashboard-page .page-header__icon { display: none; }
+.dashboard-page .page-title { font-size: clamp(1.8rem, 3vw, 2.4rem); letter-spacing: -.035em; text-transform: none; }
+.dashboard-page .page-lead { color: var(--cl-text-secondary); max-width: 65ch; }
+.dashboard-page .workflow-step { border-radius: 10px; font-size: .95rem; text-transform: none; letter-spacing: normal; }
+.dashboard-page .card { border: 1px solid var(--cl-border); border-radius: 14px; box-shadow: var(--cl-shadow-sm); overflow: hidden; }
+.dashboard-page .card-header-step { background: var(--cl-bg-surface); color: var(--cl-text-primary) !important; border-bottom: 1px solid var(--cl-border); }
+.dashboard-page .card-header-title { font-size: 1.2rem; letter-spacing: -.015em; text-transform: none; }
+.dashboard-page .card-header-step img.cl-icon { display: inline-block !important; filter: brightness(0); }
+[data-theme="dark"] .dashboard-page .card-header-step img.cl-icon { filter: brightness(0) invert(1); }
+.dashboard-page .card-header-step .btn-ayuda-seccion { background: transparent !important; color: var(--cl-text-secondary) !important; border-color: var(--cl-border-strong) !important; text-transform: none; letter-spacing: normal; font-size: .9rem !important; }
+.dashboard-page .card-body label { text-transform: none; letter-spacing: normal; color: var(--cl-text-primary); }
+.dashboard-page .card-body .form-control, .dashboard-page .card-body .form-select, .dashboard-page .card-body select { border-width: 1px !important; border-radius: 8px !important; font-size: 1rem !important; }
+.dashboard-page .card-body .form-text, .dashboard-page .card-body small.text-muted { color: var(--cl-text-secondary) !important; }
+.dashboard-page .pieza-form { border-width: 1px !important; box-shadow: none; }
+.dashboard-page .pieza-form h5 { text-transform: none; letter-spacing: normal; }
+.dashboard-page .workflow-steps { gap: 20px; background: transparent; }
+.dashboard-page .workflow-step { background: transparent; border: 0; box-shadow: none; padding: 8px 0; color: var(--cl-text-secondary); cursor: default; }
+.dashboard-page .workflow-step::after { display: none; }
+.dashboard-page .workflow-step__num { width: 28px; height: 28px; background: var(--cl-bg-surface); color: var(--cl-text-secondary); border: 1px solid var(--cl-border); font-size: .9rem; font-weight: 600; }
+.dashboard-page .card-header-step { flex-wrap: wrap; }
+.dashboard-page .card-header-step .btn-ayuda-seccion { white-space: normal; }
+@media (max-width: 767px) { .dashboard-page .page-header { flex-wrap: wrap; } .dashboard-page .page-header__actions { margin-left: 0; } }
+
+/* Lectura cómoda y controles con contraste en ambas apariencias. */
+body.dashboard-page { font-family: var(--cl-font-body); font-size: 1.125rem; line-height: 1.65; }
+.dashboard-page .page-lead, .dashboard-page .workflow-step { font-size: 1.125rem; }
+.dashboard-page .card-header-title { font-size: 1.4rem; font-weight: 600; }
+.dashboard-page .card-body label, .dashboard-page .form-check-label { font-size: 1.125rem !important; }
+.dashboard-page .card-body .form-control, .dashboard-page .card-body .form-select, .dashboard-page .card-body select { font-size: 1.125rem !important; min-height: 48px; }
+.dashboard-page .card-body .form-text, .dashboard-page .card-body small.text-muted, .dashboard-page .form-action-hint { font-size: 1rem !important; line-height: 1.6; color: var(--cl-text-secondary) !important; }
+.dashboard-page .btn, .dashboard-page .card-header-step .btn-ayuda-seccion, .dashboard-page #add-pieza, .dashboard-page .remove-pieza { font-family: var(--cl-font-body) !important; font-size: 1.0625rem !important; letter-spacing: normal !important; text-transform: none !important; min-height: 48px; white-space: normal; }
+.dashboard-page #btnCostosToggle, .dashboard-page .card-header-step .btn-ayuda-seccion { background: var(--cl-bg-card) !important; color: var(--cl-text-primary) !important; border: 1px solid var(--cl-border-strong) !important; padding: 10px 16px !important; }
+.dashboard-page #btnCostosToggle:hover, .dashboard-page .card-header-step .btn-ayuda-seccion:hover { background: var(--cl-bg-surface) !important; }
+.dashboard-page .btn-cta-primary { font-size: 1.25rem !important; }
+.dashboard-page .btn-outline-secondary img.cl-icon--btn, .dashboard-page .btn-outline-primary img.cl-icon--btn, .dashboard-page #add-pieza img.cl-icon--btn { filter: brightness(0); }
+[data-theme="dark"] .dashboard-page .btn-outline-secondary img.cl-icon--btn, [data-theme="dark"] .dashboard-page .btn-outline-primary img.cl-icon--btn, [data-theme="dark"] .dashboard-page #add-pieza img.cl-icon--btn { filter: brightness(0) invert(1); }
+.dashboard-page .btn:focus-visible { outline: 3px solid var(--cl-blue-light); outline-offset: 3px; }
+.dashboard-page #btnCostosToggle { font-family: var(--cl-font-body) !important; font-size: 1.0625rem !important; font-weight: 600 !important; letter-spacing: normal; text-transform: none; }
+.dashboard-page .card-header-step .btn-ayuda-seccion { font-weight: 600 !important; }
+.dashboard-page .form-check { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 6px 14px; align-items: start; padding: 16px; }
+.dashboard-page .form-check .form-check-input { float: none; margin: 3px 0 0; width: 24px !important; height: 24px !important; min-width: 24px; min-height: 24px; grid-column: 1; grid-row: 1; }
+.dashboard-page .form-check .form-check-label { grid-column: 2; grid-row: 1; margin: 0; font-family: var(--cl-font-body) !important; text-transform: none; letter-spacing: normal; }
+.dashboard-page .form-check small.text-muted { grid-column: 2; margin: 0 !important; }
+.dashboard-page .card-body select.form-select { background-color: var(--cl-bg-card) !important; border-color: var(--cl-border) !important; color: var(--cl-text-primary) !important; font-weight: 500; }
+.dashboard-page .card-body select.form-select:hover, .dashboard-page #tableros-dropdown:hover { background-color: var(--cl-bg-surface) !important; border-color: var(--cl-border-strong) !important; color: var(--cl-text-primary) !important; }
+.dashboard-page #tableros-dropdown { background-color: var(--cl-bg-card) !important; color: var(--cl-text-primary) !important; }
+.dashboard-page .card-body select.form-select:focus { outline: 3px solid var(--cl-blue-light) !important; outline-offset: 2px; }

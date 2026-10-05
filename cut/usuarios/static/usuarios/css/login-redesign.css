@@ -1,0 +1,69 @@
+/* Primera sección del rediseño: acceso. Estilos aislados del resto de cuentas. */
+body.login-page {
+  --login-grid: rgba(125, 99, 68, .09);
+  background-color: #fff;
+  background-image: linear-gradient(var(--login-grid) 1px, transparent 1px), linear-gradient(90deg, var(--login-grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+[data-theme="dark"] body.login-page {
+  --login-grid: rgba(183, 184, 171, .07);
+  background-color: var(--cl-bg-base);
+  background-image: linear-gradient(var(--login-grid) 1px, transparent 1px), linear-gradient(90deg, var(--login-grid) 1px, transparent 1px);
+}
+.login-page .app-main { padding-top: clamp(24px, 6vh, 64px); padding-bottom: 32px; }
+.login-shell {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  min-height: 620px;
+  max-width: 1100px;
+  margin: 24px auto;
+  border: 1px solid var(--cl-border);
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--cl-bg-card);
+  box-shadow: var(--cl-shadow-lg);
+}
+.login-story {
+  padding: clamp(28px, 5vw, 64px);
+  background: var(--cl-walnut);
+  color: var(--cl-ash-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 36px;
+}
+.login-brand { font-size: 1.3rem; font-weight: 600; letter-spacing: -.03em; }
+.login-eyebrow { font-size: .8rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+.login-story h2 { color: inherit; font-size: clamp(2rem, 3.5vw, 3rem); line-height: 1.15; letter-spacing: -.04em; margin: 12px 0 20px; }
+.login-story p { color: var(--cl-ash-light); max-width: 34ch; }
+.login-plan { position: relative; height: 160px; border: 1px solid var(--cl-olive); border-radius: 8px; background: repeating-linear-gradient(90deg, transparent 0 39px, #ffffff08 39px 40px), repeating-linear-gradient(0deg, transparent 0 39px, #ffffff08 39px 40px); }
+.login-plan span { position: absolute; border: 1px solid var(--cl-ash); background: rgba(183, 184, 171, .15); border-radius: 3px; }
+.login-plan span:nth-child(1) { inset: 10px 47% 10px 10px; }
+.login-plan span:nth-child(2) { inset: 10px 10px 54% 56%; }
+.login-plan span:nth-child(3) { inset: 52% 10px 10px 56%; }
+.login-story-footer { margin: 12px 0 0; font-size: .85rem; }
+.login-panel { padding: clamp(28px, 4vw, 56px); display: flex; flex-direction: column; justify-content: center; }
+.login-panel h1 { font-size: 2rem; text-transform: none; letter-spacing: -.035em; line-height: 1.2; margin-bottom: 12px; }
+.login-intro { color: var(--cl-text-secondary); margin-bottom: 32px; }
+.login-form .login-field { margin-bottom: 22px; }
+.login-form label { display: block; color: var(--cl-text-primary); font-family: var(--cl-font-body); font-size: .95rem; font-weight: 600; text-transform: none; letter-spacing: normal; margin-bottom: 8px; }
+.login-form input:not([type="hidden"]) { width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid var(--cl-border-strong); border-radius: 10px; background: var(--cl-bg-base); color: var(--cl-text-primary); font: inherit; }
+.login-form input:focus { outline: 3px solid var(--cl-blue-light); outline-offset: 2px; border-color: var(--cl-blue); }
+.login-form .login-submit { width: 100%; min-height: 48px; background: var(--cl-blue); color: white; border: 0; border-radius: 10px; font: inherit; font-weight: 600; margin-top: 8px; }
+.login-form .login-submit:hover { background: var(--cl-cobalt); }
+.login-shell a { color: var(--cl-blue); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+[data-theme="dark"] .login-shell a { color: var(--cl-blue-light); }
+.login-shell a:focus-visible, .login-submit:focus-visible { outline: 3px solid var(--cl-blue-light); outline-offset: 4px; }
+.login-recovery { display: block; text-align: right; font-size: .9rem; margin: -6px 0 24px; }
+.login-register { border-top: 1px solid var(--cl-border); padding-top: 24px; margin-top: 28px; font-size: .95rem; color: var(--cl-text-secondary); text-align: center; }
+.login-errors { padding: 14px; border: 1px solid var(--cl-danger); border-radius: 10px; background: var(--cl-danger-bg); margin-bottom: 20px; }
+.login-errors ul, .login-field-errors ul { margin: 0; padding-left: 20px; }
+.login-field-errors { margin-top: 8px; font-size: .9rem; }
+@media (max-width: 767px) {
+  .login-shell { grid-template-columns: 1fr; min-height: auto; margin: 8px auto; border-radius: 16px; }
+  .login-story { gap: 16px; padding: 28px; }
+  .login-story h2 { font-size: 1.8rem; }
+  .login-plan, .login-story-footer { display: none; }
+  .login-story p { max-width: none; margin-bottom: 0; }
+  .login-panel { padding: 28px; }
+}
