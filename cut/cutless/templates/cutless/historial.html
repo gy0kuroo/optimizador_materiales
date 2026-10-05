@@ -1,8 +1,11 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}review-page history-page{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'cutless/css/historial.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/history-result-refinement.css' %}?v=2">
 {% endblock %}
 
 {% block content %}
@@ -15,9 +18,9 @@
       <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
               onclick="iniciarTutorialSeccion('historial')" 
               title="Ayuda sobre el historial">
-        Ayuda
+        Cómo usar el historial
       </button>
-      <a href="{% url 'cutless:index' %}" class="btn btn-primary">Ir al optimizador</a>
+      <a href="{% url 'cutless:index' %}" class="btn btn-primary">Preparar otro corte</a>
     </div>
   </header>
 
@@ -27,7 +30,7 @@
     <form method="GET" action="{% url 'cutless:historial' %}" id="filtros-form">
       <div class="row">
         <div class="col-md-3 mb-3">
-          <label for="nombre_pieza" class="form-label">Nombre de Pieza</label>
+          <label for="nombre_pieza" class="form-label">Nombre de pieza</label>
           <input type="text" 
                  class="form-control" 
                  id="nombre_pieza" 
@@ -36,7 +39,7 @@
                  value="{{ nombre_pieza }}">
         </div>
         <div class="col-md-2 mb-3">
-          <label for="fecha_desde" class="form-label">Fecha Desde</label>
+          <label for="fecha_desde" class="form-label">Desde</label>
           <input type="date" 
                  class="form-control" 
                  id="fecha_desde" 
@@ -44,7 +47,7 @@
                  value="{{ fecha_desde }}">
         </div>
         <div class="col-md-2 mb-3">
-          <label for="fecha_hasta" class="form-label">Fecha Hasta</label>
+          <label for="fecha_hasta" class="form-label">Hasta</label>
           <input type="date" 
                  class="form-control" 
                  id="fecha_hasta" 
@@ -54,28 +57,28 @@
         <div class="col-md-2 mb-3">
           <label for="ordenar_por" class="form-label">Ordenar por</label>
           <select class="form-control" id="ordenar_por" name="ordenar_por">
-            <option value="fecha_desc" {% if ordenar_por == 'fecha_desc' %}selected{% endif %}>Fecha (Más recientes )</option>
-            <option value="fecha_asc" {% if ordenar_por == 'fecha_asc' %}selected{% endif %}>Fecha (Más antiguas )</option>
+            <option value="fecha_desc" {% if ordenar_por == 'fecha_desc' %}selected{% endif %}>Más recientes primero</option>
+            <option value="fecha_asc" {% if ordenar_por == 'fecha_asc' %}selected{% endif %}>Más antiguas primero</option>
             <option value="aprovechamiento_desc" {% if ordenar_por == 'aprovechamiento_desc' %}selected{% endif %}>Aprovechamiento (Mayor a menor)</option>
             <option value="aprovechamiento_asc" {% if ordenar_por == 'aprovechamiento_asc' %}selected{% endif %}>Aprovechamiento (Menor a mayor)</option>
           </select>
         </div>
-        <div class="col-md-2 mb-3 d-flex align-items-end">
+        <div class="col-md-3 mb-3 d-flex align-items-end">
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="solo_favoritos" name="solo_favoritos" value="true" {% if solo_favoritos == 'true' %}checked{% endif %}>
             <label class="form-check-label" for="solo_favoritos">
-              ⭐ Solo Favoritos
+              Solo favoritos
             </label>
           </div>
         </div>
-        <div class="col-md-2 mb-3 d-flex align-items-end">
+        <div class="col-md-3 mb-3 d-flex align-items-end">
           <button type="submit" class="btn btn-primary w-100">Buscar</button>
         </div>
       </div>
       {% if nombre_pieza or fecha_desde or fecha_hasta or solo_favoritos == 'true' %}
       <div class="mt-2">
         <a href="{% url 'cutless:historial' %}?ordenar_por={{ ordenar_por }}" class="btn btn-limpiar-filtros">
-          Limpiar Filtros
+          Quitar filtros
         </a>
         {% if nombre_pieza %}
           <span class="filter-badge">Pieza: {{ nombre_pieza }}</span>
@@ -87,7 +90,7 @@
           <span class="filter-badge">Hasta: {{ fecha_hasta }}</span>
         {% endif %}
         {% if solo_favoritos == 'true' %}
-          <span class="filter-badge">⭐ Solo Favoritos</span>
+          <span class="filter-badge">Solo favoritos</span>
         {% endif %}
       </div>
       <!-- Indicador de resultados filtrados -->
@@ -107,10 +110,10 @@
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
           <button type="button" class="btn btn-sm btn-outline-primary" id="select-todos-btn">Seleccionar todos</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect-todos-btn">Deseleccionar todos</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect-todos-btn">Quitar selección</button>
         </div>
         <button type="submit" class="btn btn-danger" id="btn-borrar-seleccion" disabled>
-          Borrar seleccionadas
+          Eliminar seleccionadas
         </button>
       </div>
       <div class="row">
@@ -124,7 +127,7 @@
                 <img src="{{ optimizacion.imagen.url }}" 
                      class="card-img-top chart-thumbnail" 
                      alt="Optimización #{{ item.numero }}">                <div class="chart-overlay">
-                  <span class="chart-hint">Click para ver en pantalla completa</span>
+                  <span class="chart-hint">Ampliar imagen</span>
                 </div>
               </div>
             {% endif %}
@@ -170,7 +173,7 @@
               {% if piezas %}
               <details class="mb-2">
                 <summary class="piezas-summary">
-                  Ver Piezas ({{ piezas|length }})
+                  Ver tipos de pieza ({{ piezas|length }})
                 </summary>
                 <div class="mt-2 piezas-details">
                   {% for pieza in piezas %}
@@ -180,6 +183,7 @@
               </details>
               {% endif %}
               
+              <a href="{% url 'cutless:resultado' optimizacion.id %}" class="btn btn-primary w-100 mt-3">Ver resultado</a>
               <div class="action-buttons mt-3 d-flex gap-2 align-items-center">
                 <!-- Botones principales: Editar y Duplicar -->
                 <a href="{% url 'cutless:editar_optimizacion' optimizacion.id %}" 
@@ -206,7 +210,7 @@
                   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ optimizacion.id }}">
                     <li>
                       <a class="dropdown-item" href="{% url 'cutless:calcular_tiempo_corte' optimizacion.id %}">
-                         Calcular Tiempo
+                         Estimar tiempo de corte
                       </a>
                     </li>
                     <li>
@@ -226,7 +230,7 @@
                     </li>
                     <li>
                       <a class="dropdown-item" href="{% url 'cutless:imprimir_plan_corte' optimizacion.id %}" target="_blank">
-                           Imprimir Plan de Corte
+                           Imprimir (otra pestaña)
                       </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
@@ -298,7 +302,7 @@
       <div class="mb-4" style="font-size: 4rem; opacity: 0.3;"></div>
       <h4 class="mb-3">No hay optimizaciones</h4>
       <p class="mb-4" style="max-width: 500px; margin: 0 auto;">
-        {% if nombre_pieza or fecha_desde or fecha_hasta %}
+        {% if nombre_pieza or fecha_desde or fecha_hasta or solo_favoritos == 'true' %}
           No se encontraron optimizaciones con los filtros aplicados.
           <br>
           <a href="{% url 'cutless:historial' %}" class="mt-2 d-inline-block">Ver todas las optimizaciones</a>
@@ -307,7 +311,7 @@
         {% endif %}
       </p>
       <a href="{% url 'cutless:index' %}" class="btn btn-primary btn-lg">
-        Crear optimización
+        Preparar un corte
       </a>
     </div>
   {% endif %}

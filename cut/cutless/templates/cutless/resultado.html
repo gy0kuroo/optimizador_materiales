@@ -1,8 +1,11 @@
 {% extends 'cutless/base.html' %}
 {% load static l10n %}
 
+{% block body_class %}review-page result-page{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'cutless/css/resultado.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/history-result-refinement.css' %}?v=1">
 {% endblock %}
 
 {% block content %}
@@ -18,7 +21,7 @@
       <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
               onclick="iniciarTutorialSeccion('resultado')" 
               title="Ayuda sobre resultado de optimización">
-        Ayuda
+        Cómo leer el resultado
       </button>
     </div>
   </header>
@@ -59,7 +62,7 @@
   
   <div class="text-center mt-4 mb-4">
     <p class="lead mb-0">
-      Total de tableros generados: <strong class="badge badge-accent-primary" style="font-size: 1.1rem; padding: 0.5rem 1rem;">{{ num_tableros }}</strong>
+      Tableros necesarios: <strong class="badge badge-accent-primary" style="font-size: 1.1rem; padding: 0.5rem 1rem;">{{ num_tableros }}</strong>
     </p>
   </div>
   
@@ -69,7 +72,7 @@
     <div class="col-12">
       <div class="card">
         <div class="card-header card-header-section">
-          <h5 class="mb-0"> Información de Costos</h5>
+          <h5 class="mb-0"> Costos del corte</h5>
         </div>
         <div class="card-body">
           <div class="row">
@@ -136,7 +139,7 @@
             {% if costo_total %}
             <div class="mt-4 text-center">
               <a href="{% url 'cutless:crear_presupuesto' %}?optimizacion={{ optimizacion.pk }}" class="btn btn-primary btn-lg">
-                 Crear Presupuesto
+                 Crear presupuesto
               </a>
             </div>
             {% endif %}
@@ -150,14 +153,15 @@
   <hr>
   
   <!-- Tabla de desperdicio por tablero -->
-  <h4 class="mt-4 fade-in">Detalle por Tablero</h4>
+  <h4 class="mt-4 fade-in">Detalle por tablero</h4>
   <div class="card fade-in">
+  <div class="table-responsive">
   <table class="table table-striped table-hover mb-0">
     <thead class="table-dark">
       <tr>
         <th>Tablero</th>
         <th>Piezas</th>
-        <th>Área Usada</th>
+        <th>Área utilizada</th>
         <th>Desperdicio</th>
         <th>Aprovechamiento</th>
       </tr>
@@ -200,11 +204,13 @@
     </tbody>
   </table>
   </div>
+  </div>
   
   <hr>
   
   <!-- Mostrar TODOS los tableros -->
-  <h4 class="mt-4 fade-in">Tableros Generados</h4>
+  <h4 class="mt-4 fade-in">Distribución de las piezas</h4>
+  <p class="result-explanation">Pulsa una imagen para ampliarla. Puedes descargar cada tablero por separado.</p>
   <div class="row fade-in">
     {% for item in tableros_con_imagenes %}
     <div class="col-md-6 mb-4">
@@ -214,7 +220,7 @@
           <a href="{% url 'cutless:descargar_png_tablero' optimizacion.id item.numero %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" data-carga-texto="Generando imagen..." 
              class="btn btn-sm btn-light" 
              title="Descargar imagen PNG">
-            PNG
+            Descargar PNG
           </a>
         </div>
         <div class="card-body text-center">
@@ -231,6 +237,7 @@
   
   <hr>
   
+  <h4 class="mt-4">Guardar o imprimir el resultado</h4>
   <div class="result-actions fade-in">
     <a href="{% url 'cutless:descargar_pdf' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-success btn-lg" data-carga-texto="Descargando PDF...">
       Descargar PDF
@@ -239,11 +246,11 @@
       Descargar Excel
     </a>
     <a href="{% url 'cutless:imprimir_plan_corte' optimizacion.id %}" class="btn btn-outline-primary btn-lg" target="_blank">
-      Imprimir plan de corte
+      Imprimir (otra pestaña)
     </a>
     <span class="w-100 d-block text-center text-muted small mt-1 mb-1">— o —</span>
     <a href="{% url 'cutless:index' %}" class="btn btn-outline-secondary btn-lg">
-      Ir al optimizador
+      Preparar otro corte
     </a>
     <a href="{% url 'cutless:historial' %}" class="btn btn-outline-primary btn-lg">
       Ver historial
