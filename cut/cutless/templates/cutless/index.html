@@ -27,12 +27,6 @@
       <h1 class="page-title">Plan de corte</h1>
       <p class="page-lead">Introduce las medidas del tablero y las piezas que necesitas cortar.</p>
     </div>
-    <div class="page-header__actions">
-      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary">
-        <img src="{% static 'cutless/icons/historial.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
-        Ver historial
-      </a>
-    </div>
   </header>
 
   <div class="workflow-steps fade-in" aria-label="Pasos del proceso">
@@ -325,10 +319,6 @@
         <img src="{% static 'cutless/icons/calcular.svg' %}" alt="" class="cl-icon cl-icon--cta" onerror="this.style.display='none'">
         Generar plan de corte
       </button>
-      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary btn-lg">
-        <img src="{% static 'cutless/icons/historial.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
-        Ver historial
-      </a>
       <p class="form-action-hint">
         <img src="{% static 'cutless/icons/info.svg' %}" alt="" class="cl-icon cl-icon--hint" onerror="this.style.display='none'">
         Cada fila describe un tipo de pieza. Indica en Cantidad cuántas piezas iguales necesitas. Puedes añadir hasta 20 tipos.

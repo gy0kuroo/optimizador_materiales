@@ -8,3 +8,22 @@
 .navbar-custom .nav-link.active::after { display: none; }
 .navbar-custom .dropdown-item, .navbar-custom .dropdown-header { text-transform: none; letter-spacing: normal; }
 @media (max-width: 575px) { .navbar-custom .navbar-greeting { display: none; } }
+
+/* Menús breves por tarea, activables con clic o teclado. */
+.navbar-custom button.nav-link { border: 0; background: transparent; font-family: var(--cl-font-body); min-height: 44px; }
+.navbar-custom .navbar-nav { gap: 4px; }
+.navbar-custom .dropdown-menu { background: var(--cl-bg-card); border: 1px solid var(--cl-border); border-radius: 12px; padding: 8px; min-width: 240px; box-shadow: var(--cl-shadow-md); }
+.navbar-custom .dropdown-item { display: flex; align-items: center; min-height: 48px; padding: 10px 14px; font-size: 1.0625rem; color: var(--cl-text-primary) !important; border-radius: 6px; white-space: normal; }
+.navbar-custom .dropdown-item:hover, .navbar-custom .dropdown-item:focus { background: var(--cl-bg-surface); color: var(--cl-text-primary) !important; }
+.navbar-custom .dropdown-divider { border-color: var(--cl-border); }
+.navbar-custom .nav-link:focus-visible { outline: 2px solid var(--cl-ash-white); outline-offset: 2px; }
+.navbar-custom .nav-account { margin-left: 12px; border-left: 1px solid rgba(183,184,171,.4); padding-left: 12px; }
+.nav-account-label { display: inline-block; max-width: 180px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; white-space: nowrap; }
+@media (max-width: 991px) {
+  .navbar-custom .navbar-collapse { max-height: calc(100dvh - 80px); overflow-y: auto; }
+  .navbar-custom .navbar-nav { align-items: stretch !important; }
+  .navbar-custom .navbar-nav > .nav-link, .navbar-custom .navbar-nav > .dropdown { width: 100%; }
+  .navbar-custom .dropdown > .nav-link { width: 100%; text-align: left; }
+  .navbar-custom .nav-account { margin-left: 0; padding-left: 0; border-left: 0; border-top: 1px solid rgba(183,184,171,.4); margin-top: 8px; padding-top: 8px; }
+  .navbar-custom .dropdown-menu { min-width: 0; width: 100%; }
+}
