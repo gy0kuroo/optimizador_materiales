@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="{% static 'cutless/css/visual-refinement.css' %}?v=2">
     
     {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'cutless/css/help-redesign.css' %}?v=1">
 </head>
 <body class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
     {% block navigation %}
@@ -210,32 +211,49 @@
                 modalBienvenida.hide();
             }
             
-            // Configurar pasos del tutorial según la página actual
-            const pasos = obtenerPasosTutorial();
-            
-            if (pasos.length > 0) {
-                introJs().setOptions({
-                    steps: pasos,
-                    showProgress: true,
-                    showBullets: true,
-                    exitOnOverlayClick: true,
-                    exitOnEsc: true,
-                    nextLabel: 'Siguiente →',
-                    prevLabel: '← Anterior',
-                    skipLabel: 'Omitir',
-                    doneLabel: 'Finalizar',
-                    tooltipClass: 'customTooltip',
-                    highlightClass: 'customHighlight',
-                }).oncomplete(function() {
-                    // Marcar tutorial como completado
-                    marcarTutorialCompletado();
-                }).onexit(function() {
-                    // También marcar como completado si el usuario sale
-                    marcarTutorialCompletado();
-                }).start();
+            const pagina = '{{ request.resolver_match.url_name|escapejs }}';
+            const secciones = {
+                historial: 'historial', resultado: 'resultado', perfil: 'perfil',
+                configuracion_sistema: 'configuracion_sistema', estadisticas: 'estadisticas',
+                lista_materiales: 'materiales', lista_clientes: 'clientes',
+                lista_proyectos: 'proyectos', lista_presupuestos: 'presupuestos',
+                lista_plantillas: 'plantillas', historial_costos: 'costos',
+                comparar_optimizaciones: 'comparar', calcular_tiempo: 'calcular_tiempo',
+                agregar_optimizaciones_proyecto: 'agregar_optimizaciones',
+                agregar_optimizaciones_presupuesto: 'agregar_optimizaciones'
+            };
+            if (pagina !== 'index') {
+                iniciarTutorialSeccion(secciones[pagina] || pagina);
+                return;
             }
+            mostrarGuia(obtenerPasosTutorial(), true);
         }
-        
+
+        let guiaActiva = null;
+        function mostrarGuia(pasos, completarBienvenida = false) {
+            // No señalar controles ocultos, inexistentes o todo el cuerpo de la página.
+            const visibles = pasos.filter(paso => !('element' in paso) ||
+                (paso.element && paso.element !== document.body &&
+                 paso.element.getClientRects().length > 0));
+            if (!visibles.length) {
+                visibles.push({title: 'Ayuda', intro: 'No hay controles disponibles para guiar en esta pantalla. Puedes volver a Inicio para preparar un corte o a Historial para consultar los anteriores.'});
+            }
+            if (guiaActiva) guiaActiva.exit(true);
+            guiaActiva = introJs().setOptions({
+                steps: visibles, showProgress: true, showBullets: false,
+                exitOnOverlayClick: false, exitOnEsc: true,
+                nextLabel: 'Siguiente', prevLabel: 'Anterior', skipLabel: '×',
+                doneLabel: 'Finalizar', tooltipClass: 'customTooltip',
+                highlightClass: 'customHighlight', scrollPadding: 24
+            });
+            if (completarBienvenida) guiaActiva.oncomplete(marcarTutorialCompletado);
+            guiaActiva.onafterchange(function() {
+                const cerrar = document.querySelector('.introjs-skipbutton');
+                if (cerrar) { cerrar.setAttribute('aria-label', 'Cerrar ayuda'); cerrar.setAttribute('title', 'Cerrar ayuda'); }
+            });
+            guiaActiva.start();
+        }
+
         // Obtener pasos del tutorial según la página
         function obtenerPasosTutorial() {
             const path = window.location.pathname;
@@ -247,7 +265,7 @@
                     {
                         title: '¡Bienvenido a CutLess!',
                         intro: 'Este tutorial te guiará paso a paso para usar el sistema de optimización de cortes.',
-                        element: document.querySelector('h2') || document.body
+                        element: document.querySelector('h1, h2')
                     },
                     {
                         title: 'Dimensiones del Tablero',
@@ -256,13 +274,13 @@
                     },
                     {
                         title: 'Agregar Piezas',
-                        intro: 'Agrega las piezas que necesitas cortar. Puedes darle un nombre a cada pieza para identificarla mejor. Haz clic en "Agregar otra pieza" para añadir más.',
+                        intro: 'Agrega las piezas que necesitas cortar. Puedes darle un nombre a cada pieza para identificarla mejor. Haz clic en "Añadir otro tipo de pieza" para añadir más.',
                         element: document.querySelector('input[name*="nombre"]') || document.querySelector('.formset')
                     },
                     {
-                        title: 'Calcular Optimización',
-                        intro: 'Una vez que hayas ingresado todas las piezas, haz clic en "Calcular Optimización" para generar el plan de corte.',
-                        element: document.querySelector('button[type="submit"]') || document.body
+                        title: 'Generar plan de corte',
+                        intro: 'Una vez que hayas ingresado todas las piezas, haz clic en "Generar plan de corte" para generar el plan de corte.',
+                        element: document.querySelector('#optimizacion-form button[type="submit"]')
                     }
                 );
             } else if (path.includes('mis-optimizaciones')) {
@@ -270,7 +288,7 @@
                     {
                         title: 'Historial de Optimizaciones',
                         intro: 'Aquí puedes ver todas tus optimizaciones guardadas. Puedes filtrar, buscar y ordenar según tus necesidades.',
-                        element: document.querySelector('h2') || document.body
+                        element: document.querySelector('h1, h2')
                     },
                     {
                         title: 'Buscar y Filtrar',
@@ -293,7 +311,7 @@
                     {
                         title: ' Estadísticas',
                         intro: 'Aquí puedes ver gráficos y métricas de todas tus optimizaciones para analizar tu eficiencia.',
-                        element: document.querySelector('h2') || document.body
+                        element: document.querySelector('h1, h2')
                     }
                 );
             }
@@ -372,7 +390,7 @@
                     },
                     {
                         title: 'Agregar Más Piezas',
-                        intro: 'Haz clic en "Agregar otra pieza" para añadir más piezas a tu lista. El sistema calculará la mejor forma de organizarlas en el tablero.',
+                        intro: 'Haz clic en "Añadir otro tipo de pieza" para añadir más piezas a tu lista. El sistema calculará la mejor forma de organizarlas en el tablero.',
                         element: document.getElementById('add-pieza')
                     }
                 ];
@@ -381,7 +399,7 @@
                     {
                         title: 'Historial de Optimizaciones',
                         intro: 'Aquí puedes ver todas tus optimizaciones guardadas. Cada optimización muestra el aprovechamiento, fecha y dimensiones del tablero usado.',
-                        element: document.querySelector('h2') || document.querySelector('.optimizacion-card')
+                        element: document.querySelector('h1, h2')
                     },
                     {
                         title: 'Buscar y Filtrar',
@@ -790,7 +808,7 @@
                     {
                         title: 'Configuración del Sistema',
                         intro: 'Aquí puedes establecer valores predeterminados que se aplicarán automáticamente al crear nuevas optimizaciones. Esto te ahorra tiempo al no tener que configurar estos valores cada vez.',
-                        element: document.querySelector('.auth-card')
+                        element: document.querySelector('h1, h2')
                     },
                     {
                         title: 'Unidad de Medida Predeterminada',
@@ -810,7 +828,7 @@
                     {
                         title: 'Notificaciones',
                         intro: 'Configura cómo y cuándo recibir notificaciones. Puedes activar notificaciones por email y/o en pantalla, y elegir qué eventos quieres que te notifiquen.',
-                        element: document.querySelector('h5')
+                        element: document.querySelector('[name="notificaciones_pantalla"]')
                     },
                     {
                         title: 'Guardar Configuración',
@@ -823,17 +841,17 @@
                     {
                         title: 'Configuración de Perfil',
                         intro: 'Aquí puedes gestionar tu información personal, preferencias de seguridad y apariencia del sistema.',
-                        element: document.querySelector('.auth-card')
+                        element: document.querySelector('h1, h2')
                     },
                     {
                         title: 'Información Personal',
-                        intro: 'En la pestaña "Información Personal" puedes editar tu nombre de usuario, email y configurar el timeout de sesión y el tema preferido.',
+                        intro: 'En "Preferencias" puedes ajustar el tiempo de inactividad, el tema y el tamaño de letra. Guarda los cambios para conservarlos.',
                         element: document.querySelector('#perfil-tab')
                     },
                     {
                         title: 'Timeout de Sesión',
                         intro: 'Configura cuánto tiempo de inactividad debe pasar antes de que se cierre tu sesión automáticamente. Esto mejora la seguridad de tu cuenta.',
-                        element: document.querySelector('input[name*="timeout_sesion"]')
+                        element: document.querySelector('[name="timeout_sesion"]')
                     },
                     {
                         title: 'Tema Preferido',
@@ -842,7 +860,7 @@
                     },
                     {
                         title: 'Seguridad',
-                        intro: 'En la pestaña "Seguridad" puedes cambiar tu contraseña. Asegúrate de usar una contraseña segura y única.',
+                        intro: 'En "Cuenta y contraseña" puedes editar tu nombre y correo o cambiar tu contraseña. Cada formulario tiene su propio botón para guardar.',
                         element: document.querySelector('#seguridad-tab')
                     },
                     {
@@ -856,22 +874,22 @@
                     {
                         title: 'Resumen de la Optimización',
                         intro: 'Aquí puedes ver el resumen de tu optimización: aprovechamiento, área utilizada, desperdicio y número de tableros necesarios.',
-                        element: document.querySelector('.row.mt-4')
+                        element: document.querySelector('.metric-card')?.closest('.row')
                     },
                     {
                         title: 'Plan de Corte Visual',
                         intro: 'Cada tablero muestra el plan de corte visual con las piezas distribuidas. Puedes ver el número de tablero, área utilizada y desperdicio de cada uno.',
-                        element: document.querySelector('.tableros-container')
+                        element: document.querySelector('.result-explanation')?.nextElementSibling
                     },
                     {
-                        title: 'Lista de Piezas',
-                        intro: 'La tabla muestra todas las piezas que se cortarán: nombre, dimensiones, cantidad y en qué tablero se encuentra cada pieza.',
+                        title: 'Detalle por tablero',
+                        intro: 'La tabla resume el área utilizada, el desperdicio y el aprovechamiento de cada tablero.',
                         element: document.querySelector('table')
                     },
                     {
                         title: 'Descargar Resultados',
-                        intro: 'Puedes descargar el plan de corte en PDF, Excel o imágenes PNG. También puedes editar, duplicar o eliminar la optimización.',
-                        element: document.querySelector('.btn-group')
+                        intro: 'Usa estas acciones para descargar el plan, editar las piezas o preparar otro corte. Cada imagen también permite descargar su tablero.',
+                        element: document.querySelector('.result-actions')
                     }
                 ];
             } else if (seccion === 'calcular_tiempo') {
@@ -904,29 +922,15 @@
                 pasos = [
                     {
                         title: 'Ayuda',
-                        intro: 'Esta sección te permite gestionar y organizar tus datos. Usa los botones de acción para ver detalles, editar o eliminar elementos. Si necesitas más ayuda específica, consulta el menú "Ayuda / Tutorial" en la barra de navegación.',
-                        element: document.querySelector('h2') || document.body
+                        intro: 'Esta sección te permite gestionar y organizar tus datos. Usa los botones de acción para ver detalles, editar o eliminar elementos. Si necesitas más ayuda específica, consulta el botón "Ayuda" en la barra de navegación.',
+                        element: document.querySelector('h1, h2')
                     }
                 ];
             }
             
-            if (pasos.length > 0) {
-                introJs().setOptions({
-                    steps: pasos,
-                    showProgress: true,
-                    showBullets: true,
-                    exitOnOverlayClick: true,
-                    exitOnEsc: true,
-                    nextLabel: 'Siguiente →',
-                    prevLabel: '← Anterior',
-                    skipLabel: 'Omitir',
-                    doneLabel: 'Finalizar',
-                    tooltipClass: 'customTooltip',
-                    highlightClass: 'customHighlight',
-                }).start();
-            }
+            mostrarGuia(pasos);
         }
-        
+
         // Hacer función global para que esté disponible desde onclick
         window.iniciarTutorialSeccion = iniciarTutorialSeccion;
     </script>
@@ -935,7 +939,7 @@
     <div class="modal fade modal-cutless-dialog" id="modalBienvenida" tabindex="-1" aria-labelledby="modalBienvenidaLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header">
                     <h5 class="modal-title" id="modalBienvenidaLabel">¡Bienvenido a CutLess!</h5>
                 </div>
                 <div class="modal-body">

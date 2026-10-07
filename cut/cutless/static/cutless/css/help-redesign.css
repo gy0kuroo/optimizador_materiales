@@ -1,0 +1,94 @@
+/* Ayuda compartida: dimensiones independientes del tamaño de letra del perfil. */
+.introjs-tooltip.customTooltip {
+  box-sizing: border-box;
+  width: min(440px, calc(100vw - 32px));
+  min-width: min(300px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  background: var(--cl-bg-card) !important;
+  color: var(--cl-text-primary) !important;
+  border: 1px solid var(--cl-border-strong) !important;
+  border-radius: 14px !important;
+  font: 400 1.125rem/1.6 var(--cl-font-body) !important;
+  text-align: left;
+  text-shadow: none;
+}
+.customTooltip .introjs-tooltip-header { padding: 18px 20px 0; }
+.customTooltip .introjs-tooltip-title {
+  float: none;
+  padding-right: 44px;
+  margin: 0;
+  color: var(--cl-text-primary) !important;
+  font: 700 1.25rem/1.35 var(--cl-font-body) !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  overflow-wrap: anywhere;
+}
+.customTooltip .introjs-tooltiptext {
+  padding: 18px 20px;
+  max-height: max(100px, calc(100dvh - 240px));
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  color: var(--cl-text-primary);
+}
+.customTooltip .introjs-tooltipbuttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--cl-border);
+}
+.customTooltip .introjs-button {
+  box-sizing: border-box;
+  float: none;
+  min-height: 48px;
+  margin: 0;
+  padding: 10px 16px;
+  background: var(--cl-bg-card);
+  color: var(--cl-text-primary);
+  border: 1px solid var(--cl-border-strong);
+  box-shadow: none;
+  text-shadow: none;
+  font: 600 1rem/1.5 var(--cl-font-body) !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  white-space: normal;
+}
+.customTooltip .introjs-button:hover { background: var(--cl-bg-surface); }
+.customTooltip .introjs-nextbutton:hover { background: var(--cl-cobalt) !important; }
+.customTooltip .introjs-disabled { opacity: .55; cursor: default; }
+.customTooltip .introjs-skipbutton {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  color: var(--cl-text-secondary);
+  font: 400 28px/44px var(--cl-font-body);
+  text-shadow: none;
+}
+.customTooltip .introjs-button:focus-visible,
+.customTooltip .introjs-skipbutton:focus-visible { outline: 3px solid var(--cl-blue); outline-offset: 3px; }
+.customTooltip .introjs-progress { margin: 0 20px; background: var(--cl-bg-surface); }
+.customTooltip .introjs-progressbar { background: var(--cl-blue); }
+.customTooltip .introjs-arrow.top, .customTooltip .introjs-arrow.top-middle,
+.customTooltip .introjs-arrow.top-right { border-bottom-color: var(--cl-bg-card); }
+.customTooltip .introjs-arrow.bottom, .customTooltip .introjs-arrow.bottom-middle,
+.customTooltip .introjs-arrow.bottom-right { border-top-color: var(--cl-bg-card); }
+.customTooltip .introjs-arrow.left { border-right-color: var(--cl-bg-card); }
+.customTooltip .introjs-arrow.right { border-left-color: var(--cl-bg-card); }
+.introjs-helperLayer.customHighlight { background: transparent; border: 2px solid var(--cl-blue); border-radius: 8px; }
+#modalBienvenida .modal-content { background: var(--cl-bg-card); color: var(--cl-text-primary); border-color: var(--cl-border); }
+#modalBienvenida .modal-header { background: var(--cl-bg-surface); color: var(--cl-text-primary); border-color: var(--cl-border); }
+#modalBienvenida .modal-title { color: var(--cl-text-primary); font-size: 1.4rem; }
+#modalBienvenida .modal-body { font-size: 1.125rem; line-height: 1.6; }
+#modalBienvenida .modal-footer { gap: 12px; border-color: var(--cl-border); }
+#modalBienvenida .modal-footer .btn { min-height: 48px; font-size: 1rem; white-space: normal; }
+#modalBienvenida .alert-info { color: var(--cl-text-primary); background: var(--cl-bg-surface); border-color: var(--cl-border); }
+#modalBienvenida .text-muted { color: var(--cl-text-secondary) !important; font-size: 1rem; }
+@media (prefers-reduced-motion: reduce) {
+  .introjs-tooltipReferenceLayer, .introjs-helperLayer, .introjs-overlay { transition: none !important; }
+}
