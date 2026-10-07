@@ -143,7 +143,7 @@
                    step="0.1"
                    min="0"
                    max="10"
-                   value="{% if tablero_form.margen_corte.value %}{{ tablero_form.margen_corte.value }}{% elif tablero_form.margen_corte.initial %}{{ tablero_form.margen_corte.initial }}{% else %}3{% endif %}">
+                   value="{{ tablero_form.margen_corte.value|default_if_none:'3' }}">
             <small class="form-text text-muted">Ancho que consume la sierra en cada corte. Siempre en milímetros; 0 significa sin separación.</small>
             {% if tablero_form.margen_corte.errors %}
               <div class="text-danger">{{ tablero_form.margen_corte.errors }}</div>

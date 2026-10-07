@@ -1,0 +1,27 @@
+/* Ajustes personales de trabajo: paleta y lectura comunes. */
+body.settings-page { font-size: 1.125rem; line-height: 1.65; }
+.settings-page .config-container { max-width: 1040px; margin: auto; }
+.settings-page .page-header { border: 0; margin-bottom: 28px; }
+.settings-page .page-title { font-size: clamp(1.8rem, 3vw, 2.4rem); letter-spacing: -.035em; text-transform: none; }
+.settings-page .page-lead { color: var(--cl-text-secondary); }
+.settings-page .config-section { background: var(--cl-bg-card); border: 1px solid var(--cl-border); border-radius: 14px; padding: clamp(20px, 3vw, 32px); margin-bottom: 24px; box-shadow: var(--cl-shadow-sm); }
+.settings-page .config-section-title { margin-bottom: 20px; }
+.settings-page h5 { font-size: 1.35rem; letter-spacing: normal; text-transform: none; }
+.settings-page .config-grid, .settings-page .permissions-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.settings-page .config-field label { display: block; margin-bottom: 8px; font-size: 1.125rem; font-weight: 600; color: var(--cl-text-primary); letter-spacing: normal; text-transform: none; }
+.settings-page .config-field input, .settings-page .config-field select { width: 100%; min-height: 48px; font: inherit; background-color: var(--cl-bg-card); color: var(--cl-text-primary); border: 1px solid var(--cl-border); border-radius: 8px; padding: 12px 14px; }
+.settings-page .config-field select:hover { background-color: var(--cl-bg-surface); }
+.settings-page .config-toggle, .settings-page .permission-toggle { display: flex; gap: 14px; align-items: flex-start; padding: 14px; background: var(--cl-bg-surface); border: 1px solid var(--cl-border); border-radius: 8px; }
+.settings-page input[type="checkbox"] { width: 24px !important; height: 24px !important; min-width: 24px; min-height: 24px; flex-shrink: 0; margin: 4px 0 0; float: none; }
+.settings-page .config-toggle-label, .settings-page .permission-label { margin: 0; color: var(--cl-text-primary); letter-spacing: normal; text-transform: none; }
+.settings-page .permission-label small { display: block; margin-top: 4px; }
+.settings-page .settings-help, .settings-page .permission-label small, .settings-page .text-muted { color: var(--cl-text-secondary) !important; font-size: 1rem !important; line-height: 1.6; }
+.settings-page .settings-help { margin-top: 8px; }
+.settings-page .nav-tabs { border-bottom: 1px solid var(--cl-border); gap: 8px; }
+.settings-page .config-tabs .nav-link { font-size: 1.125rem; letter-spacing: normal; text-transform: none; min-height: 48px; padding: 12px 18px; border: 0; border-bottom: 3px solid transparent; color: var(--cl-text-secondary); }
+.settings-page .config-tabs .nav-link.active { border-bottom-color: var(--cl-blue); background: var(--cl-info-bg); color: var(--cl-text-primary); }
+.settings-page .btn { font-size: 1.0625rem; letter-spacing: normal; text-transform: none; min-height: 48px; padding: 12px 18px; white-space: normal; }
+.settings-page .settings-save { margin: 4px 0 24px; }
+.settings-page input:focus, .settings-page select:focus, .settings-page button:focus-visible { outline: 3px solid var(--cl-blue-light); outline-offset: 2px; }
+.settings-page .error-text { color: var(--cl-text-primary); border-left: 3px solid var(--cl-danger); padding-left: 10px; margin-top: 8px; font-size: 1rem; }
+@media (max-width: 767px) { .settings-page .config-grid, .settings-page .permissions-grid { grid-template-columns: 1fr; } .settings-page .settings-save { width: 100%; } }

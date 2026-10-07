@@ -196,6 +196,23 @@ class PerfilUsuario(models.Model):
         help_text="Permitir acceso a historial de costos"
     )
     
+    preferencias_menu = models.JSONField(default=dict, blank=True)
+
+    @property
+    def menu_visible(self):
+        permisos = {
+            'materiales': 'puede_crear_materiales', 'clientes': 'puede_crear_clientes',
+            'proyectos': 'puede_crear_proyectos', 'presupuestos': 'puede_crear_presupuestos',
+            'plantillas': 'puede_crear_plantillas', 'costos': 'puede_ver_historial_costos',
+            'comparar': 'puede_comparar_optimizaciones', 'estadisticas': 'puede_ver_estadisticas',
+        }
+        admin = self.rol == 'admin' or self.usuario.is_superuser
+        preferencias = self.preferencias_menu or {}
+        visible = {key: (admin or getattr(self, permiso)) and preferencias.get(key, True) for key, permiso in permisos.items()}
+        visible['gestion'] = any(visible[key] for key in ('materiales', 'clientes', 'proyectos', 'presupuestos', 'plantillas'))
+        visible['analisis'] = any(visible[key] for key in ('costos', 'comparar', 'estadisticas'))
+        return visible
+
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
 

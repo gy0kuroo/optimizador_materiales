@@ -26,6 +26,22 @@ from ..utils import (
 from .common import _materiales_data_index
 
 
+def _ejecutar_con_aviso_error(request, funcion, *args, **kwargs):
+    try:
+        return funcion(*args, **kwargs)
+    except Exception:
+        enviar_notificacion(request, 'error', 'No se pudo completar el plan de corte',
+                            'Ocurrió un problema al calcular o guardar el resultado. Inténtalo de nuevo.')
+        raise
+
+
+def _avisar_sin_piezas(request, mensaje):
+    # Esta explicación debe verse aunque los avisos opcionales estén desactivados.
+    messages.error(request, mensaje)
+    enviar_notificacion(request, 'error', 'No se pudo generar el plan de corte', mensaje,
+                        mostrar_en_pantalla=False)
+
+
 def editar_optimizacion(request, pk):
     """
     Permite editar una optimización existente.
@@ -136,7 +152,7 @@ def editar_optimizacion(request, pk):
             nombres_piezas = [p['nombre'] for p in piezas_con_nombre]
             
             # Generar nuevas imágenes
-            imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(
+            imagenes_base64, aprovechamiento, info_desperdicio = _ejecutar_con_aviso_error(request, generar_grafico,
                 piezas, ancho, alto, unidad, 
                 permitir_rotacion=permitir_rotacion, 
                 margen_corte=margen_corte_cm,
@@ -147,7 +163,7 @@ def editar_optimizacion(request, pk):
             nsol = info_desperdicio.get('num_piezas_solicitadas') or 0
             if nsol > 0 and ncol == 0:
                 warn = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad)
-                messages.error(request, warn or '❌ No se pudo colocar ninguna pieza en el tablero.')
+                _avisar_sin_piezas(request, warn or 'No se pudo colocar ninguna pieza en el tablero.')
                 return render(request, "cutless/editar_optimizacion.html", {
                     "tablero_form": tablero_form,
                     "pieza_formset": pieza_formset,
@@ -184,7 +200,7 @@ def editar_optimizacion(request, pk):
             optimizacion.cliente = tablero_form.cleaned_data.get('cliente')
             optimizacion.proyecto = tablero_form.cleaned_data.get('proyecto')
             numero_lista = calcular_numero_lista(request.user, optimizacion.id)
-            persistir_resultado_optimizacion(
+            _ejecutar_con_aviso_error(request, persistir_resultado_optimizacion,
                 optimizacion,
                 imagenes_base64,
                 info_desperdicio,
@@ -393,7 +409,7 @@ def index(request):
             nombres_piezas = [p['nombre'] for p in piezas_con_nombre]
             
             # Generar TODAS las imágenes, aprovechamiento Y desperdicio
-            imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(
+            imagenes_base64, aprovechamiento, info_desperdicio = _ejecutar_con_aviso_error(request, generar_grafico,
                 piezas, ancho, alto, unidad, 
                 permitir_rotacion=permitir_rotacion, 
                 margen_corte=margen_corte_cm,
@@ -404,7 +420,7 @@ def index(request):
             nsol = info_desperdicio.get('num_piezas_solicitadas') or 0
             if nsol > 0 and ncol == 0:
                 warn = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad)
-                messages.error(request, warn or '❌ No se pudo colocar ninguna pieza en el tablero.')
+                _avisar_sin_piezas(request, warn or 'No se pudo colocar ninguna pieza en el tablero.')
                 return render(request, "cutless/index.html", {
                     "tablero_form": tablero_form,
                     "pieza_formset": pieza_formset,
@@ -445,7 +461,7 @@ def index(request):
             )
 
             numero_lista = Optimizacion.objects.filter(usuario=request.user).count() + 1
-            persistir_resultado_optimizacion(
+            _ejecutar_con_aviso_error(request, persistir_resultado_optimizacion,
                 optimizacion,
                 imagenes_base64,
                 info_desperdicio,
@@ -680,7 +696,7 @@ def resultado_view(request, pk=None):
         nombres_piezas = [p['nombre'] for p in piezas_con_nombre]
         
         # Generar TODAS las imágenes con info de desperdicio (piezas y tablero en cm)
-        imagenes_base64, aprovechamiento, info_desperdicio = generar_grafico(
+        imagenes_base64, aprovechamiento, info_desperdicio = _ejecutar_con_aviso_error(request, generar_grafico,
             piezas, ancho_cm, alto_cm, unidad_resultado,
             permitir_rotacion=permitir_rotacion,
             margen_corte=margen_corte_cm,
@@ -691,7 +707,7 @@ def resultado_view(request, pk=None):
         nsol = info_desperdicio.get('num_piezas_solicitadas') or 0
         if nsol > 0 and ncol == 0:
             warn = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad_resultado)
-            messages.error(request, warn or '❌ No se pudo colocar ninguna pieza en el tablero.')
+            _avisar_sin_piezas(request, warn or 'No se pudo colocar ninguna pieza en el tablero.')
             return redirect('cutless:index')
 
         warn_omitidas = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad_resultado)
@@ -718,7 +734,7 @@ def resultado_view(request, pk=None):
         )
 
         numero_lista = Optimizacion.objects.filter(usuario=request.user).count() + 1
-        persistir_resultado_optimizacion(
+        _ejecutar_con_aviso_error(request, persistir_resultado_optimizacion,
             optimizacion,
             imagenes_base64,
             info_desperdicio,

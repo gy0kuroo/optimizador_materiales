@@ -2,7 +2,7 @@ from django import forms
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from .models import PerfilUsuario
 
 class RegistroForm(UserCreationForm):
@@ -326,13 +326,15 @@ class PerfilForm(forms.ModelForm):
             if margen_value:
                 try:
                     margen_mm = Decimal(str(margen_value))
+                    if not margen_mm.is_finite():
+                        raise InvalidOperation
                     if margen_mm < 0:
                         self.add_error('margen_corte_predeterminado', 
                                      forms.ValidationError("El margen de corte no puede ser negativo."))
                     elif margen_mm > 10:
                         self.add_error('margen_corte_predeterminado', 
                                      forms.ValidationError("El margen de corte no puede ser mayor a 10 mm."))
-                except (ValueError, TypeError):
+                except (ValueError, TypeError, InvalidOperation):
                     self.add_error('margen_corte_predeterminado', 
                                  forms.ValidationError("El valor del margen de corte no es válido."))
         
@@ -523,6 +525,52 @@ class CuentaPerfilForm(PerfilForm):
             'autocomplete': 'username',
         })
         self.fields['email'].widget.attrs['autocomplete'] = 'email'
+
+
+class ConfiguracionSistemaForm(PerfilForm):
+    """Ajustes de trabajo sin modificar cuenta ni preferencias de lectura."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in {'username', 'email', 'timeout_sesion', 'tema_preferido', 'tamanio_fuente'}:
+            self.fields.pop(name, None)
+
+
+class PersonalizarMenuForm(forms.Form):
+    OPCIONES = [
+        ('materiales', 'Materiales', 'puede_crear_materiales'),
+        ('clientes', 'Clientes', 'puede_crear_clientes'),
+        ('proyectos', 'Proyectos', 'puede_crear_proyectos'),
+        ('presupuestos', 'Presupuestos', 'puede_crear_presupuestos'),
+        ('plantillas', 'Plantillas', 'puede_crear_plantillas'),
+        ('costos', 'Costos', 'puede_ver_historial_costos'),
+        ('comparar', 'Comparar optimizaciones', 'puede_comparar_optimizaciones'),
+        ('estadisticas', 'Estadísticas', 'puede_ver_estadisticas'),
+    ]
+
+    def __init__(self, *args, instance, **kwargs):
+        self.instance = instance
+        super().__init__(*args, **kwargs)
+        admin = instance.rol == 'admin' or instance.usuario.is_superuser
+        for key, label, permiso in self.OPCIONES:
+            if admin or getattr(instance, permiso):
+                self.fields[key] = forms.BooleanField(required=False, label=label,
+                    initial=(instance.preferencias_menu or {}).get(key, True),
+                    help_text='Mostrar en el menú', widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+
+    @property
+    def gestion_fields(self):
+        return [self[key] for key, _, _ in self.OPCIONES[:5] if key in self.fields]
+
+    @property
+    def analisis_fields(self):
+        return [self[key] for key, _, _ in self.OPCIONES[5:] if key in self.fields]
+
+    def save(self):
+        preferencias = dict(self.instance.preferencias_menu or {})
+        preferencias.update(self.cleaned_data)
+        self.instance.preferencias_menu = preferencias
+        self.instance.save(update_fields=['preferencias_menu'])
+        return self.instance
 
 
 class CambiarPasswordForm(PasswordChangeForm):

@@ -10,6 +10,26 @@ from cutless.services.optimization import _regenerar_grafico
 
 
 class MargenCeroTests(TestCase):
+    def test_cero_del_perfil_se_muestra_en_inicio_y_envio_invalido(self):
+        perfil = self.usuario.perfil
+        perfil.margen_corte_predeterminado = 0
+        perfil.save()
+        response = self.client.get(reverse('cutless:index'))
+        from html.parser import HTMLParser
+        class MargenParser(HTMLParser):
+            value = None
+            def handle_starttag(self, tag, attrs):
+                attrs = dict(attrs)
+                if tag == 'input' and attrs.get('id') == 'margen_corte':
+                    self.value = attrs.get('value')
+        parser = MargenParser()
+        parser.feed(response.content.decode())
+        self.assertEqual(parser.value, '0')
+        response = self.client.post(reverse('cutless:index'), dict(self.data, ancho=''))
+        parser = MargenParser()
+        parser.feed(response.content.decode())
+        self.assertEqual(parser.value, '0')
+
     def setUp(self):
         self.usuario = User.objects.create_user('margen_user')
         self.client.force_login(self.usuario)

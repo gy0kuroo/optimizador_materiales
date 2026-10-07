@@ -1,329 +1,10 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}settings-page{% endblock %}
+{% block title %}Configuración del sistema · CutLess{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'usuarios/css/perfil.css' %}">
-<style>
-  /* Configuración del Sistema - Diseño Simple */
-  
-  .config-container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 2rem 0;
-  }
-
-  .config-header {
-    margin-bottom: 2rem;
-  }
-
-  .config-header h1 {
-    font-size: 2rem;
-    font-weight: 600;
-    margin: 0 0 0.5rem 0;
-    color: var(--text-primary);
-  }
-
-  .config-header p {
-    color: var(--text-secondary);
-    margin: 0;
-  }
-
-  .config-header-right {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-  }
-
-  /* Secciones */
-  .config-section {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .config-section-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .config-section-title span {
-    font-size: 1.5rem;
-  }
-
-  .config-section-title h5 {
-    margin: 0;
-    font-weight: 600;
-    font-size: 1.1rem;
-    color: var(--text-primary);
-  }
-
-  /* Grid simple */
-  .config-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1rem;
-  }
-
-  .config-field {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .config-field label {
-    font-weight: 500;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
-  }
-
-  .config-field input,
-  .config-field select {
-    padding: 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 0.95rem;
-    background-color: var(--input-bg);
-    color: var(--text-primary);
-  }
-
-  .config-field input:focus,
-  .config-field select:focus {
-    border-color: #0066cc;
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
-  }
-
-  /* Toggle simple */
-  .config-toggle {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 1rem;
-    background: var(--bg-secondary);
-    border-radius: 8px;
-  }
-
-  .config-toggle input[type="checkbox"],
-  .config-toggle .form-check-input {
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: none !important;
-    width: 44px;
-    height: 24px;
-    border: 2px solid #adb5bd;
-    border-radius: 12px;
-    background-color: #ced4da;
-    cursor: pointer;
-    transition: 0.2s;
-    position: relative;
-    flex-shrink: 0;
-  }
-
-  .config-toggle input[type="checkbox"]::before,
-  .config-toggle .form-check-input::before {
-    content: '';
-    position: absolute;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: white;
-    top: 2px;
-    left: 2px;
-    transition: 0.2s;
-  }
-
-  .config-toggle input[type="checkbox"]:not(:checked),
-  .config-toggle .form-check-input:not(:checked) {
-    background-color: #ced4da;
-    border-color: #adb5bd;
-  }
-
-  .config-toggle input[type="checkbox"]:checked,
-  .config-toggle .form-check-input:checked {
-    background-color: #28a745;
-    border-color: #28a745;
-  }
-
-  .config-toggle input[type="checkbox"]:checked::before,
-  .config-toggle .form-check-input:checked::before {
-    left: 18px;
-  }
-
-  .config-toggle-label {
-    flex: 1;
-  }
-
-  .config-toggle-label strong {
-    display: block;
-    color: var(--text-primary);
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-  }
-
-  .config-toggle-label small {
-    display: block;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-  }
-
-  /* Alertas */
-  .error-text {
-    color: #dc3545;
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
-  }
-
-  /* Botones */
-  .config-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-  }
-
-  .config-actions .btn {
-    padding: 0.75rem 1.5rem;
-    font-weight: 500;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-
-  .config-actions .btn-primary {
-    background: #0066cc;
-    color: white;
-  }
-
-  .config-actions .btn-primary:hover {
-    background: #0052a3;
-  }
-
-  .config-actions .btn-secondary {
-    background: transparent;
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-  }
-
-  .config-actions .btn-secondary:hover {
-    background: var(--bg-secondary);
-  }
-
-  @media (max-width: 576px) {
-    .config-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .config-actions {
-      flex-direction: column;
-    }
-
-    .config-header h1 {
-      font-size: 1.5rem;
-    }
-  }
-
-  /* Misma estética que Editar usuario (admin) */
-  .permission-toggle {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 1rem;
-    background: var(--bg-secondary);
-    border-radius: 8px;
-    transition: 0.2s;
-  }
-
-  .permission-toggle:hover {
-    background: var(--bg-tertiary, rgba(0, 0, 0, 0.04));
-  }
-
-  .permission-toggle input[type="checkbox"],
-  .permission-toggle .form-check-input {
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: none !important;
-    width: 44px;
-    height: 24px;
-    border: 2px solid #adb5bd;
-    border-radius: 12px;
-    background-color: #ced4da;
-    cursor: pointer;
-    transition: 0.2s;
-    position: relative;
-    flex-shrink: 0;
-  }
-
-  .permission-toggle input[type="checkbox"]::before,
-  .permission-toggle .form-check-input::before {
-    content: '';
-    position: absolute;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: white;
-    top: 2px;
-    left: 2px;
-    transition: 0.2s;
-  }
-
-  .permission-toggle input[type="checkbox"]:not(:checked),
-  .permission-toggle .form-check-input:not(:checked) {
-    background-color: #ced4da;
-    border-color: #adb5bd;
-  }
-
-  .permission-toggle input[type="checkbox"]:checked,
-  .permission-toggle .form-check-input:checked {
-    background-color: #28a745;
-    border-color: #28a745;
-  }
-
-  .permission-toggle input[type="checkbox"]:checked::before,
-  .permission-toggle .form-check-input:checked::before {
-    left: 18px;
-  }
-
-  .permission-label {
-    flex: 1;
-  }
-
-  .permission-label strong {
-    display: block;
-    color: var(--text-primary);
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-  }
-
-  .permission-label small {
-    display: block;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-  }
-
-  .permissions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1rem;
-  }
-
-  .config-tabs .nav-link {
-    color: var(--text-secondary);
-  }
-
-  .config-tabs .nav-link.active {
-    color: #0066cc;
-    font-weight: 600;
-  }
-</style>
+<link rel="stylesheet" href="{% static 'usuarios/css/settings-redesign.css' %}?v=1">
 {% endblock %}
 
 {% block content %}
@@ -332,7 +13,7 @@
   <header class="page-header fade-in">
     <div class="page-header__text">
       <h1 class="page-title">Configuración del sistema</h1>
-      <p class="page-lead">Valores predeterminados de optimización, notificaciones y qué <strong>funcionalidades del sistema</strong> deseas mostrar u ocultar en tu cuenta.</p>
+      <p class="page-lead">Configura cómo empiezan tus cortes, qué avisos recibes y qué opciones usas en la aplicación. Estos ajustes son de tu cuenta.</p>
     </div>
   </header>
 
@@ -349,12 +30,12 @@
   <ul class="nav nav-tabs config-tabs mb-3" id="configSistemaTabs" role="tablist">
     <li class="nav-item" role="presentation">
       <button class="nav-link active" id="tab-opti-link" data-bs-toggle="tab" data-bs-target="#tabOpti" type="button" role="tab" aria-controls="tabOpti" aria-selected="true">
-        🔧 Optimización y notificaciones
+        Cortes y notificaciones
       </button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="tab-funcionalidades-link" data-bs-toggle="tab" data-bs-target="#tabFuncionalidades" type="button" role="tab" aria-controls="tabFuncionalidades" aria-selected="false">
-        Funcionalidades del sistema
+        Personalizar menú
       </button>
     </li>
   </ul>
@@ -365,17 +46,12 @@
   <form method="post" name="editar_configuracion">
     {% csrf_token %}
     <input type="hidden" name="editar_configuracion" value="1">
-    <input type="hidden" name="username" value="{{ perfil_form.username.initial|default:user.username }}">
-    <input type="hidden" name="email" value="{{ perfil_form.email.initial|default:user.email }}">
-    <input type="hidden" name="timeout_sesion" value="{% if perfil.timeout_sesion is not None %}{{ perfil.timeout_sesion }}{% endif %}">
-    <input type="hidden" name="tema_preferido" value="{{ perfil.tema_preferido|default:'auto' }}">
-    <input type="hidden" name="tamanio_fuente" value="{{ perfil.tamanio_fuente|default:'normal' }}">
 
     <!-- Sistema -->
     <div class="config-section">
       <div class="config-section-title">
         <span></span>
-        <h5>Sistema</h5>
+        <h5>Valores para nuevos cortes</h5>
       </div>
 
       <div class="config-grid">
@@ -384,6 +60,7 @@
             {{ perfil_form.unidad_medida_predeterminada.label }}
           </label>
           {{ perfil_form.unidad_medida_predeterminada }}
+          <p class="settings-help">Se usará al preparar un nuevo corte. Podrás cambiarla en cada formulario.</p>
           {% if perfil_form.unidad_medida_predeterminada.errors %}
             <div class="error-text">{{ perfil_form.unidad_medida_predeterminada.errors.0 }}</div>
           {% endif %}
@@ -394,6 +71,7 @@
             {{ perfil_form.margen_corte_predeterminado.label }}
           </label>
           {{ perfil_form.margen_corte_predeterminado }}
+          <p class="settings-help">Ancho que consume la sierra en cada corte, siempre en milímetros. 0 significa sin separación.</p>
           {% if perfil_form.margen_corte_predeterminado.errors %}
             <div class="error-text">{{ perfil_form.margen_corte_predeterminado.errors.0 }}</div>
           {% endif %}
@@ -449,17 +127,18 @@
           {{ perfil_form.email_notificaciones.label }}
         </label>
         {{ perfil_form.email_notificaciones }}
+        <p class="settings-help">Opcional. Si lo dejas vacío, se usará el correo de tu cuenta.</p>
         {% if perfil_form.email_notificaciones.errors %}
           <div class="error-text">{{ perfil_form.email_notificaciones.errors.0 }}</div>
         {% endif %}
       </div>
     </div>
 
-    <!-- Tipos de Notificaciones -->
+    <!-- Cuándo recibir avisos -->
     <div class="config-section">
       <div class="config-section-title">
         <span></span>
-        <h5>Tipos de Notificaciones</h5>
+        <h5>Cuándo recibir avisos</h5>
       </div>
 
       <div style="margin-bottom: 1rem;">
@@ -502,7 +181,8 @@
         <div class="config-toggle">
           {{ perfil_form.notificar_errores }}
           <label class="config-toggle-label" for="{{ perfil_form.notificar_errores.id_for_label }}">
-            <strong>⚠️ {{ perfil_form.notificar_errores.label }}</strong>
+            <strong>{{ perfil_form.notificar_errores.label }}</strong>
+            <small class="settings-help">Avisos de problemas al calcular o guardar el corte. Los errores de formulario seguirán visibles para que puedas corregirlos.</small>
           </label>
         </div>
         {% if perfil_form.notificar_errores.errors %}
@@ -510,6 +190,7 @@
         {% endif %}
       </div>
     </div>
+    <button type="submit" class="btn btn-primary settings-save">Guardar ajustes de corte y avisos</button>
   </form>
 
   </div>
@@ -519,10 +200,10 @@
     <div class="config-section">
       <div class="config-section-title">
         <span></span>
-        <h5>Funcionalidades del sistema</h5>
+        <h5>Personalizar menú</h5>
       </div>
       <p class="text-muted mb-3" style="font-size: 0.95rem;">
-        Activa o desactiva las <strong>funcionalidades del sistema</strong> que aparecen en <strong>Más opciones</strong>. Es la misma configuración que el administrador puede editar por usuario; aquí la gestionas tú mismo sin cambiar de sesión.
+        Elige qué accesos mostrar en Gestión y Análisis. Ocultar una opción no borra datos ni cambia tus permisos. Puedes volver a mostrarla aquí en cualquier momento.
       </p>
 
       {% if permisos_form.non_field_errors %}
@@ -538,26 +219,10 @@
         {% csrf_token %}
         <input type="hidden" name="editar_permisos_menu" value="1">
 
-        <div class="permissions-grid mb-3">
-          {% for field in permisos_form %}
-            {% if field.field.widget.input_type == 'checkbox' %}
-              <div>
-                <div class="permission-toggle">
-                  {{ field }}
-                  <label class="permission-label" for="{{ field.id_for_label }}">
-                    <strong>{{ field.label }}</strong>
-                    {% if field.help_text %}
-                      <small>{{ field.help_text }}</small>
-                    {% endif %}
-                  </label>
-                </div>
-                {% if field.errors %}
-                  <div class="error-text mt-1">{{ field.errors.0 }}</div>
-                {% endif %}
-              </div>
-            {% endif %}
-          {% endfor %}
-        </div>
+        {% if permisos_form.gestion_fields %}<h5>Gestión</h5><div class="permissions-grid mb-4">{% for field in permisos_form.gestion_fields %}<div class="permission-toggle">{{ field }}<label class="permission-label" for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong><small>{{ field.help_text }}</small></label></div>{% endfor %}</div>{% endif %}
+        {% if permisos_form.analisis_fields %}<h5>Análisis</h5><div class="permissions-grid mb-4">{% for field in permisos_form.analisis_fields %}<div class="permission-toggle">{{ field }}<label class="permission-label" for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong><small>{{ field.help_text }}</small></label></div>{% endfor %}</div>{% endif %}
+        {% if not permisos_form.fields %}<p>No tienes secciones adicionales habilitadas para personalizar.</p>{% endif %}
+        <button type="submit" class="btn btn-primary settings-save">Guardar menú</button>
       </form>
     </div>
 
@@ -570,223 +235,26 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  var abrirFuncionalidades = new URLSearchParams(window.location.search).get('tab') === 'funcionalidades';
-  {% if mostrar_tab_funcionalidades %}
-  abrirFuncionalidades = true;
-  {% endif %}
-  if (abrirFuncionalidades && typeof bootstrap !== 'undefined') {
-    var el = document.getElementById('tab-funcionalidades-link');
-    if (el) {
-      var tab = new bootstrap.Tab(el);
-      tab.show();
-    }
-  }
-
-  var formConfig = document.querySelector('form[name="editar_configuracion"]');
-  var formPermisos = document.querySelector('form[name="editar_permisos_menu_form"]');
-  var tabsEl = document.getElementById('configSistemaTabs');
-  var allowTabSwitch = false;
-  var confirmacionEnCurso = false;
-
-  function confirmarModal(options) {
-    if (typeof window.cutlessConfirmar === 'function') {
-      return window.cutlessConfirmar(options);
-    }
-    return Promise.resolve(window.confirm((options.titulo || '') + '\n\n' + (options.mensaje || '')));
-  }
-
-  function captureFormState(form) {
-    var state = {};
-    if (!form) return state;
-    form.querySelectorAll('input, select, textarea').forEach(function (el) {
-      if (!el.name || el.type === 'hidden') return;
-      if (el.type === 'checkbox') {
-        state[el.name] = el.checked;
-      } else {
-        state[el.name] = el.value;
-      }
-    });
-    return state;
-  }
-
-  function applyFormState(form, state) {
-    if (!form || !state) return;
-    form.querySelectorAll('input, select, textarea').forEach(function (el) {
-      if (!el.name || el.type === 'hidden' || !(el.name in state)) return;
-      if (el.type === 'checkbox') {
-        el.checked = !!state[el.name];
-      } else {
-        el.value = state[el.name];
-      }
-    });
-  }
-
-  function initFormTracking(form) {
-    if (!form) return;
-    form.dataset.initialState = JSON.stringify(captureFormState(form));
-    form.querySelectorAll('select').forEach(function (el) {
-      el.dataset.prevSelect = el.value;
-    });
-  }
-
-  function isFormDirty(form) {
-    if (!form || !form.dataset.initialState) return false;
-    try {
-      var initial = JSON.parse(form.dataset.initialState);
-      return JSON.stringify(initial) !== JSON.stringify(captureFormState(form));
-    } catch (e) {
-      return false;
-    }
-  }
-
-  function resetFormToInitial(form) {
-    if (!form || !form.dataset.initialState) return;
-    try {
-      applyFormState(form, JSON.parse(form.dataset.initialState));
-      form.querySelectorAll('select').forEach(function (el) {
-        el.dataset.prevSelect = el.value;
-      });
-    } catch (e) { /* noop */ }
-  }
-
-  function etiquetaCampo(el) {
-    var contenedor = el.closest('.config-toggle, .permission-toggle, .config-field');
-    if (contenedor) {
-      var strong = contenedor.querySelector('strong');
-      if (strong) return strong.textContent.trim();
-      var label = contenedor.querySelector('label');
-      if (label) return label.textContent.trim();
-    }
-    return 'esta opción';
-  }
-
-  function guardarFormulario(form) {
-    if (!form) return;
-    form.setAttribute('data-cutless-skip-confirm', '1');
-    form.requestSubmit();
-  }
-
-  function attachConfirmacionCambios(form) {
-    if (!form) return;
-
-    form.addEventListener('change', async function (e) {
-      var el = e.target;
-      if (!el.name || el.type === 'hidden' || confirmacionEnCurso) return;
-
-      if (el.type === 'checkbox') {
-        confirmacionEnCurso = true;
-        var nuevoEstado = el.checked;
-        var etiqueta = etiquetaCampo(el);
-        el.checked = !nuevoEstado;
-
-        var accion = nuevoEstado ? 'habilitar' : 'deshabilitar';
-        var ok = await confirmarModal({
-          titulo: '¿Confirmar cambio?',
-          mensaje: '¿Estás seguro de ' + accion + ' «' + etiqueta + '»? El cambio se guardará de inmediato.',
-          textoAceptar: 'Sí, cambiar',
-          textoCancelar: 'Cancelar'
-        });
-
-        el.checked = ok ? nuevoEstado : !nuevoEstado;
-        confirmacionEnCurso = false;
-        if (ok) {
-          guardarFormulario(form);
-        }
-        return;
-      }
-
-      if (el.tagName === 'SELECT') {
-        confirmacionEnCurso = true;
-        var valorAnterior = el.dataset.prevSelect !== undefined ? el.dataset.prevSelect : el.value;
-        var valorNuevo = el.value;
-        el.value = valorAnterior;
-
-        var okSelect = await confirmarModal({
-          titulo: '¿Confirmar cambio?',
-          mensaje: '¿Estás seguro de cambiar «' + etiquetaCampo(el) + '»? El cambio se guardará de inmediato.',
-          textoAceptar: 'Sí, cambiar',
-          textoCancelar: 'Cancelar'
-        });
-
-        if (okSelect) {
-          el.value = valorNuevo;
-          el.dataset.prevSelect = valorNuevo;
-          confirmacionEnCurso = false;
-          guardarFormulario(form);
-        } else {
-          el.value = valorAnterior;
-          confirmacionEnCurso = false;
-        }
-      }
-    });
-
-    form.querySelectorAll('input[type="text"], input[type="email"], input[type="number"], textarea').forEach(function (el) {
-      if (!el.name || el.type === 'hidden') return;
-      el.addEventListener('focus', function () {
-        el.dataset.prevValue = el.value;
-      });
-      el.addEventListener('blur', async function () {
-        if (confirmacionEnCurso || el.value === (el.dataset.prevValue || '')) return;
-        confirmacionEnCurso = true;
-        var valorAnterior = el.dataset.prevValue || '';
-        var valorNuevo = el.value;
-        el.value = valorAnterior;
-
-        var okTexto = await confirmarModal({
-          titulo: '¿Confirmar cambio?',
-          mensaje: '¿Estás seguro de cambiar «' + etiquetaCampo(el) + '»? El cambio se guardará de inmediato.',
-          textoAceptar: 'Sí, cambiar',
-          textoCancelar: 'Cancelar'
-        });
-
-        if (okTexto) {
-          el.value = valorNuevo;
-          el.dataset.prevValue = valorNuevo;
-          confirmacionEnCurso = false;
-          guardarFormulario(form);
-        } else {
-          el.value = valorAnterior;
-          confirmacionEnCurso = false;
-        }
-      });
-    });
-  }
-
-  initFormTracking(formConfig);
-  initFormTracking(formPermisos);
-  attachConfirmacionCambios(formConfig);
-  attachConfirmacionCambios(formPermisos);
-
-  if (tabsEl) {
-    tabsEl.addEventListener('show.bs.tab', async function (event) {
-      if (allowTabSwitch) {
-        allowTabSwitch = false;
-        return;
-      }
-
-      var activePane = document.querySelector('#configSistemaTabContent .tab-pane.active');
-      var formActivo = activePane ? activePane.querySelector('form') : null;
-      if (!formActivo || !isFormDirty(formActivo)) {
-        return;
-      }
-
-      event.preventDefault();
-
-      var ok = await confirmarModal({
-        titulo: 'Cambios sin guardar',
-        mensaje: 'Tienes cambios que no has guardado en esta pestaña. Si cambias de pestaña sin guardar, se perderán.',
-        textoAceptar: 'Descartar y continuar',
-        textoCancelar: 'Quedarme aquí'
-      });
-
-      if (ok) {
-        resetFormToInitial(formActivo);
-        allowTabSwitch = true;
-        bootstrap.Tab.getOrCreateInstance(event.target).show();
-      }
-    });
-  }
+  var tabs = document.getElementById('configSistemaTabs');
+  var openMenu = new URLSearchParams(window.location.search).get('tab') === 'funcionalidades';
+  {% if mostrar_tab_funcionalidades %}openMenu = true;{% endif %}
+  if (openMenu && window.bootstrap) bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-funcionalidades-link')).show();
+  function state(form) { return JSON.stringify(Array.from(new FormData(form).entries()).filter(function (item) { return item[0] !== 'csrfmiddlewaretoken'; })); }
+  document.querySelectorAll('.settings-page form').forEach(function (form) {
+    var initial = state(form);
+    form.dataset.initialState = initial;
+    form.addEventListener('submit', function () { form.dataset.initialState = state(form); });
+  });
+  var switching = false;
+  tabs.addEventListener('show.bs.tab', async function (event) {
+    if (switching) { switching = false; return; }
+    var pane = document.querySelector('#configSistemaTabContent .tab-pane.active');
+    var form = pane && pane.querySelector('form');
+    if (!form || state(form) === form.dataset.initialState) return;
+    event.preventDefault();
+    var accepted = window.cutlessConfirmar ? await window.cutlessConfirmar({titulo: 'Cambios sin guardar', mensaje: 'Puedes quedarte y guardar los ajustes, o descartarlos para cambiar de pestaña.', textoAceptar: 'Descartar y continuar', textoCancelar: 'Quedarme aquí'}) : window.confirm('¿Descartar los cambios y cambiar de pestaña?');
+    if (accepted) { form.reset(); switching = true; bootstrap.Tab.getOrCreateInstance(event.target).show(); }
+  });
 });
 </script>
 {% endblock %}
-

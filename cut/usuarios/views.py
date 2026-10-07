@@ -258,6 +258,7 @@ def perfil(request):
 @login_required
 def configuracion_sistema(request):
     """Vista para editar solo la configuración del sistema (valores predeterminados)"""
+    from .forms import ConfiguracionSistemaForm, PersonalizarMenuForm
     try:
         perfil = request.user.perfil
     except PerfilUsuario.DoesNotExist:
@@ -266,51 +267,26 @@ def configuracion_sistema(request):
     perfil.refresh_from_db()
     
     # Crear formulario solo con campos de configuración del sistema
-    perfil_form = PerfilForm(instance=perfil, user=request.user)
-    permisos_form = PermisosUsuarioForm(instance=perfil)
+    perfil_form = ConfiguracionSistemaForm(instance=perfil, user=request.user)
+    permisos_form = PersonalizarMenuForm(instance=perfil)
     password_form = CambiarPasswordForm(user=request.user)  # Necesario para el template
     mostrar_tab_funcionalidades = False
     
     if request.method == "POST":
         if 'editar_permisos_menu' in request.POST:
-            permisos_form = PermisosUsuarioForm(request.POST, instance=perfil)
+            permisos_form = PersonalizarMenuForm(request.POST, instance=perfil)
             if permisos_form.is_valid():
                 permisos_form.save()
                 messages.success(
                     request,
-                    'Funcionalidades del sistema actualizadas. Los cambios se aplican de inmediato.',
+                    'Menú personalizado. Tus datos y permisos de acceso se conservan.',
                 )
                 url = reverse('usuarios:configuracion_sistema') + '?tab=funcionalidades'
                 return redirect(url)
-            messages.error(request, 'Por favor corrige los errores en funcionalidades del sistema.')
+            messages.error(request, 'Por favor corrige los errores al personalizar el menú.')
             mostrar_tab_funcionalidades = True
         elif 'editar_configuracion' in request.POST:
-            post_data = request.POST.copy()
-            perfil.refresh_from_db()
-
-
-
-            # Asegurar que los campos ocultos tengan valores válidos
-            if not post_data.get('timeout_sesion') or post_data.get('timeout_sesion') == '':
-                if perfil.timeout_sesion is not None:
-                    post_data['timeout_sesion'] = str(perfil.timeout_sesion)
-                else:
-                    if 'timeout_sesion' in post_data:
-                        del post_data['timeout_sesion']
-
-            if not post_data.get('tema_preferido') or post_data.get('tema_preferido') == '':
-                post_data['tema_preferido'] = perfil.tema_preferido if perfil.tema_preferido else 'auto'
-
-            if not post_data.get('tamanio_fuente') or post_data.get('tamanio_fuente') == '':
-                post_data['tamanio_fuente'] = perfil.tamanio_fuente or 'normal'
-
-            # Asegurar campos de información personal
-            if not post_data.get('username'):
-                post_data['username'] = request.user.username
-            if not post_data.get('email'):
-                post_data['email'] = request.user.email
-
-            perfil_form = PerfilForm(post_data, instance=perfil, user=request.user)
+            perfil_form = ConfiguracionSistemaForm(request.POST, instance=perfil, user=request.user)
             if perfil_form.is_valid():
                 perfil_form.save()
                 perfil.refresh_from_db()

@@ -45,25 +45,25 @@
                     {% if user.is_authenticated %}
                         <a class="nav-link{% if request.resolver_match.url_name == 'index' %} active{% endif %}" href="{% url 'cutless:index' %}">Inicio</a>
                         <a class="nav-link{% if request.resolver_match.url_name == 'historial' %} active{% endif %}" href="{% url 'cutless:historial' %}">Historial</a>
-                        {% if user.perfil.puede_crear_materiales or user.perfil.puede_crear_clientes or user.perfil.puede_crear_proyectos or user.perfil.puede_crear_presupuestos or user.perfil.puede_crear_plantillas %}
+                        {% if user.perfil.menu_visible.gestion %}
                         <div class="dropdown">
                             <button class="nav-link dropdown-toggle" type="button" id="nav-gestion" data-bs-toggle="dropdown" aria-expanded="false">Gestión</button>
                             <ul class="dropdown-menu" aria-labelledby="nav-gestion">
-                                {% if user.perfil.puede_crear_materiales %}<li><a class="dropdown-item" href="{% url 'cutless:lista_materiales' %}">Materiales</a></li>{% endif %}
-                                {% if user.perfil.puede_crear_clientes %}<li><a class="dropdown-item" href="{% url 'cutless:lista_clientes' %}">Clientes</a></li>{% endif %}
-                                {% if user.perfil.puede_crear_proyectos %}<li><a class="dropdown-item" href="{% url 'cutless:lista_proyectos' %}">Proyectos</a></li>{% endif %}
-                                {% if user.perfil.puede_crear_presupuestos %}<li><a class="dropdown-item" href="{% url 'cutless:lista_presupuestos' %}">Presupuestos</a></li>{% endif %}
-                                {% if user.perfil.puede_crear_plantillas %}<li><a class="dropdown-item" href="{% url 'cutless:lista_plantillas' %}">Plantillas</a></li>{% endif %}
+                                {% if user.perfil.menu_visible.materiales %}<li><a class="dropdown-item" href="{% url 'cutless:lista_materiales' %}">Materiales</a></li>{% endif %}
+                                {% if user.perfil.menu_visible.clientes %}<li><a class="dropdown-item" href="{% url 'cutless:lista_clientes' %}">Clientes</a></li>{% endif %}
+                                {% if user.perfil.menu_visible.proyectos %}<li><a class="dropdown-item" href="{% url 'cutless:lista_proyectos' %}">Proyectos</a></li>{% endif %}
+                                {% if user.perfil.menu_visible.presupuestos %}<li><a class="dropdown-item" href="{% url 'cutless:lista_presupuestos' %}">Presupuestos</a></li>{% endif %}
+                                {% if user.perfil.menu_visible.plantillas %}<li><a class="dropdown-item" href="{% url 'cutless:lista_plantillas' %}">Plantillas</a></li>{% endif %}
                             </ul>
                         </div>
                         {% endif %}
-                        {% if user.perfil.puede_ver_historial_costos or user.perfil.puede_comparar_optimizaciones or user.perfil.puede_ver_estadisticas %}
+                        {% if user.perfil.menu_visible.analisis %}
                         <div class="dropdown">
                             <button class="nav-link dropdown-toggle" type="button" id="nav-analisis" data-bs-toggle="dropdown" aria-expanded="false">Análisis</button>
                             <ul class="dropdown-menu" aria-labelledby="nav-analisis">
-                                {% if user.perfil.puede_ver_historial_costos %}<li><a class="dropdown-item" href="{% url 'cutless:historial_costos' %}">Costos</a></li>{% endif %}
-                                {% if user.perfil.puede_comparar_optimizaciones %}<li><a class="dropdown-item" href="{% url 'cutless:comparar_optimizaciones' %}">Comparar optimizaciones</a></li>{% endif %}
-                                {% if user.perfil.puede_ver_estadisticas %}<li><a class="dropdown-item" href="{% url 'cutless:estadisticas' %}">Estadísticas</a></li>{% endif %}
+                                {% if user.perfil.menu_visible.costos %}<li><a class="dropdown-item" href="{% url 'cutless:historial_costos' %}">Costos</a></li>{% endif %}
+                                {% if user.perfil.menu_visible.comparar %}<li><a class="dropdown-item" href="{% url 'cutless:comparar_optimizaciones' %}">Comparar optimizaciones</a></li>{% endif %}
+                                {% if user.perfil.menu_visible.estadisticas %}<li><a class="dropdown-item" href="{% url 'cutless:estadisticas' %}">Estadísticas</a></li>{% endif %}
                             </ul>
                         </div>
                         {% endif %}
