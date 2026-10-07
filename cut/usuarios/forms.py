@@ -245,6 +245,7 @@ class PerfilForm(forms.ModelForm):
         fields = [
             'timeout_sesion', 
             'tema_preferido',
+            'tamanio_fuente',
             'unidad_medida_predeterminada',
             # 'margen_corte_predeterminado' - EXCLUIDO: se maneja completamente manualmente
             'rotacion_automatica_predeterminada',
@@ -499,6 +500,30 @@ class PerfilForm(forms.ModelForm):
                 self.user.save()
             perfil.save()
         return perfil
+
+class PreferenciasPerfilForm(PerfilForm):
+    """Valida solo los campos enviados desde Preferencias."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in list(self.fields):
+            if name not in {'timeout_sesion', 'tema_preferido', 'tamanio_fuente'}:
+                del self.fields[name]
+
+
+class CuentaPerfilForm(PerfilForm):
+    """Valida los datos de cuenta sin reiniciar preferencias."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in list(self.fields):
+            if name not in {'username', 'email'}:
+                del self.fields[name]
+        self.fields['username'].widget.attrs.update({
+            'pattern': r'\p{L}{1,15}',
+            'title': 'Usa únicamente letras, hasta 15 caracteres.',
+            'autocomplete': 'username',
+        })
+        self.fields['email'].widget.attrs['autocomplete'] = 'email'
+
 
 class CambiarPasswordForm(PasswordChangeForm):
     """Formulario para cambiar contraseña"""

@@ -87,12 +87,17 @@
 
     // Función para establecer tamaño de fuentes
     function setFontSize(fontSize) {
+        const sizes = {small: '15px', normal: '16px', large: '18px', xlarge: '20px'};
+        fontSize = Object.hasOwn(sizes, fontSize) ? fontSize : 'normal';
+        document.documentElement.style.fontSize = sizes[fontSize];
         document.body.setAttribute('data-font-size', fontSize);
         localStorage.setItem('fontSize', fontSize);
     }
 
     // Obtener tamaño de fuente
     function getFontSize() {
+        const profileSize = document.body.getAttribute('data-font-size');
+        if (profileSize) return profileSize;
         const savedFontSize = localStorage.getItem('fontSize');
         if (savedFontSize) {
             return savedFontSize;

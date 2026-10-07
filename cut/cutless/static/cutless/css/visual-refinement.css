@@ -16,6 +16,7 @@
 .navbar-custom .dropdown-item { display: flex; align-items: center; min-height: 48px; padding: 10px 14px; font-size: 1.0625rem; color: var(--cl-text-primary) !important; border-radius: 6px; white-space: normal; }
 .navbar-custom .dropdown-item:hover, .navbar-custom .dropdown-item:focus { background: var(--cl-bg-surface); color: var(--cl-text-primary) !important; }
 .navbar-custom .dropdown-divider { border-color: var(--cl-border); }
+.navbar-custom .dropdown-item.nav-logout { font-weight: 600; }
 .navbar-custom .nav-link:focus-visible { outline: 2px solid var(--cl-ash-white); outline-offset: 2px; }
 .navbar-custom .nav-account { margin-left: 12px; border-left: 1px solid rgba(183,184,171,.4); padding-left: 12px; }
 .nav-account-label { display: inline-block; max-width: 180px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; white-space: nowrap; }

@@ -1,53 +1,57 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}profile-page{% endblock %}
+{% block title %}Mi perfil · CutLess{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'usuarios/css/perfil.css' %}">
+<link rel="stylesheet" href="{% static 'usuarios/css/profile-redesign.css' %}?v=1">
 {% endblock %}
 
 {% block content %}
   <header class="page-header fade-in">
     <div class="page-header__text">
-      <h1 class="page-title">Configuración de perfil</h1>
-      <p class="page-lead">Gestiona tu información personal y preferencias de la aplicación.</p>
+      <h1 class="page-title">Mi perfil</h1>
+      <p class="page-lead">Ajusta la lectura de la aplicación, tus datos de cuenta y tu contraseña.</p>
     </div>
     <div class="page-header__actions">
       <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
               onclick="iniciarTutorialSeccion('perfil')" 
               title="Ayuda sobre perfil">
-        Ayuda
+        Cómo configurar mi perfil
       </button>
     </div>
   </header>
   <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-7">
+    <div class="col-12 col-lg-10 col-xl-9">
       <div class="auth-card auth-card--plain fade-in">
         <div class="auth-card-body">
 
           <!-- Pestañas -->
           <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
             <li class="nav-item" role="presentation">
-              <button class="nav-link active" id="perfil-tab" data-bs-toggle="tab" data-bs-target="#perfil" type="button" role="tab">
-                Preferencias del Sistema
+              <button class="nav-link active" id="perfil-tab" aria-controls="perfil" aria-selected="true" data-bs-toggle="tab" data-bs-target="#perfil" type="button" role="tab">
+                Preferencias
               </button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link" id="seguridad-tab" data-bs-toggle="tab" data-bs-target="#seguridad" type="button" role="tab">
-                Seguridad
+              <button class="nav-link" id="seguridad-tab" aria-controls="seguridad" aria-selected="false" data-bs-toggle="tab" data-bs-target="#seguridad" type="button" role="tab">
+                Cuenta y contraseña
               </button>
             </li>
           </ul>
 
           <div class="tab-content" id="profileTabsContent">
             <!-- Pestaña de Perfil -->
-            <div class="tab-pane fade show active" id="perfil" role="tabpanel">
+            <div class="tab-pane fade show active" id="perfil" role="tabpanel" aria-labelledby="perfil-tab">
               <form method="post" class="auth-form" name="editar_perfil">
                 {% csrf_token %}
                 <input type="hidden" name="editar_perfil" value="1">
+                {% if perfil_form.non_field_errors %}<div class="profile-errors" role="alert">{{ perfil_form.non_field_errors }}</div>{% endif %}
                 
                 <div class="form-group mb-3">
                   <label for="{{ perfil_form.timeout_sesion.id_for_label }}" class="form-label">
-                    {{ perfil_form.timeout_sesion.label }}
+                    Cerrar sesión por inactividad (minutos)
                   </label>
                   <div class="input-group">
                     {{ perfil_form.timeout_sesion }}
@@ -63,9 +67,9 @@
                     <small class="text-muted">
                       <strong>Valores sugeridos:</strong><br>
                       • 15 minutos - Mayor seguridad<br>
-                      • 30 minutos - Balanceado (recomendado)<br>
+                      • 30 minutos - Opción intermedia<br>
                       • 60 minutos - Mayor comodidad<br>
-                      • 0 - Desactivar timeout automático
+                      • 0 - No cerrar la sesión por inactividad
                     </small>
                   </div>
                 </div>
@@ -95,46 +99,47 @@
 
                 <div class="text-center">
                   <button type="submit" class="btn btn-primary btn-lg btn-auth">
-                    Guardar Cambios
+                    Guardar preferencias
                   </button>
                 </div>
               </form>
             </div>
 
             <!-- Pestaña de Seguridad -->
-            <div class="tab-pane fade" id="seguridad" role="tabpanel">
+            <div class="tab-pane fade" id="seguridad" role="tabpanel" aria-labelledby="seguridad-tab">
               <div class="mb-4">
                 <h5 class="mb-3">Datos de cuenta</h5>
                 <form method="post" class="auth-form" name="editar_perfil_seguridad">
                   {% csrf_token %}
-                  <input type="hidden" name="editar_perfil" value="1">
+                  <input type="hidden" name="editar_cuenta" value="1">
+                {% if cuenta_form.non_field_errors %}<div class="profile-errors" role="alert">{{ cuenta_form.non_field_errors }}</div>{% endif %}
 
                   <div class="form-group mb-3">
-                    <label for="{{ perfil_form.username.id_for_label }}" class="form-label">
-                      {{ perfil_form.username.label }}
+                    <label for="{{ cuenta_form.username.id_for_label }}" class="form-label">
+                      {{ cuenta_form.username.label }}
                     </label>
-                    {{ perfil_form.username }}
-                    {% if perfil_form.username.errors %}
-                      <div class="text-danger small mt-1">{{ perfil_form.username.errors }}</div>
+                    {{ cuenta_form.username }}
+                    {% if cuenta_form.username.errors %}
+                      <div class="text-danger small mt-1">{{ cuenta_form.username.errors }}</div>
                     {% endif %}
-                    {% if perfil_form.username.help_text %}
-                      <small class="form-text text-muted">{{ perfil_form.username.help_text }}</small>
+                    {% if cuenta_form.username.help_text %}
+                      <small class="form-text text-muted">{{ cuenta_form.username.help_text }}</small>
                     {% endif %}
                   </div>
 
                   <div class="form-group mb-3">
-                    <label for="{{ perfil_form.email.id_for_label }}" class="form-label">
-                      {{ perfil_form.email.label }}
+                    <label for="{{ cuenta_form.email.id_for_label }}" class="form-label">
+                      {{ cuenta_form.email.label }}
                     </label>
-                    {{ perfil_form.email }}
-                    {% if perfil_form.email.errors %}
-                      <div class="text-danger small mt-1">{{ perfil_form.email.errors }}</div>
+                    {{ cuenta_form.email }}
+                    {% if cuenta_form.email.errors %}
+                      <div class="text-danger small mt-1">{{ cuenta_form.email.errors }}</div>
                     {% endif %}
                   </div>
 
                   <div class="text-center mb-3">
                     <button type="submit" class="btn btn-primary btn-lg btn-auth">
-                      Guardar Cambios
+                      Guardar datos de cuenta
                     </button>
                   </div>
                 </form>
@@ -147,6 +152,7 @@
                 <form method="post" class="auth-form" name="cambiar_password">
                   {% csrf_token %}
                   <input type="hidden" name="cambiar_password" value="1">
+                  {% if password_form.non_field_errors %}<div class="profile-errors" role="alert">{{ password_form.non_field_errors }}</div>{% endif %}
 
                   <div class="form-group mb-3">
                     <label for="{{ password_form.old_password.id_for_label }}" class="form-label">
@@ -186,18 +192,11 @@
 
                 <div class="text-center">
                   <button type="submit" class="btn btn-success btn-lg btn-auth">
-                    Cambiar Contraseña
+                    Actualizar contraseña
                   </button>
                 </div>
               </form>
             </div>
-          </div>
-        </div>
-        <div class="auth-card-footer">
-          <div class="w-100 d-flex justify-content-end">
-            <a href="{% url 'usuarios:logout' %}" class="btn btn-outline-danger">
-              Cerrar sesión
-            </a>
           </div>
         </div>
       </div>
@@ -209,6 +208,10 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  {% if password_form.is_bound or cuenta_form.is_bound %}
+  var securityTab = document.getElementById('seguridad-tab');
+  if (securityTab && window.bootstrap) bootstrap.Tab.getOrCreateInstance(securityTab).show();
+  {% endif %}
   function confirmarAntesDeGuardar(form, titulo, mensaje, textoAceptar) {
     if (!form) return;
     var skip = 'data-cutless-skip-confirm';
@@ -239,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
   confirmarAntesDeGuardar(
     document.querySelector('form[name="editar_perfil"]'),
     '¿Guardar cambios?',
-    '¿Confirmas guardar las preferencias del sistema (tiempo de sesión, tema o tamaño de letra)?',
+    '¿Confirmas guardar las preferencias personales (tiempo de sesión, tema o tamaño de letra)?',
     'Sí, guardar'
   );
   confirmarAntesDeGuardar(

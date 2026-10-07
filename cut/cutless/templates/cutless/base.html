@@ -77,6 +77,8 @@
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{% url 'usuarios:admin_dashboard' %}">Administrar usuarios</a></li>
                                 {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item nav-logout" href="{% url 'usuarios:logout' %}">Cerrar sesión</a></li>
                             </ul>
                         </div>
                     {% else %}
@@ -166,7 +168,7 @@
     </script>
     
     <!-- JavaScript Personalizado -->
-    <script src="{% static 'cutless/js/theme.js' %}"></script>
+    <script src="{% static 'cutless/js/theme.js' %}?v=2"></script>
     <script src="{% static 'cutless/js/confirmaciones.js' %}"></script>
     {% if user.is_authenticated %}
     <script src="{% static 'cutless/js/session-timeout.js' %}"></script>

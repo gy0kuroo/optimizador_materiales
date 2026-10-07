@@ -183,6 +183,7 @@ def logout_view(request):
 @login_required
 def perfil(request):
     """Vista para ver y editar el perfil del usuario"""
+    from .forms import PreferenciasPerfilForm, CuentaPerfilForm
     try:
         perfil = request.user.perfil
     except PerfilUsuario.DoesNotExist:
@@ -193,12 +194,13 @@ def perfil(request):
     # Esto asegura que siempre tengamos los valores más recientes
     perfil.refresh_from_db()
     
-    perfil_form = PerfilForm(instance=perfil, user=request.user)
+    perfil_form = PreferenciasPerfilForm(instance=perfil, user=request.user)
+    cuenta_form = CuentaPerfilForm(instance=perfil, user=request.user)
     password_form = CambiarPasswordForm(user=request.user)
     
     if request.method == "POST":
         if 'editar_perfil' in request.POST:
-            perfil_form = PerfilForm(request.POST, instance=perfil, user=request.user)
+            perfil_form = PreferenciasPerfilForm(request.POST, instance=perfil, user=request.user)
             if perfil_form.is_valid():
                 perfil_form.save()
                 # Actualizar timeout en sesión
@@ -230,6 +232,13 @@ def perfil(request):
                 messages.success(request, 'Perfil actualizado exitosamente.')
                 return redirect('usuarios:perfil')
         
+        elif 'editar_cuenta' in request.POST:
+            cuenta_form = CuentaPerfilForm(request.POST, instance=perfil, user=request.user)
+            if cuenta_form.is_valid():
+                cuenta_form.save()
+                messages.success(request, 'Datos de cuenta actualizados.')
+                return redirect('usuarios:perfil')
+
         elif 'cambiar_password' in request.POST:
             password_form = CambiarPasswordForm(user=request.user, data=request.POST)
             if password_form.is_valid():
@@ -240,6 +249,7 @@ def perfil(request):
     
     return render(request, 'usuarios/perfil.html', {
         'perfil_form': perfil_form,
+        'cuenta_form': cuenta_form,
         'password_form': password_form,
         'perfil': perfil
     })

@@ -133,5 +133,6 @@ El margen se introduce en milímetros: 0 permite corte sin separación; el valor
 - [Mejora visual de login, registro e inicio](docs/CAMBIOS_MEJORA_VISUAL.md)
 - [Mejora visual de historial y resultado](docs/CAMBIOS_VISUALES_HISTORIAL_RESULTADO.md)
 - [Reorganización de navegación](docs/CAMBIOS_NAVEGACION.md)
+- [Mi perfil y preferencias](docs/CAMBIOS_VISUALES_PERFIL.md)
 
 Git ignora nuevos datos locales, pero los archivos ya versionados siguen en seguimiento. Su retirada y revisión del historial quedan pendientes.
