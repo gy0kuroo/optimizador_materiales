@@ -138,5 +138,10 @@ El margen se introduce en milímetros: 0 permite corte sin separación; el valor
 - [Ayuda: presentación y recorrido contextual](docs/CAMBIOS_VISUALES_AYUDA.md)
 - [Estadísticas: presentación y claridad](docs/CAMBIOS_VISUALES_ESTADISTICAS.md)
 - [Análisis: comparación y costos](docs/CAMBIOS_VISUALES_ANALISIS.md)
+- [Plantillas: presentación, unidades y copias personales](docs/CAMBIOS_VISUALES_PLANTILLAS.md)
+- [Presupuestos: revisión visual y claridad](docs/CAMBIOS_VISUALES_PRESUPUESTOS.md)
+- [Proyectos: revisión visual y claridad](docs/CAMBIOS_VISUALES_PROYECTOS.md)
+- [Clientes: revisión visual y claridad](docs/CAMBIOS_VISUALES_CLIENTES.md)
+- [Materiales: revisión visual y claridad](docs/CAMBIOS_VISUALES_MATERIALES.md)
 
 Git ignora nuevos datos locales, pero los archivos ya versionados siguen en seguimiento. Su retirada y revisión del historial quedan pendientes.

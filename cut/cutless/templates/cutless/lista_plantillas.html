@@ -1,8 +1,10 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}templates-page{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/historial.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/templates-refinement.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -12,10 +14,10 @@
       <p class="page-lead">Guarda conjuntos de piezas frecuentes para reutilizarlos rápido.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
-              onclick="iniciarTutorialSeccion('plantillas')" 
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+              onclick="iniciarTutorialSeccion('plantillas')"
               title="Ayuda sobre plantillas">
-        Ayuda
+        Cómo usar las plantillas
       </button>
       <a href="{% url 'cutless:crear_plantilla' %}" class="btn btn-primary">
         Crear plantilla
@@ -26,16 +28,19 @@
   <!-- Filtros -->
   <div class="search-filters filters-panel fade-in mb-4">
     <form method="GET" action="{% url 'cutless:lista_plantillas' %}">
-      <div class="row">
+      <h2>Buscar plantillas</h2>
+      <div class="row g-3 align-items-end">
         <div class="col-md-4">
-          <input type="text" 
-                 class="form-control" 
-                 name="busqueda" 
+          <label for="plantillasBusqueda">Nombre</label>
+          <input type="text"
+                 class="form-control"
+                 id="plantillasBusqueda" name="busqueda"
                  placeholder="Buscar por nombre..."
                  value="{{ busqueda }}">
         </div>
         <div class="col-md-3">
-          <select name="categoria" class="form-select">
+          <label for="plantillasCategoria">Categoría</label>
+          <select id="plantillasCategoria" name="categoria" class="form-select">
             <option value="">Todas las categorías</option>
             <option value="cocina" {% if categoria_filtro == 'cocina' %}selected{% endif %}>Cocina</option>
             <option value="muebles" {% if categoria_filtro == 'muebles' %}selected{% endif %}>Muebles</option>
@@ -50,7 +55,7 @@
         </div>
         {% if busqueda or categoria_filtro %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary w-100">Limpiar</a>
+          <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary w-100">Quitar filtros</a>
         </div>
         {% endif %}
       </div>
@@ -59,7 +64,7 @@
 
   <!-- Plantillas del Usuario -->
   <div class="fade-in mb-5">
-    <h4 class="mb-3">Mis Plantillas</h4>
+    <h4 class="mb-3">Mis plantillas</h4>
     {% if plantillas_usuario %}
     <div class="row">
       {% for plantilla in plantillas_usuario %}
@@ -74,13 +79,13 @@
             <p class="card-text">{{ plantilla.descripcion|truncatewords:15 }}</p>
             {% endif %}
             <p class="mb-2"><strong>Tablero:</strong> {{ plantilla.ancho_tablero }} × {{ plantilla.alto_tablero }} {{ plantilla.get_unidad_medida_display }}</p>
-            <p class="mb-2"><strong>Piezas:</strong> {{ plantilla.get_piezas_list|length }}</p>
+            <p class="mb-2"><strong>Tipos de pieza:</strong> {{ plantilla.get_piezas_list|length }}</p>
             <p class="mb-0"><strong>Rotación:</strong> {% if plantilla.permitir_rotacion %}Sí{% else %}No{% endif %}</p>
           </div>
           <div class="card-footer">
-            <a href="{% url 'cutless:usar_plantilla' plantilla.pk %}" class="btn btn-success btn-sm">Usar</a>
-            <a href="{% url 'cutless:editar_plantilla' plantilla.pk %}" class="btn btn-primary btn-sm">Editar</a>
-            <a href="{% url 'cutless:eliminar_plantilla' plantilla.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+            <a href="{% url 'cutless:usar_plantilla' plantilla.pk %}" class="btn btn-primary">Cargar plantilla</a>
+            <a href="{% url 'cutless:editar_plantilla' plantilla.pk %}" class="btn btn-outline-secondary">Editar</a>
+            <a href="{% url 'cutless:eliminar_plantilla' plantilla.pk %}" class="btn btn-outline-danger">Eliminar</a>
           </div>
         </div>
       </div>
@@ -88,13 +93,13 @@
     </div>
     {% else %}
     <div class="card fade-in text-center card-empty-state">
-      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;"></div>
-      <h4 class="mb-3">No tienes plantillas creadas</h4>
+
+      <h4 class="mb-3">{% if busqueda or categoria_filtro %}No hay plantillas personales que coincidan{% else %}No tienes plantillas creadas{% endif %}</h4>
       <p class="mb-4" style="max-width: 500px; margin: 0 auto;">
         Aún no has creado plantillas personalizadas. Crea tu primera plantilla para guardar configuraciones de optimización que uses frecuentemente.
       </p>
       <a href="{% url 'cutless:crear_plantilla' %}" class="btn btn-primary btn-lg">
-        Crear Primera Plantilla
+        Crear plantilla
       </a>
     </div>
     {% endif %}
@@ -103,7 +108,8 @@
   <!-- Plantillas Predefinidas del Sistema -->
   {% if plantillas_sistema %}
   <div class="fade-in">
-    <h4 class="mb-3">📚 Plantillas Predefinidas</h4>
+    <h4 class="mb-3">Plantillas del sistema</h4>
+    <p class="template-note">Puedes cargarlas para preparar un corte o crear una copia personal para adaptarlas.</p>
     <div class="row">
       {% for plantilla in plantillas_sistema %}
       <div class="col-md-6 col-lg-4 mb-4">
@@ -118,12 +124,12 @@
             <p class="card-text">{{ plantilla.descripcion|truncatewords:15 }}</p>
             {% endif %}
             <p class="mb-2"><strong>Tablero:</strong> {{ plantilla.ancho_tablero }} × {{ plantilla.alto_tablero }} {{ plantilla.get_unidad_medida_display }}</p>
-            <p class="mb-2"><strong>Piezas:</strong> {{ plantilla.get_piezas_list|length }}</p>
+            <p class="mb-2"><strong>Tipos de pieza:</strong> {{ plantilla.get_piezas_list|length }}</p>
             <p class="mb-0"><strong>Rotación:</strong> {% if plantilla.permitir_rotacion %}Sí{% else %}No{% endif %}</p>
           </div>
           <div class="card-footer">
-            <a href="{% url 'cutless:usar_plantilla' plantilla.pk %}" class="btn btn-success btn-sm">✅ Usar</a>
-            <a href="{% url 'cutless:editar_plantilla' plantilla.pk %}" class="btn btn-primary btn-sm">✏️ Editar</a>
+            <a href="{% url 'cutless:usar_plantilla' plantilla.pk %}" class="btn btn-primary">Cargar plantilla</a>
+            <a href="{% url 'cutless:editar_plantilla' plantilla.pk %}" class="btn btn-outline-secondary">Crear copia personal</a>
           </div>
         </div>
       </div>

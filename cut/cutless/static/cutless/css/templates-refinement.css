@@ -1,0 +1,36 @@
+/* Biblioteca y formularios de plantillas. */
+.templates-page { font-size: 1.125rem; line-height: 1.6; }
+.templates-page .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; border: 0; }
+.templates-page .page-header__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.templates-page .page-title { font-size: clamp(1.8rem, 3vw, 2.4rem); text-transform: none; letter-spacing: -.035em; }
+.templates-page h2, .templates-page h4, .templates-page h5, .templates-page .form-label { font-family: var(--cl-font-body); text-transform: none; letter-spacing: normal; }
+.templates-page h2, .templates-page h4 { font-size: 1.3rem; }
+.templates-page .page-lead, .templates-page .template-note, .templates-page .text-muted { color: var(--cl-text-secondary) !important; }
+.templates-page .template-note, .templates-page small { font-size: 1rem; }
+.templates-page .card, .templates-page .search-filters { background: var(--cl-bg-card); border: 1px solid var(--cl-border); border-radius: 14px; box-shadow: var(--cl-shadow-sm); }
+.templates-page .card-body, .templates-page .search-filters { padding: 24px; }
+.templates-page .search-filters h2 { margin-bottom: 20px; }
+.templates-page .card-header, .templates-page .card-footer { padding: 18px 24px; background: var(--cl-bg-surface); color: var(--cl-text-primary); border-color: var(--cl-border); }
+.templates-page .card-header h5 { overflow-wrap: anywhere; }
+.templates-page .card-footer { display: flex; flex-wrap: wrap; gap: 12px; }
+.templates-page .btn { min-height: 48px; padding: 10px 16px; font: 600 1.0625rem/1.5 var(--cl-font-body) !important; text-transform: none !important; letter-spacing: normal !important; white-space: normal; }
+.templates-page .btn-ayuda-seccion, .templates-page .btn-outline-secondary { color: var(--cl-text-primary); background: var(--cl-bg-card); border: 1px solid var(--cl-border-strong); }
+.templates-page .btn-ayuda-seccion:hover, .templates-page .btn-outline-secondary:hover { background: var(--cl-bg-surface); }
+.templates-page .form-control, .templates-page .form-select { font: inherit; min-height: 48px; background-color: var(--cl-bg-card); color: var(--cl-text-primary); border-color: var(--cl-border-strong); }
+.templates-page .form-select:hover { background-color: var(--cl-bg-surface); }
+.templates-page label { margin-bottom: 8px; font-weight: 600; }
+.templates-page .form-check { display: flex; gap: 12px; align-items: center; padding: 16px; background: var(--cl-bg-surface); border: 1px solid var(--cl-border); border-radius: 8px; }
+.templates-page .form-check-input { float: none; margin: 0; width: 24px !important; height: 24px !important; min-width: 24px; min-height: 24px; flex: 0 0 24px; }
+.templates-page .form-check-label { margin: 0; }
+.templates-page .template-format { margin-top: 16px; padding: 16px; background: var(--cl-bg-surface); border: 1px solid var(--cl-border); border-radius: 8px; font-size: 1rem; }
+.templates-page .template-format code { color: var(--cl-text-primary); overflow-wrap: anywhere; }
+.templates-page .template-format p { margin: 8px 0 0; }
+.templates-page .card-empty-state { padding: 32px; }
+.templates-page .alert-info { background: var(--cl-bg-surface); color: var(--cl-text-primary); border-color: var(--cl-border); }
+.templates-page .badge { background: var(--cl-bg-card) !important; color: var(--cl-text-primary) !important; border: 1px solid var(--cl-border); font-size: 1rem; }
+.templates-page .form-action-bar { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.templates-page .btn:focus-visible, .templates-page .form-control:focus-visible, .templates-page .form-select:focus-visible, .templates-page .form-check-input:focus-visible { outline: 3px solid var(--cl-blue); outline-offset: 3px; }
+@media (max-width: 767px) {
+  .templates-page .page-header__actions { width: 100%; }
+  .templates-page .card-body, .templates-page .search-filters { padding: 20px; }
+}

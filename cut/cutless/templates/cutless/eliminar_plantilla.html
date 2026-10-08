@@ -1,6 +1,9 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}templates-page{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'cutless/css/templates-refinement.css' %}">{% endblock %}
+
 {% block content %}
   <header class="page-header fade-in">
     <div class="page-header__text">
@@ -8,7 +11,7 @@
       <p class="page-lead">Confirma que deseas eliminar «{{ plantilla.nombre }}». Esta acción no se puede deshacer.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary">Volver</a>
+      <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary">Volver a plantillas</a>
     </div>
   </header>
 

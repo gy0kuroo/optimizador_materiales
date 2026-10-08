@@ -1,8 +1,10 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}management-page{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/index.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">
 {% endblock %}
 
 {% block content %}
@@ -12,32 +14,33 @@
       <p class="page-lead">Define un proyecto y asócialo a un cliente.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
-              onclick="iniciarTutorialSeccion('crear_proyecto')" 
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+              onclick="iniciarTutorialSeccion('crear_proyecto')"
               title="Ayuda">
-        Ayuda
+        Ayuda sobre proyectos
       </button>
       <a href="{% url 'cutless:lista_proyectos' %}" class="btn btn-outline-secondary">
-        Volver
+        Volver a proyectos
       </a>
     </div>
   </header>
-  
+
 <div class="card fade-in">
     <div class="card-header card-header-section">
-      <h4 class="mb-0">Información del Proyecto</h4>
+      <h4 class="mb-0">Información del proyecto</h4>
     </div>
     <div class="card-body">
       <form method="post">
+        <p class="management-note">Completa los datos y guarda los cambios. Los campos con * son obligatorios.</p>
         {% csrf_token %}
-        
+
         {% if form.errors %}
           <div class="alert alert-danger">
             <strong>Error:</strong> Por favor, corrige los siguientes errores.
             {{ form.non_field_errors }}
           </div>
         {% endif %}
-        
+
         <div class="row mb-3">
           <div class="col-md-12">
             <label for="{{ form.nombre.id_for_label }}" class="form-label">
@@ -49,7 +52,7 @@
             {% endif %}
           </div>
         </div>
-        
+
         <div class="row mb-3">
           <div class="col-md-12">
             <label for="{{ form.descripcion.id_for_label }}" class="form-label">
@@ -61,7 +64,7 @@
             {% endif %}
           </div>
         </div>
-        
+
         <div class="row mb-3">
           <div class="col-md-6">
             <label for="{{ form.cliente.id_for_label }}" class="form-label">
@@ -85,7 +88,7 @@
             {% endif %}
           </div>
         </div>
-        
+
         <div class="row mb-3">
           <div class="col-md-6">
             <label for="{{ form.fecha_inicio.id_for_label }}" class="form-label">
@@ -106,7 +109,7 @@
             {% endif %}
           </div>
         </div>
-        
+
         <div class="row mb-3">
           <div class="col-md-12">
             <label for="{{ form.optimizaciones.id_for_label }}" class="form-label">
@@ -116,7 +119,7 @@
               {% if optimizaciones_info %}
                 {% for item in optimizaciones_info %}
                   <div class="form-check mb-3 p-3 border rounded optimizacion-card">
-                    <input class="form-check-input" type="checkbox" name="optimizaciones" value="{{ item.optimizacion.pk }}" id="opt_{{ item.optimizacion.pk }}" 
+                    <input class="form-check-input" type="checkbox" name="optimizaciones" value="{{ item.optimizacion.pk }}" id="opt_{{ item.optimizacion.pk }}"
                            {% if item.seleccionada %}checked{% endif %}>
                     <label class="form-check-label ms-2 w-100 label-clickable" for="opt_{{ item.optimizacion.pk }}">
                       <div class="d-flex justify-content-between align-items-start">
@@ -129,8 +132,8 @@
                       </div>
                       <div class="mt-2">
                         <small class="text-muted">
-                          <strong>Dimensiones:</strong> {{ item.optimizacion.ancho_tablero }} × {{ item.optimizacion.alto_tablero }} cm | 
-                          <strong>Aprovechamiento:</strong> <span class="badge bg-{% if item.optimizacion.aprovechamiento_total >= 80 %}success{% elif item.optimizacion.aprovechamiento_total >= 60 %}warning{% else %}danger{% endif %}">{{ item.optimizacion.aprovechamiento_total|floatformat:1 }}%</span> | 
+                          <strong>Dimensiones:</strong> {{ item.optimizacion.ancho_tablero }} × {{ item.optimizacion.alto_tablero }} cm |
+                          <strong>Aprovechamiento:</strong> <span class="badge bg-{% if item.optimizacion.aprovechamiento_total >= 80 %}success{% elif item.optimizacion.aprovechamiento_total >= 60 %}warning{% else %}danger{% endif %}">{{ item.optimizacion.aprovechamiento_total|floatformat:1 }}%</span> |
                           <strong>Tableros:</strong> {{ item.optimizacion.num_tableros|default:"0" }}
                           {% if item.optimizacion.material %}
                             | <strong>Material:</strong> {{ item.optimizacion.material.nombre }}
@@ -140,7 +143,7 @@
                       {% if item.nombres_piezas %}
                       <div class="mt-2">
                         <small class="text-muted">
-                          <strong>Piezas:</strong> 
+                          <strong>Piezas:</strong>
                           {% for nombre_pieza in item.nombres_piezas %}
                             <span class="badge bg-info text-dark me-1">{{ nombre_pieza }}</span>
                           {% endfor %}
@@ -167,7 +170,7 @@
             </small>
           </div>
         </div>
-        
+
         <div class="form-action-bar">
           <a href="{% url 'cutless:lista_proyectos' %}" class="btn btn-outline-secondary">Cancelar</a>
           <button type="submit" class="btn btn-primary btn-lg">Crear proyecto</button>

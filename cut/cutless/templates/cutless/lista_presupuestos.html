@@ -1,8 +1,10 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}management-page{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/historial.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">
 {% endblock %}
 
 {% block content %}
@@ -12,10 +14,10 @@
       <p class="page-lead">Crea y administra presupuestos a partir de tus optimizaciones.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
-              onclick="iniciarTutorialSeccion('presupuestos')" 
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+              onclick="iniciarTutorialSeccion('presupuestos')"
               title="Ayuda sobre presupuestos">
-        Ayuda
+        Ayuda sobre presupuestos
       </button>
       <a href="{% url 'cutless:crear_presupuesto' %}" class="btn btn-primary">
         Crear presupuesto
@@ -26,16 +28,19 @@
   <!-- Filtros -->
   <div class="search-filters filters-panel fade-in mb-4">
     <form method="GET" action="{% url 'cutless:lista_presupuestos' %}">
-      <div class="row">
+      <h2>Buscar y filtrar</h2>
+      <div class="row g-3 align-items-end">
         <div class="col-md-4">
-          <input type="text" 
-                 class="form-control" 
-                 name="busqueda" 
+          <label for="presupuestosBusqueda">Buscar presupuestos</label>
+          <input id="presupuestosBusqueda" type="text"
+                 class="form-control"
+                 name="busqueda"
                  placeholder="Buscar por número o cliente..."
                  value="{{ busqueda }}">
         </div>
         <div class="col-md-3">
-          <select name="estado" class="form-select">
+          <label for="presupuestosEstado">Estado</label>
+          <select id="presupuestosEstado" name="estado" class="form-select">
             <option value="">Todos los estados</option>
             <option value="borrador" {% if estado_filtro == 'borrador' %}selected{% endif %}>Borrador</option>
             <option value="enviado" {% if estado_filtro == 'enviado' %}selected{% endif %}>Enviado</option>
@@ -49,7 +54,7 @@
         </div>
         {% if busqueda or estado_filtro %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-outline-secondary w-100">Limpiar</a>
+          <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-outline-secondary w-100">Quitar filtros</a>
         </div>
         {% endif %}
       </div>
@@ -64,9 +69,9 @@
         <tr>
           <th>Número</th>
           <th>Cliente</th>
-          <th>Fecha Creación</th>
-          <th>Válido Hasta</th>
-          <th>Costo Total</th>
+          <th>Fecha de creación</th>
+          <th>Válido hasta</th>
+          <th>Costo total</th>
           <th>Estado</th>
           <th>Acciones</th>
         </tr>
@@ -90,9 +95,9 @@
             </span>
           </td>
           <td>
-            <a href="{% url 'cutless:detalle_presupuesto' presupuesto.pk %}" class="btn btn-sm btn-primary"> Ver</a>
-            <a href="{% url 'cutless:editar_presupuesto' presupuesto.pk %}" class="btn btn-sm btn-success">Editar</a>
-            <a href="{% url 'cutless:generar_pdf_presupuesto' presupuesto.pk %}" class="btn btn-sm btn-danger" target="_blank">PDF</a>
+            <a href="{% url 'cutless:detalle_presupuesto' presupuesto.pk %}" class="btn btn-sm btn-primary">Ver detalle</a>
+            <a href="{% url 'cutless:editar_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary">Editar</a>
+            <a href="{% url 'cutless:generar_pdf_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary" target="_blank" rel="noopener">PDF</a>
           </td>
         </tr>
         {% endfor %}
@@ -101,7 +106,7 @@
   </div>
   {% else %}
   <div class="card fade-in text-center card-empty-state">
-    <div class="mb-4" style="font-size: 4rem; opacity: 0.3;"></div>
+
     <h4 class="mb-3">
       {% if busqueda or estado_filtro %}
         No se encontraron presupuestos

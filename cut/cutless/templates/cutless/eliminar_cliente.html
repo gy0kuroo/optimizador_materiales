@@ -1,6 +1,9 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}management-page{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">{% endblock %}
+
 {% block content %}
   <header class="page-header fade-in">
     <div class="page-header__text">
@@ -8,7 +11,7 @@
       <p class="page-lead">Confirma que deseas eliminar «{{ cliente.nombre }}». Esta acción no se puede deshacer.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'cutless:lista_clientes' %}" class="btn btn-outline-secondary">Volver</a>
+      <a href="{% url 'cutless:lista_clientes' %}" class="btn btn-outline-secondary">Volver a clientes</a>
     </div>
   </header>
 

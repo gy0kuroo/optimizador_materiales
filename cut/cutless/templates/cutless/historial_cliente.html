@@ -1,8 +1,10 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}management-page{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/historial.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">
 {% endblock %}
 
 {% block content %}
@@ -12,10 +14,10 @@
       <p class="page-lead">Optimizaciones y actividad asociadas a este cliente.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
-              onclick="iniciarTutorialSeccion('historial_cliente')" 
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+              onclick="iniciarTutorialSeccion('historial_cliente')"
               title="Ayuda">
-        Ayuda
+        Ayuda sobre clientes
       </button>
       <a href="{% url 'cutless:lista_clientes' %}" class="btn btn-outline-secondary">
         Volver a clientes
@@ -60,7 +62,7 @@
   <!-- Estadísticas -->
   <div class="row mb-4 fade-in">
     <div class="col-md-4">
-      <div class="card text-center">
+      <div class="card text-center stats-card">
         <div class="card-body">
           <h3 class="text-primary">{{ total_optimizaciones }}</h3>
           <p class="mb-0">Optimizaciones</p>
@@ -68,7 +70,7 @@
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card text-center">
+      <div class="card text-center stats-card">
         <div class="card-body">
           <h3 class="text-success">{{ total_proyectos }}</h3>
           <p class="mb-0">Proyectos</p>
@@ -76,10 +78,10 @@
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card text-center">
+      <div class="card text-center stats-card">
         <div class="card-body">
           <h3 class="text-info">${{ costo_total|floatformat:0 }}</h3>
-          <p class="mb-0">Costo Total</p>
+          <p class="mb-0">Costo total</p>
         </div>
       </div>
     </div>
@@ -111,14 +113,14 @@
               </span>
             </td>
             <td>
-              {% if opt.get_costo_total %}
+              {% if opt.precio_tablero != None %}
                 ${{ opt.get_costo_total|floatformat:0 }}
               {% else %}
                 <span class="text-muted">—</span>
               {% endif %}
             </td>
             <td>
-              <a href="{% url 'cutless:resultado' opt.pk %}" class="btn btn-sm btn-outline-primary">Ver</a>
+              <a href="{% url 'cutless:resultado' opt.pk %}" class="btn btn-sm btn-outline-primary">Ver resultado</a>
             </td>
           </tr>
           {% endfor %}
@@ -157,7 +159,7 @@
             <td>{{ proyecto.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
             <td>{{ proyecto.get_total_optimizaciones }}</td>
             <td>
-              <a href="#" class="btn btn-sm btn-outline-primary">Ver</a>
+              <a href="#" class="btn btn-sm btn-outline-primary">Ver resultado</a>
             </td>
           </tr>
           {% endfor %}

@@ -1,8 +1,10 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}management-page{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/index.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">
 {% endblock %}
 
 {% block content %}
@@ -12,10 +14,10 @@
       <p class="page-lead">Confirma que deseas eliminar «{{ material.nombre }}». Esta acción no se puede deshacer.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary">Volver</a>
+      <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary">Volver a materiales</a>
     </div>
   </header>
-  
+
   <div class="card fade-in">
     <div class="card-header card-header-section card-header-section--danger">
       <h4 class="mb-0">Confirmar eliminación</h4>
@@ -25,7 +27,7 @@
         <div class="card-body">
           <h5>{{ material.nombre }}</h5>
           <p class="mb-1"><strong>Dimensiones:</strong> {{ material.ancho }} × {{ material.alto }} {{ material.get_unidad_medida_display }}</p>
-          {% if material.precio %}
+          {% if material.precio != None %}
             <p class="mb-1"><strong>Precio:</strong> ${{ material.precio|floatformat:0 }}</p>
           {% endif %}
           {% if material.descripcion %}
@@ -33,7 +35,7 @@
           {% endif %}
         </div>
       </div>
-      
+
       <form method="post" data-tipo="material">
         {% csrf_token %}
         <div class="form-action-bar">

@@ -1,8 +1,10 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}management-page{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/historial.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">
 {% endblock %}
 
 {% block content %}
@@ -12,13 +14,13 @@
       <p class="page-lead">Selecciona optimizaciones para incluir en el presupuesto.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
-              onclick="iniciarTutorialSeccion('agregar_optimizaciones_presupuesto')" 
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+              onclick="iniciarTutorialSeccion('agregar_optimizaciones')"
               title="Ayuda">
-        Ayuda
+        Ayuda sobre presupuestos
       </button>
       <a href="{% url 'cutless:detalle_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary">
-        Volver
+        Volver a presupuestos
       </a>
     </div>
   </header>
@@ -28,25 +30,25 @@
       <h4 class="mb-0">Presupuesto: {{ presupuesto.numero }}</h4>
     </div>
     <div class="card-body">
-      <p class="mb-0">Selecciona las optimizaciones que deseas agregar a este presupuesto. Puedes seleccionar múltiples optimizaciones manteniendo presionada la tecla Ctrl (Windows/Linux) o Cmd (Mac).</p>
+      <p class="mb-0">Selecciona las optimizaciones que deseas agregar a este presupuesto. Marca la casilla de cada registro que quieras agregar.</p>
     </div>
   </div>
 
   {% if optimizaciones_disponibles %}
   <div class="card fade-in">
     <div class="card-header card-header-section">
-      <h4 class="mb-0">Optimizaciones Disponibles</h4>
+      <h4 class="mb-0">Optimizaciones disponibles</h4>
     </div>
     <div class="card-body">
       <form method="post">
         {% csrf_token %}
-        
+
         <div class="table-responsive">
           <table class="table table-hover">
             <thead>
               <tr>
                 <th class="checkbox-column">
-                  <input type="checkbox" id="select-all" title="Seleccionar todas">
+                  <input type="checkbox" id="select-all" aria-label="Seleccionar todas las optimizaciones" title="Seleccionar todas">
                 </th>
                 <th>Fecha</th>
                 <th>Dimensiones</th>
@@ -60,7 +62,7 @@
               {% for opt in optimizaciones_disponibles %}
               <tr>
                 <td>
-                  <input type="checkbox" name="optimizaciones" value="{{ opt.pk }}" class="optimizacion-checkbox">
+                  <input type="checkbox" name="optimizaciones" value="{{ opt.pk }}" class="optimizacion-checkbox" aria-label="Seleccionar optimización del {{ opt.fecha|date:'d/m/Y H:i' }}">
                 </td>
                 <td>{{ opt.fecha|date:"d/m/Y H:i" }}</td>
                 <td>{{ opt.ancho_tablero }} × {{ opt.alto_tablero }} cm</td>
@@ -71,14 +73,14 @@
                 </td>
                 <td>{{ opt.num_tableros|default:"0" }}</td>
                 <td>
-                  {% if opt.get_costo_total %}
+                  {% if opt.precio_tablero != None %}
                     ${{ opt.get_costo_total|floatformat:0 }}
                   {% else %}
                     <span class="text-muted">—</span>
                   {% endif %}
                 </td>
                 <td>
-                  <a href="{% url 'cutless:resultado' opt.pk %}" class="btn btn-sm btn-outline-primary" target="_blank">Ver</a>
+                  <a href="{% url 'cutless:resultado' opt.pk %}" class="btn btn-sm btn-outline-primary" target="_blank">Ver resultado</a>
                 </td>
               </tr>
               {% endfor %}
@@ -87,7 +89,7 @@
         </div>
 
         <div class="alert alert-info mt-3">
-          <strong>Tip:</strong> Mantén presionada la tecla <kbd>Ctrl</kbd> (Windows/Linux) o <kbd>Cmd</kbd> (Mac) mientras haces clic para seleccionar múltiples optimizaciones.
+          <strong>Selección:</strong> Marca las casillas individualmente o usa la casilla del encabezado para seleccionar todos los registros.
         </div>
 
         <div class="d-flex justify-content-between mt-4">
@@ -107,14 +109,14 @@
 document.addEventListener('DOMContentLoaded', function() {
   const selectAll = document.getElementById('select-all');
   const checkboxes = document.querySelectorAll('.optimizacion-checkbox');
-  
+
   if (selectAll) {
     selectAll.addEventListener('change', function() {
       checkboxes.forEach(checkbox => {
         checkbox.checked = selectAll.checked;
       });
     });
-    
+
     // Actualizar el estado del checkbox "Seleccionar todas"
     checkboxes.forEach(checkbox => {
       checkbox.addEventListener('change', function() {

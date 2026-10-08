@@ -1,8 +1,10 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}management-page{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/historial.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">
 {% endblock %}
 
 {% block content %}
@@ -12,10 +14,10 @@
       <p class="page-lead">Agrupa optimizaciones por proyecto y haz seguimiento del avance.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
-              onclick="iniciarTutorialSeccion('proyectos')" 
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+              onclick="iniciarTutorialSeccion('proyectos')"
               title="Ayuda sobre proyectos">
-        Ayuda
+        Ayuda sobre proyectos
       </button>
       <a href="{% url 'cutless:crear_proyecto' %}" class="btn btn-primary">
         Crear proyecto
@@ -26,16 +28,19 @@
   <!-- Filtros -->
   <div class="search-filters filters-panel fade-in mb-4">
     <form method="GET" action="{% url 'cutless:lista_proyectos' %}">
-      <div class="row">
+      <h2>Buscar y filtrar</h2>
+      <div class="row g-3 align-items-end">
         <div class="col-md-4">
-          <input type="text" 
-                 class="form-control" 
-                 name="busqueda" 
+          <label for="proyectosBusqueda">Buscar proyectos</label>
+          <input id="proyectosBusqueda" type="text"
+                 class="form-control"
+                 name="busqueda"
                  placeholder="Buscar por nombre, descripción o cliente..."
                  value="{{ busqueda }}">
         </div>
         <div class="col-md-3">
-          <select name="estado" class="form-select">
+          <label for="proyectosEstado">Estado</label>
+          <select id="proyectosEstado" name="estado" class="form-select">
             <option value="">Todos los estados</option>
             <option value="planificacion" {% if estado_filtro == 'planificacion' %}selected{% endif %}>Planificación</option>
             <option value="en_proceso" {% if estado_filtro == 'en_proceso' %}selected{% endif %}>En Proceso</option>
@@ -44,11 +49,11 @@
           </select>
         </div>
         <div class="col-md-2">
-          <button type="submit" class="btn btn-outline-primary w-100">🔍 Buscar</button>
+          <button type="submit" class="btn btn-outline-primary w-100">Buscar</button>
         </div>
         {% if busqueda or estado_filtro %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:lista_proyectos' %}" class="btn btn-outline-secondary w-100">Limpiar</a>
+          <a href="{% url 'cutless:lista_proyectos' %}" class="btn btn-outline-secondary w-100">Quitar filtros</a>
         </div>
         {% endif %}
       </div>
@@ -65,8 +70,8 @@
           <th>Cliente</th>
           <th>Estado</th>
           <th>Optimizaciones</th>
-          <th>Costo Total</th>
-          <th>Fecha Creación</th>
+          <th>Costo total</th>
+          <th>Fecha de creación</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -97,9 +102,9 @@
           </td>
           <td>{{ proyecto.fecha_creacion|date:"d/m/Y" }}</td>
           <td>
-            <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-sm btn-primary"> Ver</a>
-            <a href="{% url 'cutless:editar_proyecto' proyecto.pk %}" class="btn btn-sm btn-success">Editar</a>
-            <a href="{% url 'cutless:eliminar_proyecto' proyecto.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
+            <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-sm btn-primary">Ver detalle</a>
+            <a href="{% url 'cutless:editar_proyecto' proyecto.pk %}" class="btn btn-outline-secondary">Editar</a>
+            <a href="{% url 'cutless:eliminar_proyecto' proyecto.pk %}" class="btn btn-outline-danger">Eliminar</a>
           </td>
         </tr>
         {% endfor %}
@@ -108,7 +113,7 @@
   </div>
   {% else %}
   <div class="card fade-in text-center card-empty-state">
-    <div class="mb-4" style="font-size: 4rem; opacity: 0.3;"></div>
+
     <h4 class="mb-3">
       {% if busqueda or estado_filtro %}
         No se encontraron proyectos

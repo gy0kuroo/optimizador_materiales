@@ -19,22 +19,21 @@ def editar_plantilla(request, pk):
         messages.error(request, "No tienes permiso para editar esta plantilla.")
         return redirect('cutless:lista_plantillas')
     
+    copiar_sistema = plantilla.es_predefinida
     if request.method == "POST":
-        form = PlantillaForm(request.POST, instance=plantilla)
+        form = PlantillaForm(request.POST, instance=plantilla, user=request.user)
         if form.is_valid():
             plantilla_actualizada = form.save(commit=False)
-            # Si es predefinida, asegurar que siga siendo predefinida
-            if plantilla.es_predefinida:
-                plantilla_actualizada.es_predefinida = True
-                plantilla_actualizada.usuario = None
+            if copiar_sistema:
+                plantilla_actualizada.pk = None
+                plantilla_actualizada.es_predefinida = False
+                plantilla_actualizada.usuario = request.user
             plantilla_actualizada.save()
-            messages.success(request, f'✅ Plantilla "{plantilla_actualizada.nombre}" actualizada exitosamente.')
+            accion = 'copiada a tus plantillas' if copiar_sistema else 'actualizada'
+            messages.success(request, f'Plantilla "{plantilla_actualizada.nombre}" {accion}.')
             return redirect('cutless:lista_plantillas')
     else:
-        form = PlantillaForm(instance=plantilla)
-        # Convertir margen de corte de cm a mm para mostrar
-        if plantilla.margen_corte:
-            form.fields['margen_corte'].initial = round(plantilla.margen_corte * 10, 1)
+        form = PlantillaForm(instance=plantilla, user=request.user)
     
     return render(request, 'cutless/editar_plantilla.html', {
         'form': form,
@@ -52,7 +51,7 @@ def crear_plantilla(request):
         optimizacion = get_object_or_404(Optimizacion, pk=optimizacion_id, usuario=request.user)
     
     if request.method == "POST":
-        form = PlantillaForm(request.POST)
+        form = PlantillaForm(request.POST, user=request.user)
         if form.is_valid():
             plantilla = form.save(commit=False)
             plantilla.usuario = request.user
@@ -61,7 +60,7 @@ def crear_plantilla(request):
             messages.success(request, f'✅ Plantilla "{plantilla.nombre}" creada exitosamente.')
             return redirect('cutless:lista_plantillas')
     else:
-        form = PlantillaForm()
+        form = PlantillaForm(user=request.user)
         if optimizacion:
             # Prellenar datos desde la optimización
             unidad_opt = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
@@ -69,13 +68,13 @@ def crear_plantilla(request):
             alto_mostrar = convertir_desde_cm(optimizacion.alto_tablero, unidad_opt)
             margen_mm = round(getattr(optimizacion, 'margen_corte', 0.3) * 10, 1)
             
-            form.fields['nombre'].initial = f"Plantilla de {optimizacion.fecha.strftime('%d/%m/%Y')}"
-            form.fields['ancho_tablero'].initial = ancho_mostrar
-            form.fields['alto_tablero'].initial = alto_mostrar
-            form.fields['unidad_medida'].initial = unidad_opt
-            form.fields['piezas'].initial = optimizacion.piezas
-            form.fields['permitir_rotacion'].initial = optimizacion.permitir_rotacion
-            form.fields['margen_corte'].initial = margen_mm
+            form.initial['nombre'] = f"Plantilla de {optimizacion.fecha.strftime('%d/%m/%Y')}"
+            form.initial['ancho_tablero'] = ancho_mostrar
+            form.initial['alto_tablero'] = alto_mostrar
+            form.initial['unidad_medida'] = unidad_opt
+            form.initial['piezas'] = optimizacion.piezas
+            form.initial['permitir_rotacion'] = optimizacion.permitir_rotacion
+            form.initial['margen_corte'] = margen_mm
     
     return render(request, 'cutless/crear_plantilla.html', {
         'form': form,

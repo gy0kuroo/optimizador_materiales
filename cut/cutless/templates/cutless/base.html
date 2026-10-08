@@ -450,7 +450,7 @@
                     {
                         title: 'Gestión de Presupuestos',
                         intro: 'Aquí puedes crear y gestionar presupuestos para tus clientes. Cada presupuesto puede incluir una o más optimizaciones con sus costos asociados.',
-                        element: document.querySelector('h2')
+                        element: document.querySelector('h1')
                     },
                     {
                         title: 'Filtrar Presupuestos',
@@ -473,7 +473,7 @@
                     {
                         title: 'Gestión de Proyectos',
                         intro: 'Los proyectos te permiten agrupar múltiples optimizaciones relacionadas. Útiles para organizar trabajos grandes o proyectos con múltiples fases.',
-                        element: document.querySelector('h2')
+                        element: document.querySelector('h1')
                     },
                     {
                         title: 'Filtrar Proyectos',
@@ -496,7 +496,7 @@
                     {
                         title: 'Gestión de Clientes',
                         intro: 'Mantén un registro de todos tus clientes. Puedes asociar optimizaciones, presupuestos y proyectos a cada cliente para un mejor seguimiento.',
-                        element: document.querySelector('h2')
+                        element: document.querySelector('h1')
                     },
                     {
                         title: 'Buscar Clientes',
@@ -519,11 +519,11 @@
                     {
                         title: 'Biblioteca de Materiales',
                         intro: 'Guarda los materiales que usas frecuentemente con sus dimensiones y precios. Esto agiliza la creación de optimizaciones y presupuestos.',
-                        element: document.querySelector('h2')
+                        element: document.querySelector('h1')
                     },
                     {
                         title: 'Buscar Materiales',
-                        intro: 'Busca materiales por nombre o descripción. Los materiales predefinidos del sistema también están disponibles para usar.',
+                        intro: 'Busca materiales por nombre. Los materiales predefinidos del sistema también están disponibles para usar.',
                         element: document.querySelector('.search-filters')
                     },
                     {
@@ -533,7 +533,7 @@
                     },
                     {
                         title: 'Lista de Materiales',
-                        intro: 'La tabla muestra todos tus materiales con sus dimensiones, precio y área. Los materiales predefinidos del sistema están marcados.',
+                        intro: 'La biblioteca muestra las medidas en centímetros, el precio por tablero y el área. Solo los administradores pueden modificar materiales del sistema.',
                         element: document.querySelector('.table')
                     }
                 ];
@@ -542,7 +542,7 @@
                     {
                         title: 'Biblioteca de Plantillas',
                         intro: 'Las plantillas te permiten guardar configuraciones de tableros y piezas que usas frecuentemente. Ahorra tiempo reutilizando plantillas.',
-                        element: document.querySelector('h2')
+                        element: document.querySelector('h1')
                     },
                     {
                         title: 'Filtrar Plantillas',
@@ -555,8 +555,8 @@
                         element: document.querySelector('a[href*="crear_plantilla"]')
                     },
                     {
-                        title: 'Usar Plantilla',
-                        intro: 'Haz clic en "Usar" para aplicar una plantilla a una nueva optimización. Esto carga automáticamente todas las piezas y configuraciones guardadas.',
+                        title: 'Cargar plantilla Plantilla',
+                        intro: 'Haz clic en "Cargar plantilla" para aplicar una plantilla a una nueva optimización. Esto carga automáticamente todas las piezas y configuraciones guardadas.',
                         element: document.querySelector('.card')
                     }
                 ];
@@ -730,7 +730,7 @@
                     },
                     {
                         title: 'Optimizaciones Incluidas',
-                        intro: 'La lista muestra todas las optimizaciones asociadas al presupuesto con sus detalles: dimensiones, aprovechamiento, tableros y piezas.',
+                        intro: 'La lista muestra todas las optimizaciones asociadas al presupuesto con sus detalles: dimensiones, aprovechamiento, cantidad de tableros y costo.',
                         element: document.querySelector('.table')
                     },
                     {
@@ -741,7 +741,7 @@
                     {
                         title: 'Acciones Disponibles',
                         intro: 'Puedes editar el presupuesto, agregar más optimizaciones, generar un PDF para enviar al cliente o volver a la lista de presupuestos.',
-                        element: document.querySelector('.btn')
+                        element: document.querySelector('.management-actions, .form-action-bar')
                     }
                 ];
             } else if (seccion === 'detalle_proyecto') {
@@ -764,7 +764,7 @@
                     {
                         title: 'Acciones Disponibles',
                         intro: 'Puedes editar el proyecto, agregar más optimizaciones o volver a la lista de proyectos.',
-                        element: document.querySelector('.btn')
+                        element: document.querySelector('.management-actions, .form-action-bar')
                     }
                 ];
             } else if (seccion === 'historial_cliente') {
@@ -781,7 +781,7 @@
                     },
                     {
                         title: 'Estadísticas',
-                        intro: 'Puedes ver métricas del cliente como total de optimizaciones, aprovechamiento promedio y costo total si hay costos asociados.',
+                        intro: 'Puedes ver el total de optimizaciones, la cantidad de proyectos y el costo total del cliente.',
                         element: document.querySelector('.stats-card')
                     }
                 ];
@@ -790,12 +790,12 @@
                     {
                         title: 'Agregar Optimizaciones',
                         intro: 'Selecciona una o más optimizaciones disponibles para agregar al proyecto o presupuesto. Solo se muestran las optimizaciones que aún no están asociadas.',
-                        element: document.querySelector('h2')
+                        element: document.querySelector('h1')
                     },
                     {
                         title: 'Lista de Optimizaciones',
-                        intro: 'Cada optimización muestra sus detalles: fecha, dimensiones, aprovechamiento, número de tableros y piezas. Usa los checkboxes para seleccionar.',
-                        element: document.querySelector('.optimizaciones-container')
+                        intro: 'Cada optimización muestra sus detalles: fecha, dimensiones, aprovechamiento, número de tableros y piezas. Marca las casillas para seleccionar. Puedes usar la casilla del encabezado para seleccionar todos los registros.',
+                        element: document.querySelector('.table-responsive')
                     },
                     {
                         title: 'Confirmar Selección',

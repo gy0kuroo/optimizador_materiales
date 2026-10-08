@@ -1,6 +1,9 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}management-page{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">{% endblock %}
+
 {% block content %}
   <header class="page-header fade-in">
     <div class="page-header__text">
@@ -8,7 +11,7 @@
       <p class="page-lead">Confirma que deseas eliminar «{{ proyecto.nombre }}». Esta acción no se puede deshacer.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-outline-secondary">Volver</a>
+      <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-outline-secondary">Volver a proyectos</a>
     </div>
   </header>
 
@@ -18,12 +21,12 @@
     </div>
     <div class="card-body">
       <p class="lead">Se eliminará el proyecto y sus datos asociados.</p>
-      
+
       {% if optimizaciones_count > 0 %}
       <div class="alert alert-warning">
-        <strong>⚠️ Advertencia:</strong> Este proyecto tiene <strong>{{ optimizaciones_count }}</strong> optimización(es) asociada(s).
+        <strong>Advertencia:</strong> Este proyecto tiene <strong>{{ optimizaciones_count }}</strong> optimización(es) asociada(s).
       </div>
-      
+
       <div class="mb-3">
         <label class="form-label"><strong>¿Qué hacer con las optimizaciones?</strong></label>
         <div class="form-check">
@@ -40,11 +43,11 @@
         </div>
       </div>
       {% endif %}
-      
+
       <div class="alert alert-danger">
-        <strong>⚠️ Advertencia:</strong> Esta acción no se puede deshacer.
+        <strong>Advertencia:</strong> Esta acción no se puede deshacer.
       </div>
-      
+
       <form method="post" data-tipo="proyecto">
         {% csrf_token %}
         {% if optimizaciones_count > 0 %}

@@ -1,0 +1,44 @@
+/* Presupuestos, proyectos, clientes y materiales: continuidad visual. */
+.management-page { font-size: 1.125rem; line-height: 1.6; }
+.management-page .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; border: 0; }
+.management-page .page-header__text { flex: 1 1 400px; min-width: 0; }
+.management-page .page-header__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.management-page .page-title { font-size: clamp(1.8rem, 3vw, 2.4rem); text-transform: none; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.management-page h2, .management-page h3, .management-page h4, .management-page h5, .management-page .form-label { font-family: var(--cl-font-body); text-transform: none; letter-spacing: normal; }
+.management-page h2, .management-page h4 { font-size: 1.3rem; }
+.management-page .page-lead, .management-page .management-note, .management-page .text-muted { color: var(--cl-text-secondary) !important; }
+.management-page small, .management-page .small, .management-page .management-note { font-size: 1rem; line-height: 1.6; }
+.management-page .card, .management-page .search-filters { background: var(--cl-bg-card); border: 1px solid var(--cl-border); border-radius: 14px; box-shadow: var(--cl-shadow-sm); }
+.management-page .card-body, .management-page .search-filters { padding: 24px; }
+.management-page .search-filters h2 { margin-bottom: 20px; }
+.management-page .card-header { padding: 18px 24px; background: var(--cl-bg-surface); color: var(--cl-text-primary); border-color: var(--cl-border); flex-wrap: wrap; gap: 12px; }
+.management-page .btn { min-height: 48px; padding: 10px 16px; font: 600 1.0625rem/1.5 var(--cl-font-body) !important; white-space: normal; text-transform: none !important; letter-spacing: normal !important; }
+.management-page .btn-ayuda-seccion, .management-page .btn-outline-secondary { background: var(--cl-bg-card); color: var(--cl-text-primary); border: 1px solid var(--cl-border-strong); }
+.management-page .btn-ayuda-seccion:hover, .management-page .btn-outline-secondary:hover { background: var(--cl-bg-surface); }
+.management-page .form-control, .management-page .form-select { min-height: 48px; font: inherit; color: var(--cl-text-primary); background-color: var(--cl-bg-card); border-color: var(--cl-border-strong); }
+.management-page textarea { resize: vertical; }
+.management-page .form-select:hover { background-color: var(--cl-bg-surface); }
+.management-page label { margin-bottom: 8px; font-weight: 600; }
+.management-page .form-action-bar { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.management-page .table { --bs-table-bg: var(--cl-bg-card); --bs-table-color: var(--cl-text-primary); --bs-table-hover-bg: var(--cl-bg-surface); --bs-table-hover-color: var(--cl-text-primary); --bs-table-border-color: var(--cl-border); }
+.management-page .table-responsive { border: 1px solid var(--cl-border); border-radius: 12px; background: var(--cl-bg-card); }
+.management-page .table th, .management-page .table td { padding: 16px; vertical-align: middle; }
+.management-page .table thead, .management-page .table .table-primary { --bs-table-bg: var(--cl-bg-surface); --bs-table-color: var(--cl-text-primary); }
+.management-page .table td:last-child { min-width: 180px; }
+.management-page .table .btn { margin: 4px 0; }
+.management-page .badge { background: var(--cl-bg-surface) !important; color: var(--cl-text-primary) !important; border: 1px solid var(--cl-border); font-size: 1rem; font-weight: 600; line-height: 1.5; white-space: normal; }
+.management-page .badge.bg-danger { border-color: var(--cl-danger); }
+.management-page .card h3 { font-size: clamp(1.8rem, 3vw, 2.4rem); color: var(--cl-text-primary) !important; overflow-wrap: anywhere; }
+.management-page .alert-info { background: var(--cl-bg-surface); color: var(--cl-text-primary); border-color: var(--cl-border); }
+.management-page .card-empty-state { padding: 32px; }
+.management-page .optimizaciones-container { max-height: 520px; overflow-y: auto; border-color: var(--cl-border) !important; background: var(--cl-bg-card); }
+.management-page .optimizacion-card { display: flex; align-items: flex-start; gap: 12px; background: var(--cl-bg-surface); border-color: var(--cl-border) !important; }
+.management-page input[type="checkbox"] { width: 24px !important; height: 24px !important; min-width: 24px; min-height: 24px; margin: 4px 0 0 !important; float: none; flex: 0 0 24px; accent-color: var(--cl-blue); }
+.management-page .form-check-label { margin: 0 !important; min-width: 0; font-weight: 400; }
+.management-page .checkbox-column { width: 60px; }
+.management-page .btn:focus-visible, .management-page .form-control:focus-visible, .management-page .form-select:focus-visible, .management-page input[type="checkbox"]:focus-visible { outline: 3px solid var(--cl-blue); outline-offset: 3px; }
+@media (max-width: 767px) {
+  .management-page .page-header__actions { width: 100%; }
+  .management-page .card-body, .management-page .search-filters { padding: 20px; }
+  .management-page .form-action-bar .btn { flex: 1 1 160px; }
+}
