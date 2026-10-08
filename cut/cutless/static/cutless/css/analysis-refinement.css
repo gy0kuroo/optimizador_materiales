@@ -1,0 +1,40 @@
+/* Costos y comparación: presentación compartida, limitada a estas pantallas. */
+.analysis-page { font-size: 1.125rem; line-height: 1.6; }
+.analysis-page .page-header { display: flex; justify-content: space-between; flex-wrap: wrap; align-items: center; gap: 20px; border: 0; }
+.analysis-page .page-header__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.analysis-page .page-title { font-size: clamp(1.8rem, 3vw, 2.4rem); text-transform: none; letter-spacing: -.035em; }
+.analysis-page h2, .analysis-page h4, .analysis-page h5, .analysis-page .form-label { font-family: var(--cl-font-body); text-transform: none; letter-spacing: normal; }
+.analysis-page h2, .analysis-page h4 { font-size: 1.3rem; }
+.analysis-page .page-lead, .analysis-page .analysis-note, .analysis-page .text-muted, .analysis-page .material-info { color: var(--cl-text-secondary) !important; }
+.analysis-page .analysis-note, .analysis-page small { font-size: 1rem; }
+.analysis-page .card, .analysis-page .filter-card, .costs-page .chart-container { background: var(--cl-bg-card); border: 1px solid var(--cl-border); border-radius: 14px; box-shadow: var(--cl-shadow-sm); }
+.analysis-page .card-body, .analysis-page .filter-card, .costs-page .chart-container { padding: 24px; }
+.analysis-page .filter-card { margin-bottom: 24px; }
+.analysis-page .card-header { padding: 18px 24px; background: var(--cl-bg-surface); color: var(--cl-text-primary); border-bottom: 1px solid var(--cl-border); }
+.analysis-page .btn { min-height: 48px; padding: 10px 16px; font: 600 1.0625rem/1.5 var(--cl-font-body) !important; white-space: normal; text-transform: none !important; letter-spacing: normal !important; }
+.analysis-page .btn-ayuda-seccion, .analysis-page .btn-outline-secondary { background: var(--cl-bg-card); color: var(--cl-text-primary); border: 1px solid var(--cl-border-strong); }
+.analysis-page .btn-ayuda-seccion:hover, .analysis-page .btn-outline-secondary:hover { background: var(--cl-bg-surface); }
+.analysis-page .form-control, .analysis-page .form-select { min-height: 48px; font: inherit; background-color: var(--cl-bg-card); color: var(--cl-text-primary); border-color: var(--cl-border-strong); }
+.analysis-page .form-select:hover { background-color: var(--cl-bg-surface); }
+.analysis-page .list-group-item { padding: 14px 16px; color: var(--cl-text-primary); background: var(--cl-bg-card); border-color: var(--cl-border); }
+.analysis-page .comparison-value { font-weight: 700; }
+.analysis-page .table { --bs-table-bg: var(--cl-bg-card); --bs-table-color: var(--cl-text-primary); --bs-table-hover-bg: var(--cl-bg-surface); --bs-table-hover-color: var(--cl-text-primary); --bs-table-border-color: var(--cl-border); }
+.analysis-page .table th, .analysis-page .table td { padding: 16px; vertical-align: middle; }
+.analysis-page .table thead, .analysis-page .table tfoot { --bs-table-bg: var(--cl-bg-surface); --bs-table-color: var(--cl-text-primary); }
+.analysis-page .table .text-success, .analysis-page .table .text-danger, .analysis-page .table .text-info, .analysis-page .table .text-warning { color: var(--cl-text-primary) !important; }
+.analysis-page .table td:last-child { min-width: 160px; }
+.costs-page .stats-card { height: 100%; border-color: var(--cl-border) !important; border-top: 3px solid var(--cl-olive) !important; }
+.costs-page .stats-value { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 600; color: var(--cl-text-primary) !important; overflow-wrap: anywhere; }
+.costs-page .stats-label { margin-top: 8px; font-size: 1.125rem; }
+.costs-page .avg-cost { margin-top: 12px; font-size: 1rem; color: var(--cl-text-secondary); }
+.costs-page .badge { background: var(--cl-bg-surface) !important; color: var(--cl-text-primary) !important; border: 1px solid var(--cl-border); font-size: 1rem; font-weight: 600; white-space: normal; }
+.costs-page .chart-container > div { flex-wrap: wrap; gap: 12px; }
+.costs-page .chart-container img { display: block; width: 100%; background: white; }
+.costs-page .alert-info { color: var(--cl-text-primary); background: var(--cl-bg-surface); border-color: var(--cl-border); flex-wrap: wrap; }
+.analysis-page .card-empty-state { padding: 32px; }
+.analysis-page .btn:focus-visible, .analysis-page .form-control:focus-visible, .analysis-page .form-select:focus-visible { outline: 3px solid var(--cl-blue); outline-offset: 3px; }
+@media (max-width: 767px) {
+  .analysis-page .page-header__actions { width: 100%; }
+  .analysis-page .card-body, .analysis-page .filter-card { padding: 20px; }
+  .comparison-page .table { min-width: 650px; }
+}

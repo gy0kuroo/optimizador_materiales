@@ -19,8 +19,8 @@
     <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{% static 'cutless/css/main.css' %}">
     <link rel="stylesheet" href="{% static 'cutless/css/palette.css' %}">
-    <link rel="stylesheet" href="{% static 'cutless/css/ui.css' %}">
-    <link rel="stylesheet" href="{% static 'cutless/css/accessibility.css' %}">
+    <link rel="stylesheet" href="{% static 'cutless/css/ui.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'cutless/css/accessibility.css' %}?v=2">
     <link rel="stylesheet" href="{% static 'cutless/css/visual-refinement.css' %}?v=2">
     
     {% block extra_css %}{% endblock %}
@@ -422,7 +422,7 @@
                     {
                         title: 'Estadísticas y Análisis',
                         intro: 'Esta sección te muestra métricas importantes sobre todas tus optimizaciones. Puedes analizar tu eficiencia y mejorar tus procesos de corte.',
-                        element: document.querySelector('h2')
+                        element: document.querySelector('h1')
                     },
                     {
                         title: 'Métricas Principales',
@@ -431,7 +431,7 @@
                     },
                     {
                         title: 'Seleccionar Período',
-                        intro: 'Filtra las estadísticas por período de tiempo: última semana, último mes, último año o todos los tiempos. Esto te permite analizar tendencias específicas.',
+                        intro: 'Filtra las estadísticas por período de tiempo: últimos 7, 30 o 365 días, o todo el historial. Selecciona el período y pulsa "Aplicar período". Esto te permite analizar tendencias específicas.',
                         element: document.querySelector('select[name="periodo"]')
                     },
                     {
@@ -440,7 +440,7 @@
                         element: document.querySelector('.chart-container')
                     },
                     {
-                        title: 'Top 10 Optimizaciones',
+                        title: 'Mejores resultados del período',
                         intro: 'Revisa tus mejores optimizaciones ordenadas por aprovechamiento. Puedes duplicar o descargar estas optimizaciones para reutilizarlas.',
                         element: document.querySelector('.table')
                     }
@@ -564,8 +564,8 @@
                 pasos = [
                     {
                         title: 'Historial de Costos',
-                        intro: 'Esta sección muestra un análisis detallado de los costos de todas tus optimizaciones. Útil para controlar gastos y calcular márgenes.',
-                        element: document.querySelector('h2')
+                        intro: 'Consulta los cortes que tienen un precio de tablero registrado. Sus costos incluyen el material y la mano de obra que hayas agregado.',
+                        element: document.querySelector('h1')
                     },
                     {
                         title: 'Estadísticas de Costos',
@@ -574,7 +574,7 @@
                     },
                     {
                         title: 'Filtrar por Fecha',
-                        intro: 'Selecciona un rango de fechas para analizar costos en un período específico. Esto te ayuda a evaluar gastos mensuales o por proyecto.',
+                        intro: 'Elige las fechas y pulsa "Aplicar fechas". El resumen, el gráfico, la tabla y Exportar Excel corresponden al filtro aplicado.',
                         element: document.querySelector('input[type="date"]')
                     },
                     {
@@ -593,21 +593,21 @@
                     {
                         title: 'Comparar Optimizaciones',
                         intro: 'Compara dos optimizaciones lado a lado para evaluar cuál es más eficiente. Útil para decidir entre diferentes configuraciones.',
-                        element: document.querySelector('h2')
+                        element: document.querySelector('h1')
                     },
                     {
                         title: 'Seleccionar Optimizaciones',
-                        intro: 'Elige dos optimizaciones de la lista para comparar. Puedes buscar por nombre de pieza o fecha para encontrar las que necesitas.',
-                        element: document.querySelector('.card')
+                        intro: 'Elige dos registros diferentes, identificados por fecha, medidas del tablero y aprovechamiento. Después pulsa "Comparar".',
+                        element: document.querySelector('.comparison-selector')
                     },
                     {
                         title: 'Resultados de Comparación',
-                        intro: 'La comparación muestra: número de tableros, aprovechamiento, desperdicio y diferencias entre ambas optimizaciones. Esto te ayuda a elegir la mejor opción.',
+                        intro: 'Las diferencias se calculan como segunda optimización menos primera. Los porcentajes se expresan en puntos porcentuales. Lee el signo junto con la métrica: menos desperdicio y más aprovechamiento pueden ser mejoras.',
                         element: document.querySelector('.comparison-result')
                     },
                     {
                         title: 'Ver Detalles',
-                        intro: 'Haz clic en "Ver Detalles" para ver el plan de corte completo de cada optimización, incluyendo el gráfico visual y la lista de piezas.',
+                        intro: 'Haz clic en "Ver resultado" para ver el plan de corte completo de cada optimización, incluyendo el gráfico visual y la lista de piezas.',
                         element: document.querySelector('a[href*="resultado"]')
                     }
                 ];

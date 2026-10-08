@@ -416,7 +416,7 @@ def historial_costos(request):
     optimizaciones_con_costo = []
     for opt in optimizaciones:
         costo = opt.get_costo_total()
-        if costo:
+        if costo is not None:
             costo_total += costo
             costo_material = Decimal(str(opt.num_tableros or 0)) * opt.precio_tablero if opt.precio_tablero else Decimal('0.00')
             costo_material_total += costo_material
@@ -487,7 +487,7 @@ def historial_costos(request):
         import base64
         
         plt.figure(figsize=(12, 6))
-        plt.plot(fechas, costos, marker='o', linestyle='-', linewidth=2, markersize=6)
+        plt.plot(fechas[::-1], costos[::-1], marker='o', linestyle='-', linewidth=2, markersize=6, color='#4558E7')
         plt.title('Evolución de Costos', fontsize=16, fontweight='bold')
         plt.xlabel('Fecha', fontsize=12)
         plt.ylabel('Costo Total ($)', fontsize=12)
@@ -539,8 +539,12 @@ def comparar_optimizaciones(request):
     diferencia_desperdicio = None
     desperdicio1 = None
     desperdicio2 = None
+    diferencia_costo = None
     
     if opt1_id and opt2_id:
+        if opt1_id == opt2_id:
+            messages.error(request, 'Selecciona dos optimizaciones diferentes para comparar.')
+            return redirect('cutless:comparar_optimizaciones')
         try:
             optimizacion1 = Optimizacion.objects.get(pk=opt1_id, usuario=request.user)
             optimizacion2 = Optimizacion.objects.get(pk=opt2_id, usuario=request.user)
@@ -630,8 +634,12 @@ def comparar_optimizaciones(request):
             desperdicio1 = 100 - optimizacion1.aprovechamiento_total
             desperdicio2 = 100 - optimizacion2.aprovechamiento_total
             diferencia_desperdicio = desperdicio2 - desperdicio1
+            costo1 = optimizacion1.get_costo_total()
+            costo2 = optimizacion2.get_costo_total()
+            if costo1 is not None and costo2 is not None:
+                diferencia_costo = costo2 - costo1
             
-        except Optimizacion.DoesNotExist:
+        except (Optimizacion.DoesNotExist, ValueError, OverflowError):
             messages.error(request, "Una o ambas optimizaciones no fueron encontradas.")
             return redirect('cutless:comparar_optimizaciones')
     
@@ -644,5 +652,6 @@ def comparar_optimizaciones(request):
         'diferencia_desperdicio': diferencia_desperdicio,
         'desperdicio1': desperdicio1,
         'desperdicio2': desperdicio2,
+        'diferencia_costo': diferencia_costo,
     })
 

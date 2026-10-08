@@ -345,26 +345,26 @@ def generar_grafico_aprovechamiento(optimizaciones, periodo='todos', alta_resolu
     
     # Gráfico de línea
     ax.plot(fechas, aprovechamientos, marker='o', linewidth=linewidth, markersize=markersize, 
-            color='#4ECDC4', label='Aprovechamiento')
+            color='#4558E7', label='Aprovechamiento')
     
     # Línea de promedio
-    ax.axhline(y=promedio, color='#FF6B6B', linestyle='--', linewidth=linewidth, 
+    ax.axhline(y=promedio, color='#7D6344', linestyle='--', linewidth=linewidth,
                label=f'Promedio: {promedio:.2f}%')
     
     # Formatear fechas según período
     if periodo == 'semanal':
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m'))
     elif periodo == 'mensual':
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m'))
     elif periodo == 'anual':
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
     else:
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m/%Y'))
     
     plt.xticks(rotation=45, ha='right')
     ax.set_xlabel('Fecha', fontsize=fontsize_labels, fontweight='bold')
     ax.set_ylabel('Aprovechamiento (%)', fontsize=fontsize_labels, fontweight='bold')
-    ax.set_title('📊 Tendencia de Aprovechamiento', fontsize=fontsize_title, fontweight='bold', pad=20)
+    ax.set_title('Tendencia de aprovechamiento', fontsize=fontsize_title, fontweight='bold', pad=20)
     ax.grid(True, alpha=0.3, linestyle='--')
     ax.legend(loc='best', fontsize=fontsize_legend)
     ax.set_ylim(0, 100)
@@ -422,26 +422,26 @@ def generar_grafico_desperdicio(optimizaciones, periodo='todos', alta_resolucion
     
     # Gráfico de línea
     ax.plot(fechas, desperdicios, marker='s', linewidth=linewidth, markersize=markersize, 
-            color='#FF6B6B', label='Desperdicio')
+            color='#7D6344', label='Desperdicio')
     
     # Línea de promedio
-    ax.axhline(y=promedio, color='#4ECDC4', linestyle='--', linewidth=linewidth, 
+    ax.axhline(y=promedio, color='#4558E7', linestyle='--', linewidth=linewidth,
                label=f'Promedio: {promedio:.2f}%')
     
     # Formatear fechas según período
     if periodo == 'semanal':
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m'))
     elif periodo == 'mensual':
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m'))
     elif periodo == 'anual':
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%Y'))
     else:
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m/%Y'))
     
     plt.xticks(rotation=45, ha='right')
     ax.set_xlabel('Fecha', fontsize=fontsize_labels, fontweight='bold')
     ax.set_ylabel('Desperdicio (%)', fontsize=fontsize_labels, fontweight='bold')
-    ax.set_title('📉 Tendencia de Desperdicio', fontsize=fontsize_title, fontweight='bold', pad=20)
+    ax.set_title('Tendencia de desperdicio', fontsize=fontsize_title, fontweight='bold', pad=20)
     ax.grid(True, alpha=0.3, linestyle='--')
     ax.legend(loc='best', fontsize=fontsize_legend)
     ax.set_ylim(0, 100)

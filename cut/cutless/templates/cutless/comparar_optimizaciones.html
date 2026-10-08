@@ -1,8 +1,10 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}analysis-page comparison-page{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/historial.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/analysis-refinement.css' %}?v=1">
 {% endblock %}
 
 {% block content %}
@@ -12,28 +14,33 @@
       <p class="page-lead">Analiza dos planes de corte lado a lado.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
-              onclick="iniciarTutorialSeccion('comparar')" 
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+              onclick="iniciarTutorialSeccion('comparar')"
               title="Ayuda">
-        Ayuda
+        Cómo comparar resultados
       </button>
-      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary">
-        Ver historial
-      </a>
+
     </div>
   </header>
 
 <!-- Selector de Optimizaciones -->
-  {% if not optimizacion1 or not optimizacion2 %}
-  <div class="card mb-4 fade-in">
+  {% if optimizaciones|length < 2 %}
+  <div class="card card-empty-state">
+    <h2>Necesitas dos optimizaciones para comparar</h2>
+    <p>Guarda al menos dos planes de corte para consultar sus diferencias.</p>
+    <a href="{% url 'cutless:index' %}" class="btn btn-primary">Preparar un corte</a>
+  </div>
+  {% elif not optimizacion1 or not optimizacion2 %}
+  <div class="card comparison-selector mb-4 fade-in">
     <div class="card-header card-header-section">
-      <h4 class="mb-0">Seleccionar Optimizaciones para Comparar</h4>
+      <h4 class="mb-0">Elige dos optimizaciones</h4>
     </div>
     <div class="card-body">
+      <p class="analysis-note">Las medidas del tablero se muestran en centímetros para facilitar la comparación. Elige dos registros diferentes.</p>
       <form method="GET" action="{% url 'cutless:comparar_optimizaciones' %}">
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="opt1" class="form-label">Primera Optimización:</label>
+            <label for="opt1" class="form-label">Primera optimización</label>
             <select name="opt1" id="opt1" class="form-select" required>
               <option value="">Seleccionar...</option>
               {% for opt in optimizaciones %}
@@ -44,7 +51,7 @@
             </select>
           </div>
           <div class="col-md-6 mb-3">
-            <label for="opt2" class="form-label">Segunda Optimización:</label>
+            <label for="opt2" class="form-label">Segunda optimización</label>
             <select name="opt2" id="opt2" class="form-select" required>
               <option value="">Seleccionar...</option>
               {% for opt in optimizaciones %}
@@ -70,31 +77,31 @@
     <div class="col-md-6 mb-4">
       <div class="card h-100">
         <div class="card-header card-header-section">
-          <h4 class="mb-0">Optimización #1</h4>
+          <h4 class="mb-0">Primera optimización</h4>
           <small>{{ optimizacion1.fecha|date:"d/m/Y H:i" }}</small>
         </div>
         <div class="card-body">
-          <h5>Dimensiones del Tablero</h5>
+          <h5>Dimensiones del tablero (cm)</h5>
           <p>{{ optimizacion1.ancho_tablero }} × {{ optimizacion1.alto_tablero }} cm</p>
-          
-          <h5>Métricas</h5>
+
+          <h5>Resumen del resultado</h5>
           <ul class="list-group mb-3">
             <li class="list-group-item">
-              <strong>Aprovechamiento:</strong> 
-              <span class="badge bg-{% if optimizacion1.aprovechamiento_total >= 80 %}success{% elif optimizacion1.aprovechamiento_total >= 60 %}warning{% else %}danger{% endif %}">
+              <strong>Aprovechamiento:</strong>
+              <span class="comparison-value">
                 {{ optimizacion1.aprovechamiento_total|floatformat:2 }}%
               </span>
             </li>
-            <li class="list-group-item"><strong>Número de Tableros:</strong> {{ optimizacion1.num_tableros|default:0 }}</li>
+            <li class="list-group-item"><strong>Tableros necesarios:</strong> {{ optimizacion1.num_tableros|default:0 }}</li>
             {% if optimizacion1.material %}
             <li class="list-group-item"><strong>Material:</strong> {{ optimizacion1.material.nombre }}</li>
             {% endif %}
-            {% if optimizacion1.get_costo_total %}
-            <li class="list-group-item"><strong>Costo Total:</strong> ${{ optimizacion1.get_costo_total|floatformat:0 }}</li>
+            {% if optimizacion1.precio_tablero != None %}
+            <li class="list-group-item"><strong>Costo total:</strong> ${{ optimizacion1.get_costo_total|floatformat:0 }}</li>
             {% endif %}
           </ul>
-          
-          <a href="{% url 'cutless:resultado' optimizacion1.pk %}" class="btn btn-outline-primary w-100">Ver Detalles</a>
+
+          <a href="{% url 'cutless:resultado' optimizacion1.pk %}" class="btn btn-outline-primary w-100">Ver resultado</a>
         </div>
       </div>
     </div>
@@ -103,49 +110,50 @@
     <div class="col-md-6 mb-4">
       <div class="card h-100">
         <div class="card-header card-header-section">
-          <h4 class="mb-0">Optimización #2</h4>
+          <h4 class="mb-0">Segunda optimización</h4>
           <small>{{ optimizacion2.fecha|date:"d/m/Y H:i" }}</small>
         </div>
         <div class="card-body">
-          <h5>Dimensiones del Tablero</h5>
+          <h5>Dimensiones del tablero (cm)</h5>
           <p>{{ optimizacion2.ancho_tablero }} × {{ optimizacion2.alto_tablero }} cm</p>
-          
-          <h5>Métricas</h5>
+
+          <h5>Resumen del resultado</h5>
           <ul class="list-group mb-3">
             <li class="list-group-item">
-              <strong>Aprovechamiento:</strong> 
-              <span class="badge bg-{% if optimizacion2.aprovechamiento_total >= 80 %}success{% elif optimizacion2.aprovechamiento_total >= 60 %}warning{% else %}danger{% endif %}">
+              <strong>Aprovechamiento:</strong>
+              <span class="comparison-value">
                 {{ optimizacion2.aprovechamiento_total|floatformat:2 }}%
               </span>
             </li>
-            <li class="list-group-item"><strong>Número de Tableros:</strong> {{ optimizacion2.num_tableros|default:0 }}</li>
+            <li class="list-group-item"><strong>Tableros necesarios:</strong> {{ optimizacion2.num_tableros|default:0 }}</li>
             {% if optimizacion2.material %}
             <li class="list-group-item"><strong>Material:</strong> {{ optimizacion2.material.nombre }}</li>
             {% endif %}
-            {% if optimizacion2.get_costo_total %}
-            <li class="list-group-item"><strong>Costo Total:</strong> ${{ optimizacion2.get_costo_total|floatformat:0 }}</li>
+            {% if optimizacion2.precio_tablero != None %}
+            <li class="list-group-item"><strong>Costo total:</strong> ${{ optimizacion2.get_costo_total|floatformat:0 }}</li>
             {% endif %}
           </ul>
-          
-          <a href="{% url 'cutless:resultado' optimizacion2.pk %}" class="btn btn-outline-success w-100">Ver Detalles</a>
+
+          <a href="{% url 'cutless:resultado' optimizacion2.pk %}" class="btn btn-outline-primary w-100">Ver resultado</a>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Tabla Comparativa -->
-  <div class="card mb-4 fade-in">
+  <div class="card comparison-result mb-4 fade-in">
     <div class="card-header card-header-section">
-      <h4 class="mb-0">Comparación Detallada</h4>
+      <h4 class="mb-0">Diferencias entre resultados</h4>
     </div>
     <div class="card-body">
-      <table class="table table-bordered">
+      <p class="analysis-note">La diferencia se calcula como segunda optimización menos primera. En aprovechamiento, un valor positivo indica mayor uso del tablero; en desperdicio, tableros y costos, un valor negativo indica una reducción. Los porcentajes se comparan en puntos porcentuales.</p>
+      <div class="table-responsive"><table class="table table-bordered">
         <thead>
           <tr>
             <th>Métrica</th>
-            <th class="text-center">Optimización #1</th>
-            <th class="text-center">Optimización #2</th>
-            <th class="text-center">Diferencia</th>
+            <th class="text-center">Primera optimización</th>
+            <th class="text-center">Segunda optimización</th>
+            <th class="text-center">Diferencia (segunda − primera)</th>
           </tr>
         </thead>
         <tbody>
@@ -154,7 +162,7 @@
             <td class="text-center">{{ optimizacion1.aprovechamiento_total|floatformat:2 }}%</td>
             <td class="text-center">{{ optimizacion2.aprovechamiento_total|floatformat:2 }}%</td>
             <td class="text-center {% if diferencia_aprovechamiento > 0 %}text-success{% elif diferencia_aprovechamiento < 0 %}text-danger{% endif %}">
-              {% if diferencia_aprovechamiento > 0 %}+{% endif %}{{ diferencia_aprovechamiento|floatformat:2 }}%
+              {% if diferencia_aprovechamiento > 0 %}+{% endif %}{{ diferencia_aprovechamiento|floatformat:2 }} puntos
             </td>
           </tr>
           <tr>
@@ -162,35 +170,27 @@
             <td class="text-center">{{ desperdicio1|floatformat:2 }}%</td>
             <td class="text-center">{{ desperdicio2|floatformat:2 }}%</td>
             <td class="text-center {% if diferencia_desperdicio < 0 %}text-success{% elif diferencia_desperdicio > 0 %}text-danger{% endif %}">
-              {% if diferencia_desperdicio > 0 %}+{% endif %}{{ diferencia_desperdicio|floatformat:2 }}%
+              {% if diferencia_desperdicio > 0 %}+{% endif %}{{ diferencia_desperdicio|floatformat:2 }} puntos
             </td>
           </tr>
           <tr>
-            <td><strong>Número de Tableros</strong></td>
+            <td><strong>Tableros necesarios</strong></td>
             <td class="text-center">{{ optimizacion1.num_tableros|default:0 }}</td>
             <td class="text-center">{{ optimizacion2.num_tableros|default:0 }}</td>
             <td class="text-center {% if diferencia_tableros < 0 %}text-success{% elif diferencia_tableros > 0 %}text-danger{% endif %}">
               {% if diferencia_tableros > 0 %}+{% endif %}{{ diferencia_tableros }}
             </td>
           </tr>
-          {% if optimizacion1.get_costo_total and optimizacion2.get_costo_total %}
+          {% if diferencia_costo != None %}
           <tr>
-            <td><strong>Costo Total</strong></td>
+            <td><strong>Costo total</strong></td>
             <td class="text-center">${{ optimizacion1.get_costo_total|floatformat:0 }}</td>
             <td class="text-center">${{ optimizacion2.get_costo_total|floatformat:0 }}</td>
-            <td class="text-center {% if optimizacion2.get_costo_total < optimizacion1.get_costo_total %}text-success{% elif optimizacion2.get_costo_total > optimizacion1.get_costo_total %}text-danger{% endif %}">
-              {% if optimizacion1.get_costo_total and optimizacion2.get_costo_total %}
-                {% with diff=optimizacion2.get_costo_total|add:optimizacion1.get_costo_total|add:"-" %}
-                  {% if optimizacion2.get_costo_total > optimizacion1.get_costo_total %}+{% endif %}${{ diff|floatformat:0 }}
-                {% endwith %}
-              {% else %}
-                —
-              {% endif %}
-            </td>
+            <td class="text-center">{% if diferencia_costo > 0 %}+{% elif diferencia_costo < 0 %}−{% endif %}${{ diferencia_costo|floatformat:0|cut:"-" }}</td>
           </tr>
           {% endif %}
         </tbody>
-      </table>
+      </table></div>
     </div>
   </div>
 

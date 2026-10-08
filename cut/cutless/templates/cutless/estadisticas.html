@@ -1,63 +1,67 @@
 {% extends 'cutless/base.html' %}
 {% load static %}
 
+{% block body_class %}statistics-page{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/estadisticas.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/estadisticas.css' %}?v=2">
 {% endblock %}
 
 {% block content %}
   <header class="page-header fade-in">
     <div class="page-header__text">
       <h1 class="page-title">Estadísticas y análisis</h1>
-      <p class="page-lead">Visualiza tendencias de aprovechamiento y desperdicio en el tiempo.</p>
+      <p class="page-lead">Consulta el aprovechamiento de tus cortes y compara sus resultados en el período que elijas.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
-              onclick="iniciarTutorialSeccion('estadisticas')" 
+      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+              onclick="iniciarTutorialSeccion('estadisticas')"
               title="Ayuda sobre estadísticas">
-        Ayuda
+        Cómo leer las estadísticas
       </button>
     </div>
   </header>
-  
+
   <!-- Selector de Período -->
-  <div class="card mb-4 fade-in">
+  <section class="card period-panel mb-4 fade-in" aria-labelledby="periodoTitulo">
     <div class="card-body">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="card-title mb-0">Seleccionar período</h5>
+      <div class="period-panel__header">
+        <h2 class="card-title" id="periodoTitulo">Período de consulta</h2>
         {% if total_optimizaciones > 0 %}
-        <div class="btn-group">
-          <a href="{% url 'cutless:exportar_excel_desperdicio' %}?periodo={{ periodo }}" 
-             class="btn btn-success btn-sm">
+        <div class="export-actions" aria-label="Descargar estadísticas">
+          <a href="{% url 'cutless:exportar_excel_desperdicio' %}?periodo={{ periodo }}"
+             class="btn btn-outline-secondary">
             Exportar Excel
           </a>
-          <a href="{% url 'cutless:exportar_pdf_desperdicio' %}?periodo={{ periodo }}" 
-             class="btn btn-danger btn-sm">
+          <a href="{% url 'cutless:exportar_pdf_desperdicio' %}?periodo={{ periodo }}"
+             class="btn btn-outline-secondary">
             Exportar PDF
           </a>
         </div>
         {% endif %}
       </div>
-      <form method="GET" action="{% url 'cutless:estadisticas' %}" class="d-flex gap-2">
-        <select name="periodo" class="form-select" onchange="this.form.submit()">
-          <option value="todos" {% if periodo == 'todos' %}selected{% endif %}>Todos los tiempos</option>
-          <option value="semanal" {% if periodo == 'semanal' %}selected{% endif %}>Última semana</option>
-          <option value="mensual" {% if periodo == 'mensual' %}selected{% endif %}>Último mes</option>
-          <option value="anual" {% if periodo == 'anual' %}selected{% endif %}>Último año</option>
-        </select>
-        <button type="submit" class="btn btn-primary">Actualizar</button>
+      <form method="GET" action="{% url 'cutless:estadisticas' %}" class="period-form">
+        <div class="period-field"><label for="estadisticasPeriodo">Mostrar resultados de</label>
+        <select id="estadisticasPeriodo" name="periodo" class="form-select">
+          <option value="todos" {% if periodo == 'todos' %}selected{% endif %}>Todo el historial</option>
+          <option value="semanal" {% if periodo == 'semanal' %}selected{% endif %}>Últimos 7 días</option>
+          <option value="mensual" {% if periodo == 'mensual' %}selected{% endif %}>Últimos 30 días</option>
+          <option value="anual" {% if periodo == 'anual' %}selected{% endif %}>Últimos 365 días</option>
+        </select></div>
+        <button type="submit" class="btn btn-primary">Aplicar período</button>
       </form>
+      <p class="stats-explanation">Las tarjetas, los gráficos y las descargas corresponden al período aplicado.</p>
     </div>
-  </div>
-  
+  </section>
+
   {% if total_optimizaciones > 0 %}
     <!-- Resumen de Estadísticas -->
     <div class="row mb-4 fade-in">
       <div class="col-md-3 mb-3">
         <div class="card text-center stats-card metric-card metric-card--primary">
           <div class="card-body">
-            <h5 class="card-title stats-title">Total optimizaciones</h5>
-            <h2>{{ total_optimizaciones }}</h2>
+            <h5 class="card-title stats-title">Optimizaciones guardadas</h5>
+            <p class="stats-value">{{ total_optimizaciones }}</p>
           </div>
         </div>
       </div>
@@ -65,7 +69,7 @@
         <div class="card text-center stats-card metric-card metric-card--success">
           <div class="card-body">
             <h5 class="card-title stats-title">Aprovechamiento promedio</h5>
-            <h2>{{ promedio_aprovechamiento }}%</h2>
+            <p class="stats-value">{{ promedio_aprovechamiento }}%</p>
           </div>
         </div>
       </div>
@@ -73,7 +77,7 @@
         <div class="card text-center stats-card metric-card metric-card--info">
           <div class="card-body">
             <h5 class="card-title stats-title">Mejor aprovechamiento</h5>
-            <h2>{{ max_aprovechamiento }}%</h2>
+            <p class="stats-value">{{ max_aprovechamiento }}%</p>
           </div>
         </div>
       </div>
@@ -81,53 +85,50 @@
         <div class="card text-center stats-card metric-card metric-card--warning">
           <div class="card-body">
             <h5 class="card-title stats-title">Desperdicio promedio</h5>
-            <h2>{{ promedio_desperdicio }}%</h2>
+            <p class="stats-value">{{ promedio_desperdicio }}%</p>
           </div>
         </div>
       </div>
     </div>
-    
+
+    <p class="stats-explanation">Cada optimización cuenta por igual en el promedio. El desperdicio es la parte del tablero que no se aprovecha: 100% menos el aprovechamiento.</p>
     <!-- Gráficos -->
     <div class="row mb-4 fade-in">
       <div class="col-md-6 mb-4">
         <div class="card">
           <div class="card-header card-header-section">
-            <h5 class="mb-0">Gráfico de Aprovechamiento</h5>
+            <h5 class="mb-0">Aprovechamiento en el tiempo</h5>
           </div>
           <div class="card-body">
             {% if grafico_aprovechamiento %}
-              <div class="chart-container" 
-                   onclick="abrirModalGrafico('aprovechamiento')">
-                <img src="data:image/png;base64,{{ grafico_aprovechamiento }}" 
-                     alt="Gráfico de Aprovechamiento" 
+              <button type="button" class="chart-container"
+                   onclick="abrirModalGrafico('aprovechamiento')" aria-label="Ampliar gráfico de aprovechamiento">
+                <img src="data:image/png;base64,{{ grafico_aprovechamiento }}"
+                     alt="Aprovechamiento en el tiempo"
                      class="img-fluid chart-thumbnail">
-                <div class="chart-overlay">
-                  <span class="chart-hint">Click para ver en pantalla completa</span>
-                </div>
-              </div>
+                <span class="chart-hint">Ampliar gráfico</span>
+              </button>
             {% else %}
               <p class="text-muted">No hay datos para mostrar</p>
             {% endif %}
           </div>
         </div>
       </div>
-      
+
       <div class="col-md-6 mb-4">
         <div class="card">
           <div class="card-header card-header-section card-header-section--danger">
-            <h5 class="mb-0">Gráfico de Desperdicio</h5>
+            <h5 class="mb-0">Desperdicio en el tiempo</h5>
           </div>
           <div class="card-body">
             {% if grafico_desperdicio %}
-              <div class="chart-container" 
-                   onclick="abrirModalGrafico('desperdicio')">
-                <img src="data:image/png;base64,{{ grafico_desperdicio }}" 
-                     alt="Gráfico de Desperdicio" 
+              <button type="button" class="chart-container"
+                   onclick="abrirModalGrafico('desperdicio')" aria-label="Ampliar gráfico de desperdicio">
+                <img src="data:image/png;base64,{{ grafico_desperdicio }}"
+                     alt="Desperdicio en el tiempo"
                      class="img-fluid chart-thumbnail">
-                <div class="chart-overlay">
-                  <span class="chart-hint">Click para ver en pantalla completa</span>
-                </div>
-              </div>
+                <span class="chart-hint">Ampliar gráfico</span>
+              </button>
             {% else %}
               <p class="text-muted">No hay datos para mostrar</p>
             {% endif %}
@@ -135,53 +136,42 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Modal para gráficos en pantalla completa -->
     <div class="modal fade" id="modalGrafico" tabindex="-1" aria-labelledby="modalGraficoLabel" aria-hidden="true">
       <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
           <div class="modal-header modal-header-app">
             <h5 class="modal-title" id="modalGraficoLabel">Gráfico en Pantalla Completa</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
-          <div class="modal-body text-center modal-grafico-body">
-            <div class="row h-100">
-              <div class="col-10">
-                <div id="modalGraficoContenido" class="modal-grafico-contenido">
-                  <!-- El gráfico en alta resolución se cargará aquí -->
-                </div>
-              </div>
-              <div class="col-2 d-flex flex-column justify-content-center align-items-center zoom-controls">
-                <label for="zoomSlider" class="text-white mb-2">Zoom</label>
-                <input type="range" 
-                       class="form-range" 
-                       id="zoomSlider" 
-                       min="50" 
-                       max="300" 
-                       value="100" 
-                       step="5">
-                <span id="zoomValue" class="text-white mt-2">100%</span>
-              </div>
+          <div class="modal-body modal-grafico-body">
+            <div class="zoom-controls">
+              <label for="zoomSlider">Ampliación</label>
+              <input type="range" class="form-range" id="zoomSlider" min="50" max="300" value="100" step="5">
+              <output id="zoomValue" for="zoomSlider">100%</output>
+              <span>Usa las barras de desplazamiento para recorrer el gráfico ampliado.</span>
             </div>
+            <div id="modalGraficoContenido" class="modal-grafico-contenido" tabindex="0" aria-label="Gráfico ampliado; desplázate para ver sus detalles"></div>
           </div>
           <div class="modal-footer modal-footer-app">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
-            <button type="button" class="btn btn-primary" onclick="resetearZoom()">🔍 Resetear Zoom</button>
+            <button type="button" class="btn btn-primary" onclick="resetearZoom()">Restablecer ampliación</button>
           </div>
         </div>
       </div>
     </div>
-    
+
     <!-- Top Optimizaciones -->
     <div class="card fade-in">
       <div class="card-header card-header-section">
-        <h5 class="mb-0">Top 10 Mejores Optimizaciones</h5>
+        <h5 class="mb-0">Hasta 10 mejores resultados del período</h5>
       </div>
       <div class="card-body">
         {% if top_optimizaciones %}
           <div class="table-responsive">
             <table class="table table-striped table-hover">
-              <thead class="table-dark">
+              <thead>
                 <tr>
                   <th>#</th>
                   <th>Fecha</th>
@@ -197,25 +187,26 @@
                     <td><strong>{{ item.posicion }}</strong></td>
                     <td>{{ item.optimizacion.fecha|date:"d/m/Y H:i" }}</td>
                     <td>
-                      <span class="badge bg-success">{{ item.optimizacion.aprovechamiento_total|floatformat:2 }}%</span>
+                      <span class="stats-percentage">{{ item.optimizacion.aprovechamiento_total|floatformat:2 }}%</span>
                     </td>
                     <td>{{ item.ancho_mostrar }} × {{ item.alto_mostrar }} {{ item.unidad_medida }}</td>
                     <td>
                       <details>
-                        <summary>Ver ({{ item.piezas|length }})</summary>
+                        <summary>Ver tipos de pieza ({{ item.piezas|length }})</summary>
                         <div class="mt-2">
                           {% for pieza in item.piezas %}
-                            <div>• <strong>{{ pieza.nombre }}</strong>: {{ pieza.ancho }}×{{ pieza.alto }}cm (x{{ pieza.cantidad }})</div>
+                            <div>• <strong>{{ pieza.nombre }}</strong>: {{ pieza.ancho }}×{{ pieza.alto }} {{ item.unidad_medida }} (×{{ pieza.cantidad }})</div>
                           {% endfor %}
                         </div>
                       </details>
                     </td>
                     <td>
-                      <a href="{% url 'cutless:duplicar_optimizacion' item.optimizacion.id %}" 
+                      <a href="{% url 'cutless:resultado' item.optimizacion.id %}" class="btn btn-outline-secondary">Ver resultado</a>
+                      <a href="{% url 'cutless:duplicar_optimizacion' item.optimizacion.id %}"
                          class="btn btn-sm btn-primary" title="Duplicar">
                         Duplicar
                       </a>
-                      <a href="{% url 'cutless:descargar_pdf' item.optimizacion.id %}" 
+                      <a href="{% url 'cutless:descargar_pdf' item.optimizacion.id %}"
                          class="btn btn-sm btn-success" title="Descargar PDF" data-carga-texto="Descargando PDF...">
                         PDF
                       </a>
@@ -230,10 +221,10 @@
         {% endif %}
       </div>
     </div>
-    
+
   {% else %}
       <div class="card fade-in text-center card-empty-state">
-      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;"></div>
+
       <h4 class="mb-3">No hay datos</h4>
       <p class="mb-4" style="max-width: 500px; margin: 0 auto;">
         {% if periodo != 'todos' %}
@@ -241,24 +232,14 @@
           <br>
           <a href="{% url 'cutless:estadisticas' %}?periodo=todos" class="mt-2 d-inline-block">Ver todas las optimizaciones</a>
         {% else %}
-          Aún no tienes optimizaciones guardadas para mostrar estadísticas. Crea tu primera optimización para comenzar.
+          Aún no tienes optimizaciones guardadas para mostrar estadísticas. Prepara tu primer corte para comenzar.
         {% endif %}
       </p>
       <a href="{% url 'cutless:index' %}" class="btn btn-primary btn-lg">
-        Ir al optimizador
+        Preparar un corte
       </a>
     </div>
   {% endif %}
-  
-  <!-- Botón para volver -->
-  <div class="form-action-bar fade-in">
-    <a href="{% url 'cutless:index' %}" class="btn btn-outline-secondary btn-lg">
-      Ir al optimizador
-    </a>
-    <a href="{% url 'cutless:historial' %}" class="btn btn-outline-primary btn-lg">
-      Ver historial
-    </a>
-  </div>
 
 <script>
 // Datos de gráficos en alta resolución
@@ -267,184 +248,40 @@ const graficosHD = {
     desperdicio: {% if grafico_desperdicio_hd %}'data:image/png;base64,{{ grafico_desperdicio_hd }}'{% else %}null{% endif %}
 };
 
-function abrirModalGrafico(tipo) {
-    const modal = new bootstrap.Modal(document.getElementById('modalGrafico'));
+function actualizarZoomGrafico() {
+    const slider = document.getElementById('zoomSlider');
     const contenido = document.getElementById('modalGraficoContenido');
-    const titulo = document.getElementById('modalGraficoLabel');
-    
-    // Limpiar contenido anterior
-    contenido.innerHTML = '';
-    
-    // Establecer título
-    if (tipo === 'aprovechamiento') {
-        titulo.textContent = 'Gráfico de Aprovechamiento - Pantalla Completa';
-    } else {
-        titulo.textContent = 'Gráfico de Desperdicio - Pantalla Completa';
-    }
-    
-    // Crear contenedor para el gráfico con capacidad de arrastre
-    const contenedorGrafico = document.createElement('div');
-    contenedorGrafico.style.position = 'relative';
-    contenedorGrafico.style.overflow = 'hidden';
-    contenedorGrafico.style.width = '100%';
-    contenedorGrafico.style.height = '100%';
-    contenedorGrafico.style.cursor = 'grab';
-    
-    // Crear imagen en alta resolución
-    const img = document.createElement('img');
-    img.src = graficosHD[tipo];
-    img.alt = tipo === 'aprovechamiento' ? 'Gráfico de Aprovechamiento' : 'Gráfico de Desperdicio';
-    img.className = 'img-fluid';
-    // Mostrar inicialmente al 70% para que se vea completo y permita zoom
-    img.style.maxWidth = '70%';
-    img.style.height = 'auto';
-    img.style.display = 'block';
-    img.style.margin = '0 auto';
-    img.style.transition = 'transform 0.1s ease-out';
-    img.style.userSelect = 'none';
-    img.draggable = false;
-    
-    // Variables para zoom y arrastre
-    let zoomLevel = 1; // Valor del zoom (1.0 = 100%)
-    let isDragging = false;
-    let startX = 0;
-    let startY = 0;
-    let translateX = 0;
-    let translateY = 0;
-    let currentTranslateX = 0;
-    let currentTranslateY = 0;
-    
-    // Función para actualizar el zoom basado en el slider
-    const actualizarZoom = (zoomPercent) => {
-        zoomLevel = zoomPercent / 100; // Convertir porcentaje a escala (50% = 0.5, 100% = 1.0, 300% = 3.0)
-        img.style.transform = `scale(${zoomLevel}) translate(${translateX}px, ${translateY}px)`;
-        img.style.transformOrigin = 'center center';
-        
-        // Actualizar cursor según el zoom
-        if (zoomLevel > 1) {
-            img.style.cursor = 'grab';
-            contenedorGrafico.style.cursor = 'grab';
-        } else {
-            img.style.cursor = 'default';
-            contenedorGrafico.style.cursor = 'default';
-        }
-        
-        // Actualizar el valor mostrado
-        document.getElementById('zoomValue').textContent = zoomPercent + '%';
-    };
-    
-    // Configurar el slider de zoom
-    const zoomSlider = document.getElementById('zoomSlider');
-    zoomSlider.addEventListener('input', function(e) {
-        const zoomPercent = parseInt(e.target.value);
-        actualizarZoom(zoomPercent);
-    });
-    
-    // Funcionalidad de arrastre cuando está en zoom
-    img.addEventListener('mousedown', function(e) {
-        if (zoomLevel > 1) {
-            // Cuando está en zoom, permitir arrastre
-            e.preventDefault();
-            isDragging = true;
-            startX = e.clientX - currentTranslateX;
-            startY = e.clientY - currentTranslateY;
-            this.style.cursor = 'grabbing';
-            contenedorGrafico.style.cursor = 'grabbing';
-        }
-    });
-    
-    img.addEventListener('mousemove', function(e) {
-        if (isDragging && zoomLevel > 1) {
-            e.preventDefault();
-            currentTranslateX = e.clientX - startX;
-            currentTranslateY = e.clientY - startY;
-            translateX = currentTranslateX;
-            translateY = currentTranslateY;
-            this.style.transform = `scale(${zoomLevel}) translate(${translateX}px, ${translateY}px)`;
-        }
-    });
-    
-    img.addEventListener('mouseup', function(e) {
-        if (isDragging) {
-            isDragging = false;
-            if (zoomLevel > 1) {
-                this.style.cursor = 'grab';
-                contenedorGrafico.style.cursor = 'grab';
-            } else {
-                this.style.cursor = 'default';
-                contenedorGrafico.style.cursor = 'default';
-            }
-        }
-    });
-    
-    img.addEventListener('mouseleave', function(e) {
-        if (isDragging) {
-            isDragging = false;
-            if (zoomLevel > 1) {
-                this.style.cursor = 'grab';
-                contenedorGrafico.style.cursor = 'grab';
-            }
-        }
-    });
-    
-    // Prevenir menú contextual al hacer click derecho cuando está en zoom
-    img.addEventListener('contextmenu', function(e) {
-        if (zoomLevel > 1) {
-            e.preventDefault();
-        }
-    });
-    
-    // Soporte para touch (móviles)
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchCurrentX = 0;
-    let touchCurrentY = 0;
-    let isTouchDragging = false;
-    
-    img.addEventListener('touchstart', function(e) {
-        if (zoomLevel > 1) {
-            e.preventDefault();
-            isTouchDragging = true;
-            touchStartX = e.touches[0].clientX - currentTranslateX;
-            touchStartY = e.touches[0].clientY - currentTranslateY;
-        }
-    });
-    
-    img.addEventListener('touchmove', function(e) {
-        if (isTouchDragging && zoomLevel > 1) {
-            e.preventDefault();
-            touchCurrentX = e.touches[0].clientX - touchStartX;
-            touchCurrentY = e.touches[0].clientY - touchStartY;
-            translateX = touchCurrentX;
-            translateY = touchCurrentY;
-            currentTranslateX = touchCurrentX;
-            currentTranslateY = touchCurrentY;
-            this.style.transform = `scale(${zoomLevel}) translate(${translateX}px, ${translateY}px)`;
-        }
-    });
-    
-    img.addEventListener('touchend', function(e) {
-        isTouchDragging = false;
-    });
-    
-    contenedorGrafico.appendChild(img);
-    contenido.appendChild(contenedorGrafico);
-    modal.show();
+    const imagen = contenido?.querySelector('img');
+    if (!imagen || !slider) return;
+    const porcentaje = Number(slider.value);
+    imagen.style.width = porcentaje + '%';
+    document.getElementById('zoomValue').textContent = porcentaje + '%';
 }
 
 function resetearZoom() {
-    const img = document.querySelector('#modalGraficoContenido img');
-    const zoomSlider = document.getElementById('zoomSlider');
-    if (img && zoomSlider) {
-        // Resetear slider a 100%
-        zoomSlider.value = 100;
-        // Resetear transformación visual
-        img.style.transform = 'scale(1) translate(0px, 0px)';
-        img.style.cursor = 'default';
-        // Actualizar el valor mostrado
-        document.getElementById('zoomValue').textContent = '100%';
-    }
+    const slider = document.getElementById('zoomSlider');
+    const contenido = document.getElementById('modalGraficoContenido');
+    if (!slider || !contenido) return;
+    slider.value = 100;
+    actualizarZoomGrafico();
+    contenido.scrollTop = 0;
+    contenido.scrollLeft = 0;
 }
+
+function abrirModalGrafico(tipo) {
+    const fuente = graficosHD[tipo];
+    const elemento = document.getElementById('modalGrafico');
+    if (!fuente || !elemento) return;
+    const contenido = document.getElementById('modalGraficoContenido');
+    const imagen = document.createElement('img');
+    imagen.src = fuente;
+    imagen.alt = tipo === 'aprovechamiento' ? 'Aprovechamiento en el tiempo' : 'Desperdicio en el tiempo';
+    contenido.replaceChildren(imagen);
+    document.getElementById('modalGraficoLabel').textContent = imagen.alt;
+    resetearZoom();
+    bootstrap.Modal.getOrCreateInstance(elemento).show();
+}
+
+document.getElementById('zoomSlider')?.addEventListener('input', actualizarZoomGrafico);
 </script>
 {% endblock %}
-

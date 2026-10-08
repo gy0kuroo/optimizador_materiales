@@ -300,7 +300,7 @@
   font-family: var(--cl-font-body);
   font-size: var(--cl-fs-sm);
   color: var(--cl-text-primary);
-  background: var(--cl-bg-card);
+  background-color: var(--cl-bg-card);
   border: 1.5px solid var(--cl-border);
   border-radius: var(--cl-radius-sm);
   padding: 9px 14px;
@@ -319,7 +319,7 @@
   border-color: var(--cl-blue);
   outline: none;
   box-shadow: 0 0 0 3px rgba(69,88,231,.18), inset 0 1px 3px rgba(28,16,8,.05);
-  background: var(--cl-bg-card);
+  background-color: var(--cl-bg-card);
 }
 
 .form-control::placeholder {
@@ -330,14 +330,14 @@
 /* Modo oscuro */
 [data-theme="dark"] .form-control,
 [data-theme="dark"] .form-select {
-  background: #1F1208;
+  background-color: #1F1208;
   border-color: var(--cl-border);
   color: var(--cl-text-primary);
 }
 
 [data-theme="dark"] .form-control:focus,
 [data-theme="dark"] .form-select:focus {
-  background: #251508;
+  background-color: #251508;
 }
 
 /* Input group */
