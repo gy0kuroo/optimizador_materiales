@@ -1,0 +1,72 @@
+{% extends 'cutless/base.html' %}
+{% load static %}
+{% block title %}Tu espacio de trabajo · CutLess{% endblock %}
+{% block body_class %}setup-page{% endblock %}
+{% block navigation %}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'usuarios/css/configuracion-inicial.css' %}?v=1">{% endblock %}
+{% block content %}
+<div class="setup-shell">
+  <header class="setup-top">
+    <a class="setup-brand" href="{% url 'cutless:index' %}" aria-label="CutLess, ir al inicio"><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19 3v26M19 17h10" fill="none" stroke="currentColor" stroke-width="2"/></svg> CutLess</a>
+    {% if inicio_completado %}<a href="{% url 'cutless:index' %}" class="setup-back">Volver sin guardar</a>{% else %}<a href="{% url 'usuarios:logout' %}" class="setup-back">Cerrar sesión</a>{% endif %}
+  </header>
+  <div class="setup-heading">
+    <p class="setup-eyebrow">TU ESPACIO DE TRABAJO</p>
+    <h1>Prepara CutLess para ti</h1>
+    <p>Elige lo que necesitas y cómo prefieres verlo. Podrás cambiarlo cuando quieras desde Cuenta.</p>
+  </div>
+  <ol class="setup-progress" aria-label="Pasos de personalización">
+    <li data-progress="0" aria-current="step"><span>1</span> Tus herramientas</li>
+    <li data-progress="1"><span>2</span> Cómo quieres verlo</li>
+  </ol>
+  <form method="post" id="setup-form">
+    {% csrf_token %}
+    {% if form.errors %}<div class="setup-errors" role="alert"><strong>Revisa las opciones antes de guardar.</strong>{{ form.non_field_errors }}{% for field in form %}{% for error in field.errors %}<p>{{ field.label }}: {{ error }}</p>{% endfor %}{% endfor %}</div>{% endif %}
+    <section data-step="0" aria-labelledby="tools-title">
+      <h2 id="tools-title" tabindex="-1">¿Con qué quieres empezar?</h2>
+      <p class="setup-description">Puedes mantener el menú sencillo o añadir las herramientas que usas en tu trabajo.</p>
+      <fieldset class="setup-modes">
+        <legend class="visually-hidden">Elige tu punto de partida</legend>
+        {% for radio in form.modo %}
+        <label class="setup-choice setup-mode" for="{{ radio.id_for_label }}">
+          {{ radio.tag }}<span><strong>{{ radio.choice_label }}</strong>
+          {% if radio.data.value == 'esencial' %}<span class="setup-recommended">Para empezar</span><small>Prepara cortes y consulta tu historial, con un menú despejado.</small>{% else %}<small>Selecciona las herramientas adicionales que quieras ver en el menú.</small>{% endif %}</span>
+        </label>
+        {% endfor %}
+      </fieldset>
+      <div class="setup-basics"><span class="setup-fixed">Siempre disponibles</span><strong>Optimización</strong><span>Prepara tu plan de corte.</span><strong>Historial</strong><span>Consulta y reutiliza tus cortes anteriores.</span></div>
+      <div id="optional-tools">
+        <div class="setup-grid-heading"><h3>Elige tus herramientas</h3><p id="tools-count" role="status" aria-live="polite"></p></div>
+        <div class="setup-tools">
+          {% for item in form.herramientas %}
+          <label class="setup-choice setup-tool" for="{{ item.campo.id_for_label }}">
+            {{ item.campo }}
+            <span class="setup-tool-content"><span class="setup-tool-art" aria-hidden="true"><svg width="64" height="48" viewBox="0 0 64 48"><rect x="7" y="5" width="50" height="38" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M37 6v36M8 28h28M38 19h18" stroke="currentColor" stroke-width="2" fill="none"/></svg></span><strong>{{ item.campo.label }}</strong><small>{{ item.descripcion }}</small><span class="setup-tool-state" aria-hidden="true">Seleccionar</span></span>
+          </label>
+          {% empty %}<p>No tienes herramientas adicionales disponibles en esta cuenta. Optimización e Historial siguen incluidos.</p>{% endfor %}
+        </div>
+        <p class="setup-description">Ocultar una herramienta no borra tus datos. Puedes volver a mostrarla después.</p>
+      </div>
+    </section>
+    <section data-step="1" aria-labelledby="appearance-title">
+      <h2 id="appearance-title" tabindex="-1">Que se vea cómodo para ti</h2>
+      <p class="setup-description">Prueba las opciones: la vista cambia al momento. Solo se guardan al finalizar.</p>
+      <fieldset class="setup-fieldset"><legend>Tamaño de letra</legend><div class="setup-fonts">
+        {% for radio in form.tamanio_fuente %}<label class="setup-choice setup-font" for="{{ radio.id_for_label }}">{{ radio.tag }}<span><span class="setup-font-sample" data-sample="{{ radio.data.value }}" aria-hidden="true">Aa</span><strong>{{ radio.choice_label }}</strong></span></label>{% endfor %}
+      </div></fieldset>
+      <fieldset class="setup-fieldset"><legend>Apariencia</legend><div class="setup-themes">
+        {% for radio in form.tema_preferido %}<label class="setup-choice setup-theme" for="{{ radio.id_for_label }}">{{ radio.tag }}<span><span class="setup-theme-sample" data-sample="{{ radio.data.value }}" aria-hidden="true"><i></i><i></i><i></i></span><strong>{{ radio.choice_label }}</strong>{% if radio.data.value == 'auto' %}<small>Sigue el tema de tu dispositivo.</small>{% endif %}</span></label>{% endfor %}
+      </div></fieldset>
+      <div class="setup-preview" aria-label="Vista previa de tu espacio">
+        <div class="setup-preview-nav"><strong>CutLess</strong><span>Inicio</span><span>Historial</span></div>
+        <div class="setup-preview-body"><span class="setup-eyebrow">VISTA PREVIA</span><h3>Prepara tu primer corte</h3><p>Configura el tablero y añade las piezas que necesitas.</p><div class="setup-preview-field">Ancho del tablero <strong>122 cm</strong></div><span class="setup-preview-action">Generar plan de corte</span><p id="setup-summary" aria-live="polite"></p></div>
+      </div>
+    </section>
+    <footer class="setup-footer">
+      <p id="setup-step-text">Tus preferencias se guardarán al finalizar.</p>
+      <div class="setup-actions"><button type="button" class="setup-secondary" id="setup-prev" hidden>Anterior</button><button type="button" class="setup-primary" id="setup-next" hidden>Continuar</button><button type="submit" class="setup-primary" id="setup-save">{% if inicio_completado %}Guardar mis preferencias{% else %}Empezar con mi espacio{% endif %}</button></div>
+    </footer>
+  </form>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'usuarios/js/configuracion-inicial.js' %}?v=1"></script>{% endblock %}

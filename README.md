@@ -145,3 +145,5 @@ El margen se introduce en milímetros: 0 permite corte sin separación; el valor
 - [Materiales: revisión visual y claridad](docs/CAMBIOS_VISUALES_MATERIALES.md)
 
 Git ignora nuevos datos locales, pero los archivos ya versionados siguen en seguimiento. Su retirada y revisión del historial quedan pendientes.
+
+- [Configuración inicial del espacio de trabajo](docs/CAMBIOS_CONFIGURACION_INICIAL.md)

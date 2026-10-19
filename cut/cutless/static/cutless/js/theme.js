@@ -36,8 +36,10 @@
         }
     }
 
-    // Función para obtener el tema preferido (prioridad localStorage > perfil > system)
+    // En una cuenta autenticada prevalece su perfil, incluso si eligió Automático.
     function getTheme() {
+        const profileTheme = document.body.getAttribute('data-perfil-theme');
+        if (profileTheme) return profileTheme;
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
             return savedTheme;
@@ -184,8 +186,8 @@
     // Escuchar cambios en la preferencia del sistema
     if (window.matchMedia) {
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-            if (!localStorage.getItem('theme')) {
-                setTheme(e.matches ? 'dark' : 'light');
+            if (getTheme() === 'auto') {
+                setTheme('auto');
             }
         });
     }

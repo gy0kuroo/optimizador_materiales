@@ -199,6 +199,11 @@ class PerfilUsuario(models.Model):
     preferencias_menu = models.JSONField(default=dict, blank=True)
 
     @property
+    def inicio_personalizado(self):
+        """Estado independiente del tutorial, guardado junto a las preferencias de menú."""
+        return (self.preferencias_menu or {}).get('_inicio_completado') is True
+
+    @property
     def menu_visible(self):
         permisos = {
             'materiales': 'puede_crear_materiales', 'clientes': 'puede_crear_clientes',

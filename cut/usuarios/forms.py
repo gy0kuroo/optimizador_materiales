@@ -573,6 +573,57 @@ class PersonalizarMenuForm(forms.Form):
         return self.instance
 
 
+class ConfiguracionInicialForm(PersonalizarMenuForm):
+    modo = forms.ChoiceField(choices=[('esencial', 'Solo lo esencial'),
+                                     ('personalizado', 'Elegir mis herramientas')],
+                            widget=forms.RadioSelect)
+    tema_preferido = forms.ChoiceField(choices=[('light', 'Claro'), ('dark', 'Oscuro'),
+                                               ('auto', 'Automático')], widget=forms.RadioSelect)
+    tamanio_fuente = forms.ChoiceField(choices=[('small', 'Pequeña'), ('normal', 'Normal'),
+                                              ('large', 'Grande'), ('xlarge', 'Muy grande')],
+                                     widget=forms.RadioSelect)
+
+    DESCRIPCIONES = {
+        'materiales': 'Guarda tableros y precios para tus cortes.',
+        'clientes': 'Organiza los datos de las personas para las que trabajas.',
+        'proyectos': 'Agrupa varios cortes en un mismo trabajo.',
+        'presupuestos': 'Prepara cotizaciones con material y mano de obra.',
+        'plantillas': 'Reutiliza conjuntos de piezas habituales.',
+        'costos': 'Consulta los gastos de tus cortes guardados.',
+        'comparar': 'Revisa las diferencias entre dos resultados.',
+        'estadisticas': 'Consulta aprovechamiento y desperdicio en el tiempo.',
+    }
+
+    def __init__(self, *args, instance, **kwargs):
+        super().__init__(*args, instance=instance, **kwargs)
+        self.initial.update(tema_preferido=instance.tema_preferido,
+                            tamanio_fuente=instance.tamanio_fuente)
+        elegidas = any(instance.menu_visible[key] for key, _, _ in self.OPCIONES)
+        self.initial['modo'] = 'personalizado' if instance.inicio_personalizado and elegidas else 'esencial'
+        if not instance.inicio_personalizado:
+            for key, _, _ in self.OPCIONES:
+                if key in self.fields:
+                    self.fields[key].initial = False
+
+    @property
+    def herramientas(self):
+        return [{'campo': self[key], 'descripcion': self.DESCRIPCIONES[key]}
+                for key, _, _ in self.OPCIONES if key in self.fields]
+
+    def save(self):
+        preferencias = dict(self.instance.preferencias_menu or {})
+        esencial = self.cleaned_data['modo'] == 'esencial'
+        for key, _, _ in self.OPCIONES:
+            if key in self.fields:
+                preferencias[key] = False if esencial else self.cleaned_data[key]
+        preferencias['_inicio_completado'] = True
+        self.instance.preferencias_menu = preferencias
+        self.instance.tema_preferido = self.cleaned_data['tema_preferido']
+        self.instance.tamanio_fuente = self.cleaned_data['tamanio_fuente']
+        self.instance.save(update_fields=['preferencias_menu', 'tema_preferido', 'tamanio_fuente'])
+        return self.instance
+
+
 class CambiarPasswordForm(PasswordChangeForm):
     """Formulario para cambiar contraseña"""
     def __init__(self, *args, **kwargs):

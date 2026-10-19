@@ -73,6 +73,7 @@
                             <button class="nav-link dropdown-toggle" type="button" id="nav-cuenta" data-bs-toggle="dropdown" aria-expanded="false"><span class="nav-account-label">Cuenta · {{ user.username }}</span></button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-cuenta">
                                 <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">Mi perfil</a></li>
+                                <li><a class="dropdown-item" href="{% url 'usuarios:configuracion_inicial' %}">Personalizar mi inicio</a></li>
                                 <li><a class="dropdown-item" href="{% url 'usuarios:configuracion_sistema' %}">Configuración del sistema</a></li>
                                 {% if user.is_superuser or user.perfil.rol == 'admin' %}
                                 <li><hr class="dropdown-divider"></li>
@@ -169,10 +170,12 @@
     </script>
     
     <!-- JavaScript Personalizado -->
-    <script src="{% static 'cutless/js/theme.js' %}?v=2"></script>
+    <script src="{% static 'cutless/js/theme.js' %}?v=3"></script>
     <script src="{% static 'cutless/js/confirmaciones.js' %}"></script>
     {% if user.is_authenticated %}
     <script src="{% static 'cutless/js/session-timeout.js' %}"></script>
+    {% endif %}
+    {% if user.is_authenticated and not ocultar_tutorial %}
     <script>
         // Aplicar tema del perfil si está configurado
         (function() {

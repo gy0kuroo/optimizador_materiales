@@ -144,7 +144,7 @@ def actualizar_rol(request, pk):
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('cutless:index')
+        return redirect('cutless:index' if request.user.perfil.inicio_personalizado else 'usuarios:configuracion_inicial')
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -169,11 +169,27 @@ def login_view(request):
                 request.session.pop('timeout_personalizado', None)
                 request.session.set_expiry(None)  # Usar SESSION_COOKIE_AGE por defecto
             # Mostrar modal de bienvenida solo en la primera vista tras login exitoso
-            request.session['mostrar_bienvenida_cutless'] = True
-            return redirect('cutless:index')
+            request.session['mostrar_bienvenida_cutless'] = perfil.inicio_personalizado
+            return redirect('cutless:index' if perfil.inicio_personalizado else 'usuarios:configuracion_inicial')
     else:
         form = AuthenticationForm()
     return render(request, 'usuarios/login.html', {'form': form})
+
+@login_required
+def configuracion_inicial(request):
+    from .forms import ConfiguracionInicialForm
+    perfil, _ = PerfilUsuario.objects.get_or_create(usuario=request.user)
+    form = ConfiguracionInicialForm(request.POST if request.method == 'POST' else None, instance=perfil)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        request.session.pop('mostrar_bienvenida_cutless', None)
+        messages.success(request, 'Tu espacio está listo. Puedes cambiar estas preferencias desde Cuenta.')
+        return redirect('cutless:index')
+    return render(request, 'usuarios/configuracion_inicial.html', {
+        'form': form, 'inicio_completado': perfil.inicio_personalizado,
+        'ocultar_tutorial': True,
+    })
+
 
 def logout_view(request):
     logout(request)
