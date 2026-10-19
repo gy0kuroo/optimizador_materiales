@@ -14,12 +14,12 @@
       <p class="page-lead">Registra un tablero con sus dimensiones y precio.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
               onclick="iniciarTutorialSeccion('crear_material')"
-              title="Ayuda sobre crear material">
+              title="Ayuda sobre crear material" data-action="secondary">
         Ayuda sobre materiales
       </button>
-      <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary">
+      <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary" data-action="secondary">
         Volver a materiales
       </a>
     </div>
@@ -114,8 +114,8 @@
         </div>
 
         <div class="form-action-bar">
-          <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary">Cancelar</a>
-          <button type="submit" class="btn btn-primary btn-lg">Guardar material</button>
+          <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary" data-action="secondary">Cancelar</a>
+          <button type="submit" class="btn btn-lg btn-primary" data-action="primary">Guardar material</button>
         </div>
       </form>
     </div>

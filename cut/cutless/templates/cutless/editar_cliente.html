@@ -14,12 +14,12 @@
       <p class="page-lead">{{ cliente.nombre }}</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
               onclick="iniciarTutorialSeccion('editar_cliente')"
-              title="Ayuda">
+              title="Ayuda" data-action="secondary">
         Ayuda sobre clientes
       </button>
-      <a href="{% url 'cutless:lista_clientes' %}" class="btn btn-outline-secondary">
+      <a href="{% url 'cutless:lista_clientes' %}" class="btn btn-outline-secondary" data-action="secondary">
         Volver a clientes
       </a>
     </div>
@@ -112,8 +112,8 @@
         </div>
 
         <div class="form-action-bar">
-          <a href="{% url 'cutless:lista_clientes' %}" class="btn btn-outline-secondary">Cancelar</a>
-          <button type="submit" class="btn btn-primary btn-lg">Guardar cambios</button>
+          <a href="{% url 'cutless:lista_clientes' %}" class="btn btn-outline-secondary" data-action="secondary">Cancelar</a>
+          <button type="submit" class="btn btn-lg btn-primary" data-action="primary">Guardar cambios</button>
         </div>
       </form>
     </div>

@@ -49,3 +49,19 @@ body.review-page { font-size: 1.125rem; line-height: 1.65; }
 .review-page .dropdown-menu .dropdown-item { color: var(--cl-text-primary); }
 .review-page .dropdown-menu .dropdown-item:hover { background: var(--cl-bg-surface); }
 @media (max-width: 767px) { .review-page .page-header { flex-wrap: wrap; } .review-page .page-header__actions { margin-left: 0; } .result-page .result-actions .btn { width: 100%; } }
+
+/* Cifra informativa: el color del texto siempre corresponde a su fondo,
+   en ambos temas; no heredar el blanco de las insignias de Bootstrap. */
+.result-page .result-board-count {
+  display: inline-block;
+  margin-inline-start: .5rem;
+  padding: .375rem .875rem;
+  border: 1px solid var(--cl-border-strong);
+  border-radius: 8px;
+  background-color: var(--cl-bg-surface);
+  color: var(--cl-text-primary);
+  font: inherit;
+  font-weight: 700;
+  line-height: 1.5;
+  vertical-align: baseline;
+}

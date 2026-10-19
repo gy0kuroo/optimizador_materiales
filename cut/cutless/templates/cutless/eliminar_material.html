@@ -14,7 +14,7 @@
       <p class="page-lead">Confirma que deseas eliminar «{{ material.nombre }}». Esta acción no se puede deshacer.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary">Volver a materiales</a>
+      <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary" data-action="secondary">Volver a materiales</a>
     </div>
   </header>
 
@@ -39,8 +39,8 @@
       <form method="post" data-tipo="material">
         {% csrf_token %}
         <div class="form-action-bar">
-          <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary">Cancelar</a>
-          <button type="submit" class="btn btn-danger" data-tipo="material">Sí, eliminar</button>
+          <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary" data-action="secondary">Cancelar</a>
+          <button type="submit" class="btn btn-danger" data-tipo="material" data-action="delete">Sí, eliminar</button>
         </div>
       </form>
     </div>

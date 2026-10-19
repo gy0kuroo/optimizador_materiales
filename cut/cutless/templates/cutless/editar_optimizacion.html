@@ -17,21 +17,21 @@
       <p class="page-lead">Modifica tablero y piezas, luego recalcula el plan de corte.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary">Ver historial</a>
+      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary" data-action="secondary">Ver historial</a>
     </div>
   </header>
-  
+
 <form method="post" action="{% url 'cutless:editar_optimizacion' optimizacion.id %}" id="optimizacion-form">
     {% csrf_token %}
-    
+
     <!-- Sección: Dimensiones del Tablero -->
     <div class="card mb-4 fade-in">
       <div class="card-header card-header-step card-header-step-primary text-white">
         <span class="step-badge" aria-hidden="true">1</span>
         <h4 class="card-header-title">Dimensiones del tablero</h4>
-        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion ms-auto" 
-                onclick="iniciarTutorialSeccion('tablero')" 
-                title="Ayuda sobre dimensiones del tablero">
+        <button type="button" class="btn btn-sm btn-ayuda-seccion ms-auto btn-outline-secondary"
+                onclick="iniciarTutorialSeccion('tablero')"
+                title="Ayuda sobre dimensiones del tablero" data-action="secondary">
           Ayuda
         </button>
       </div>
@@ -96,11 +96,11 @@
     <!-- Sección: Costos (Opcional) -->
     <div class="card mb-4 fade-in">
       <div class="card-header card-header-step card-header-step-info text-white d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">Costos (Opcional)</h4>
-        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion" 
-                onclick="iniciarTutorialSeccion('costos')" 
-                title="Ayuda sobre costos">
-          
+        <h4 class="mb-0">Costos <span class="text-annotation">(Opcional)</span></h4>
+        <button type="button" class="btn btn-sm btn-ayuda-seccion btn-outline-secondary"
+                onclick="iniciarTutorialSeccion('costos')"
+                title="Ayuda sobre costos" data-action="secondary">
+
         </button>
       </div>
       <div class="card-body">
@@ -113,7 +113,7 @@
               <div class="text-danger">{{ tablero_form.material.errors }}</div>
             {% endif %}
             <div class="mt-2">
-              <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-sm btn-outline-primary" target="_blank">
+              <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-sm btn-outline-secondary" target="_blank" data-action="secondary">
                  Gestionar Materiales
               </a>
             </div>
@@ -168,25 +168,25 @@
       <div class="card-header card-header-step card-header-step-success text-white">
         <span class="step-badge" aria-hidden="true">2</span>
         <h4 class="card-header-title">Piezas a cortar</h4>
-        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion" 
-                onclick="iniciarTutorialSeccion('piezas')" 
-                title="Ayuda sobre piezas a cortar">
-          
+        <button type="button" class="btn btn-sm btn-ayuda-seccion btn-outline-secondary"
+                onclick="iniciarTutorialSeccion('piezas')"
+                title="Ayuda sobre piezas a cortar" data-action="secondary">
+
         </button>
       </div>
       <div class="card-body">
         {{ pieza_formset.management_form }}
-        
+
         <div id="pieza-container">
           {% for form in pieza_formset %}
           <div class="pieza-form border rounded p-3 mb-3 bg-light">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h5 class="mb-0">Pieza #<span class="pieza-numero">{{ forloop.counter }}</span></h5>
-              <button type="button" class="btn btn-danger btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %}">
+              <button type="button" class="btn btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %} btn-outline-danger" data-action="delete">
                 Eliminar
               </button>
             </div>
-            
+
             <div class="row">
               <div class="col-md-6 mb-2">
                 {{ form.nombre.label_tag }}
@@ -206,7 +206,7 @@
                 {{ form.cantidad }}
               </div>
             </div>
-            
+
             {% if form.errors %}
               <div class="alert alert-danger mt-2">{{ form.errors }}</div>
             {% endif %}
@@ -214,7 +214,7 @@
           {% endfor %}
         </div>
 
-        <button type="button" id="add-pieza" class="btn btn-outline-success">
+        <button type="button" id="add-pieza" class="btn btn-outline-secondary" data-action="secondary">
           Agregar otra pieza
         </button>
       </div>
@@ -222,8 +222,8 @@
 
     <!-- Botón de envío -->
     <div class="form-action-bar fade-in">
-      <button type="submit" class="btn btn-primary btn-lg btn-cta-primary">Actualizar optimización</button>
-      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary btn-lg">Cancelar</a>
+      <button type="submit" class="btn btn-lg btn-cta-primary btn-primary" data-action="primary">Actualizar optimización</button>
+      <a href="{% url 'cutless:historial' %}" class="btn btn-lg btn-outline-secondary" data-action="secondary">Cancelar</a>
     </div>
   </form>
 
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('pieza-container');
     const addButton = document.getElementById('add-pieza');
     const totalFormsInput = document.querySelector('input[name$="-TOTAL_FORMS"]');
-    
+
     let formCount = parseInt(totalFormsInput.value);
 
     // Función para actualizar números de piezas
@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.pieza-numero').forEach((elem, index) => {
             elem.textContent = index + 1;
         });
-        
+
         // Mostrar/ocultar botones de eliminar
         const removeBtns = document.querySelectorAll('.remove-pieza');
         const totalPiezas = document.querySelectorAll('.pieza-form').length;
@@ -265,14 +265,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const template = container.children[0].cloneNode(true);
-        
+
         // Limpiar valores
         template.querySelectorAll('input, select, textarea').forEach(input => {
             const name = input.name.replace(/-\d+-/, `-${formCount}-`);
             const id = input.id.replace(/-\d+-/, `-${formCount}-`);
             input.name = name;
             input.id = id;
-            
+
             if (input.type !== 'hidden') {
                 input.value = '';
                 if (input.name.includes('cantidad')) {
@@ -309,23 +309,23 @@ function actualizarLabelsUnidad() {
     const unidadSpan = document.getElementById('unidad_ancho');
     const unidadAltoSpan = document.getElementById('unidad_alto');
     const unidadesPiezas = document.querySelectorAll('.unidad-pieza');
-    
+
     const simbolos = {
         'cm': 'cm',
         'm': 'm',
         'in': 'in',
         'ft': 'ft'
     };
-    
+
     const simbolo = simbolos[unidad] || 'cm';
     unidadSpan.textContent = `(${simbolo})`;
     unidadAltoSpan.textContent = `(${simbolo})`;
-    
+
     // Actualizar unidades de piezas también
     unidadesPiezas.forEach(span => {
         span.textContent = `(${simbolo})`;
     });
-    
+
     // Actualizar unidad del margen de corte - siempre muestra (mm)
     const unidadMargen = document.querySelector('.unidad-margen');
     if (unidadMargen) {
@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (selector) {
         selector.addEventListener('change', actualizarLabelsUnidad);
     }
-    
+
     // Actualizar unidades cuando se agregan nuevas piezas
     const addButton = document.getElementById('add-pieza');
     if (addButton) {
@@ -349,15 +349,15 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(actualizarLabelsUnidad, 100);
         });
     }
-    
+
     // Manejar selección de material para llenar precio automáticamente
     const materialSelect = document.getElementById('material_select');
     const precioTableroInput = document.getElementById('precio_tablero');
-    
+
     if (materialSelect && precioTableroInput) {
         // Obtener precios de materiales desde el contexto de Django
         const materialPrices = JSON.parse(document.getElementById('materiales-data').textContent);
-        
+
         materialSelect.addEventListener('change', function() {
             const selectedMaterialId = this.value;
             if (selectedMaterialId && materialPrices[selectedMaterialId] && materialPrices[selectedMaterialId].precio) {

@@ -9,7 +9,7 @@
 
 {% block content %}
 <div class="config-container">
-  
+
   <header class="page-header fade-in">
     <div class="page-header__text">
       <h1 class="page-title">Configuración del sistema</h1>
@@ -190,7 +190,7 @@
         {% endif %}
       </div>
     </div>
-    <button type="submit" class="btn btn-primary settings-save">Guardar ajustes de corte y avisos</button>
+    <button type="submit" class="btn settings-save btn-primary" data-action="primary">Guardar ajustes de corte y avisos</button>
   </form>
 
   </div>
@@ -222,7 +222,7 @@
         {% if permisos_form.gestion_fields %}<h5>Gestión</h5><div class="permissions-grid mb-4">{% for field in permisos_form.gestion_fields %}<div class="permission-toggle">{{ field }}<label class="permission-label" for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong><small>{{ field.help_text }}</small></label></div>{% endfor %}</div>{% endif %}
         {% if permisos_form.analisis_fields %}<h5>Análisis</h5><div class="permissions-grid mb-4">{% for field in permisos_form.analisis_fields %}<div class="permission-toggle">{{ field }}<label class="permission-label" for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong><small>{{ field.help_text }}</small></label></div>{% endfor %}</div>{% endif %}
         {% if not permisos_form.fields %}<p>No tienes secciones adicionales habilitadas para personalizar.</p>{% endif %}
-        <button type="submit" class="btn btn-primary settings-save">Guardar menú</button>
+        <button type="submit" class="btn settings-save btn-primary" data-action="primary">Guardar menú</button>
       </form>
     </div>
 
@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var form = pane && pane.querySelector('form');
     if (!form || state(form) === form.dataset.initialState) return;
     event.preventDefault();
-    var accepted = window.cutlessConfirmar ? await window.cutlessConfirmar({titulo: 'Cambios sin guardar', mensaje: 'Puedes quedarte y guardar los ajustes, o descartarlos para cambiar de pestaña.', textoAceptar: 'Descartar y continuar', textoCancelar: 'Quedarme aquí'}) : window.confirm('¿Descartar los cambios y cambiar de pestaña?');
+    var accepted = window.cutlessConfirmar ? await window.cutlessConfirmar({destructiva: true, titulo: 'Cambios sin guardar', mensaje: 'Puedes quedarte y guardar los ajustes, o descartarlos para cambiar de pestaña.', textoAceptar: 'Descartar y continuar', textoCancelar: 'Quedarme aquí'}) : window.confirm('¿Descartar los cambios y cambiar de pestaña?');
     if (accepted) { form.reset(); switching = true; bootstrap.Tab.getOrCreateInstance(event.target).show(); }
   });
 });

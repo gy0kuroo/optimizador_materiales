@@ -14,9 +14,9 @@
       <p class="page-lead">Consulta el aprovechamiento de tus cortes y compara sus resultados en el período que elijas.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
               onclick="iniciarTutorialSeccion('estadisticas')"
-              title="Ayuda sobre estadísticas">
+              title="Ayuda sobre estadísticas" data-action="secondary">
         Cómo leer las estadísticas
       </button>
     </div>
@@ -30,11 +30,11 @@
         {% if total_optimizaciones > 0 %}
         <div class="export-actions" aria-label="Descargar estadísticas">
           <a href="{% url 'cutless:exportar_excel_desperdicio' %}?periodo={{ periodo }}"
-             class="btn btn-outline-secondary">
+             class="btn btn-outline-secondary" data-action="secondary">
             Exportar Excel
           </a>
           <a href="{% url 'cutless:exportar_pdf_desperdicio' %}?periodo={{ periodo }}"
-             class="btn btn-outline-secondary">
+             class="btn btn-outline-secondary" data-action="secondary">
             Exportar PDF
           </a>
         </div>
@@ -48,7 +48,7 @@
           <option value="mensual" {% if periodo == 'mensual' %}selected{% endif %}>Últimos 30 días</option>
           <option value="anual" {% if periodo == 'anual' %}selected{% endif %}>Últimos 365 días</option>
         </select></div>
-        <button type="submit" class="btn btn-primary">Aplicar período</button>
+        <button type="submit" class="btn btn-primary" data-action="primary">Aplicar período</button>
       </form>
       <p class="stats-explanation">Las tarjetas, los gráficos y las descargas corresponden al período aplicado.</p>
     </div>
@@ -155,8 +155,8 @@
             <div id="modalGraficoContenido" class="modal-grafico-contenido" tabindex="0" aria-label="Gráfico ampliado; desplázate para ver sus detalles"></div>
           </div>
           <div class="modal-footer modal-footer-app">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
-            <button type="button" class="btn btn-primary" onclick="resetearZoom()">Restablecer ampliación</button>
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" data-action="secondary">Cerrar</button>
+            <button type="button" class="btn btn-primary" onclick="resetearZoom()" data-action="primary">Restablecer ampliación</button>
           </div>
         </div>
       </div>
@@ -192,7 +192,7 @@
                     <td>{{ item.ancho_mostrar }} × {{ item.alto_mostrar }} {{ item.unidad_medida }}</td>
                     <td>
                       <details>
-                        <summary>Ver tipos de pieza ({{ item.piezas|length }})</summary>
+                        <summary>Ver tipos de pieza <span class="text-annotation">({{ item.piezas|length }})</span></summary>
                         <div class="mt-2">
                           {% for pieza in item.piezas %}
                             <div>• <strong>{{ pieza.nombre }}</strong>: {{ pieza.ancho }}×{{ pieza.alto }} {{ item.unidad_medida }} (×{{ pieza.cantidad }})</div>
@@ -201,13 +201,13 @@
                       </details>
                     </td>
                     <td>
-                      <a href="{% url 'cutless:resultado' item.optimizacion.id %}" class="btn btn-outline-secondary">Ver resultado</a>
+                      <a href="{% url 'cutless:resultado' item.optimizacion.id %}" class="btn btn-outline-secondary" data-action="secondary">Ver resultado</a>
                       <a href="{% url 'cutless:duplicar_optimizacion' item.optimizacion.id %}"
-                         class="btn btn-sm btn-primary" title="Duplicar">
+                         class="btn btn-sm btn-outline-secondary" title="Duplicar" data-action="secondary">
                         Duplicar
                       </a>
                       <a href="{% url 'cutless:descargar_pdf' item.optimizacion.id %}"
-                         class="btn btn-sm btn-success" title="Descargar PDF" data-carga-texto="Descargando PDF...">
+                         class="btn btn-sm btn-outline-secondary" title="Descargar PDF" data-carga-texto="Descargando PDF..." data-action="secondary">
                         PDF
                       </a>
                     </td>
@@ -235,7 +235,7 @@
           Aún no tienes optimizaciones guardadas para mostrar estadísticas. Prepara tu primer corte para comenzar.
         {% endif %}
       </p>
-      <a href="{% url 'cutless:index' %}" class="btn btn-primary btn-lg">
+      <a href="{% url 'cutless:index' %}" class="btn btn-lg btn-primary" data-action="primary">
         Preparar un corte
       </a>
     </div>

@@ -24,6 +24,10 @@
             cuerpoEl.textContent = options.mensaje || '';
             btnOk.textContent = options.textoAceptar || 'Aceptar';
             btnCancel.textContent = options.textoCancelar || 'Cancelar';
+            var destructiva = options.destructiva === true;
+            btnOk.classList.toggle('btn-danger', destructiva);
+            btnOk.classList.toggle('btn-primary', !destructiva);
+            btnOk.dataset.action = destructiva ? 'delete' : 'primary';
 
             var soloAceptar = options.soloAceptar === true;
             if (soloAceptar) {
@@ -40,6 +44,7 @@
             var accepted = false;
 
             function onHidden() {
+                el.removeEventListener('shown.bs.modal', onShown);
                 el.removeEventListener('hidden.bs.modal', onHidden);
                 btnOk.removeEventListener('click', onOk);
                 btnCancel.removeEventListener('click', onCancel);
@@ -47,6 +52,11 @@
                     btnClose.removeEventListener('click', onClose);
                 }
                 resolve(accepted);
+            }
+
+            function onShown() {
+                // Cancelar recibe el foco en una acción irreversible.
+                (destructiva && !soloAceptar ? btnCancel : btnOk).focus();
             }
 
             function onOk() {
@@ -65,6 +75,7 @@
             }
 
             el.addEventListener('hidden.bs.modal', onHidden);
+            el.addEventListener('shown.bs.modal', onShown);
             btnOk.addEventListener('click', onOk);
             if (!soloAceptar) {
                 btnCancel.addEventListener('click', onCancel);

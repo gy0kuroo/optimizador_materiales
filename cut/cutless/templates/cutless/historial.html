@@ -15,12 +15,12 @@
       <p class="page-lead">Consulta, filtra y reutiliza tus planes de corte anteriores.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
-              onclick="iniciarTutorialSeccion('historial')" 
-              title="Ayuda sobre el historial">
+      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
+              onclick="iniciarTutorialSeccion('historial')"
+              title="Ayuda sobre el historial" data-action="secondary">
         Cómo usar el historial
       </button>
-      <a href="{% url 'cutless:index' %}" class="btn btn-primary">Preparar otro corte</a>
+      <a href="{% url 'cutless:index' %}" class="btn btn-primary" data-action="primary">Preparar otro corte</a>
     </div>
   </header>
 
@@ -31,27 +31,27 @@
       <div class="row">
         <div class="col-md-3 mb-3">
           <label for="nombre_pieza" class="form-label">Nombre de pieza</label>
-          <input type="text" 
-                 class="form-control" 
-                 id="nombre_pieza" 
-                 name="nombre_pieza" 
+          <input type="text"
+                 class="form-control"
+                 id="nombre_pieza"
+                 name="nombre_pieza"
                  placeholder="Ej: Puerta, Cajón, Estante..."
                  value="{{ nombre_pieza }}">
         </div>
         <div class="col-md-2 mb-3">
           <label for="fecha_desde" class="form-label">Desde</label>
-          <input type="date" 
-                 class="form-control" 
-                 id="fecha_desde" 
-                 name="fecha_desde" 
+          <input type="date"
+                 class="form-control"
+                 id="fecha_desde"
+                 name="fecha_desde"
                  value="{{ fecha_desde }}">
         </div>
         <div class="col-md-2 mb-3">
           <label for="fecha_hasta" class="form-label">Hasta</label>
-          <input type="date" 
-                 class="form-control" 
-                 id="fecha_hasta" 
-                 name="fecha_hasta" 
+          <input type="date"
+                 class="form-control"
+                 id="fecha_hasta"
+                 name="fecha_hasta"
                  value="{{ fecha_hasta }}">
         </div>
         <div class="col-md-2 mb-3">
@@ -72,12 +72,12 @@
           </div>
         </div>
         <div class="col-md-3 mb-3 d-flex align-items-end">
-          <button type="submit" class="btn btn-primary w-100">Buscar</button>
+          <button type="submit" class="btn w-100 btn-primary" data-action="primary">Buscar</button>
         </div>
       </div>
       {% if nombre_pieza or fecha_desde or fecha_hasta or solo_favoritos == 'true' %}
       <div class="mt-2">
-        <a href="{% url 'cutless:historial' %}?ordenar_por={{ ordenar_por }}" class="btn btn-limpiar-filtros">
+        <a href="{% url 'cutless:historial' %}?ordenar_por={{ ordenar_por }}" class="btn btn-limpiar-filtros btn-outline-secondary" data-action="secondary">
           Quitar filtros
         </a>
         {% if nombre_pieza %}
@@ -109,10 +109,10 @@
       {% csrf_token %}
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-          <button type="button" class="btn btn-sm btn-outline-primary" id="select-todos-btn">Seleccionar todos</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect-todos-btn">Quitar selección</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="select-todos-btn" data-action="secondary">Seleccionar todos</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="deselect-todos-btn" data-action="secondary">Quitar selección</button>
         </div>
-        <button type="submit" class="btn btn-danger" id="btn-borrar-seleccion" disabled>
+        <button type="submit" class="btn btn-outline-danger" id="btn-borrar-seleccion" disabled data-action="delete">
           Eliminar seleccionadas
         </button>
       </div>
@@ -122,10 +122,10 @@
         <div class="col-md-6 col-lg-4 mb-4 fade-in">
           <div class="optimizacion-card">
             {% if optimizacion.imagen %}
-              <div class="chart-container chart-container-clickable" 
+              <div class="chart-container chart-container-clickable"
                    onclick="abrirModalImagen('{{ optimizacion.imagen.url }}', {{ optimizacion.id }}, '{{ item.numero }}')">
-                <img src="{{ optimizacion.imagen.url }}" 
-                     class="card-img-top chart-thumbnail" 
+                <img src="{{ optimizacion.imagen.url }}"
+                     class="card-img-top chart-thumbnail"
                      alt="Optimización #{{ item.numero }}">                <div class="chart-overlay">
                   <span class="chart-hint">Ampliar imagen</span>
                 </div>
@@ -134,21 +134,21 @@
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <div class="form-check">
-                  <input class="form-check-input optimizacion-select" type="checkbox" 
-                         name="seleccion" 
-                         id="check-opt-{{ optimizacion.id }}" 
+                  <input class="form-check-input optimizacion-select" type="checkbox"
+                         name="seleccion"
+                         id="check-opt-{{ optimizacion.id }}"
                          value="{{ optimizacion.id }}">
                   <label class="form-check-label" for="check-opt-{{ optimizacion.id }}">
                     Optimización #{{ item.numero }}
                   </label>
                 </div>
-                <button type="button" 
-                        class="btn btn-sm p-0 border-0 bg-transparent favorito-btn align-self-center" 
+                <button type="button"
+                        class="btn btn-sm p-0 border-0 bg-transparent favorito-btn align-self-center btn-outline-secondary"
                         data-optimizacion-id="{{ optimizacion.id }}"
                         data-favorito-url="{% url 'cutless:toggle_favorito' optimizacion.id %}"
                         data-favorito="{{ optimizacion.favorito|yesno:'true,false' }}"
                         title="{% if optimizacion.favorito %}Quitar de favoritos{% else %}Marcar como favorito{% endif %}"
-                        class="favorito-btn-inline">
+                        class="favorito-btn-inline" data-action="secondary">
                   {% if optimizacion.favorito %}
                     <span class="favorito-icon favorito-icon-active">⭐</span>
                   {% else %}
@@ -158,22 +158,22 @@
               </div>
               <p class="card-text">
                 <strong>Fecha:</strong> {{ optimizacion.fecha|date:"d/m/Y" }}<br>
-                <strong>Hora:</strong> {{ optimizacion.fecha|date:"H:i" }} (Chile)<br>
+                <strong>Hora:</strong> {{ optimizacion.fecha|date:"H:i" }} <span class="text-annotation">(Chile)</span><br>
                 <strong>Tablero:</strong> {{ item.ancho_mostrar }} × {{ item.alto_mostrar }} {{ item.unidad_medida }}<br>
-                <strong>Aprovechamiento:</strong> 
-                <span class="badge 
+                <strong>Aprovechamiento:</strong>
+                <span class="badge
                      {% if optimizacion.aprovechamiento_total < 30 %}bg-danger
                      {% elif optimizacion.aprovechamiento_total < 60 %}bg-warning
                      {% else %}bg-success{% endif %}">
                   {{ optimizacion.aprovechamiento_total|floatformat:2 }}%
                 </span>
               </p>
-              
+
               <!-- Lista de piezas -->
               {% if piezas %}
               <details class="mb-2">
                 <summary class="piezas-summary">
-                  Ver tipos de pieza ({{ piezas|length }})
+                  Ver tipos de pieza <span class="text-annotation">({{ piezas|length }})</span>
                 </summary>
                 <div class="mt-2 piezas-details">
                   {% for pieza in piezas %}
@@ -182,29 +182,29 @@
                 </div>
               </details>
               {% endif %}
-              
-              <a href="{% url 'cutless:resultado' optimizacion.id %}" class="btn btn-primary w-100 mt-3">Ver resultado</a>
+
+              <a href="{% url 'cutless:resultado' optimizacion.id %}" class="btn w-100 mt-3 btn-outline-secondary" data-action="secondary">Ver resultado</a>
               <div class="action-buttons mt-3 d-flex gap-2 align-items-center">
                 <!-- Botones principales: Editar y Duplicar -->
-                <a href="{% url 'cutless:editar_optimizacion' optimizacion.id %}" 
+                <a href="{% url 'cutless:editar_optimizacion' optimizacion.id %}"
                    class="btn-action btn-edit flex-fill"
-                   title="Editar esta optimización">
+                   title="Editar esta optimización" data-action="secondary">
                    Editar
                 </a>
-                <a href="{% url 'cutless:duplicar_optimizacion' optimizacion.id %}?ordenar_por={{ ordenar_por }}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}" 
-                   class="btn-action btn-duplicar flex-fill" 
-                   title="Duplicar esta optimización">
+                <a href="{% url 'cutless:duplicar_optimizacion' optimizacion.id %}?ordenar_por={{ ordenar_por }}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}"
+                   class="btn-action btn-duplicar flex-fill"
+                   title="Duplicar esta optimización" data-action="secondary">
                   <span class="icon"></span> Duplicar
                 </a>
-                
+
                 <!-- Menú desplegable para acciones secundarias -->
                 <div class="dropdown">
-                  <button class="btn btn-action btn-mas-opciones flex-fill" 
-                          type="button" 
-                          id="dropdownMenuButton{{ optimizacion.id }}" 
-                          data-bs-toggle="dropdown" 
+                  <button class="btn btn-action btn-mas-opciones flex-fill btn-outline-secondary"
+                          type="button"
+                          id="dropdownMenuButton{{ optimizacion.id }}"
+                          data-bs-toggle="dropdown"
                           aria-expanded="false"
-                          title="Más opciones">
+                          title="Más opciones" data-action="secondary">
                     <span class="icon"></span> Más opciones
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ optimizacion.id }}">
@@ -230,12 +230,12 @@
                     </li>
                     <li>
                       <a class="dropdown-item" href="{% url 'cutless:imprimir_plan_corte' optimizacion.id %}" target="_blank">
-                           Imprimir (otra pestaña)
+                           Imprimir <span class="text-annotation">(otra pestaña)</span>
                       </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
-                      <a href="{% url 'cutless:borrar_optimizacion' optimizacion.id %}" class="dropdown-item text-danger delete-button">
+                      <a href="{% url 'cutless:borrar_optimizacion' optimizacion.id %}" class="dropdown-item text-danger delete-button" data-action="delete">
                         Eliminar
                       </a>
                     </li>
@@ -310,7 +310,7 @@
           Aún no tienes optimizaciones guardadas. Crea tu primera optimización para comenzar.
         {% endif %}
       </p>
-      <a href="{% url 'cutless:index' %}" class="btn btn-primary btn-lg">
+      <a href="{% url 'cutless:index' %}" class="btn btn-lg btn-primary" data-action="primary">
         Preparar un corte
       </a>
     </div>
@@ -333,20 +333,20 @@
               </div>
               <div class="col-2 d-flex flex-column justify-content-center align-items-center zoom-controls">
                 <label for="zoomSliderImagen" class="text-white mb-2 zoom-label">Zoom</label>
-                <input type="range" 
-                       class="form-range zoom-slider" 
-                       id="zoomSliderImagen" 
-                       min="30" 
-                       max="200" 
-                       value="100" 
+                <input type="range"
+                       class="form-range zoom-slider"
+                       id="zoomSliderImagen"
+                       min="30"
+                       max="200"
+                       value="100"
                        step="5">
                 <span id="zoomValueImagen" class="text-white mt-2 zoom-value">100%</span>
               </div>
             </div>
           </div>
           <div class="modal-footer modal-footer-app">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
-            <button type="button" class="btn btn-primary" onclick="resetearZoomImagen()">Resetear Zoom</button>
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" data-action="secondary">Cerrar</button>
+            <button type="button" class="btn btn-primary" onclick="resetearZoomImagen()" data-action="primary">Resetear Zoom</button>
           </div>
         </div>
       </div>
@@ -357,30 +357,30 @@ function abrirModalImagen(urlImagen, optimizacionId, optimizacionNumero) {
     const modal = new bootstrap.Modal(document.getElementById('modalImagen'));
     const contenido = document.getElementById('modalImagenContenido');
     const titulo = document.getElementById('modalImagenLabel');
-    
+
     // Limpiar contenido anterior
     contenido.innerHTML = '<div class="text-white">Cargando tableros...</div>';
-    
+
     // Cargar todas las imágenes de la optimización via AJAX
     fetch(`/cutless/api/tableros/${optimizacionId}/`)
         .then(response => response.json())
         .then(data => {
             contenido.innerHTML = '';
-            
+
             const numeroAMostrar = optimizacionNumero || optimizacionId;
             if (data.imagenes && data.imagenes.length > 0) {
                 titulo.textContent = `Tableros (${data.imagenes.length}) - Optimización #${numeroAMostrar}`;
-                
+
                 data.imagenes.forEach((imgBase64, idx) => {
                     const contenedorImagen = document.createElement('div');
                     contenedorImagen.className = 'tablero-modal-item';
                     contenedorImagen.style.flex = '0 0 auto';
                     contenedorImagen.style.textAlign = 'center';
-                    
+
                     const label = document.createElement('div');
                     label.className = 'text-white mb-2';
                     label.innerHTML = `<strong>Tablero ${idx + 1} de ${data.imagenes.length}</strong>`;
-                    
+
                     const img = document.createElement('img');
                     img.src = `data:image/png;base64,${imgBase64}`;
                     img.alt = `Tablero ${idx + 1}`;
@@ -389,7 +389,7 @@ function abrirModalImagen(urlImagen, optimizacionId, optimizacionNumero) {
                     img.style.objectFit = 'contain';
                     img.style.border = '2px solid #444';
                     img.style.borderRadius = '8px';
-                    
+
                     contenedorImagen.appendChild(label);
                     contenedorImagen.appendChild(img);
                     contenido.appendChild(contenedorImagen);
@@ -419,7 +419,7 @@ function abrirModalImagen(urlImagen, optimizacionId, optimizacionNumero) {
             img.style.objectFit = 'contain';
             contenido.appendChild(img);
         });
-    
+
     modal.show();
 }
 
@@ -446,7 +446,7 @@ let modalTranslateX = 0, modalTranslateY = 0;
 document.getElementById('modalImagen').addEventListener('shown.bs.modal', function() {
     const zoomSlider = document.getElementById('zoomSliderImagen');
     const contenido = document.getElementById('modalImagenContenido');
-    
+
     // Resetear valores
     modalZoomLevel = 1;
     modalTranslateX = 0;
@@ -455,7 +455,7 @@ document.getElementById('modalImagen').addEventListener('shown.bs.modal', functi
     contenido.style.transform = 'scale(1) translate(0px, 0px)';
     contenido.style.transformOrigin = 'center center';
     contenido.style.cursor = 'grab';
-    
+
     zoomSlider.oninput = function() {
         const zoomPercent = parseInt(this.value);
         modalZoomLevel = zoomPercent / 100;
@@ -467,12 +467,12 @@ document.getElementById('modalImagen').addEventListener('shown.bs.modal', functi
 // Eventos de arrastre solo en el contenido de imágenes
 document.addEventListener('mousedown', function(e) {
     const contenido = document.getElementById('modalImagenContenido');
-    
+
     // No activar arrastre si se hace click en el slider o sus controles
     if (e.target.closest('.zoom-controls')) {
         return;
     }
-    
+
     if (contenido && contenido.contains(e.target)) {
         modalIsDragging = true;
         modalStartX = e.clientX;
@@ -523,7 +523,7 @@ function getCookie(name) {
 // Funcionalidad AJAX para favoritos
 document.addEventListener('DOMContentLoaded', function() {
     const favoritoButtons = document.querySelectorAll('.favorito-btn');
-    
+
     favoritoButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
@@ -531,18 +531,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const favoritoUrl = this.getAttribute('data-favorito-url');
             const icon = this.querySelector('.favorito-icon');
             const buttonElement = this;
-            
+
             // Deshabilitar el botón mientras se procesa
             buttonElement.disabled = true;
             buttonElement.style.opacity = '0.6';
-            
+
             // Obtener token CSRF
             const csrftoken = getCookie('csrftoken');
-            
+
             // Crear FormData para enviar el CSRF token
             const formData = new FormData();
             formData.append('csrfmiddlewaretoken', csrftoken);
-            
+
             // Hacer petición AJAX usando la URL del atributo data
             const url = favoritoUrl + '?ajax=true';
             fetch(url, {

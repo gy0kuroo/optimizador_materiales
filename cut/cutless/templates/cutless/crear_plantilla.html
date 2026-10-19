@@ -14,12 +14,12 @@
       <p class="page-lead">Guarda un conjunto de piezas para reutilizar.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
               onclick="iniciarTutorialSeccion('crear_plantilla')"
-              title="Ayuda">
+              title="Ayuda" data-action="secondary">
         Cómo usar las plantillas
       </button>
-      <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary">
+      <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary" data-action="secondary">
         Volver a plantillas
       </a>
     </div>
@@ -29,7 +29,7 @@
   <div class="alert alert-info fade-in mb-4">
     <strong>Optimización seleccionada:</strong> Tablero {{ optimizacion.ancho_tablero }}×{{ optimizacion.alto_tablero }} cm
     ({{ optimizacion.aprovechamiento_total|floatformat:1 }}% aprovechamiento)
-    <a href="{% url 'cutless:resultado' optimizacion.pk %}" class="btn btn-sm btn-outline-primary ms-2">Ver optimización</a>
+    <a href="{% url 'cutless:resultado' optimizacion.pk %}" class="btn btn-sm ms-2 btn-outline-secondary" data-action="secondary">Ver optimización</a>
   </div>
   {% endif %}
 
@@ -156,8 +156,8 @@
         </div>
 
         <div class="form-action-bar">
-          <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary">Cancelar</a>
-          <button type="submit" class="btn btn-primary btn-lg">Crear plantilla</button>
+          <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary" data-action="secondary">Cancelar</a>
+          <button type="submit" class="btn btn-lg btn-primary" data-action="primary">Crear plantilla</button>
         </div>
       </form>
     </div>

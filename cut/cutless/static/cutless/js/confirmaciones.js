@@ -21,6 +21,7 @@
             return window.confirm(mensajeFinal);
         }
         return window.cutlessConfirmar({
+            destructiva: true,
             titulo: 'Confirmar eliminación',
             mensaje: mensajeFinal,
             textoAceptar: 'Sí, eliminar',

@@ -24,7 +24,7 @@
           <option value="admin">Administrador</option>
         </select>
       </div>
-      <button type="submit" class="btn btn-success" name="crear_usuario">Crear usuario</button>
+      <button type="submit" class="btn btn-primary" name="crear_usuario" data-action="primary">Crear usuario</button>
     </form>
   </div>
 </div>
@@ -49,25 +49,25 @@
         <td>{{ u.perfil.rol|default:'usuario' }}</td>
         <td>{{ u.is_staff|yesno:'Sí,No' }}</td>
         <td>{{ u.is_active|yesno:'Sí,No' }}</td>
-        <td>
+        <td><div class="action-group">
           {% if u != request.user %}
-            <a href="{% url 'usuarios:editar_usuario' u.pk %}" class="btn btn-outline-primary btn-sm me-1 admin-action-btn">Editar</a>
+            <a href="{% url 'usuarios:editar_usuario' u.pk %}" class="btn btn-sm me-1 admin-action-btn btn-outline-secondary" data-action="secondary">Editar</a>
             <form method="post" action="{% url 'usuarios:actualizar_rol' u.pk %}" class="d-inline">
               {% csrf_token %}
               <select name="rol" class="form-select form-select-sm d-inline w-auto me-1 rol-select-inline">
                 <option value="usuario" {% if u.perfil.rol == 'usuario' %}selected{% endif %}>Usuario</option>
                 <option value="admin" {% if u.perfil.rol == 'admin' %}selected{% endif %}>Admin</option>
               </select>
-              <button type="submit" class="btn btn-primary btn-sm admin-action-btn">Actualizar rol</button>
+              <button type="submit" class="btn btn-sm admin-action-btn btn-primary" data-action="primary">Actualizar rol</button>
             </form>
-            <form method="post" action="{% url 'usuarios:eliminar_usuario' u.pk %}" class="d-inline" data-cutless-mensaje="¿Eliminar al usuario «{{ u.username }}»? Esta acción no se puede deshacer.">
+            <form method="post" action="{% url 'usuarios:eliminar_usuario' u.pk %}" class="d-inline action-delete-holder" data-cutless-mensaje="¿Eliminar al usuario «{{ u.username }}»? Esta acción no se puede deshacer.">
               {% csrf_token %}
-              <button type="submit" class="btn btn-danger btn-sm admin-action-btn">Eliminar</button>
+              <button type="submit" class="btn btn-sm admin-action-btn btn-outline-danger" data-action="delete">Eliminar</button>
             </form>
           {% else %}
             <span class="text-muted">Tu cuenta</span>
           {% endif %}
-        </td>
+        </div></td>
       </tr>
       {% empty %}
       <tr>

@@ -14,12 +14,12 @@
       <p class="page-lead">Revisa líneas, totales y optimizaciones incluidas.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
               onclick="iniciarTutorialSeccion('detalle_presupuesto')"
-              title="Ayuda">
+              title="Ayuda" data-action="secondary">
         Ayuda sobre presupuestos
       </button>
-      <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-outline-secondary">
+      <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-outline-secondary" data-action="secondary">
         Volver a presupuestos
       </a>
     </div>
@@ -63,8 +63,8 @@
   <!-- Detalles de las Optimizaciones -->
   <div class="card mb-4 fade-in">
     <div class="card-header card-header-section d-flex justify-content-between align-items-center">
-      <h4 class="mb-0">Optimizaciones asociadas ({{ presupuesto.optimizaciones.count }})</h4>
-      <a href="{% url 'cutless:agregar_optimizaciones_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary">Agregar optimizaciones</a>
+      <h4 class="mb-0">Optimizaciones asociadas <span class="text-annotation">({{ presupuesto.optimizaciones.count }})</span></h4>
+      <a href="{% url 'cutless:agregar_optimizaciones_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary" data-action="secondary">Agregar optimizaciones</a>
     </div>
     <div class="card-body">
       {% if presupuesto.optimizaciones.all %}
@@ -99,7 +99,7 @@
                 {% endif %}
               </td>
               <td>
-                <a href="{% url 'cutless:resultado' opt.pk %}" class="btn btn-sm btn-outline-primary">Ver resultado</a>
+                <a href="{% url 'cutless:resultado' opt.pk %}" class="btn btn-sm btn-outline-secondary" data-action="secondary">Ver resultado</a>
               </td>
             </tr>
             {% endfor %}
@@ -132,7 +132,7 @@
         <tbody>
           {% for item in optimizaciones_con_costos %}
           <tr>
-            <td>Tableros (Optimización #{{ item.numero_lista }})</td>
+            <td>Tableros <span class="text-annotation">(Optimización #{{ item.numero_lista }})</span></td>
             <td>{{ item.num_tableros }}</td>
             <td>${{ presupuesto.precio_tablero|floatformat:0 }}</td>
             <td>${{ item.costo_tableros|floatformat:0 }}</td>
@@ -173,11 +173,11 @@
 
   <!-- Acciones -->
   <div class="form-action-bar fade-in">
-    <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-outline-secondary">Volver a presupuestos</a>
-    <a href="{% url 'cutless:editar_presupuesto' presupuesto.pk %}" class="btn btn-primary">
+    <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-outline-secondary" data-action="secondary">Volver a presupuestos</a>
+    <a href="{% url 'cutless:editar_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary" data-action="secondary">
       Editar presupuesto
     </a>
-    <a href="{% url 'cutless:generar_pdf_presupuesto' presupuesto.pk %}" class="btn btn-outline-primary" target="_blank">
+    <a href="{% url 'cutless:generar_pdf_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary" target="_blank" data-action="secondary">
       Generar PDF
     </a>
   </div>

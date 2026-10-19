@@ -14,12 +14,12 @@
       <p class="page-lead">{{ presupuesto.numero }}</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
               onclick="iniciarTutorialSeccion('editar_presupuesto')"
-              title="Ayuda">
+              title="Ayuda" data-action="secondary">
         Ayuda sobre presupuestos
       </button>
-      <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-outline-secondary">
+      <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-outline-secondary" data-action="secondary">
         Volver a presupuestos
       </a>
     </div>
@@ -204,8 +204,8 @@
         </div>
 
         <div class="form-action-bar">
-          <a href="{% url 'cutless:detalle_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary">Cancelar</a>
-          <button type="submit" class="btn btn-primary btn-lg">Guardar cambios</button>
+          <a href="{% url 'cutless:detalle_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary" data-action="secondary">Cancelar</a>
+          <button type="submit" class="btn btn-lg btn-primary" data-action="primary">Guardar cambios</button>
         </div>
       </form>
     </div>

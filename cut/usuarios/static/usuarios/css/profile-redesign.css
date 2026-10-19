@@ -19,8 +19,6 @@ body.profile-page { font-size: 1.125rem; line-height: 1.65; }
 .profile-page .btn { font-family: var(--cl-font-body); font-size: 1.0625rem; text-transform: none; letter-spacing: normal; min-height: 48px; padding: 10px 18px; white-space: normal; }
 .profile-page .btn-ayuda-seccion { color: var(--cl-text-primary); background: var(--cl-bg-card); border: 1px solid var(--cl-border-strong); border-radius: 8px; }
 .profile-page .btn-ayuda-seccion:hover { background: var(--cl-bg-surface); }
-.profile-page .btn-success { background: var(--cl-blue); border-color: var(--cl-blue); color: white; }
-.profile-page .btn-success:hover { background: var(--cl-cobalt); }
 .profile-page .profile-errors { border: 1px solid var(--cl-danger); background: var(--cl-danger-bg); padding: 16px; border-radius: 8px; margin-bottom: 20px; }
 .profile-page .text-danger.small { font-size: 1rem; }
 .profile-page hr { border-color: var(--cl-border); margin: 28px 0; }

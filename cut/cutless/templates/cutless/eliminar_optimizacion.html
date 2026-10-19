@@ -8,7 +8,7 @@
       <p class="page-lead">Confirma que deseas eliminar la optimización #{{ numero_mostrado }}. Esta acción no se puede deshacer.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary">Volver</a>
+      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary" data-action="secondary">Volver</a>
     </div>
   </header>
 
@@ -20,8 +20,8 @@
       <form method="post" data-tipo="optimizacion">
         {% csrf_token %}
         <div class="form-action-bar">
-          <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary">Cancelar</a>
-          <button type="submit" class="btn btn-danger">Sí, eliminar optimización</button>
+          <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary" data-action="secondary">Cancelar</a>
+          <button type="submit" class="btn btn-danger" data-action="delete">Sí, eliminar optimización</button>
         </div>
       </form>
     </div>

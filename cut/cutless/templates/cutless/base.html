@@ -5,26 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}CutLess{% endblock %}</title>
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{% static 'cutless/favicon.svg' %}">
     <link rel="alternate icon" href="{% static 'cutless/favicon.svg' %}">
-    
+
     <!-- Bootstrap CSS (opcional, para compatibilidad) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Intro.js CSS para tutorial -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/introjs.min.css">
-    
+
     <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{% static 'cutless/css/main.css' %}">
     <link rel="stylesheet" href="{% static 'cutless/css/palette.css' %}">
     <link rel="stylesheet" href="{% static 'cutless/css/ui.css' %}?v=2">
     <link rel="stylesheet" href="{% static 'cutless/css/accessibility.css' %}?v=2">
     <link rel="stylesheet" href="{% static 'cutless/css/visual-refinement.css' %}?v=2">
-    
+
     {% block extra_css %}{% endblock %}
     <link rel="stylesheet" href="{% static 'cutless/css/help-redesign.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'cutless/css/action-semantics.css' %}?v=3">
 </head>
 <body class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
     {% block navigation %}
@@ -37,7 +38,7 @@
                     CutLess
                 </a>
             </div>
-            <button class="navbar-toggler navbar-toggler-custom" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+            <button class="navbar-toggler navbar-toggler-custom" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegación">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -85,8 +86,8 @@
                         </div>
                     {% else %}
                         {% block show_auth_buttons %}
-                        <a href="{% url 'usuarios:login' %}" class="btn btn-outline-primary btn-sm me-2">Iniciar sesión</a>
-                        <a href="{% url 'usuarios:registro' %}" class="btn btn-outline-success btn-sm">Registrarse</a>
+                        <a href="{% url 'usuarios:login' %}" class="btn btn-sm me-2 btn-outline-secondary" data-action="secondary">Iniciar sesión</a>
+                        <a href="{% url 'usuarios:registro' %}" class="btn btn-sm btn-outline-secondary" data-action="secondary">Registrarse</a>
                         {% endblock %}
                     {% endif %}
                 </div>
@@ -94,7 +95,7 @@
         </div>
     </nav>
     {% endblock %}
-    
+
     <!-- Contenido Principal -->
     <div class="container app-main">
         {% if messages %}
@@ -105,7 +106,7 @@
                 </div>
             {% endfor %}
         {% endif %}
-        
+
         {% block content %}
         {% endblock %}
     </div>
@@ -120,30 +121,30 @@
                 </div>
                 <div class="modal-body" id="cutlessModalDialogoCuerpo"></div>
                 <div class="modal-footer flex-nowrap">
-                    <button type="button" class="btn btn-outline-secondary flex-grow-1 flex-sm-grow-0" id="cutlessModalDialogoCancel">Cancelar</button>
-                    <button type="button" class="btn btn-primary flex-grow-1 flex-sm-grow-0" id="cutlessModalDialogoOk">Aceptar</button>
+                    <button type="button" class="btn flex-grow-1 flex-sm-grow-0 btn-outline-secondary" id="cutlessModalDialogoCancel" data-action="secondary">Cancelar</button>
+                    <button type="button" class="btn flex-grow-1 flex-sm-grow-0 btn-primary" id="cutlessModalDialogoOk" data-action="primary">Aceptar</button>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'cutless/js/modal-dialogos.js' %}"></script>
-    
+    <script src="{% static 'cutless/js/modal-dialogos.js' %}?v=2"></script>
+
     <!-- Intro.js para tutorial interactivo -->
     <script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/intro.min.js"></script>
-    
+
     <!-- Auto-cierre de mensajes con fade-out suave -->
     <script>
         // Auto-cerrar mensajes después de cierto tiempo con animación suave
         document.addEventListener('DOMContentLoaded', function() {
             const alerts = document.querySelectorAll('.alert.alert-dismissible');
-            
+
             alerts.forEach(function(alert) {
                 // Determinar tiempo según el tipo de mensaje
                 let tiempoCierre = 5000; // Por defecto 5 segundos
-                
+
                 if (alert.classList.contains('alert-success')) {
                     tiempoCierre = 5000; // 5 segundos para éxito
                 } else if (alert.classList.contains('alert-danger')) {
@@ -153,12 +154,12 @@
                 } else if (alert.classList.contains('alert-info')) {
                     tiempoCierre = 5000; // 5 segundos para información
                 }
-                
+
                 // Cerrar automáticamente después del tiempo determinado con fade-out suave
                 setTimeout(function() {
                     // Agregar clase de fade-out
                     alert.classList.add('alert-fade-out');
-                    
+
                     // Esperar a que termine la animación (500ms) antes de remover el elemento
                     setTimeout(function() {
                         const bsAlert = new bootstrap.Alert(alert);
@@ -168,10 +169,10 @@
             });
         });
     </script>
-    
+
     <!-- JavaScript Personalizado -->
     <script src="{% static 'cutless/js/theme.js' %}?v=3"></script>
-    <script src="{% static 'cutless/js/confirmaciones.js' %}"></script>
+    <script src="{% static 'cutless/js/confirmaciones.js' %}?v=2"></script>
     {% if user.is_authenticated %}
     <script src="{% static 'cutless/js/session-timeout.js' %}"></script>
     {% endif %}
@@ -186,7 +187,7 @@
             }
         })();
     </script>
-    
+
     <!-- Sistema de Tutorial/Ayuda -->
     <script>
         // Detectar si es usuario nuevo
@@ -194,7 +195,7 @@
         // Verificar si tiene optimizaciones (se pasará desde la vista)
         const tieneOptimizaciones = {% if tiene_optimizaciones %}true{% else %}false{% endif %};
         const mostrarModalBienvenida = {% if mostrar_modal_bienvenida %}true{% else %}false{% endif %};
-        
+
         // Solo tras login exitoso (bandera en sesión), usuario nuevo y sin optimizaciones aún
         if (mostrarModalBienvenida && esUsuarioNuevo && !tieneOptimizaciones) {
             document.addEventListener('DOMContentLoaded', function() {
@@ -205,7 +206,7 @@
                 }, 500);
             });
         }
-        
+
         // Función para iniciar tutorial interactivo
         function iniciarTutorial() {
             // Cerrar modal de bienvenida si está abierto
@@ -213,7 +214,7 @@
             if (modalBienvenida) {
                 modalBienvenida.hide();
             }
-            
+
             const pagina = '{{ request.resolver_match.url_name|escapejs }}';
             const secciones = {
                 historial: 'historial', resultado: 'resultado', perfil: 'perfil',
@@ -261,7 +262,7 @@
         function obtenerPasosTutorial() {
             const path = window.location.pathname;
             const pasos = [];
-            
+
             if (path.includes('index') || path === '/cutless/') {
                 // Tutorial en página principal
                 pasos.push(
@@ -318,10 +319,10 @@
                     }
                 );
             }
-            
+
             return pasos;
         }
-        
+
         // Marcar tutorial como completado
         function marcarTutorialCompletado() {
             fetch('{% url "usuarios:completar_tutorial" %}', {
@@ -338,7 +339,7 @@
                   }
               });
         }
-        
+
         // Función auxiliar para obtener cookie CSRF
         function getCookie(name) {
             let cookieValue = null;
@@ -354,7 +355,7 @@
             }
             return cookieValue;
         }
-        
+
         // Event listener para botón de tutorial
         document.addEventListener('DOMContentLoaded', function() {
             const btnTutorial = document.getElementById('btn-tutorial');
@@ -365,12 +366,12 @@
                 });
             }
         });
-        
+
         // Función para iniciar tutorial de sección específica
         function iniciarTutorialSeccion(seccion) {
             const path = window.location.pathname;
             let pasos = [];
-            
+
             if (seccion === 'tablero') {
                 pasos = [
                     {
@@ -919,7 +920,7 @@
                     }
                 ];
             }
-            
+
             // Si no hay pasos definidos, mostrar mensaje genérico
             if (pasos.length === 0) {
                 pasos = [
@@ -930,14 +931,14 @@
                     }
                 ];
             }
-            
+
             mostrarGuia(pasos);
         }
 
         // Hacer función global para que esté disponible desde onclick
         window.iniciarTutorialSeccion = iniciarTutorialSeccion;
     </script>
-    
+
     <!-- Modal de Bienvenida -->
     <div class="modal fade modal-cutless-dialog" id="modalBienvenida" tabindex="-1" aria-labelledby="modalBienvenidaLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
@@ -955,17 +956,17 @@
                     <p class="mb-0"><small class="text-muted">Puedes acceder al tutorial en cualquier momento desde el botón "Ayuda" en el menú superior.</small></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" onclick="marcarTutorialCompletado(); bootstrap.Modal.getInstance(document.getElementById('modalBienvenida')).hide();">
+                    <button type="button" class="btn btn-outline-secondary" onclick="marcarTutorialCompletado(); bootstrap.Modal.getInstance(document.getElementById('modalBienvenida')).hide();" data-action="secondary">
                         Omitir
                     </button>
-                    <button type="button" class="btn btn-primary" onclick="iniciarTutorial();">
+                    <button type="button" class="btn btn-primary" onclick="iniciarTutorial();" data-action="primary">
                         Iniciar Tutorial
                     </button>
                 </div>
             </div>
         </div>
     </div>
-    
+
     {% endif %}
     {% block extra_js %}{% endblock %}
 </body>

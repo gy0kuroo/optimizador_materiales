@@ -14,12 +14,12 @@
       <p class="page-lead">Administra tableros y precios para usarlos en tus optimizaciones.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
               onclick="iniciarTutorialSeccion('materiales')"
-              title="Ayuda sobre materiales">
+              title="Ayuda sobre materiales" data-action="secondary">
         Ayuda sobre materiales
       </button>
-      <a href="{% url 'cutless:crear_material' %}" class="btn btn-primary">
+      <a href="{% url 'cutless:crear_material' %}" class="btn btn-primary" data-action="primary">
         Agregar material
       </a>
     </div>
@@ -39,11 +39,11 @@
                  value="{{ busqueda }}">
         </div>
         <div class="col-md-2">
-          <button type="submit" class="btn btn-outline-primary w-100">Buscar</button>
+          <button type="submit" class="btn w-100 btn-primary" data-action="primary">Buscar</button>
         </div>
         {% if busqueda %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary w-100">Quitar filtros</a>
+          <a href="{% url 'cutless:lista_materiales' %}" class="btn w-100 btn-outline-secondary" data-action="secondary">Quitar filtros</a>
         </div>
         {% endif %}
       </div>
@@ -86,14 +86,14 @@
               {% endif %}
             </td>
             <td>{{ material.get_area|floatformat:2 }} cm²</td>
-            <td>
-              <a href="{% url 'cutless:editar_material' material.pk %}" class="btn btn-sm btn-primary"> Editar</a>
+            <td><div class="action-group">
+              <a href="{% url 'cutless:editar_material' material.pk %}" class="btn btn-sm btn-outline-secondary" data-action="secondary"> Editar</a>
               {% if not material.es_predefinido %}
-              <a href="{% url 'cutless:eliminar_material' material.pk %}" class="btn btn-outline-danger"> Eliminar</a>
+              <a href="{% url 'cutless:eliminar_material' material.pk %}" class="btn btn-outline-danger" data-action="delete"> Eliminar</a>
               {% else %}
               <span class="badge bg-info">Sistema</span>
               {% endif %}
-            </td>
+            </div></td>
           </tr>
           {% endfor %}
         </tbody>
@@ -106,7 +106,7 @@
       <p class="mb-4" style="max-width: 500px; margin: 0 auto;">
         Aún no has creado materiales personalizados. Crea tu primer material para comenzar a usarlo en tus optimizaciones.
       </p>
-      <a href="{% url 'cutless:crear_material' %}" class="btn btn-primary btn-lg">
+      <a href="{% url 'cutless:crear_material' %}" class="btn btn-lg btn-primary" data-action="primary">
          Crear Primer Material
       </a>
     </div>
@@ -151,7 +151,7 @@
             <td>{{ material.get_area|floatformat:2 }} cm²</td>
             <td>
               {% if user.is_superuser or user.perfil.rol == "admin" %}
-              <a href="{% url 'cutless:editar_material' material.pk %}" class="btn btn-sm btn-primary"> Editar</a>
+              <a href="{% url 'cutless:editar_material' material.pk %}" class="btn btn-sm btn-outline-secondary" data-action="secondary"> Editar</a>
               {% endif %}
               <span class="badge bg-info">Sistema</span>
             </td>

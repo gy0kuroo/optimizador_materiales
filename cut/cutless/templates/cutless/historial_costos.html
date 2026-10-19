@@ -14,13 +14,13 @@
       <p class="page-lead">Revisa los costos de material y mano de obra de tus cortes, con el detalle de cada registro.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
               onclick="iniciarTutorialSeccion('costos')"
-              title="Ayuda">
+              title="Ayuda" data-action="secondary">
         Cómo consultar los costos
       </button>
       {% if optimizaciones_con_costo %}
-      <a href="{% url 'cutless:historial_costos' %}?export=excel&amp;fecha_desde={{ fecha_desde|urlencode }}&amp;fecha_hasta={{ fecha_hasta|urlencode }}" class="btn btn-outline-secondary">Exportar Excel</a>
+      <a href="{% url 'cutless:historial_costos' %}?export=excel&amp;fecha_desde={{ fecha_desde|urlencode }}&amp;fecha_hasta={{ fecha_hasta|urlencode }}" class="btn btn-outline-secondary" data-action="secondary">Exportar Excel</a>
       {% endif %}
     </div>
   </header>
@@ -46,13 +46,13 @@
                  value="{{ fecha_hasta }}">
         </div>
         <div class="col-md-2">
-          <button type="submit" class="btn btn-primary w-100">
+          <button type="submit" class="btn w-100 btn-primary" data-action="primary">
             Aplicar fechas
           </button>
         </div>
         {% if fecha_desde or fecha_hasta %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:historial_costos' %}" class="btn btn-outline-secondary w-100">
+          <a href="{% url 'cutless:historial_costos' %}" class="btn w-100 btn-outline-secondary" data-action="secondary">
             Quitar filtros
           </a>
         </div>
@@ -210,8 +210,8 @@
             </td>
             <td>
               <a href="{% url 'cutless:resultado' item.optimizacion.pk %}"
-                 class="btn btn-sm btn-outline-primary"
-                 title="Ver detalles">
+                 class="btn btn-sm btn-outline-secondary"
+                 title="Ver detalles" data-action="secondary">
                  Ver resultado
               </a>
             </td>

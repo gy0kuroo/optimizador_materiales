@@ -14,12 +14,12 @@
       <p class="page-lead">Optimizaciones y actividad asociadas a este cliente.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
               onclick="iniciarTutorialSeccion('historial_cliente')"
-              title="Ayuda">
+              title="Ayuda" data-action="secondary">
         Ayuda sobre clientes
       </button>
-      <a href="{% url 'cutless:lista_clientes' %}" class="btn btn-outline-secondary">
+      <a href="{% url 'cutless:lista_clientes' %}" class="btn btn-outline-secondary" data-action="secondary">
         Volver a clientes
       </a>
     </div>
@@ -54,7 +54,7 @@
         </div>
       </div>
       <div class="mt-3">
-        <a href="{% url 'cutless:editar_cliente' cliente.pk %}" class="btn btn-sm btn-outline-primary">Editar Cliente</a>
+        <a href="{% url 'cutless:editar_cliente' cliente.pk %}" class="btn btn-sm btn-outline-secondary" data-action="secondary">Editar Cliente</a>
       </div>
     </div>
   </div>
@@ -120,7 +120,7 @@
               {% endif %}
             </td>
             <td>
-              <a href="{% url 'cutless:resultado' opt.pk %}" class="btn btn-sm btn-outline-primary">Ver resultado</a>
+              <a href="{% url 'cutless:resultado' opt.pk %}" class="btn btn-sm btn-outline-secondary" data-action="secondary">Ver resultado</a>
             </td>
           </tr>
           {% endfor %}
@@ -159,7 +159,7 @@
             <td>{{ proyecto.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
             <td>{{ proyecto.get_total_optimizaciones }}</td>
             <td>
-              <a href="#" class="btn btn-sm btn-outline-primary">Ver resultado</a>
+              <a href="#" class="btn btn-sm btn-outline-secondary" data-action="secondary">Ver resultado</a>
             </td>
           </tr>
           {% endfor %}

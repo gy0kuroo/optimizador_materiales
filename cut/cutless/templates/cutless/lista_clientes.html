@@ -14,12 +14,12 @@
       <p class="page-lead">Organiza clientes y vincúlalos a proyectos y presupuestos.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion"
+      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
               onclick="iniciarTutorialSeccion('clientes')"
-              title="Ayuda sobre clientes">
+              title="Ayuda sobre clientes" data-action="secondary">
         Ayuda sobre clientes
       </button>
-      <a href="{% url 'cutless:crear_cliente' %}" class="btn btn-primary">
+      <a href="{% url 'cutless:crear_cliente' %}" class="btn btn-primary" data-action="primary">
         Agregar cliente
       </a>
     </div>
@@ -39,11 +39,11 @@
                  value="{{ busqueda }}">
         </div>
         <div class="col-md-2">
-          <button type="submit" class="btn btn-outline-primary w-100"> Buscar</button>
+          <button type="submit" class="btn w-100 btn-primary" data-action="primary"> Buscar</button>
         </div>
         {% if busqueda %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:lista_clientes' %}" class="btn btn-outline-secondary w-100">Quitar filtros</a>
+          <a href="{% url 'cutless:lista_clientes' %}" class="btn w-100 btn-outline-secondary" data-action="secondary">Quitar filtros</a>
         </div>
         {% endif %}
       </div>
@@ -86,13 +86,13 @@
           <td>
             <span class="badge bg-primary">{{ cliente.get_total_optimizaciones }}</span>
           </td>
-          <td>
-            <a href="{% url 'cutless:historial_cliente' cliente.pk %}" class="btn btn-sm btn-outline-primary" title="Ver historial">
+          <td><div class="action-group">
+            <a href="{% url 'cutless:historial_cliente' cliente.pk %}" class="btn btn-sm btn-outline-secondary" title="Ver historial" data-action="secondary">
               Historial
             </a>
-            <a href="{% url 'cutless:editar_cliente' cliente.pk %}" class="btn btn-outline-secondary"> Editar</a>
-            <a href="{% url 'cutless:eliminar_cliente' cliente.pk %}" class="btn btn-outline-danger"> Eliminar</a>
-          </td>
+            <a href="{% url 'cutless:editar_cliente' cliente.pk %}" class="btn btn-outline-secondary" data-action="secondary"> Editar</a>
+            <a href="{% url 'cutless:eliminar_cliente' cliente.pk %}" class="btn btn-outline-danger" data-action="delete"> Eliminar</a>
+          </div></td>
         </tr>
         {% endfor %}
       </tbody>
@@ -118,7 +118,7 @@
       {% endif %}
     </p>
     {% if not busqueda %}
-    <a href="{% url 'cutless:crear_cliente' %}" class="btn btn-primary btn-lg">
+    <a href="{% url 'cutless:crear_cliente' %}" class="btn btn-lg btn-primary" data-action="primary">
        Crear Primer Cliente
     </a>
     {% endif %}

@@ -12,12 +12,12 @@
       <p class="page-lead">Estimación orientativa según piezas y tableros de la optimización #{{ optimizacion.id }}.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-outline-info btn-ayuda-seccion" 
-              onclick="iniciarTutorialSeccion('calcular_tiempo')" 
-              title="Ayuda">
+      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
+              onclick="iniciarTutorialSeccion('calcular_tiempo')"
+              title="Ayuda" data-action="secondary">
         Ayuda
       </button>
-      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary">Ver historial</a>
+      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary" data-action="secondary">Ver historial</a>
     </div>
   </header>
 
@@ -99,7 +99,7 @@
                   <td class="text-end">{{ porcentaje_corte }}%</td>
                 </tr>
                 <tr>
-                  <td>Tiempo de Setup (Preparación)</td>
+                  <td>Tiempo de Setup <span class="text-annotation">(Preparación)</span></td>
                   <td class="text-end">{{ tiempo_setup_total|floatformat:2 }} minutos</td>
                   <td class="text-end">{{ porcentaje_setup }}%</td>
                 </tr>
@@ -161,18 +161,18 @@
             <p class="mb-0">
               Estos tiempos son estimaciones basadas en parámetros estándar. El tiempo real puede variar según:
               <ul class="mb-0">
-                <li>El tipo de material (madera, MDF, aglomerado, etc.)</li>
+                <li>El tipo de material <span class="text-annotation">(madera, MDF, aglomerado, etc.)</span></li>
                 <li>El tipo de herramienta de corte utilizada</li>
                 <li>La experiencia del operador</li>
                 <li>La complejidad de los cortes</li>
-                <li>Condiciones del taller (temperatura, humedad, etc.)</li>
+                <li>Condiciones del taller <span class="text-annotation">(temperatura, humedad, etc.)</span></li>
               </ul>
             </p>
           </div>
 
           <div class="form-action-bar mt-4">
-            <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary">Ver historial</a>
-            <a href="{% url 'cutless:descargar_pdf' optimizacion.id %}" class="btn btn-primary" data-carga-texto="Descargando PDF...">📄 Descargar PDF</a>
+            <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary" data-action="secondary">Ver historial</a>
+            <a href="{% url 'cutless:descargar_pdf' optimizacion.id %}" class="btn btn-outline-secondary" data-carga-texto="Descargando PDF..." data-action="secondary">📄 Descargar PDF</a>
           </div>
         </div>
       </div>

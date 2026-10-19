@@ -54,9 +54,9 @@
           <img src="{% static 'cutless/icons/tablero-outline.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
           1. Configura el tablero
         </h4>
-        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion ms-auto"
+        <button type="button" class="btn btn-sm btn-ayuda-seccion ms-auto btn-outline-secondary"
                 onclick="iniciarTutorialSeccion('tablero')"
-                title="Ayuda sobre dimensiones del tablero">
+                title="Ayuda sobre dimensiones del tablero" data-action="secondary">
           <img src="{% static 'cutless/icons/ayuda.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
           Cómo medir el tablero
         </button>
@@ -162,9 +162,9 @@
           <img src="{% static 'cutless/icons/pieza.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
           2. Añade las piezas
         </h4>
-        <button type="button" class="btn btn-sm btn-light btn-ayuda-seccion ms-auto"
+        <button type="button" class="btn btn-sm btn-ayuda-seccion ms-auto btn-outline-secondary"
                 onclick="iniciarTutorialSeccion('piezas')"
-                title="Cómo añadir piezas">
+                title="Cómo añadir piezas" data-action="secondary">
           <img src="{% static 'cutless/icons/ayuda.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
           Cómo añadir piezas
         </button>
@@ -181,7 +181,7 @@
                 <img src="{% static 'cutless/icons/pieza-outline.png' %}" alt="" class="cl-icon cl-icon--mini" onerror="this.style.display='none'">
                 Tipo de pieza <span class="pieza-numero">{{ forloop.counter }}</span>
               </h5>
-              <button type="button" class="btn btn-danger btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %}">
+              <button type="button" class="btn btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %} btn-outline-danger" data-action="delete">
                 <img src="{% static 'cutless/icons/eliminar.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
                 Eliminar
               </button>
@@ -214,7 +214,7 @@
           {% endfor %}
         </div>
 
-        <button type="button" id="add-pieza" class="btn btn-outline-success">
+        <button type="button" id="add-pieza" class="btn btn-outline-secondary" data-action="secondary">
           <img src="{% static 'cutless/icons/agregar.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
           Añadir otro tipo de pieza
         </button>
@@ -227,9 +227,9 @@
       <div class="card-header card-header-step card-header-step-info text-white d-flex justify-content-between align-items-center">
         <h4 class="mb-0 card-header-title">
           <img src="{% static 'cutless/icons/costos.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
-          Costos y datos del proyecto (opcional)
+          Costos y datos del proyecto <span class="text-annotation">(opcional)</span>
         </h4>
-        <button id="btnCostosToggle" class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse" data-bs-target="#costosCollapse" aria-expanded="false" aria-controls="costosCollapse">
+        <button id="btnCostosToggle" class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#costosCollapse" aria-expanded="false" aria-controls="costosCollapse" data-action="secondary">
           <span id="costosToggleIcon">+</span> Añadir costos y datos
         </button>
       </div>
@@ -245,9 +245,9 @@
                 <div class="text-danger">{{ tablero_form.material.errors }}</div>
               {% endif %}
               <div class="mt-2">
-                <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-sm btn-outline-primary" target="_blank">
+                <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-sm btn-outline-secondary" target="_blank" data-action="secondary">
                   <img src="{% static 'cutless/icons/material.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
-                  Gestionar materiales (otra pestaña)
+                  Gestionar materiales <span class="text-annotation">(otra pestaña)</span>
                 </a>
               </div>
             </div>
@@ -287,7 +287,7 @@
                 <div class="text-danger">{{ tablero_form.cliente.errors }}</div>
               {% endif %}
               <small class="form-text text-muted">
-                <a href="{% url 'cutless:crear_cliente' %}" target="_blank">Crear cliente (otra pestaña)</a>
+                <a href="{% url 'cutless:crear_cliente' %}" target="_blank">Crear cliente <span class="text-annotation">(otra pestaña)</span></a>
               </small>
             </div>
             <div class="col-md-6 mb-3">
@@ -298,7 +298,7 @@
                 <div class="text-danger">{{ tablero_form.proyecto.errors }}</div>
               {% endif %}
               <small class="form-text text-muted">
-                <a href="{% url 'cutless:crear_proyecto' %}" target="_blank">Crear proyecto (otra pestaña)</a>
+                <a href="{% url 'cutless:crear_proyecto' %}" target="_blank">Crear proyecto <span class="text-annotation">(otra pestaña)</span></a>
               </small>
             </div>
           </div>
@@ -315,7 +315,7 @@
     </div>    {% endif %}
     <!-- Botón de envío -->
     <div class="form-action-bar fade-in">
-      <button type="submit" class="btn btn-primary btn-lg btn-cta-primary">
+      <button type="submit" class="btn btn-lg btn-cta-primary btn-primary" data-action="primary">
         <img src="{% static 'cutless/icons/calcular.svg' %}" alt="" class="cl-icon cl-icon--cta" onerror="this.style.display='none'">
         Generar plan de corte
       </button>
