@@ -1,5 +1,43 @@
 /* Estilos específicos para la página Resultado */
 
+.result-page .board-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, .85fr); gap: 24px; }
+.result-page .board-open { display: block; width: 100%; padding: 20px; background: var(--cl-bg-surface); border: 1px solid var(--cl-border); border-radius: 10px; color: var(--cl-text-primary); }
+.result-page .board-open > span { display: block; margin-top: 16px; font: 600 1.125rem/1.5 var(--cl-font-body); text-transform: none; letter-spacing: normal; }
+.result-page .board-open:hover { border-color: var(--cl-blue); }
+.result-page .board-open > .board-drawing { width: 100%; height: 420px; display: block; object-fit: contain; }
+.result-page .board-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0 0 24px; }
+.result-page .board-metrics dt { font-size: 1rem; font-weight: 500; color: var(--cl-text-secondary); }
+.result-page .board-metrics dd { margin: 4px 0 0; font-size: 1.25rem; font-weight: 600; color: var(--cl-text-primary); }
+.result-page .board-data h6 { font: 700 1.125rem/1.5 var(--cl-font-body); text-transform: none; letter-spacing: normal; }
+.result-page .board-pieces { font-size: 1.125rem; }
+.result-page .board-pieces td span:not(.board-color) { display: block; color: var(--cl-text-secondary); }
+.result-page .board-color { display: inline-block; width: 18px; height: 18px; border: 1px solid #263238; border-radius: 3px; margin-right: 8px; }
+.result-page .board-note { font-size: 1rem; line-height: 1.6; color: var(--cl-text-secondary); margin: 12px 0; }
+.result-page .board-viewer .modal-content { color: var(--cl-text-primary); background: var(--cl-bg-card); }
+.result-page .board-viewer .modal-header { display: flex; flex-wrap: wrap; gap: 12px; padding: 16px 24px; background: var(--cl-bg-surface); border-color: var(--cl-border); }
+.result-page .board-viewer .modal-title { color: var(--cl-text-primary); font: 700 1.4rem/1.5 var(--cl-font-body); }
+.result-page .board-toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; padding: 12px 24px; border-bottom: 1px solid var(--cl-border); }
+.result-page .board-navigation, .result-page .board-zoom { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.result-page .board-zoom output { min-width: 64px; text-align: center; font-weight: 600; }
+.result-page .board-viewer-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 400px); gap: 24px; padding: 16px 24px; min-height: 0; overflow: hidden; }
+.result-page .board-canvas-section { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.result-page #board-viewport { flex: 1; min-height: 0; padding: 16px; overflow: auto; background: #FFFFFF; border: 1px solid var(--cl-border); border-radius: 10px; }
+.result-page #board-canvas { margin: 0 auto; }
+.result-page #board-canvas > .board-drawing { display: block; width: 100%; height: 100%; max-width: none; object-fit: contain; }
+.result-page #board-viewer-data { overflow: auto; min-height: 0; }
+.result-page .board-open:focus-visible, .result-page #board-viewport:focus-visible { outline: 3px solid var(--cl-blue); outline-offset: 3px; }
+@media (max-width: 900px) {
+  .result-page .board-layout { grid-template-columns: 1fr; }
+  .result-page .board-viewer-body { display: block; overflow: auto; padding: 12px; }
+  .result-page #board-viewport { flex: none; height: 55dvh; }
+  .result-page .board-toolbar, .result-page .board-viewer .modal-header { padding: 12px; }
+  .result-page #board-viewer-data { overflow: visible; margin-top: 20px; }
+}
+@media (max-width: 480px) {
+  .result-page .board-open > .board-drawing { height: 320px; }
+  .result-page .board-metrics { grid-template-columns: 1fr; gap: 12px; }
+}
+
 .progress-utilization {
     display: flex;
     align-items: center;

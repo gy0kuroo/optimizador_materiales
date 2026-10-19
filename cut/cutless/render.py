@@ -165,6 +165,28 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
         posiciones = tablero['posiciones']
         info_tablero = info_tableros[i-1]
 
+        # La vista web guarda la misma distribución que el PNG, sin recalcularla al leer.
+        cantidades_web = {}
+        piezas_web = []
+        for indice, posicion in enumerate(posiciones):
+            x, y, w, h, rotada, _, _, nombre = _unpack_posicion_grafico(posicion, indice)
+            clave = _tipo_pieza_visual_key(posicion, indice)
+            cantidades_web[clave] = cantidades_web.get(clave, 0) + 1
+            piezas_web.append({'x': x, 'y': y, 'ancho': w, 'alto': h,
+                               'centro_x': x + w / 2, 'centro_y': y + h / 2,
+                               'numero': numero_por_tipo[clave], 'color': color_por_tipo[clave],
+                               'nombre': nombre, 'rotada': bool(rotada),
+                               'mostrar_numero': min(w, h) >= min(ancho_tablero, alto_tablero) * .04})
+        info_tablero['vista_web'] = {
+            'ancho': float(ancho_tablero), 'alto': float(alto_tablero),
+            'tamano_numero': min(ancho_tablero, alto_tablero) * .055,
+            'piezas': piezas_web,
+            'catalogo': [{'numero': numero_por_tipo[clave], 'nombre': clave[0],
+                          'ancho': clave[1], 'alto': clave[2], 'color': color_por_tipo[clave],
+                          'cantidad': cantidades_web[clave]}
+                         for clave in catalogo_ord if clave in cantidades_web],
+        }
+
         fig = plt.figure(figsize=(12.5, 9.8))
         gs = GridSpec(1, 2, figure=fig, width_ratios=[1, 0.44], wspace=0.10)
         ax = fig.add_subplot(gs[0, 0])

@@ -4,7 +4,7 @@
 {% block body_class %}review-page result-page{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/resultado.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/resultado.css' %}?v=2">
 <link rel="stylesheet" href="{% static 'cutless/css/history-result-refinement.css' %}?v=1">
 {% endblock %}
 
@@ -210,31 +210,55 @@
   
   <!-- Mostrar TODOS los tableros -->
   <h4 class="mt-4 fade-in">Distribución de las piezas</h4>
-  <p class="result-explanation">Pulsa una imagen para ampliarla. Puedes descargar cada tablero por separado.</p>
+  <p class="result-explanation">Lee las medidas y cantidades junto al dibujo. Abre el visor para ampliar el tablero o recorrer los demás.</p>
   <div class="row fade-in">
     {% for item in tableros_con_imagenes %}
-    <div class="col-md-6 mb-4">
-      <div class="card">
-        <div class="card-header text-center card-header-step-primary d-flex justify-content-between align-items-center">
+    <div class="col-12 mb-4">
+      <article class="card board-card" data-board="{{ item.numero }}">
+        <div class="card-header d-flex justify-content-between align-items-center">
           <h5 class="mb-0">Tablero {{ item.numero }} de {{ num_tableros }}</h5>
-          <a href="{% url 'cutless:descargar_png_tablero' optimizacion.id item.numero %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" data-carga-texto="Generando imagen..." 
-             class="btn btn-sm btn-light" 
-             title="Descargar imagen PNG">
-            Descargar PNG
-          </a>
+          <a href="{% url 'cutless:descargar_png_tablero' optimizacion.id item.numero %}" class="btn btn-outline-secondary" data-carga-texto="Generando imagen...">Descargar PNG</a>
         </div>
-        <div class="card-body text-center">
-          <img src="data:image/png;base64,{{ item.imagen }}" 
-               alt="Tablero {{ item.numero }}" 
-               class="img-fluid" 
-               style="cursor: pointer;"
-               onclick="abrirModalTablero({{ item.numero }}, {{ num_tableros }}, '{{ item.imagen }}', '{{ item.info.porcentaje_uso|unlocalize }}', '{{ item.info.desperdicio|unlocalize }}', '{{ simbolo_area|default:"cm²" }}')">
+        <div class="card-body board-layout">
+          <button type="button" class="board-open" data-open-board="{{ item.numero }}" aria-label="Abrir visor del tablero {{ item.numero }}">
+            {% if item.vista_web %}
+            <svg class="board-drawing" viewBox="0 0 {{ item.vista_web.ancho|unlocalize }} {{ item.vista_web.alto|unlocalize }}" role="img" aria-label="Distribución de piezas en el tablero {{ item.numero }}" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100%" height="100%" fill="#F4F3EE" stroke="#4E2D01" stroke-width="2" vector-effect="non-scaling-stroke"/>
+              {% for pieza in item.vista_web.piezas %}
+              <rect x="{{ pieza.x|unlocalize }}" y="{{ pieza.y|unlocalize }}" width="{{ pieza.ancho|unlocalize }}" height="{{ pieza.alto|unlocalize }}" fill="{{ pieza.color }}" stroke="#263238" stroke-width="1.5" vector-effect="non-scaling-stroke"><title>{{ pieza.nombre }}{% if pieza.rotada %}, girada 90 grados{% endif %}</title></rect>
+              {% if pieza.mostrar_numero %}<text x="{{ pieza.centro_x|unlocalize }}" y="{{ pieza.centro_y|unlocalize }}" font-size="{{ item.vista_web.tamano_numero|unlocalize }}" text-anchor="middle" dominant-baseline="central" fill="#1C1008" font-weight="700">{{ pieza.numero }}</text>{% endif %}
+              {% endfor %}
+            </svg>
+            {% else %}<img class="board-drawing board-legacy" src="data:image/png;base64,{{ item.imagen }}" alt="Distribución guardada del tablero {{ item.numero }}">{% endif %}
+            <span>Abrir visor del tablero</span>
+          </button>
+          <section class="board-data" aria-label="Información del tablero {{ item.numero }}">
+            <dl class="board-metrics">
+              <div><dt>Medidas del tablero</dt><dd>{{ ancho_tablero_mostrar }} × {{ alto_tablero_mostrar }} {{ unidad_medida }}</dd></div>
+              <div><dt>Aprovechamiento</dt><dd>{{ item.info.porcentaje_uso|floatformat:1 }}%</dd></div>
+              <div><dt>Desperdicio</dt><dd>{{ item.info.desperdicio|floatformat:1 }} {{ simbolo_area }}</dd></div>
+              <div><dt>Piezas en este tablero</dt><dd>{{ item.info.num_piezas }}</dd></div>
+            </dl>
+            {% if item.catalogo %}
+            <h6>Piezas de este tablero</h6>
+            <div class="table-responsive"><table class="table board-pieces"><thead><tr><th scope="col">N.º</th><th scope="col">Pieza y medidas</th><th scope="col">Cantidad</th></tr></thead><tbody>
+              {% for pieza in item.catalogo %}<tr><td><span class="board-color" style="background-color:{{ pieza.color }}" aria-hidden="true"></span>{{ pieza.numero }}</td><td><strong>{{ pieza.nombre }}</strong><span>{{ pieza.ancho }} × {{ pieza.alto }} {{ unidad_medida }}</span></td><td>{{ pieza.cantidad }}</td></tr>{% endfor %}
+            </tbody></table></div>
+            <p class="board-note">Los números y colores relacionan cada pieza con el dibujo. Las medidas corresponden a la orientación solicitada.</p>
+            {% else %}
+            <h6>Piezas solicitadas para todo el corte</h6>
+            <div class="table-responsive"><table class="table board-pieces"><thead><tr><th>Pieza y medidas</th><th>Cantidad</th></tr></thead><tbody>
+              {% for pieza in piezas_con_nombre %}<tr><td><strong>{{ pieza.nombre }}</strong><span>{{ pieza.ancho }} × {{ pieza.alto }} {{ unidad_medida }}</span></td><td>{{ pieza.cantidad }}</td></tr>{% endfor %}
+            </tbody></table></div>
+            <p class="board-note">Resultado anterior: se conserva su dibujo original. Esta lista corresponde al pedido completo, no a la distribución por tablero.</p>
+            {% endif %}
+          </section>
         </div>
-      </div>
+      </article>
     </div>
     {% endfor %}
   </div>
-  
+
   <hr>
   
   <h4 class="mt-4">Guardar o imprimir el resultado</h4>
@@ -257,180 +281,19 @@
     </a>
   </div>
 
-<!-- Modal para tableros en pantalla completa -->
-<div class="modal fade" id="modalTablero" tabindex="-1" aria-labelledby="modalTableroLabel" aria-hidden="true">
-  <div class="modal-dialog modal-fullscreen">
-    <div class="modal-content">
-      <div class="modal-header modal-header-app">
-        <h5 class="modal-title" id="modalTableroLabel">Tablero 1 de 1 - FFD</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center modal-grafico-body">
-        <div class="row h-100">
-          <div class="col-10">
-            <div id="modalTableroContenido" class="d-flex align-items-center justify-content-center modal-imagen-contenido">
-              <!-- La imagen se cargará aquí -->
-            </div>
-          </div>
-          <div class="col-2 d-flex flex-column justify-content-center align-items-center zoom-controls">
-            <label for="zoomSliderTablero" class="text-white mb-2 zoom-label">Zoom</label>
-            <input type="range" 
-                   class="form-range zoom-slider" 
-                   id="zoomSliderTablero" 
-                   min="30" 
-                   max="200" 
-                   value="100" 
-                   step="5">
-            <span id="zoomValueTablero" class="text-white mt-2 zoom-value">100%</span>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer modal-footer-app">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary" onclick="resetearZoomTablero()">🔍 Resetear Zoom</button>
-      </div>
+<!-- Visor de tableros: datos legibles independientes del dibujo. -->
+<div class="modal board-viewer" id="modalTablero" tabindex="-1" aria-labelledby="modalTableroLabel" aria-hidden="true" data-result-id="{{ optimizacion.pk }}">
+  <div class="modal-dialog modal-fullscreen"><div class="modal-content">
+    <div class="modal-header"><h2 class="modal-title" id="modalTableroLabel">Visor del tablero</h2><button type="button" class="btn btn-outline-secondary" data-close-viewer>Volver al resultado</button></div>
+    <div class="board-toolbar" aria-label="Controles del visor">
+      <div class="board-navigation"><button type="button" class="btn btn-outline-secondary" id="board-previous">Tablero anterior</button><span id="board-position" role="status"></span><button type="button" class="btn btn-outline-secondary" id="board-next">Tablero siguiente</button></div>
+      <div class="board-zoom"><button type="button" class="btn btn-outline-secondary" id="board-zoom-out" aria-label="Reducir tablero">−</button><output id="board-zoom-value" aria-live="polite">100%</output><button type="button" class="btn btn-outline-secondary" id="board-zoom-in" aria-label="Ampliar tablero">+</button><button type="button" class="btn btn-outline-secondary" id="board-fit">Ajustar tablero</button></div>
     </div>
-  </div>
+    <div class="modal-body board-viewer-body">
+      <section class="board-canvas-section"><p class="board-note" id="board-navigation-help">Amplía con + y recorre el dibujo con las barras de desplazamiento o deslizando con el dedo.</p><div id="board-viewport" tabindex="0" aria-label="Dibujo ampliado del tablero" aria-describedby="board-navigation-help"><div id="board-canvas"></div></div></section>
+      <aside id="board-viewer-data" aria-label="Medidas y piezas del tablero"></aside>
+    </div>
+  </div></div>
 </div>
-
-<script>
-// Variables globales para el zoom del modal de tableros
-let modalTableroZoomLevel = 1;
-let modalTableroIsDragging = false;
-let modalTableroStartX, modalTableroStartY;
-let modalTableroTranslateX = 0, modalTableroTranslateY = 0;
-
-function abrirModalTablero(numero, total, imagenBase64, porcentajeUso, desperdicio, simboloArea) {
-    const modal = new bootstrap.Modal(document.getElementById('modalTablero'));
-    const titulo = document.getElementById('modalTableroLabel');
-    const contenido = document.getElementById('modalTableroContenido');
-    
-    titulo.textContent = `Tablero ${numero} de ${total} - FFD`;
-    contenido.innerHTML = '';
-    
-    // Crear contenedor para la imagen
-    const contenedorImagen = document.createElement('div');
-    contenedorImagen.style.position = 'relative';
-    contenedorImagen.style.display = 'inline-block';
-    
-    // Crear etiqueta con información
-    const label = document.createElement('div');
-    label.className = 'text-white mb-3';
-    label.style.fontSize = '1.2rem';
-    label.innerHTML = `<strong>Uso: ${parseFloat(porcentajeUso).toFixed(2)}% | Desperdicio: ${parseFloat(desperdicio).toFixed(1)} ${simboloArea}</strong>`;
-    
-    // Crear imagen
-    const img = document.createElement('img');
-    img.src = `data:image/png;base64,${imagenBase64}`;
-    img.alt = `Tablero ${numero}`;
-    img.style.maxHeight = '80vh';
-    img.style.maxWidth = '90vw';
-    img.style.objectFit = 'contain';
-    img.style.border = '2px solid #444';
-    img.style.borderRadius = '8px';
-    img.style.cursor = 'grab';
-    
-    contenedorImagen.appendChild(label);
-    contenedorImagen.appendChild(img);
-    contenido.appendChild(contenedorImagen);
-    
-    // Resetear zoom al abrir
-    modalTableroZoomLevel = 1;
-    modalTableroTranslateX = 0;
-    modalTableroTranslateY = 0;
-    contenido.style.transform = 'scale(1) translate(0px, 0px)';
-    contenido.style.transformOrigin = 'center center';
-    
-    modal.show();
-}
-
-function resetearZoomTablero() {
-    const contenido = document.getElementById('modalTableroContenido');
-    const zoomSlider = document.getElementById('zoomSliderTablero');
-    if (contenido && zoomSlider) {
-        modalTableroZoomLevel = 1;
-        modalTableroTranslateX = 0;
-        modalTableroTranslateY = 0;
-        zoomSlider.value = 100;
-        contenido.style.transform = 'scale(1) translate(0px, 0px)';
-        document.getElementById('zoomValueTablero').textContent = '100%';
-    }
-}
-
-// Configurar slider de zoom cuando el modal se muestra
-document.getElementById('modalTablero').addEventListener('shown.bs.modal', function() {
-    const contenido = document.getElementById('modalTableroContenido');
-    const zoomSlider = document.getElementById('zoomSliderTablero');
-    
-    // Resetear valores
-    modalTableroZoomLevel = 1;
-    modalTableroTranslateX = 0;
-    modalTableroTranslateY = 0;
-    zoomSlider.value = 100;
-    contenido.style.transform = 'scale(1) translate(0px, 0px)';
-    contenido.style.transformOrigin = 'center center';
-    contenido.style.cursor = 'grab';
-    
-    zoomSlider.oninput = function() {
-        const zoomPercent = parseInt(this.value);
-        modalTableroZoomLevel = zoomPercent / 100;
-        contenido.style.transform = `scale(${modalTableroZoomLevel}) translate(${modalTableroTranslateX}px, ${modalTableroTranslateY}px)`;
-        document.getElementById('zoomValueTablero').textContent = zoomPercent + '%';
-        
-        // Cambiar cursor según el zoom
-        if (modalTableroZoomLevel > 1) {
-            contenido.style.cursor = 'grab';
-        } else {
-            contenido.style.cursor = 'default';
-        }
-    };
-});
-
-// Eventos de arrastre solo en el contenido de imágenes
-document.addEventListener('mousedown', function(e) {
-    const contenido = document.getElementById('modalTableroContenido');
-    const modal = document.getElementById('modalTablero');
-    
-    // Solo si el modal está visible
-    if (!modal.classList.contains('show')) return;
-    
-    // No activar arrastre si se hace click en el slider o sus controles
-    if (e.target.closest('.zoom-controls')) {
-        return;
-    }
-    
-    if (contenido && contenido.contains(e.target) && modalTableroZoomLevel > 1) {
-        modalTableroIsDragging = true;
-        modalTableroStartX = e.clientX;
-        modalTableroStartY = e.clientY;
-        contenido.style.cursor = 'grabbing';
-        e.preventDefault();
-    }
-});
-
-document.addEventListener('mousemove', function(e) {
-    const contenido = document.getElementById('modalTableroContenido');
-    if (modalTableroIsDragging && contenido && modalTableroZoomLevel > 1) {
-        const dx = (e.clientX - modalTableroStartX) / modalTableroZoomLevel;
-        const dy = (e.clientY - modalTableroStartY) / modalTableroZoomLevel;
-        modalTableroTranslateX += dx;
-        modalTableroTranslateY += dy;
-        contenido.style.transform = `scale(${modalTableroZoomLevel}) translate(${modalTableroTranslateX}px, ${modalTableroTranslateY}px)`;
-        modalTableroStartX = e.clientX;
-        modalTableroStartY = e.clientY;
-    }
-});
-
-document.addEventListener('mouseup', function() {
-    const contenido = document.getElementById('modalTableroContenido');
-    if (modalTableroIsDragging && contenido) {
-        modalTableroIsDragging = false;
-        if (modalTableroZoomLevel > 1) {
-            contenido.style.cursor = 'grab';
-        } else {
-            contenido.style.cursor = 'default';
-        }
-    }
-});
-</script>
 {% endblock %}
+{% block extra_js %}<script src="{% static 'cutless/js/board-viewer.js' %}?v=1"></script>{% endblock %}

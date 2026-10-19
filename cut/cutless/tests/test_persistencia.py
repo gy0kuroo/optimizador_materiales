@@ -54,6 +54,17 @@ class PersistenciaResultadoTests(TransactionTestCase):
         self.comprobar_anterior()
         self.assertEqual(self.opt.piezas, '50,50,1')
 
+    def test_vista_web_se_guarda_y_se_recupera_sin_recalcular(self):
+        from cutless.services.optimization import obtener_resultado_optimizacion
+        vista = {'ancho': 100, 'alto': 100, 'piezas': [], 'catalogo': []}
+        self.info['info_tableros'][0]['vista_web'] = vista
+        persistir_resultado_optimizacion(self.opt, self.imagenes, self.info, 25)
+        self.opt.refresh_from_db()
+        self.assertEqual(self.opt.resultado_extra['vistas_web']['1'], vista)
+        with patch('cutless.services.optimization._regenerar_grafico', side_effect=AssertionError('No recalcular')):
+            _, _, info = obtener_resultado_optimizacion(self.opt)
+        self.assertEqual(info['info_tableros'][0]['vista_web'], vista)
+
     def test_fallo_guardado_pdf_conserva_anterior(self):
         storage = self.opt.pdf.storage
         original = storage.save

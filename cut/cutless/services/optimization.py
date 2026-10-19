@@ -184,6 +184,7 @@ def _cargar_imagenes_persistidas(optimizacion):
 
 def _info_desperdicio_desde_modelo(optimizacion):
     info_tableros = []
+    vistas_web = (optimizacion.resultado_extra or {}).get('vistas_web', {})
     for tablero in optimizacion.tableros.order_by('numero'):
         info_tableros.append({
             'numero': tablero.numero,
@@ -191,6 +192,7 @@ def _info_desperdicio_desde_modelo(optimizacion):
             'desperdicio': tablero.desperdicio,
             'porcentaje_uso': tablero.porcentaje_uso,
             'num_piezas': tablero.num_piezas,
+            'vista_web': vistas_web.get(str(tablero.numero)),
         })
 
     extra = optimizacion.resultado_extra or {}
@@ -264,6 +266,10 @@ def persistir_resultado_optimizacion(optimizacion, imagenes_base64, info_desperd
             optimizacion.resultado_generado_en = timezone.now()
             optimizacion.resultado_extra = {
                 clave: info[clave] for clave in ('piezas_no_colocadas', 'num_piezas_solicitadas', 'num_piezas_colocadas')
+            }
+            optimizacion.resultado_extra['vistas_web'] = {
+                str(tablero['numero']): tablero['vista_web']
+                for tablero in info['info_tableros'] if tablero.get('vista_web')
             }
             _crear_pdf(optimizacion, imagenes_base64, info, nuevos, numero_lista)
             optimizacion.tableros.all().delete()
@@ -359,10 +365,19 @@ def preparar_contexto_resultado(optimizacion, imagenes_base64, info_desperdicio,
 
     tableros_con_imagenes = []
     for imagen, info in zip(imagenes_base64, info_tableros_convertida):
+        vista_web = info.get('vista_web')
+        catalogo = []
+        if vista_web:
+            catalogo = [{**pieza,
+                         'ancho': convertir_desde_cm(pieza['ancho'], unidad),
+                         'alto': convertir_desde_cm(pieza['alto'], unidad)}
+                        for pieza in vista_web['catalogo']]
         tableros_con_imagenes.append({
             'numero': info['numero'],
             'imagen': imagen,
             'info': info,
+            'vista_web': vista_web,
+            'catalogo': catalogo,
         })
 
     num_tableros = len(imagenes_base64)
@@ -382,6 +397,8 @@ def preparar_contexto_resultado(optimizacion, imagenes_base64, info_desperdicio,
         'info_desperdicio': info_desperdicio_mostrar,
         'tableros_con_imagenes': tableros_con_imagenes,
         'unidad_medida': unidad,
+        'ancho_tablero_mostrar': convertir_desde_cm(optimizacion.ancho_tablero, unidad),
+        'alto_tablero_mostrar': convertir_desde_cm(optimizacion.alto_tablero, unidad),
         'simbolo_area': simbolo_area,
         'costo_total': optimizacion.get_costo_total(),
         'costo_material': costo_material,
