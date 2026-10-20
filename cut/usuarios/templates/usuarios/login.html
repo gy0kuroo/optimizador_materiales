@@ -5,7 +5,7 @@
 {% block body_class %}login-page{% endblock %}
 {% block navigation %}{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'usuarios/css/login-redesign.css' %}">
+<link rel="stylesheet" href="{% static 'usuarios/css/login-redesign.css' %}?v=buttons-1">
 {% endblock %}
 {% block show_auth_buttons %}{% endblock %}
 
@@ -42,7 +42,7 @@
         {% if form.password.errors %}<div class="login-field-errors" role="alert">{{ form.password.errors }}</div>{% endif %}
       </div>
       <a class="login-recovery" href="{% url 'usuarios:recuperar_password' %}">¿Olvidaste tu contraseña?</a>
-      <button type="submit" class="login-submit">Iniciar sesión</button>
+      <button type="submit" class="btn login-submit btn-primary" data-action="primary" data-icon="chevron-right">Iniciar sesión</button>
     </form>
     <p class="login-register">¿Primera vez aquí? <a href="{% url 'usuarios:registro' %}">Crear una cuenta</a></p>
   </section>

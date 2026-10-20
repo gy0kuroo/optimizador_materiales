@@ -4,7 +4,7 @@
 {% block body_class %}templates-page{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/templates-refinement.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/templates-refinement.css' %}?v=buttons-1">
 {% endblock %}
 
 {% block content %}
@@ -14,12 +14,12 @@
       <p class="page-lead">Guarda conjuntos de piezas frecuentes para reutilizarlos rápido.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
+      <button type="button" class="btn btn-ayuda-seccion btn-text"
               onclick="iniciarTutorialSeccion('plantillas')"
-              title="Ayuda sobre plantillas" data-action="secondary">
+              title="Ayuda sobre plantillas" data-action="text" data-icon="help">
         Cómo usar las plantillas
       </button>
-      <a href="{% url 'cutless:crear_plantilla' %}" class="btn btn-primary" data-action="primary">
+      <a href="{% url 'cutless:crear_plantilla' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
         Crear plantilla
       </a>
     </div>
@@ -51,11 +51,11 @@
           </select>
         </div>
         <div class="col-md-2">
-          <button type="submit" class="btn w-100 btn-primary" data-action="primary">Buscar</button>
+          <button type="submit" class="btn w-100 btn-primary" data-action="primary" data-icon="search">Buscar</button>
         </div>
         {% if busqueda or categoria_filtro %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:lista_plantillas' %}" class="btn w-100 btn-outline-secondary" data-action="secondary">Quitar filtros</a>
+          <a href="{% url 'cutless:lista_plantillas' %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="close">Quitar filtros</a>
         </div>
         {% endif %}
       </div>
@@ -83,9 +83,9 @@
             <p class="mb-0"><strong>Rotación:</strong> {% if plantilla.permitir_rotacion %}Sí{% else %}No{% endif %}</p>
           </div>
           <div class="card-footer action-group">
-            <a href="{% url 'cutless:usar_plantilla' plantilla.pk %}" class="btn btn-primary" data-action="primary">Cargar plantilla</a>
-            <a href="{% url 'cutless:editar_plantilla' plantilla.pk %}" class="btn btn-outline-secondary" data-action="secondary">Editar</a>
-            <a href="{% url 'cutless:eliminar_plantilla' plantilla.pk %}" class="btn btn-outline-danger" data-action="delete">Eliminar</a>
+            <a href="{% url 'cutless:usar_plantilla' plantilla.pk %}" class="btn btn-primary" data-action="primary" data-icon="chevron-right">Cargar plantilla</a>
+            <a href="{% url 'cutless:editar_plantilla' plantilla.pk %}" class="btn btn-secondary" data-action="secondary" data-icon="edit">Editar</a>
+            <a href="{% url 'cutless:eliminar_plantilla' plantilla.pk %}" class="btn btn-danger" data-action="delete" data-icon="trash">Eliminar</a>
           </div>
         </div>
       </div>
@@ -98,7 +98,7 @@
       <p class="mb-4" style="max-width: 500px; margin: 0 auto;">
         Aún no has creado plantillas personalizadas. Crea tu primera plantilla para guardar configuraciones de optimización que uses frecuentemente.
       </p>
-      <a href="{% url 'cutless:crear_plantilla' %}" class="btn btn-lg btn-primary" data-action="primary">
+      <a href="{% url 'cutless:crear_plantilla' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
         Crear plantilla
       </a>
     </div>
@@ -128,8 +128,8 @@
             <p class="mb-0"><strong>Rotación:</strong> {% if plantilla.permitir_rotacion %}Sí{% else %}No{% endif %}</p>
           </div>
           <div class="card-footer action-group">
-            <a href="{% url 'cutless:usar_plantilla' plantilla.pk %}" class="btn btn-primary" data-action="primary">Cargar plantilla</a>
-            <a href="{% url 'cutless:editar_plantilla' plantilla.pk %}" class="btn btn-outline-secondary" data-action="secondary">Crear copia personal</a>
+            <a href="{% url 'cutless:usar_plantilla' plantilla.pk %}" class="btn btn-primary" data-action="primary" data-icon="chevron-right">Cargar plantilla</a>
+            <a href="{% url 'cutless:editar_plantilla' plantilla.pk %}" class="btn btn-secondary" data-action="secondary" data-icon="copy">Crear copia personal</a>
           </div>
         </div>
       </div>

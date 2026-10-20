@@ -4,7 +4,7 @@
 {% block body_class %}management-page{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=buttons-1">
 {% endblock %}
 
 {% block content %}
@@ -14,7 +14,7 @@
       <p class="page-lead">Confirma que deseas eliminar «{{ material.nombre }}». Esta acción no se puede deshacer.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary" data-action="secondary">Volver a materiales</a>
+      <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Volver a materiales</a>
     </div>
   </header>
 
@@ -36,11 +36,11 @@
         </div>
       </div>
 
-      <form method="post" data-tipo="material">
+      <form method="post" data-tipo="material" data-confirm-delete="true">
         {% csrf_token %}
         <div class="form-action-bar">
-          <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary" data-action="secondary">Cancelar</a>
-          <button type="submit" class="btn btn-danger" data-tipo="material" data-action="delete">Sí, eliminar</button>
+          <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
+          <button type="submit" class="btn btn-danger" data-tipo="material" data-action="delete" data-icon="trash">Sí, eliminar</button>
         </div>
       </form>
     </div>

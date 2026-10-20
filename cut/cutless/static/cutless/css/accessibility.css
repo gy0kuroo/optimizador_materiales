@@ -8,7 +8,7 @@
 }
 
 /* Áreas de clic más grandes - Solo para elementos interactivos */
-button, input[type="submit"], input[type="button"], 
+button, input[type="submit"], input[type="button"],
 input[type="checkbox"], input[type="radio"] {
     min-height: 44px;
     min-width: 44px;
@@ -21,24 +21,13 @@ label[for] {
 }
 
 /* Enlaces como botones */
-a.btn {
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
+a.btn { display: inline-flex; align-items: center; justify-content: center; }
 
 /* Mejorar visibilidad de enlaces de texto */
-a:not(.btn) {
-    text-decoration: none; /* Sin subrayado */
-    color: var(--accent-primary);
-    font-weight: var(--font-weight-medium);
-}
+a:not(.btn) { text-decoration: none; /* Sin subrayado */
+    color: var(--accent-primary); }
 
-a:not(.btn):hover {
-    color: #0b5ed7;
-    text-decoration: none; /* Sin subrayado al hover */
-}
+a:not(.btn):hover { text-decoration: none; /* Sin subrayado al hover */; }
 
 /* Mejorar contraste de texto */
 .text-muted {
@@ -163,14 +152,11 @@ select.form-select {
 
 /* Mejorar visibilidad en modo de alto contraste */
 @media (prefers-contrast: high) {
-    .btn {
-        border-width: 3px;
-    }
-    
+
     .form-control, .form-select {
         border-width: 3px;
     }
-    
+
     .card {
         border-width: 3px;
     }
@@ -194,12 +180,7 @@ select.form-select {
 }
 
 /* Mejorar visibilidad de ayuda */
-.btn-ayuda-seccion {
-    font-size: 1.25rem !important;
-    padding: 0.75rem 1rem !important;
-    min-width: 50px;
-    min-height: 50px;
-}
+.btn-ayuda-seccion { min-width: 50px; }
 
 /* Asegurar que los textos sean legibles */
 small, .small {
@@ -211,7 +192,7 @@ small, .small {
     .table {
         font-size: var(--font-size-base);
     }
-    
+
     .table thead th,
     .table tbody td {
         padding: 0.875rem 0.75rem;
@@ -263,7 +244,7 @@ small, .small {
 }
 
 [data-theme="dark"] #session-warning-modal .modal-header {
-    background-color: var(--warning-dark) !important;
+    background-color: var(--cl-bg-card) !important;
     border-bottom-color: var(--border-color);
     color: var(--text-primary);
 }
@@ -284,28 +265,6 @@ small, .small {
 [data-theme="dark"] #session-warning-modal .modal-footer {
     background-color: var(--bg-secondary);
     border-top-color: var(--border-color);
-}
-
-[data-theme="dark"] #session-warning-modal .btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: var(--text-on-primary);
-}
-
-[data-theme="dark"] #session-warning-modal .btn-primary:hover {
-    background-color: var(--primary-hover);
-    border-color: var(--primary-hover);
-}
-
-[data-theme="dark"] #session-warning-modal .btn-secondary {
-    background-color: var(--secondary-color);
-    border-color: var(--secondary-color);
-    color: var(--text-secondary);
-}
-
-[data-theme="dark"] #session-warning-modal .btn-secondary:hover {
-    background-color: var(--secondary-hover);
-    border-color: var(--secondary-hover);
 }
 
 /* Mejorar visibilidad de breadcrumbs si existen */

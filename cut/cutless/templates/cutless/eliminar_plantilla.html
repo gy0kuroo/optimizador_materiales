@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block body_class %}templates-page{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'cutless/css/templates-refinement.css' %}">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'cutless/css/templates-refinement.css' %}?v=buttons-1">{% endblock %}
 
 {% block content %}
   <header class="page-header fade-in">
@@ -11,7 +11,7 @@
       <p class="page-lead">Confirma que deseas eliminar «{{ plantilla.nombre }}». Esta acción no se puede deshacer.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary" data-action="secondary">Volver a plantillas</a>
+      <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Volver a plantillas</a>
     </div>
   </header>
 
@@ -20,11 +20,11 @@
       <h4 class="mb-0">Confirmar eliminación</h4>
     </div>
     <div class="card-body">
-      <form method="post" data-tipo="plantilla">
+      <form method="post" data-tipo="plantilla" data-confirm-delete="true">
         {% csrf_token %}
         <div class="form-action-bar">
-          <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-outline-secondary" data-action="secondary">Cancelar</a>
-          <button type="submit" class="btn btn-danger" data-tipo="plantilla" data-action="delete">Sí, eliminar plantilla</button>
+          <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
+          <button type="submit" class="btn btn-danger" data-tipo="plantilla" data-action="delete" data-icon="trash">Sí, eliminar plantilla</button>
         </div>
       </form>
     </div>

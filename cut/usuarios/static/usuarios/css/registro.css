@@ -85,20 +85,7 @@
     color: #212529;
 }
 
-.btn-auth {
-    min-width: 200px;
-    padding: 0.875rem 2rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
-    transition: all 0.3s ease;
-}
-
-.btn-auth:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.4);
-}
+.btn-auth { min-width: 200px; }
 
 .auth-link {
     color: var(--accent-success);
@@ -140,7 +127,7 @@
     .auth-card {
         margin: 1rem;
     }
-    
+
     .auth-card-header,
     .auth-card-body,
     .auth-card-footer {

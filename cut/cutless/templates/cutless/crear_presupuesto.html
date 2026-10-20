@@ -4,7 +4,7 @@
 {% block body_class %}management-page{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=buttons-1">
 {% endblock %}
 
 {% block content %}
@@ -14,12 +14,12 @@
       <p class="page-lead">Genera un presupuesto con optimizaciones y costos.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
+      <button type="button" class="btn btn-ayuda-seccion btn-text"
               onclick="iniciarTutorialSeccion('crear_presupuesto')"
-              title="Ayuda" data-action="secondary">
+              title="Ayuda" data-action="text" data-icon="help">
         Ayuda sobre presupuestos
       </button>
-      <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-outline-secondary" data-action="secondary">
+      <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">
         Volver a presupuestos
       </a>
     </div>
@@ -29,7 +29,7 @@
   <div class="alert alert-info fade-in mb-4">
     <strong>Optimización pre-seleccionada:</strong> Tablero {{ optimizacion.ancho_tablero }}×{{ optimizacion.alto_tablero }} cm
     ({{ optimizacion.aprovechamiento_total|floatformat:1 }}% aprovechamiento)
-    <a href="{% url 'cutless:resultado' optimizacion.pk %}" class="btn btn-sm ms-2 btn-outline-secondary" data-action="secondary">Ver optimización</a>
+    <a href="{% url 'cutless:resultado' optimizacion.pk %}" class="btn btn-sm ms-2 btn-secondary" data-action="secondary" data-icon="eye">Ver optimización</a>
     <br><small>Puedes seleccionar más optimizaciones en el formulario de abajo.</small>
   </div>
   {% endif %}
@@ -208,8 +208,8 @@
         </div>
 
         <div class="form-action-bar">
-          <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-outline-secondary" data-action="secondary">Cancelar</a>
-          <button type="submit" class="btn btn-lg btn-primary" data-action="primary">Crear presupuesto</button>
+          <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
+          <button type="submit" class="btn btn-success" data-action="success" data-icon="check">Crear presupuesto</button>
         </div>
       </form>
     </div>

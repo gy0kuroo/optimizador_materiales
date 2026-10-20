@@ -4,7 +4,7 @@
 {% block body_class %}management-page{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=buttons-1">
 {% endblock %}
 
 {% block content %}
@@ -14,12 +14,12 @@
       <p class="page-lead">Agrupa optimizaciones por proyecto y haz seguimiento del avance.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
+      <button type="button" class="btn btn-ayuda-seccion btn-text"
               onclick="iniciarTutorialSeccion('proyectos')"
-              title="Ayuda sobre proyectos" data-action="secondary">
+              title="Ayuda sobre proyectos" data-action="text" data-icon="help">
         Ayuda sobre proyectos
       </button>
-      <a href="{% url 'cutless:crear_proyecto' %}" class="btn btn-primary" data-action="primary">
+      <a href="{% url 'cutless:crear_proyecto' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
         Crear proyecto
       </a>
     </div>
@@ -49,11 +49,11 @@
           </select>
         </div>
         <div class="col-md-2">
-          <button type="submit" class="btn w-100 btn-primary" data-action="primary">Buscar</button>
+          <button type="submit" class="btn w-100 btn-primary" data-action="primary" data-icon="search">Buscar</button>
         </div>
         {% if busqueda or estado_filtro %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:lista_proyectos' %}" class="btn w-100 btn-outline-secondary" data-action="secondary">Quitar filtros</a>
+          <a href="{% url 'cutless:lista_proyectos' %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="close">Quitar filtros</a>
         </div>
         {% endif %}
       </div>
@@ -102,9 +102,9 @@
           </td>
           <td>{{ proyecto.fecha_creacion|date:"d/m/Y" }}</td>
           <td><div class="action-group">
-            <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-sm btn-outline-secondary" data-action="secondary">Ver detalle</a>
-            <a href="{% url 'cutless:editar_proyecto' proyecto.pk %}" class="btn btn-outline-secondary" data-action="secondary">Editar</a>
-            <a href="{% url 'cutless:eliminar_proyecto' proyecto.pk %}" class="btn btn-outline-danger" data-action="delete">Eliminar</a>
+            <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-sm btn-secondary" data-action="secondary" data-icon="eye">Ver detalle</a>
+            <a href="{% url 'cutless:editar_proyecto' proyecto.pk %}" class="btn btn-secondary" data-action="secondary" data-icon="edit">Editar</a>
+            <a href="{% url 'cutless:eliminar_proyecto' proyecto.pk %}" class="btn btn-danger" data-action="delete" data-icon="trash">Eliminar</a>
           </div></td>
         </tr>
         {% endfor %}
@@ -131,7 +131,7 @@
       {% endif %}
     </p>
     {% if not busqueda and not estado_filtro %}
-    <a href="{% url 'cutless:crear_proyecto' %}" class="btn btn-lg btn-primary" data-action="primary">
+    <a href="{% url 'cutless:crear_proyecto' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
        Crear Primer Proyecto
     </a>
     {% endif %}

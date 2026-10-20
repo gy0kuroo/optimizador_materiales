@@ -3,7 +3,7 @@
 {% block title %}Tu espacio de trabajo · CutLess{% endblock %}
 {% block body_class %}setup-page{% endblock %}
 {% block navigation %}{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'usuarios/css/configuracion-inicial.css' %}?v=1">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'usuarios/css/configuracion-inicial.css' %}?v=2">{% endblock %}
 {% block content %}
 <div class="setup-shell">
   <header class="setup-top">
@@ -58,13 +58,17 @@
         {% for radio in form.tema_preferido %}<label class="setup-choice setup-theme" for="{{ radio.id_for_label }}">{{ radio.tag }}<span><span class="setup-theme-sample" data-sample="{{ radio.data.value }}" aria-hidden="true"><i></i><i></i><i></i></span><strong>{{ radio.choice_label }}</strong>{% if radio.data.value == 'auto' %}<small>Sigue el tema de tu dispositivo.</small>{% endif %}</span></label>{% endfor %}
       </div></fieldset>
       <div class="setup-preview" aria-label="Vista previa de tu espacio">
-        <div class="setup-preview-nav"><strong>CutLess</strong><span>Inicio</span><span>Historial</span></div>
-        <div class="setup-preview-body"><span class="setup-eyebrow">VISTA PREVIA</span><h3>Prepara tu primer corte</h3><p>Configura el tablero y añade las piezas que necesitas.</p><div class="setup-preview-field">Ancho del tablero <strong>122 cm</strong></div><span class="setup-preview-action">Generar plan de corte</span><p id="setup-summary" aria-live="polite"></p></div>
+        <div class="setup-preview-nav">
+          <div class="setup-preview-brand">{% include 'cutless/includes/brand.html' %}</div>
+          <span class="btn btn-primary">Inicio</span>
+          <span class="btn btn-secondary">Historial</span>
+        </div>
+        <div class="setup-preview-body"><span class="setup-eyebrow">VISTA PREVIA</span><h3>Prepara tu primer corte</h3><p>Configura el tablero y añade las piezas que necesitas.</p><div class="setup-preview-field">Ancho del tablero <strong>122 cm</strong></div><span class="setup-preview-action btn btn-primary">Generar plan de corte</span><p id="setup-summary" aria-live="polite"></p></div>
       </div>
     </section>
     <footer class="setup-footer">
       <p id="setup-step-text">Tus preferencias se guardarán al finalizar.</p>
-      <div class="setup-actions"><button type="button" class="setup-secondary" id="setup-prev" hidden>Anterior</button><button type="button" class="setup-primary" id="setup-next" hidden>Continuar</button><button type="submit" class="setup-primary" id="setup-save">{% if inicio_completado %}Guardar mis preferencias{% else %}Empezar con mi espacio{% endif %}</button></div>
+      <div class="setup-actions"><button type="button" class="btn setup-secondary btn-secondary" id="setup-prev" hidden data-action="secondary" data-icon="chevron-left">Anterior</button><button type="button" class="btn setup-primary btn-primary" id="setup-next" hidden data-action="primary" data-icon="chevron-right">Continuar</button><button type="submit" class="btn setup-primary btn-success" id="setup-save" data-action="success" data-icon="check">{% if inicio_completado %}Guardar mis preferencias{% else %}Empezar con mi espacio{% endif %}</button></div>
     </footer>
   </form>
 </div>

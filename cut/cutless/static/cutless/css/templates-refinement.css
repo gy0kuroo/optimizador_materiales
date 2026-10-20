@@ -13,9 +13,7 @@
 .templates-page .card-header, .templates-page .card-footer { padding: 18px 24px; background: var(--cl-bg-surface); color: var(--cl-text-primary); border-color: var(--cl-border); }
 .templates-page .card-header h5 { overflow-wrap: anywhere; }
 .templates-page .card-footer { display: flex; flex-wrap: wrap; gap: 12px; }
-.templates-page .btn { min-height: 48px; padding: 10px 16px; font: 600 1.0625rem/1.5 var(--cl-font-body) !important; text-transform: none !important; letter-spacing: normal !important; white-space: normal; }
-.templates-page .btn-ayuda-seccion, .templates-page .btn-outline-secondary { color: var(--cl-text-primary); background: var(--cl-bg-card); border: 1px solid var(--cl-border-strong); }
-.templates-page .btn-ayuda-seccion:hover, .templates-page .btn-outline-secondary:hover { background: var(--cl-bg-surface); }
+.templates-page .btn { white-space: normal; }
 .templates-page .form-control, .templates-page .form-select { font: inherit; min-height: 48px; background-color: var(--cl-bg-card); color: var(--cl-text-primary); border-color: var(--cl-border-strong); }
 .templates-page .form-select:hover { background-color: var(--cl-bg-surface); }
 .templates-page label { margin-bottom: 8px; font-weight: 600; }

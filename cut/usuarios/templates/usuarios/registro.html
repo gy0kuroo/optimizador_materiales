@@ -5,8 +5,8 @@
 {% block body_class %}login-page register-page{% endblock %}
 {% block navigation %}{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'usuarios/css/login-redesign.css' %}">
-<link rel="stylesheet" href="{% static 'usuarios/css/register-redesign.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'usuarios/css/login-redesign.css' %}?v=buttons-1">
+<link rel="stylesheet" href="{% static 'usuarios/css/register-redesign.css' %}?v=buttons-1">
 {% endblock %}
 
 {% block content %}
@@ -42,7 +42,7 @@
         {% if field.help_text %}<div class="register-help">{{ field.help_text }}</div>{% endif %}
       </div>
       {% endfor %}
-      <button type="submit" class="login-submit">Crear cuenta</button>
+      <button type="submit" class="btn login-submit btn-success" data-action="success" data-icon="check">Crear cuenta</button>
     </form>
     <p class="login-register">¿Ya tienes cuenta? <a href="{% url 'usuarios:login' %}">Iniciar sesión</a></p>
   </section>

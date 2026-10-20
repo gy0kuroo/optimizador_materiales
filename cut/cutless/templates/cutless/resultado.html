@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'cutless/css/resultado.css' %}?v=2">
-<link rel="stylesheet" href="{% static 'cutless/css/history-result-refinement.css' %}?v=3">
+<link rel="stylesheet" href="{% static 'cutless/css/history-result-refinement.css' %}?v=buttons-1">
 <link rel="stylesheet" href="{% static 'cutless/css/board-landscape.css' %}?v=3">
 {% endblock %}
 
@@ -19,19 +19,21 @@
       </p>
     </div>
     <div class="page-header__actions">
-    <a href="{% url 'cutless:descargar_pdf' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-primary" data-carga-texto="Descargando PDF..." data-action="primary">
-      Descargar PDF
-    </a>
-    <a href="{% url 'cutless:descargar_excel' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-outline-secondary" data-carga-texto="Generando archivo Excel..." data-action="secondary">
+    <div class="button-download-bar">
+<a href="{% url 'cutless:descargar_excel' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-secondary" data-carga-texto="Generando archivo Excel..." data-action="secondary" data-icon="sheet">
       Descargar Excel
     </a>
-    <a href="{% url 'cutless:imprimir_plan_corte' optimizacion.id %}" class="btn btn-outline-secondary" target="_blank" data-action="secondary">
-      Imprimir <span class="text-annotation">(otra pestaña)</span>
+<a href="{% url 'cutless:imprimir_plan_corte' optimizacion.id %}" class="btn btn-secondary" target="_blank" data-action="secondary" data-icon="print" title="Se abre en otra pestaña">
+      Imprimir
     </a>
+<a href="{% url 'cutless:descargar_pdf' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-primary" data-carga-texto="Descargando PDF..." data-action="primary" data-icon="pdf">
+      Descargar PDF
+    </a>
+    </div>
 
-      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
+      <button type="button" class="btn btn-ayuda-seccion btn-text"
               onclick="iniciarTutorialSeccion('resultado')"
-              title="Ayuda sobre resultado de optimización" data-action="secondary">
+              title="Ayuda sobre resultado de optimización" data-action="text" data-icon="help">
         Cómo leer el resultado
       </button>
     </div>
@@ -40,20 +42,17 @@
   <section data-board-deck aria-label="Planos de corte">
     <div class="board-deck-controls" hidden>
       <div class="board-deck-heading"><h2>Distribución de las piezas</h2><p>Recorre los tableros sin perder de vista sus medidas.</p></div>
-      <div class="board-deck-navigation">
-        <button type="button" class="btn btn-outline-secondary" id="deck-previous" data-action="secondary" aria-label="Ver tablero anterior">← Anterior</button>
+      <div class="board-deck-navigation button-pagination">
+        <button type="button" class="btn btn-secondary btn-icon" id="deck-previous" aria-label="Ver tablero anterior" data-action="secondary" data-icon="chevron-left"></button>
         <output id="deck-position" aria-live="polite">Tablero 1 de {{ num_tableros }}</output>
-        <button type="button" class="btn btn-outline-secondary" id="deck-next" data-action="secondary" aria-label="Ver tablero siguiente">Siguiente →</button>
+        <button type="button" class="btn btn-secondary btn-icon" id="deck-next" aria-label="Ver tablero siguiente" data-action="secondary" data-icon="chevron-right"></button>
       </div>
     </div>
     <div class="board-pages">
     {% for item in tableros_con_imagenes %}
     <div class="board-page">
       <article class="board-card cut-board" data-board="{{ item.numero }}">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">Tablero {{ item.numero }} de {{ num_tableros }}</h5>
-          <a href="{% url 'cutless:descargar_png_tablero' optimizacion.id item.numero %}" class="btn btn-outline-secondary" data-carga-texto="Generando imagen..." data-action="secondary">Descargar PNG</a>
-        </div>
+
         {% include 'cutless/includes/board-layout.html' %}
       </article>
     </div>
@@ -188,7 +187,7 @@
             {% endif %}
             {% if costo_total %}
             <div class="mt-4 text-center">
-              <a href="{% url 'cutless:crear_presupuesto' %}?optimizacion={{ optimizacion.pk }}" class="btn btn-lg btn-primary" data-action="primary">
+              <a href="{% url 'cutless:crear_presupuesto' %}?optimizacion={{ optimizacion.pk }}" class="btn btn-primary" data-action="primary" data-icon="plus">
                  Crear presupuesto
               </a>
             </div>
@@ -202,10 +201,10 @@
 
   <h2 class="visually-hidden">Continuar trabajando</h2>
   <div class="result-actions fade-in">
-    <a href="{% url 'cutless:index' %}" class="btn btn-lg btn-outline-secondary" data-action="secondary">
+    <a href="{% url 'cutless:index' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-right">
       Preparar otro corte
     </a>
-    <a href="{% url 'cutless:historial' %}" class="btn btn-lg btn-outline-secondary" data-action="secondary">
+    <a href="{% url 'cutless:historial' %}" class="btn btn-secondary" data-action="secondary" data-icon="eye">
       Ver historial
     </a>
   </div>
@@ -213,10 +212,10 @@
 <!-- Visor de tableros: datos legibles independientes del dibujo. -->
 <div class="modal board-viewer" id="modalTablero" tabindex="-1" aria-labelledby="modalTableroLabel" aria-hidden="true" data-result-id="{{ optimizacion.pk }}">
   <div class="modal-dialog modal-fullscreen"><div class="modal-content">
-    <div class="modal-header"><h2 class="modal-title" id="modalTableroLabel">Visor del tablero</h2><button type="button" class="btn btn-outline-secondary" data-close-viewer data-action="secondary">Volver al resultado</button></div>
+    <div class="modal-header"><h2 class="modal-title" id="modalTableroLabel">Visor del tablero</h2><button type="button" class="btn btn-secondary" data-close-viewer data-action="secondary" data-icon="chevron-left">Volver al resultado</button></div>
     <div class="board-toolbar" aria-label="Controles del visor">
-      <div class="board-navigation"><button type="button" class="btn btn-outline-secondary" id="board-previous" data-action="secondary">Tablero anterior</button><span id="board-position" role="status"></span><button type="button" class="btn btn-outline-secondary" id="board-next" data-action="secondary">Tablero siguiente</button></div>
-      <div class="board-zoom"><button type="button" class="btn btn-outline-secondary" id="board-zoom-out" aria-label="Reducir tablero" data-action="secondary">−</button><output id="board-zoom-value" aria-live="polite">100%</output><button type="button" class="btn btn-outline-secondary" id="board-zoom-in" aria-label="Ampliar tablero" data-action="secondary">+</button><button type="button" class="btn btn-outline-secondary" id="board-fit" data-action="secondary">Ajustar tablero</button></div>
+      <div class="board-navigation button-pagination"><button type="button" class="btn btn-secondary btn-icon" id="board-previous" data-action="secondary" aria-label="Tablero anterior" data-icon="chevron-left"></button><span id="board-position" role="status"></span><button type="button" class="btn btn-secondary btn-icon" id="board-next" data-action="secondary" aria-label="Tablero siguiente" data-icon="chevron-right"></button></div>
+      <div class="board-zoom"><button type="button" class="btn btn-secondary btn-icon" id="board-zoom-out" aria-label="Reducir tablero" data-action="secondary" data-icon="minus"></button><output id="board-zoom-value" aria-live="polite">100%</output><button type="button" class="btn btn-secondary btn-icon" id="board-zoom-in" aria-label="Ampliar tablero" data-action="secondary" data-icon="plus"></button><button type="button" class="btn btn-secondary" id="board-fit" data-action="secondary" data-icon="expand">Ajustar tablero</button></div>
     </div>
     <div class="modal-body board-viewer-body">
       <section class="board-canvas-section"><p class="board-note" id="board-navigation-help">Amplía con + y recorre el dibujo con las barras de desplazamiento o deslizando con el dedo.</p><div id="board-viewport" tabindex="0" aria-label="Dibujo ampliado del tablero" aria-describedby="board-navigation-help"><div id="board-canvas"></div></div></section>
@@ -225,4 +224,4 @@
   </div></div>
 </div>
 {% endblock %}
-{% block extra_js %}<script src="{% static 'cutless/js/board-deck.js' %}?v=1"></script><script src="{% static 'cutless/js/board-viewer.js' %}?v=3"></script>{% endblock %}
+{% block extra_js %}<script src="{% static 'cutless/js/board-deck.js' %}?v=1"></script><script src="{% static 'cutless/js/board-viewer.js' %}?v=buttons-1"></script>{% endblock %}

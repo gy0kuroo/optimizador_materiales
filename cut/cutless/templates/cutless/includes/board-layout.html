@@ -2,7 +2,7 @@
 <div class="cut-layout">
   <div class="cut-main">
     <section class="card cut-drawing-card">
-      <h2 class="card-header">Distribución del tablero</h2>
+      <div class="card-header"><h2>Distribución del tablero</h2><a href="{% url 'cutless:descargar_png_tablero' optimizacion.id item.numero %}" class="btn btn-secondary" data-carga-texto="Generando imagen..." data-action="secondary" data-icon="image">Descargar PNG</a></div>
       <button type="button" class="board-open" data-open-board="{{ item.numero }}" aria-label="Abrir visor del tablero {{ item.numero }}">
         {% include 'cutless/includes/board-drawing.html' %}
         <span>Abrir visor del tablero</span>

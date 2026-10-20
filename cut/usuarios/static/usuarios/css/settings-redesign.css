@@ -20,7 +20,7 @@ body.settings-page { font-size: 1.125rem; line-height: 1.65; }
 .settings-page .nav-tabs { border-bottom: 1px solid var(--cl-border); gap: 8px; }
 .settings-page .config-tabs .nav-link { font-size: 1.125rem; letter-spacing: normal; text-transform: none; min-height: 48px; padding: 12px 18px; border: 0; border-bottom: 3px solid transparent; color: var(--cl-text-secondary); }
 .settings-page .config-tabs .nav-link.active { border-bottom-color: var(--cl-blue); background: var(--cl-info-bg); color: var(--cl-text-primary); }
-.settings-page .btn { font-size: 1.0625rem; letter-spacing: normal; text-transform: none; min-height: 48px; padding: 12px 18px; white-space: normal; }
+.settings-page .btn { white-space: normal; }
 .settings-page .settings-save { margin: 4px 0 24px; }
 .settings-page input:focus, .settings-page select:focus, .settings-page button:focus-visible { outline: 3px solid var(--cl-blue-light); outline-offset: 2px; }
 .settings-page .error-text { color: var(--cl-text-primary); border-left: 3px solid var(--cl-danger); padding-left: 10px; margin-top: 8px; font-size: 1rem; }

@@ -86,7 +86,7 @@
       <p class="page-lead">Modifica datos, contraseña y permisos del usuario.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'usuarios:admin_dashboard' %}" class="btn btn-outline-secondary" data-action="secondary">Volver</a>
+      <a href="{% url 'usuarios:admin_dashboard' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Volver</a>
     </div>
   </header>
 
@@ -129,8 +129,8 @@
                 </div>
 
                 <div class="d-flex justify-content-between mt-4">
-                    <a href="{% url 'usuarios:admin_dashboard' %}" class="btn btn-outline-secondary" data-action="secondary">Volver al Dashboard</a>
-                    <button type="submit" class="btn btn-primary" data-action="primary">Guardar cambios</button>
+                    <a href="{% url 'usuarios:admin_dashboard' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Volver al Dashboard</a>
+                    <button type="submit" class="btn btn-success" data-action="success" data-icon="check">Guardar cambios</button>
                 </div>
             </form>
         </div>

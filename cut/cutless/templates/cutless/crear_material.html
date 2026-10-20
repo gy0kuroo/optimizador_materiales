@@ -4,7 +4,7 @@
 {% block body_class %}management-page{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=buttons-1">
 {% endblock %}
 
 {% block content %}
@@ -14,12 +14,12 @@
       <p class="page-lead">Registra un tablero con sus dimensiones y precio.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
+      <button type="button" class="btn btn-ayuda-seccion btn-text"
               onclick="iniciarTutorialSeccion('crear_material')"
-              title="Ayuda sobre crear material" data-action="secondary">
+              title="Ayuda sobre crear material" data-action="text" data-icon="help">
         Ayuda sobre materiales
       </button>
-      <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary" data-action="secondary">
+      <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">
         Volver a materiales
       </a>
     </div>
@@ -114,8 +114,8 @@
         </div>
 
         <div class="form-action-bar">
-          <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-outline-secondary" data-action="secondary">Cancelar</a>
-          <button type="submit" class="btn btn-lg btn-primary" data-action="primary">Guardar material</button>
+          <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
+          <button type="submit" class="btn btn-success" data-action="success" data-icon="check">Guardar material</button>
         </div>
       </form>
     </div>

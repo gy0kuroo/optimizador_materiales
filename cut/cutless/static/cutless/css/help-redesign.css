@@ -40,23 +40,7 @@
   padding: 16px 20px;
   border-top: 1px solid var(--cl-border);
 }
-.customTooltip .introjs-button {
-  box-sizing: border-box;
-  float: none;
-  min-height: 48px;
-  margin: 0;
-  padding: 10px 16px;
-  background: var(--cl-bg-card);
-  color: var(--cl-text-primary);
-  border: 1px solid var(--cl-border-strong);
-  box-shadow: none;
-  text-shadow: none;
-  font: 600 1rem/1.5 var(--cl-font-body) !important;
-  text-transform: none !important;
-  letter-spacing: normal !important;
-  white-space: normal;
-}
-.customTooltip .introjs-button:hover { background: var(--cl-bg-surface); }
+.customTooltip .introjs-button { box-sizing: border-box; float: none; margin: 0; text-shadow: none; white-space: normal; }
 .customTooltip .introjs-nextbutton:hover { background: var(--cl-cobalt) !important; }
 .customTooltip .introjs-disabled { opacity: .55; cursor: default; }
 .customTooltip .introjs-skipbutton {
@@ -86,7 +70,7 @@
 #modalBienvenida .modal-title { color: var(--cl-text-primary); font-size: 1.4rem; }
 #modalBienvenida .modal-body { font-size: 1.125rem; line-height: 1.6; }
 #modalBienvenida .modal-footer { gap: 12px; border-color: var(--cl-border); }
-#modalBienvenida .modal-footer .btn { min-height: 48px; font-size: 1rem; white-space: normal; }
+#modalBienvenida .modal-footer .btn { white-space: normal; }
 #modalBienvenida .alert-info { color: var(--cl-text-primary); background: var(--cl-bg-surface); border-color: var(--cl-border); }
 #modalBienvenida .text-muted { color: var(--cl-text-secondary) !important; font-size: 1rem; }
 @media (prefers-reduced-motion: reduce) {

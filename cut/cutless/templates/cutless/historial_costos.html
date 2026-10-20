@@ -4,7 +4,7 @@
 {% block body_class %}analysis-page costs-page{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/analysis-refinement.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'cutless/css/analysis-refinement.css' %}?v=buttons-1">
 {% endblock %}
 
 {% block content %}
@@ -14,13 +14,13 @@
       <p class="page-lead">Revisa los costos de material y mano de obra de tus cortes, con el detalle de cada registro.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
+      <button type="button" class="btn btn-ayuda-seccion btn-text"
               onclick="iniciarTutorialSeccion('costos')"
-              title="Ayuda" data-action="secondary">
+              title="Ayuda" data-action="text" data-icon="help">
         Cómo consultar los costos
       </button>
       {% if optimizaciones_con_costo %}
-      <a href="{% url 'cutless:historial_costos' %}?export=excel&amp;fecha_desde={{ fecha_desde|urlencode }}&amp;fecha_hasta={{ fecha_hasta|urlencode }}" class="btn btn-outline-secondary" data-action="secondary">Exportar Excel</a>
+      <a href="{% url 'cutless:historial_costos' %}?export=excel&amp;fecha_desde={{ fecha_desde|urlencode }}&amp;fecha_hasta={{ fecha_hasta|urlencode }}" class="btn btn-secondary" data-action="secondary" data-icon="sheet">Exportar Excel</a>
       {% endif %}
     </div>
   </header>
@@ -46,13 +46,13 @@
                  value="{{ fecha_hasta }}">
         </div>
         <div class="col-md-2">
-          <button type="submit" class="btn w-100 btn-primary" data-action="primary">
+          <button type="submit" class="btn w-100 btn-primary" data-action="primary" data-icon="filter">
             Aplicar fechas
           </button>
         </div>
         {% if fecha_desde or fecha_hasta %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:historial_costos' %}" class="btn w-100 btn-outline-secondary" data-action="secondary">
+          <a href="{% url 'cutless:historial_costos' %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="close">
             Quitar filtros
           </a>
         </div>
@@ -210,8 +210,8 @@
             </td>
             <td>
               <a href="{% url 'cutless:resultado' item.optimizacion.pk %}"
-                 class="btn btn-sm btn-outline-secondary"
-                 title="Ver detalles" data-action="secondary">
+                 class="btn btn-sm btn-secondary"
+                 title="Ver detalles" data-action="secondary" data-icon="eye">
                  Ver resultado
               </a>
             </td>

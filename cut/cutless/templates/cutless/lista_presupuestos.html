@@ -4,7 +4,7 @@
 {% block body_class %}management-page{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=buttons-1">
 {% endblock %}
 
 {% block content %}
@@ -14,12 +14,12 @@
       <p class="page-lead">Crea y administra presupuestos a partir de tus optimizaciones.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
+      <button type="button" class="btn btn-ayuda-seccion btn-text"
               onclick="iniciarTutorialSeccion('presupuestos')"
-              title="Ayuda sobre presupuestos" data-action="secondary">
+              title="Ayuda sobre presupuestos" data-action="text" data-icon="help">
         Ayuda sobre presupuestos
       </button>
-      <a href="{% url 'cutless:crear_presupuesto' %}" class="btn btn-primary" data-action="primary">
+      <a href="{% url 'cutless:crear_presupuesto' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
         Crear presupuesto
       </a>
     </div>
@@ -50,11 +50,11 @@
           </select>
         </div>
         <div class="col-md-2">
-          <button type="submit" class="btn w-100 btn-primary" data-action="primary"> Buscar</button>
+          <button type="submit" class="btn w-100 btn-primary" data-action="primary" data-icon="search"> Buscar</button>
         </div>
         {% if busqueda or estado_filtro %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:lista_presupuestos' %}" class="btn w-100 btn-outline-secondary" data-action="secondary">Quitar filtros</a>
+          <a href="{% url 'cutless:lista_presupuestos' %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="close">Quitar filtros</a>
         </div>
         {% endif %}
       </div>
@@ -95,9 +95,9 @@
             </span>
           </td>
           <td>
-            <a href="{% url 'cutless:detalle_presupuesto' presupuesto.pk %}" class="btn btn-sm btn-outline-secondary" data-action="secondary">Ver detalle</a>
-            <a href="{% url 'cutless:editar_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary" data-action="secondary">Editar</a>
-            <a href="{% url 'cutless:generar_pdf_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary" target="_blank" rel="noopener" data-action="secondary">PDF</a>
+            <a href="{% url 'cutless:detalle_presupuesto' presupuesto.pk %}" class="btn btn-sm btn-secondary" data-action="secondary" data-icon="eye">Ver detalle</a>
+            <a href="{% url 'cutless:editar_presupuesto' presupuesto.pk %}" class="btn btn-secondary" data-action="secondary" data-icon="edit">Editar</a>
+            <a href="{% url 'cutless:generar_pdf_presupuesto' presupuesto.pk %}" class="btn btn-primary" target="_blank" rel="noopener" data-action="primary" data-icon="pdf">PDF</a>
           </td>
         </tr>
         {% endfor %}
@@ -124,7 +124,7 @@
       {% endif %}
     </p>
     {% if not busqueda and not estado_filtro %}
-    <a href="{% url 'cutless:crear_presupuesto' %}" class="btn btn-lg btn-primary" data-action="primary">
+    <a href="{% url 'cutless:crear_presupuesto' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
       Crear Primer Presupuesto
     </a>
     {% endif %}

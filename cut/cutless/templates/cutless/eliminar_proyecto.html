@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block body_class %}management-page{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=buttons-1">{% endblock %}
 
 {% block content %}
   <header class="page-header fade-in">
@@ -11,7 +11,7 @@
       <p class="page-lead">Confirma que deseas eliminar «{{ proyecto.nombre }}». Esta acción no se puede deshacer.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-outline-secondary" data-action="secondary">Volver a proyectos</a>
+      <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Volver a proyectos</a>
     </div>
   </header>
 
@@ -48,7 +48,7 @@
         <strong>Advertencia:</strong> Esta acción no se puede deshacer.
       </div>
 
-      <form method="post" data-tipo="proyecto">
+      <form method="post" data-tipo="proyecto" data-confirm-delete="true">
         {% csrf_token %}
         {% if optimizaciones_count > 0 %}
         <input type="hidden" name="accion" id="accion_hidden" value="mover">
@@ -61,8 +61,8 @@
         </script>
         {% endif %}
         <div class="form-action-bar">
-          <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-outline-secondary" data-action="secondary">Cancelar</a>
-          <button type="submit" class="btn btn-danger" data-tipo="proyecto" data-action="delete">Sí, eliminar proyecto</button>
+          <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
+          <button type="submit" class="btn btn-danger" data-tipo="proyecto" data-action="delete" data-icon="trash">Sí, eliminar proyecto</button>
         </div>
       </form>
     </div>

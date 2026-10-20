@@ -4,7 +4,7 @@
 {% block body_class %}management-page{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=buttons-1">
 {% endblock %}
 
 {% block content %}
@@ -14,12 +14,12 @@
       <p class="page-lead">Revisa líneas, totales y optimizaciones incluidas.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
+      <button type="button" class="btn btn-ayuda-seccion btn-text"
               onclick="iniciarTutorialSeccion('detalle_presupuesto')"
-              title="Ayuda" data-action="secondary">
+              title="Ayuda" data-action="text" data-icon="help">
         Ayuda sobre presupuestos
       </button>
-      <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-outline-secondary" data-action="secondary">
+      <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">
         Volver a presupuestos
       </a>
     </div>
@@ -64,7 +64,7 @@
   <div class="card mb-4 fade-in">
     <div class="card-header card-header-section d-flex justify-content-between align-items-center">
       <h4 class="mb-0">Optimizaciones asociadas <span class="text-annotation">({{ presupuesto.optimizaciones.count }})</span></h4>
-      <a href="{% url 'cutless:agregar_optimizaciones_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary" data-action="secondary">Agregar optimizaciones</a>
+      <a href="{% url 'cutless:agregar_optimizaciones_presupuesto' presupuesto.pk %}" class="btn btn-secondary" data-action="secondary" data-icon="plus">Agregar optimizaciones</a>
     </div>
     <div class="card-body">
       {% if presupuesto.optimizaciones.all %}
@@ -99,7 +99,7 @@
                 {% endif %}
               </td>
               <td>
-                <a href="{% url 'cutless:resultado' opt.pk %}" class="btn btn-sm btn-outline-secondary" data-action="secondary">Ver resultado</a>
+                <a href="{% url 'cutless:resultado' opt.pk %}" class="btn btn-sm btn-secondary" data-action="secondary" data-icon="eye">Ver resultado</a>
               </td>
             </tr>
             {% endfor %}
@@ -173,11 +173,11 @@
 
   <!-- Acciones -->
   <div class="form-action-bar fade-in">
-    <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-outline-secondary" data-action="secondary">Volver a presupuestos</a>
-    <a href="{% url 'cutless:editar_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary" data-action="secondary">
+    <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Volver a presupuestos</a>
+    <a href="{% url 'cutless:editar_presupuesto' presupuesto.pk %}" class="btn btn-secondary" data-action="secondary" data-icon="edit">
       Editar presupuesto
     </a>
-    <a href="{% url 'cutless:generar_pdf_presupuesto' presupuesto.pk %}" class="btn btn-outline-secondary" target="_blank" data-action="secondary">
+    <a href="{% url 'cutless:generar_pdf_presupuesto' presupuesto.pk %}" class="btn btn-primary" target="_blank" data-action="primary" data-icon="pdf">
       Generar PDF
     </a>
   </div>

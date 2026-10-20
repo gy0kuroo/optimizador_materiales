@@ -9,7 +9,6 @@
 .dashboard-page .card-header-title { font-size: 1.2rem; letter-spacing: -.015em; text-transform: none; }
 .dashboard-page .card-header-step img.cl-icon { display: inline-block !important; filter: brightness(0); }
 [data-theme="dark"] .dashboard-page .card-header-step img.cl-icon { filter: brightness(0) invert(1); }
-.dashboard-page .card-header-step .btn-ayuda-seccion { background: transparent !important; color: var(--cl-text-secondary) !important; border-color: var(--cl-border-strong) !important; text-transform: none; letter-spacing: normal; font-size: .9rem !important; }
 .dashboard-page .card-body label { text-transform: none; letter-spacing: normal; color: var(--cl-text-primary); }
 .dashboard-page .card-body .form-control, .dashboard-page .card-body .form-select, .dashboard-page .card-body select { border-width: 1px !important; border-radius: 8px !important; font-size: 1rem !important; }
 .dashboard-page .card-body .form-text, .dashboard-page .card-body small.text-muted { color: var(--cl-text-secondary) !important; }
@@ -31,14 +30,6 @@ body.dashboard-page { font-family: var(--cl-font-body); font-size: 1.125rem; lin
 .dashboard-page .card-body .form-control, .dashboard-page .card-body .form-select, .dashboard-page .card-body select { font-size: 1.125rem !important; min-height: 48px; }
 .dashboard-page .card-body .form-text, .dashboard-page .card-body small.text-muted, .dashboard-page .form-action-hint { font-size: 1rem !important; line-height: 1.6; color: var(--cl-text-secondary) !important; }
 .dashboard-page .btn, .dashboard-page .card-header-step .btn-ayuda-seccion, .dashboard-page #add-pieza, .dashboard-page .remove-pieza { font-family: var(--cl-font-body) !important; font-size: 1.0625rem !important; letter-spacing: normal !important; text-transform: none !important; min-height: 48px; white-space: normal; }
-.dashboard-page #btnCostosToggle, .dashboard-page .card-header-step .btn-ayuda-seccion { background: var(--cl-bg-card) !important; color: var(--cl-text-primary) !important; border: 1px solid var(--cl-border-strong) !important; padding: 10px 16px !important; }
-.dashboard-page #btnCostosToggle:hover, .dashboard-page .card-header-step .btn-ayuda-seccion:hover { background: var(--cl-bg-surface) !important; }
-.dashboard-page .btn-cta-primary { font-size: 1.25rem !important; }
-.dashboard-page .btn-outline-secondary img.cl-icon--btn, .dashboard-page .btn-outline-primary img.cl-icon--btn, .dashboard-page #add-pieza img.cl-icon--btn { filter: brightness(0); }
-[data-theme="dark"] .dashboard-page .btn-outline-secondary img.cl-icon--btn, [data-theme="dark"] .dashboard-page .btn-outline-primary img.cl-icon--btn, [data-theme="dark"] .dashboard-page #add-pieza img.cl-icon--btn { filter: brightness(0) invert(1); }
-.dashboard-page .btn:focus-visible { outline: 3px solid var(--cl-blue-light); outline-offset: 3px; }
-.dashboard-page #btnCostosToggle { font-family: var(--cl-font-body) !important; font-size: 1.0625rem !important; font-weight: 600 !important; letter-spacing: normal; text-transform: none; }
-.dashboard-page .card-header-step .btn-ayuda-seccion { font-weight: 600 !important; }
 .dashboard-page .form-check { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 6px 14px; align-items: start; padding: 16px; }
 .dashboard-page .form-check .form-check-input { float: none; margin: 3px 0 0; width: 24px !important; height: 24px !important; min-width: 24px; min-height: 24px; grid-column: 1; grid-row: 1; }
 .dashboard-page .form-check .form-check-label { grid-column: 2; grid-row: 1; margin: 0; font-family: var(--cl-font-body) !important; text-transform: none; letter-spacing: normal; }

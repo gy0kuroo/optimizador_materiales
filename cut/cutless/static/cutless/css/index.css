@@ -332,25 +332,7 @@ img.cl-icon--hint {
   flex: 1;
 }
 
-.btn-ayuda-seccion {
-  font-family: var(--cl-font-display);
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  background: rgba(255,255,255,.15);
-  color: rgba(255,255,255,.9);
-  border: 1px solid rgba(255,255,255,.3);
-  border-radius: var(--cl-radius-sm);
-  padding: 5px 12px;
-  transition: var(--cl-transition);
-  white-space: nowrap;
-}
-.btn-ayuda-seccion:hover {
-  background: rgba(255,255,255,.28);
-  color: #fff;
-  border-color: rgba(255,255,255,.5);
-}
+.btn-ayuda-seccion { white-space: nowrap; }
 
 /* ── Card body ─────────────────────────────────────────────── */
 .card-body {
@@ -581,51 +563,7 @@ img.cl-icon--hint {
 .remove-pieza-hidden { display: none !important; }
 
 /* Botón "Agregar otra pieza" */
-#add-pieza {
-  font-family: var(--cl-font-display) !important;
-  font-size: 1rem !important;
-  font-weight: 700 !important;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  padding: 12px 24px !important;
-  border-radius: var(--cl-radius-sm) !important;
-  background: transparent !important;
-  color: var(--cl-blue) !important;
-  border: 2px solid var(--cl-blue) !important;
-  display: flex;
-  align-items: center;
-  gap: var(--cl-space-sm);
-  transition: var(--cl-transition);
-  margin-top: var(--cl-space-sm);
-}
-
-#add-pieza:hover {
-  background: var(--cl-blue) !important;
-  color: #fff !important;
-  box-shadow: var(--cl-shadow-blue);
-  transform: translateY(-1px);
-}
-
-/* ══════════════════════════════════════════════════════════════
-   SECCIÓN COSTOS (collapse)
-   ══════════════════════════════════════════════════════════════ */
-#btnCostosToggle {
-  font-family: var(--cl-font-display) !important;
-  font-size: .75rem !important;
-  font-weight: 700 !important;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  background: rgba(255,255,255,.15) !important;
-  color: rgba(255,255,255,.9) !important;
-  border: 1px solid rgba(255,255,255,.3) !important;
-  border-radius: var(--cl-radius-sm) !important;
-  padding: 5px 14px !important;
-  transition: var(--cl-transition);
-}
-
-#btnCostosToggle:hover {
-  background: rgba(255,255,255,.28) !important;
-}
+#add-pieza { display: flex; align-items: center; margin-top: var(--cl-space-sm); }
 
 /* Tip dentro del collapse */
 .card-body .alert-info {
@@ -660,33 +598,7 @@ img.cl-icon--hint {
 }
 
 /* CTA principal — grande, azul, imposible de ignorar */
-.btn-cta-primary {
-  font-family: var(--cl-font-display) !important;
-  font-size: 1.2rem !important;
-  font-weight: 800 !important;
-  letter-spacing: .10em;
-  text-transform: uppercase;
-  padding: 16px 36px !important;
-  background: var(--cl-blue) !important;
-  color: #fff !important;
-  border: none !important;
-  border-radius: var(--cl-radius-sm) !important;
-  box-shadow: var(--cl-shadow-blue);
-  display: flex;
-  align-items: center;
-  gap: var(--cl-space-sm);
-  transition: all .2s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-cta-primary:hover {
-  background: var(--cl-blue-dim) !important;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(69,88,231,.5) !important;
-}
-
-.btn-cta-primary:active { transform: translateY(0); }
+.btn-cta-primary { display: flex; align-items: center; position: relative; overflow: hidden; }
 
 /* Texto de ayuda en la barra */
 .form-action-hint {

@@ -2,12 +2,12 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/index.css' %}">
+<link rel="stylesheet" href="{% static 'cutless/css/index.css' %}?v=buttons-1">
 {% endblock %}
 
 {% block extra_js %}
 {{ materiales_data|json_script:"materiales-data" }}
-<script src="{% static 'cutless/js/medidas-pred.js' %}"></script>
+<script src="{% static 'cutless/js/medidas-pred.js' %}?v=buttons-1"></script>
 {% endblock %}
 
 {% block content %}
@@ -17,7 +17,7 @@
       <p class="page-lead">Modifica tablero y piezas, luego recalcula el plan de corte.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary" data-action="secondary">Ver historial</a>
+      <a href="{% url 'cutless:historial' %}" class="btn btn-secondary" data-action="secondary" data-icon="eye">Ver historial</a>
     </div>
   </header>
 
@@ -29,9 +29,9 @@
       <div class="card-header card-header-step card-header-step-primary text-white">
         <span class="step-badge" aria-hidden="true">1</span>
         <h4 class="card-header-title">Dimensiones del tablero</h4>
-        <button type="button" class="btn btn-sm btn-ayuda-seccion ms-auto btn-outline-secondary"
+        <button type="button" class="btn btn-sm btn-ayuda-seccion ms-auto btn-text"
                 onclick="iniciarTutorialSeccion('tablero')"
-                title="Ayuda sobre dimensiones del tablero" data-action="secondary">
+                title="Ayuda sobre dimensiones del tablero" data-action="text" data-icon="help">
           Ayuda
         </button>
       </div>
@@ -97,9 +97,9 @@
     <div class="card mb-4 fade-in">
       <div class="card-header card-header-step card-header-step-info text-white d-flex justify-content-between align-items-center">
         <h4 class="mb-0">Costos <span class="text-annotation">(Opcional)</span></h4>
-        <button type="button" class="btn btn-sm btn-ayuda-seccion btn-outline-secondary"
+        <button type="button" class="btn btn-sm btn-ayuda-seccion btn-secondary"
                 onclick="iniciarTutorialSeccion('costos')"
-                title="Ayuda sobre costos" data-action="secondary">
+                title="Ayuda sobre costos" data-action="secondary" data-icon="chevron-right">
 
         </button>
       </div>
@@ -113,7 +113,7 @@
               <div class="text-danger">{{ tablero_form.material.errors }}</div>
             {% endif %}
             <div class="mt-2">
-              <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-sm btn-outline-secondary" target="_blank" data-action="secondary">
+              <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-sm btn-secondary" target="_blank" data-action="secondary" data-icon="chevron-right">
                  Gestionar Materiales
               </a>
             </div>
@@ -168,9 +168,9 @@
       <div class="card-header card-header-step card-header-step-success text-white">
         <span class="step-badge" aria-hidden="true">2</span>
         <h4 class="card-header-title">Piezas a cortar</h4>
-        <button type="button" class="btn btn-sm btn-ayuda-seccion btn-outline-secondary"
+        <button type="button" class="btn btn-sm btn-ayuda-seccion btn-secondary"
                 onclick="iniciarTutorialSeccion('piezas')"
-                title="Ayuda sobre piezas a cortar" data-action="secondary">
+                title="Ayuda sobre piezas a cortar" data-action="secondary" data-icon="chevron-right">
 
         </button>
       </div>
@@ -182,7 +182,7 @@
           <div class="pieza-form border rounded p-3 mb-3 bg-light">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h5 class="mb-0">Pieza #<span class="pieza-numero">{{ forloop.counter }}</span></h5>
-              <button type="button" class="btn btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %} btn-outline-danger" data-action="delete">
+              <button type="button" class="btn btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %} btn-danger" data-action="delete" data-icon="trash">
                 Eliminar
               </button>
             </div>
@@ -214,7 +214,7 @@
           {% endfor %}
         </div>
 
-        <button type="button" id="add-pieza" class="btn btn-outline-secondary" data-action="secondary">
+        <button type="button" id="add-pieza" class="btn btn-secondary" data-action="secondary" data-icon="plus">
           Agregar otra pieza
         </button>
       </div>
@@ -222,8 +222,8 @@
 
     <!-- Botón de envío -->
     <div class="form-action-bar fade-in">
-      <button type="submit" class="btn btn-lg btn-cta-primary btn-primary" data-action="primary">Actualizar optimización</button>
-      <a href="{% url 'cutless:historial' %}" class="btn btn-lg btn-outline-secondary" data-action="secondary">Cancelar</a>
+      <a href="{% url 'cutless:historial' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
+      <button type="submit" class="btn btn-cta-primary btn-primary" data-action="primary" data-icon="layout">Actualizar optimización</button>
     </div>
   </form>
 

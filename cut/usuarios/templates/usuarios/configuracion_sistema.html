@@ -4,7 +4,7 @@
 {% block body_class %}settings-page{% endblock %}
 {% block title %}Configuración del sistema · CutLess{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'usuarios/css/settings-redesign.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'usuarios/css/settings-redesign.css' %}?v=buttons-1">
 {% endblock %}
 
 {% block content %}
@@ -23,18 +23,18 @@
       {% for error in perfil_form.non_field_errors %}
         <div>{{ error }}</div>
       {% endfor %}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      <button type="button" class="btn btn-icon btn-text" data-bs-dismiss="alert" aria-label="Cerrar" data-action="text" data-icon="close"></button>
     </div>
   {% endif %}
 
   <ul class="nav nav-tabs config-tabs mb-3" id="configSistemaTabs" role="tablist">
     <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="tab-opti-link" data-bs-toggle="tab" data-bs-target="#tabOpti" type="button" role="tab" aria-controls="tabOpti" aria-selected="true">
+      <button class="nav-link active btn btn-secondary" id="tab-opti-link" data-bs-toggle="tab" data-bs-target="#tabOpti" type="button" role="tab" aria-controls="tabOpti" aria-selected="true" data-action="secondary" data-icon="chevron-right">
         Cortes y notificaciones
       </button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="tab-funcionalidades-link" data-bs-toggle="tab" data-bs-target="#tabFuncionalidades" type="button" role="tab" aria-controls="tabFuncionalidades" aria-selected="false">
+      <button class="nav-link btn btn-secondary" id="tab-funcionalidades-link" data-bs-toggle="tab" data-bs-target="#tabFuncionalidades" type="button" role="tab" aria-controls="tabFuncionalidades" aria-selected="false" data-action="secondary" data-icon="chevron-right">
         Personalizar menú
       </button>
     </li>
@@ -190,7 +190,7 @@
         {% endif %}
       </div>
     </div>
-    <button type="submit" class="btn settings-save btn-primary" data-action="primary">Guardar ajustes de corte y avisos</button>
+    <button type="submit" class="btn settings-save btn-success" data-action="success" data-icon="check">Guardar ajustes de corte y avisos</button>
   </form>
 
   </div>
@@ -211,7 +211,7 @@
           {% for error in permisos_form.non_field_errors %}
             <div>{{ error }}</div>
           {% endfor %}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          <button type="button" class="btn btn-icon btn-text" data-bs-dismiss="alert" aria-label="Cerrar" data-action="text" data-icon="close"></button>
         </div>
       {% endif %}
 
@@ -222,7 +222,7 @@
         {% if permisos_form.gestion_fields %}<h5>Gestión</h5><div class="permissions-grid mb-4">{% for field in permisos_form.gestion_fields %}<div class="permission-toggle">{{ field }}<label class="permission-label" for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong><small>{{ field.help_text }}</small></label></div>{% endfor %}</div>{% endif %}
         {% if permisos_form.analisis_fields %}<h5>Análisis</h5><div class="permissions-grid mb-4">{% for field in permisos_form.analisis_fields %}<div class="permission-toggle">{{ field }}<label class="permission-label" for="{{ field.id_for_label }}"><strong>{{ field.label }}</strong><small>{{ field.help_text }}</small></label></div>{% endfor %}</div>{% endif %}
         {% if not permisos_form.fields %}<p>No tienes secciones adicionales habilitadas para personalizar.</p>{% endif %}
-        <button type="submit" class="btn settings-save btn-primary" data-action="primary">Guardar menú</button>
+        <button type="submit" class="btn settings-save btn-success" data-action="success" data-icon="check">Guardar menú</button>
       </form>
     </div>
 

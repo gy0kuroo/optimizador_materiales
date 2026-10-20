@@ -49,8 +49,7 @@ body.login-page {
 .login-form label { display: block; color: var(--cl-text-primary); font-family: var(--cl-font-body); font-size: .95rem; font-weight: 600; text-transform: none; letter-spacing: normal; margin-bottom: 8px; }
 .login-form input:not([type="hidden"]) { width: 100%; min-height: 48px; padding: 12px 14px; border: 1px solid var(--cl-border-strong); border-radius: 10px; background: var(--cl-bg-base); color: var(--cl-text-primary); font: inherit; }
 .login-form input:focus { outline: 3px solid var(--cl-blue-light); outline-offset: 2px; border-color: var(--cl-blue); }
-.login-form .login-submit { width: 100%; min-height: 48px; background: var(--cl-blue); color: white; border: 0; border-radius: 10px; font: inherit; font-weight: 600; margin-top: 8px; }
-.login-form .login-submit:hover { background: var(--cl-cobalt); }
+.login-form .login-submit { width: 100%; margin-top: 8px; }
 .login-shell a { color: var(--cl-blue); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 [data-theme="dark"] .login-shell a { color: var(--cl-blue-light); }
 .login-shell a:focus-visible, .login-submit:focus-visible { outline: 3px solid var(--cl-blue-light); outline-offset: 4px; }

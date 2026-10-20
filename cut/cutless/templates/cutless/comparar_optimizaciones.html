@@ -4,7 +4,7 @@
 {% block body_class %}analysis-page comparison-page{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/analysis-refinement.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'cutless/css/analysis-refinement.css' %}?v=buttons-1">
 {% endblock %}
 
 {% block content %}
@@ -14,9 +14,9 @@
       <p class="page-lead">Analiza dos planes de corte lado a lado.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
+      <button type="button" class="btn btn-ayuda-seccion btn-text"
               onclick="iniciarTutorialSeccion('comparar')"
-              title="Ayuda" data-action="secondary">
+              title="Ayuda" data-action="text" data-icon="help">
         Cómo comparar resultados
       </button>
 
@@ -28,7 +28,7 @@
   <div class="card card-empty-state">
     <h2>Necesitas dos optimizaciones para comparar</h2>
     <p>Guarda al menos dos planes de corte para consultar sus diferencias.</p>
-    <a href="{% url 'cutless:index' %}" class="btn btn-primary" data-action="primary">Preparar un corte</a>
+    <a href="{% url 'cutless:index' %}" class="btn btn-primary" data-action="primary" data-icon="chevron-right">Preparar un corte</a>
   </div>
   {% elif not optimizacion1 or not optimizacion2 %}
   <div class="card comparison-selector mb-4 fade-in">
@@ -63,7 +63,7 @@
           </div>
         </div>
         <div class="text-center">
-          <button type="submit" class="btn btn-primary" data-action="primary">Comparar</button>
+          <button type="submit" class="btn btn-primary" data-action="primary" data-icon="chevron-right">Comparar</button>
         </div>
       </form>
     </div>
@@ -101,7 +101,7 @@
             {% endif %}
           </ul>
 
-          <a href="{% url 'cutless:resultado' optimizacion1.pk %}" class="btn w-100 btn-outline-secondary" data-action="secondary">Ver resultado</a>
+          <a href="{% url 'cutless:resultado' optimizacion1.pk %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="eye">Ver resultado</a>
         </div>
       </div>
     </div>
@@ -134,7 +134,7 @@
             {% endif %}
           </ul>
 
-          <a href="{% url 'cutless:resultado' optimizacion2.pk %}" class="btn w-100 btn-outline-secondary" data-action="secondary">Ver resultado</a>
+          <a href="{% url 'cutless:resultado' optimizacion2.pk %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="eye">Ver resultado</a>
         </div>
       </div>
     </div>
@@ -195,7 +195,7 @@
   </div>
 
   <div class="form-action-bar mb-4">
-    <a href="{% url 'cutless:comparar_optimizaciones' %}" class="btn btn-outline-secondary" data-action="secondary">Comparar otras optimizaciones</a>
+    <a href="{% url 'cutless:comparar_optimizaciones' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-right">Comparar otras optimizaciones</a>
   </div>
   {% endif %}
 {% endblock %}

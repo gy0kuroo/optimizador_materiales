@@ -90,7 +90,8 @@
         return fallback;
     };
 
-    window.descargarArchivo = async function (url, mensaje) {
+    window.descargarArchivo = async function (url, mensaje, boton) {
+        window.cutlessButtonLoading?.(boton, true);
         try {
             window.mostrarIndicadorCarga(mensaje || 'Generando archivo... Por favor espera.');
             var response = await fetch(url, {
@@ -124,6 +125,7 @@
                 alert('No se pudo descargar el archivo. Intenta de nuevo.');
             }
         } finally {
+            window.cutlessButtonLoading?.(boton, false);
             window.ocultarIndicadorCarga();
         }
     };
@@ -152,11 +154,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    var deleteForms = document.querySelectorAll('form.delete-form-inline, form[action*="borrar"], form[action*="eliminar"]');
+    var deleteForms = document.querySelectorAll('form[data-confirm-delete], form.delete-form-inline, form[action*="borrar"], form[action*="eliminar"], form:has(button[type="submit"][data-action="delete"])');
     deleteForms.forEach(attachDeleteConfirm);
 
     var descargaLinks = document.querySelectorAll(
-        'a[href*="descargar_pdf"], a[href*="descargar_excel"], a[href*="descargar_png"], a[href$=".pdf"], a[href$=".xlsx"], a[href$=".xls"]'
+        'a[data-carga-texto], a[href*="descargar_pdf"], a[href*="descargar_excel"], a[href*="descargar_png"], a[href$=".pdf"], a[href$=".xlsx"], a[href$=".xls"]'
     );
     descargaLinks.forEach(function (link) {
         if (link.href.includes('imprimir_plan_corte') || link.target === '_blank') {
@@ -167,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
             link.addEventListener('click', function (event) {
                 event.preventDefault();
                 var mensaje = this.dataset.cargaTexto || 'Descargando archivo... Por favor espera.';
-                window.descargarArchivo(this.href, mensaje);
+                window.descargarArchivo(this.href, mensaje, this);
             });
         }
     });

@@ -12,12 +12,12 @@
       <p class="page-lead">Estimación orientativa según piezas y tableros de la optimización #{{ optimizacion.id }}.</p>
     </div>
     <div class="page-header__actions">
-      <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
+      <button type="button" class="btn btn-ayuda-seccion btn-text"
               onclick="iniciarTutorialSeccion('calcular_tiempo')"
-              title="Ayuda" data-action="secondary">
+              title="Ayuda" data-action="text" data-icon="help">
         Ayuda
       </button>
-      <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary" data-action="secondary">Ver historial</a>
+      <a href="{% url 'cutless:historial' %}" class="btn btn-secondary" data-action="secondary" data-icon="eye">Ver historial</a>
     </div>
   </header>
 
@@ -171,8 +171,8 @@
           </div>
 
           <div class="form-action-bar mt-4">
-            <a href="{% url 'cutless:historial' %}" class="btn btn-outline-secondary" data-action="secondary">Ver historial</a>
-            <a href="{% url 'cutless:descargar_pdf' optimizacion.id %}" class="btn btn-outline-secondary" data-carga-texto="Descargando PDF..." data-action="secondary">📄 Descargar PDF</a>
+            <a href="{% url 'cutless:historial' %}" class="btn btn-secondary" data-action="secondary" data-icon="eye">Ver historial</a>
+            <a href="{% url 'cutless:descargar_pdf' optimizacion.id %}" class="btn btn-primary" data-carga-texto="Descargando PDF..." data-action="primary" data-icon="pdf"> Descargar PDF</a>
           </div>
         </div>
       </div>

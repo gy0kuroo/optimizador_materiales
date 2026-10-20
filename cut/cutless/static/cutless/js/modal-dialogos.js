@@ -26,8 +26,10 @@
             btnCancel.textContent = options.textoCancelar || 'Cancelar';
             var destructiva = options.destructiva === true;
             btnOk.classList.toggle('btn-danger', destructiva);
-            btnOk.classList.toggle('btn-primary', !destructiva);
-            btnOk.dataset.action = destructiva ? 'delete' : 'primary';
+            btnOk.classList.remove('btn-primary');
+            btnOk.classList.toggle('btn-success', !destructiva);
+            btnOk.dataset.icon = destructiva ? 'trash' : 'check';
+            btnOk.dataset.action = destructiva ? 'delete' : 'success';
 
             var soloAceptar = options.soloAceptar === true;
             if (soloAceptar) {

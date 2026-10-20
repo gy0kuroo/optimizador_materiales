@@ -34,8 +34,8 @@
     zoom = 1;
     previous.disabled = index === 0;
     next.disabled = index === sources.length - 1;
-    document.getElementById('history-board-position').textContent = `${index + 1} de ${sources.length}`;
-    document.getElementById('modalImagenLabel').textContent = `Tablero ${index + 1} de ${sources.length} · Optimización #${number}`;
+    document.getElementById('history-board-position').textContent = `Tablero ${index + 1} de ${sources.length}`;
+    document.getElementById('modalImagenLabel').textContent = `Optimización #${number}`;
     pieces.replaceChildren(); details.replaceChildren();
     element.classList.toggle('history-legacy', !panels[index]);
     if (panels[index]) {

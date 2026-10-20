@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plan de Corte #{{ numero_lista|default:optimizacion.id }}</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'cutless/css/imprimir_plan_corte.css' %}">
+    <link rel="stylesheet" href="{% static 'cutless/css/imprimir_plan_corte.css' %}?v=buttons-1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'cutless/css/print-preview-shell.css' %}" media="screen">
-</head>
-<body>
+    <link rel="stylesheet" href="{% static 'cutless/css/print-preview-shell.css' %}?v=buttons-1" media="screen">
+<link rel="stylesheet" href="{% static 'cutless/css/buttons.css' %}?v=2"></head>
+<body data-button-icons="{% static 'cutless/button-icons.svg' %}?v=2">
     <!-- Barra de herramientas (solo visible en pantalla) -->
     <div class="toolbar no-print">
         <div class="toolbar-content">
             <h4 class="toolbar-title">Plan de Corte - Optimización #{{ numero_lista|default:optimizacion.id }}</h4>
             <div class="toolbar-buttons">
-                <button onclick="window.print()" class="btn btn-print btn-outline-secondary" data-action="secondary">
+                <button onclick="window.print()" class="btn btn-print btn-secondary" data-action="secondary" data-icon="print">
                      Imprimir
                 </button>
-                <button onclick="window.close()" class="btn btn-return btn-outline-secondary" data-action="secondary">
+                <button onclick="window.close()" class="btn btn-return btn-secondary" data-action="secondary" data-icon="close">
                      Cerrar
                 </button>
             </div>
@@ -44,6 +44,6 @@
         // Descomenta la siguiente línea si quieres que se abra el diálogo de impresión automáticamente
         // window.onload = function() { window.print(); };
     </script>
-</body>
+<script src="{% static 'cutless/js/buttons.js' %}?v=2" defer></script></body>
 </html>
 

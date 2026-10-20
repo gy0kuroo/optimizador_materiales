@@ -19,17 +19,18 @@
     <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{% static 'cutless/css/main.css' %}">
     <link rel="stylesheet" href="{% static 'cutless/css/palette.css' %}">
-    <link rel="stylesheet" href="{% static 'cutless/css/ui.css' %}?v=2">
-    <link rel="stylesheet" href="{% static 'cutless/css/accessibility.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'cutless/css/ui.css' %}?v=panels-1">
+    <link rel="stylesheet" href="{% static 'cutless/css/accessibility.css' %}?v=panels-1">
     <link rel="stylesheet" href="{% static 'cutless/css/visual-refinement.css' %}?v=2">
 
     {% block extra_css %}{% endblock %}
-    <link rel="stylesheet" href="{% static 'cutless/css/help-redesign.css' %}?v=1">
-    <link rel="stylesheet" href="{% static 'cutless/css/action-semantics.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'cutless/css/help-redesign.css' %}?v=buttons-1">
+    <link rel="stylesheet" href="{% static 'cutless/css/action-semantics.css' %}?v=buttons-1">
     <link rel="stylesheet" href="{% static 'cutless/css/magnifier.css' %}?v=3">
-    <link rel="stylesheet" href="{% static 'cutless/css/reforma-visual.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'cutless/css/reforma-visual.css' %}?v=panels-1">
+    <link rel="stylesheet" href="{% static 'cutless/css/buttons.css' %}?v=3">
 </head>
-<body data-app-shell="{{ user.is_authenticated|yesno:'true,false' }}" class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
+<body data-button-icons="{% static 'cutless/button-icons.svg' %}?v=2" data-app-shell="{{ user.is_authenticated|yesno:'true,false' }}" class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
     {% block navigation %}
     <!-- Navegación -->
     <nav class="navbar navbar-expand-xl navbar-custom">
@@ -39,19 +40,19 @@
                     {% include 'cutless/includes/brand.html' %}
                 </a>
             </div>
-            <button class="navbar-toggler navbar-toggler-custom" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegación">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler navbar-toggler-custom btn btn-secondary btn-icon" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegación" data-action="secondary" data-icon="menu">
+
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 {% if user.is_authenticated %}<p class="nav-section-label">Espacio de trabajo</p>{% endif %}
                 <div class="navbar-nav ms-auto d-flex align-items-center">
                     {% if user.is_authenticated %}
-                        <a class="nav-link{% if request.resolver_match.url_name == 'index' %} active{% endif %}" href="{% url 'cutless:index' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Z"/><path d="M9 20v-7h6v7"/></svg>Inicio</a>
-                        <a class="nav-link{% if request.resolver_match.url_name == 'historial' %} active{% endif %}" href="{% url 'cutless:historial' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2 7M3 5v6h6"/><path d="M12 7v5l3 2"/></svg>Historial</a>
+                        <a data-action="secondary" class="nav-link btn btn-secondary{% if request.resolver_match.url_name == 'index' %} active{% endif %}" href="{% url 'cutless:index' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Z"/><path d="M9 20v-7h6v7"/></svg>Inicio</a>
+                        <a data-action="secondary" class="nav-link btn btn-secondary{% if request.resolver_match.url_name == 'historial' %} active{% endif %}" href="{% url 'cutless:historial' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2 7M3 5v6h6"/><path d="M12 7v5l3 2"/></svg>Historial</a>
                         {% if user.perfil.menu_visible.gestion %}
                         <div class="dropdown">
-                            <button class="nav-link dropdown-toggle" type="button" id="nav-gestion" data-bs-toggle="dropdown" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Gestión</button>
+                            <button class="nav-link dropdown-toggle btn btn-secondary" type="button" id="nav-gestion" data-bs-toggle="dropdown" aria-expanded="false" data-action="secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Gestión</button>
                             <ul class="dropdown-menu" aria-labelledby="nav-gestion">
                                 {% if user.perfil.menu_visible.materiales %}<li><a class="dropdown-item" href="{% url 'cutless:lista_materiales' %}">Materiales</a></li>{% endif %}
                                 {% if user.perfil.menu_visible.clientes %}<li><a class="dropdown-item" href="{% url 'cutless:lista_clientes' %}">Clientes</a></li>{% endif %}
@@ -63,7 +64,7 @@
                         {% endif %}
                         {% if user.perfil.menu_visible.analisis %}
                         <div class="dropdown">
-                            <button class="nav-link dropdown-toggle" type="button" id="nav-analisis" data-bs-toggle="dropdown" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 15V9m5 6V5m5 10v-4"/></svg>Análisis</button>
+                            <button class="nav-link dropdown-toggle btn btn-secondary" type="button" id="nav-analisis" data-bs-toggle="dropdown" aria-expanded="false" data-action="secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 15V9m5 6V5m5 10v-4"/></svg>Análisis</button>
                             <ul class="dropdown-menu" aria-labelledby="nav-analisis">
                                 {% if user.perfil.menu_visible.costos %}<li><a class="dropdown-item" href="{% url 'cutless:historial_costos' %}">Costos</a></li>{% endif %}
                                 {% if user.perfil.menu_visible.comparar %}<li><a class="dropdown-item" href="{% url 'cutless:comparar_optimizaciones' %}">Comparar optimizaciones</a></li>{% endif %}
@@ -71,9 +72,9 @@
                             </ul>
                         </div>
                         {% endif %}
-                        <button type="button" class="nav-link nav-help" id="btn-tutorial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M12 16v1"/></svg>Ayuda</button>
+                        <button type="button" class="nav-link nav-help btn btn-secondary" id="btn-tutorial" data-action="secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M12 16v1"/></svg>Ayuda</button>
                         <div class="dropdown nav-account">
-                            <button class="nav-link dropdown-toggle" type="button" id="nav-cuenta" data-bs-toggle="dropdown" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg><span class="nav-account-label">Cuenta · {{ user.username }}</span></button>
+                            <button class="nav-link dropdown-toggle btn btn-secondary" type="button" id="nav-cuenta" data-bs-toggle="dropdown" aria-expanded="false" data-action="secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg><span class="nav-account-label">Cuenta · {{ user.username }}</span></button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-cuenta">
                                 <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">Mi perfil</a></li>
                                 <li><a class="dropdown-item" href="{% url 'usuarios:configuracion_inicial' %}">Personalizar mi inicio</a></li>
@@ -88,8 +89,8 @@
                         </div>
                     {% else %}
                         {% block show_auth_buttons %}
-                        <a href="{% url 'usuarios:login' %}" class="btn btn-sm me-2 btn-outline-secondary" data-action="secondary">Iniciar sesión</a>
-                        <a href="{% url 'usuarios:registro' %}" class="btn btn-sm btn-outline-secondary" data-action="secondary">Registrarse</a>
+                        <a href="{% url 'usuarios:login' %}" class="btn btn-sm me-2 btn-secondary" data-action="secondary" data-icon="chevron-right">Iniciar sesión</a>
+                        <a href="{% url 'usuarios:registro' %}" class="btn btn-sm btn-secondary" data-action="secondary" data-icon="chevron-right">Registrarse</a>
                         {% endblock %}
                     {% endif %}
                 </div>
@@ -104,7 +105,7 @@
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn btn-icon btn-text" data-bs-dismiss="alert" aria-label="Close" data-action="text" data-icon="close"></button>
                 </div>
             {% endfor %}
         {% endif %}
@@ -119,12 +120,12 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="cutlessModalDialogoTitulo">¿Confirmar?</h5>
-                    <button type="button" class="btn-close" id="cutlessModalDialogoClose" aria-label="Cerrar"></button>
+                    <button type="button" class="btn btn-icon btn-text" id="cutlessModalDialogoClose" aria-label="Cerrar" data-action="text" data-icon="close"></button>
                 </div>
                 <div class="modal-body" id="cutlessModalDialogoCuerpo"></div>
                 <div class="modal-footer flex-nowrap">
-                    <button type="button" class="btn flex-grow-1 flex-sm-grow-0 btn-outline-secondary" id="cutlessModalDialogoCancel" data-action="secondary">Cancelar</button>
-                    <button type="button" class="btn flex-grow-1 flex-sm-grow-0 btn-primary" id="cutlessModalDialogoOk" data-action="primary">Aceptar</button>
+                    <button type="button" class="btn flex-grow-1 flex-sm-grow-0 btn-secondary" id="cutlessModalDialogoCancel" data-action="secondary" data-icon="chevron-left">Cancelar</button>
+                    <button type="button" class="btn flex-grow-1 flex-sm-grow-0 btn-primary" id="cutlessModalDialogoOk" data-action="primary" data-icon="chevron-right">Aceptar</button>
                 </div>
             </div>
         </div>
@@ -132,7 +133,7 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'cutless/js/modal-dialogos.js' %}?v=2"></script>
+    <script src="{% static 'cutless/js/modal-dialogos.js' %}?v=buttons-2"></script>
 
     <!-- Intro.js para tutorial interactivo -->
     <script src="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/intro.min.js"></script>
@@ -174,9 +175,9 @@
 
     <!-- JavaScript Personalizado -->
     <script src="{% static 'cutless/js/theme.js' %}?v=3"></script>
-    <script src="{% static 'cutless/js/confirmaciones.js' %}?v=2"></script>
+    <script src="{% static 'cutless/js/confirmaciones.js' %}?v=buttons-2"></script>
     {% if user.is_authenticated %}
-    <script src="{% static 'cutless/js/session-timeout.js' %}"></script>
+    <script src="{% static 'cutless/js/session-timeout.js' %}?v=panels-1"></script>
     {% endif %}
     {% if user.is_authenticated and not ocultar_tutorial %}
     <script>
@@ -958,10 +959,10 @@
                     <p class="mb-0"><small class="text-muted">Puedes acceder al tutorial en cualquier momento desde el botón "Ayuda" en el menú superior.</small></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" onclick="marcarTutorialCompletado(); bootstrap.Modal.getInstance(document.getElementById('modalBienvenida')).hide();" data-action="secondary">
+                    <button type="button" class="btn btn-secondary" onclick="marcarTutorialCompletado(); bootstrap.Modal.getInstance(document.getElementById('modalBienvenida')).hide();" data-action="secondary" data-icon="close">
                         Omitir
                     </button>
-                    <button type="button" class="btn btn-primary" onclick="iniciarTutorial();" data-action="primary">
+                    <button type="button" class="btn btn-primary" onclick="iniciarTutorial();" data-action="primary" data-icon="chevron-right">
                         Iniciar Tutorial
                     </button>
                 </div>
@@ -976,12 +977,11 @@
     <aside id="reading-magnifier" class="reading-magnifier" aria-label="Herramienta de ampliación">
       <div id="magnifier-hint" class="reading-magnifier__hint" hidden>Mueve el cursor para ampliar. Pulsa Esc para cerrar.</div>
       <div id="magnifier-options" class="reading-magnifier__controls" hidden>
-        <button type="button" class="btn btn-outline-secondary" data-action="secondary" data-magnifier-step="-0.5" aria-label="Reducir ampliación">−</button>
+        <button type="button" class="btn btn-secondary btn-icon" data-magnifier-step="-0.5" aria-label="Reducir ampliación" data-action="secondary" data-icon="minus"></button>
         <output id="magnifier-level" class="reading-magnifier__level" aria-label="Nivel de ampliación">200%</output>
-        <button type="button" class="btn btn-outline-secondary" data-action="secondary" data-magnifier-step="0.5" aria-label="Aumentar ampliación">+</button>
+        <button type="button" class="btn btn-secondary btn-icon" data-magnifier-step="0.5" aria-label="Aumentar ampliación" data-action="secondary" data-icon="plus"></button>
       </div>
-      <button type="button" id="magnifier-toggle" class="btn btn-outline-secondary" data-action="secondary" aria-pressed="false" aria-controls="magnifier-options magnifier-lens">
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m15 15 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <button type="button" id="magnifier-toggle" class="btn btn-secondary" aria-pressed="false" aria-controls="magnifier-options magnifier-lens" data-action="secondary" data-icon="search">
         Lupa
       </button>
       <span id="magnifier-status" class="visually-hidden" role="status"></span>
@@ -990,5 +990,6 @@
     <script src="{% static 'cutless/js/magnifier.js' %}?v=3" defer></script>
     {% endif %}
     <script src="{% static 'cutless/js/visual-shell.js' %}?v=1" defer></script>
+    <script src="{% static 'cutless/js/buttons.js' %}?v=2" defer></script>
 </body>
 </html>

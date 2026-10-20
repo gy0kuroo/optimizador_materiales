@@ -174,112 +174,7 @@
   gap: var(--cl-space-xs);
   line-height: 1;
 }
-
-/* Tamaños */
-.btn-sm  { padding: 6px 14px;  font-size: var(--cl-fs-xs); }
-.btn     { padding: 9px 20px;  font-size: var(--cl-fs-sm); }
-.btn-lg  { padding: 13px 28px; font-size: var(--cl-fs-md); }
-
-/* ── Primario (Azul) ──────────────────────────────────────── */
-.btn-primary {
-  background: var(--cl-blue);
-  color: var(--cl-text-on-blue);
-  border-color: var(--cl-blue);
-  box-shadow: var(--cl-shadow-blue);
-}
-.btn-primary:hover, .btn-primary:focus {
-  background: var(--cl-blue-dim);
-  border-color: var(--cl-blue-dim);
-  color: var(--cl-text-on-blue);
-  box-shadow: 0 6px 20px rgba(69,88,231,.45);
-  transform: translateY(-1px);
-}
-.btn-primary:active { transform: translateY(0); box-shadow: none; }
-
-/* ── Secundario (Walnut) ──────────────────────────────────── */
-.btn-secondary {
-  background: var(--cl-walnut);
-  color: var(--cl-text-on-dark);
-  border-color: var(--cl-walnut);
-}
-.btn-secondary:hover {
-  background: var(--cl-walnut-dark);
-  border-color: var(--cl-walnut-dark);
-  color: var(--cl-text-on-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(78,45,1,.4);
-}
-
-/* ── Outline Primario ─────────────────────────────────────── */
-.btn-outline-primary {
-  background: transparent;
-  color: var(--cl-blue);
-  border-color: var(--cl-blue);
-}
-.btn-outline-primary:hover {
-  background: var(--cl-blue);
-  color: var(--cl-text-on-blue);
-  box-shadow: var(--cl-shadow-blue);
-  transform: translateY(-1px);
-}
-
-/* ── Outline Secundario ───────────────────────────────────── */
-.btn-outline-secondary {
-  background: transparent;
-  color: var(--cl-text-secondary);
-  border-color: var(--cl-border-strong);
-}
-.btn-outline-secondary:hover {
-  background: var(--cl-ash-light);
-  color: var(--cl-text-primary);
-  border-color: var(--cl-olive);
-}
-
-/* ── Outline Success ──────────────────────────────────────── */
-.btn-outline-success {
-  background: transparent;
-  color: var(--cl-success);
-  border-color: var(--cl-success);
-}
-.btn-outline-success:hover {
-  background: var(--cl-success);
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-/* ── Danger ───────────────────────────────────────────────── */
-.btn-danger {
-  background: var(--cl-danger);
-  color: #fff;
-  border-color: var(--cl-danger);
-}
-.btn-danger:hover {
-  background: #9e2e22;
-  border-color: #9e2e22;
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-/* ── Ghost / enlace ───────────────────────────────────────── */
-.btn-link {
-  background: transparent;
-  color: var(--cl-blue);
-  border-color: transparent;
-  padding-left: 0; padding-right: 0;
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 600;
-  font-family: var(--cl-font-body);
-}
-.btn-link:hover {
-  color: var(--cl-cobalt);
-  text-decoration: underline;
-}
-
-/* ── Grupo de botones ─────────────────────────────────────── */
-.btn-group .btn:first-child { border-radius: var(--cl-radius-sm) 0 0 var(--cl-radius-sm); }
-.btn-group .btn:last-child  { border-radius: 0 var(--cl-radius-sm) var(--cl-radius-sm) 0; }
-.btn-group .btn:not(:first-child) { border-left-width: 1px; }
+.btn-link:hover { text-decoration: underline; }
 
 /* ══════════════════════════════════════════════════════════════
    FORMULARIOS
@@ -426,7 +321,7 @@
    MODALES
    ══════════════════════════════════════════════════════════════ */
 .modal-cutless-dialog .modal-content {
-  border: 1px solid var(--cl-border-strong);
+  border: 1px solid var(--cl-border);
   border-radius: var(--cl-radius-lg);
   background: var(--cl-bg-card);
   box-shadow: var(--cl-shadow-lg);
@@ -434,8 +329,8 @@
 }
 
 .modal-cutless-dialog .modal-header {
-  background: var(--cl-walnut);
-  border-bottom: none;
+  background: var(--cl-bg-card);
+  border-bottom: 1px solid var(--cl-border);
   padding: var(--cl-space-md) var(--cl-space-lg);
 }
 
@@ -443,19 +338,14 @@
   font-family: var(--cl-font-display);
   font-weight: 700;
   font-size: var(--cl-fs-lg);
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--cl-text-on-dark);
-}
-
-.modal-cutless-dialog .modal-header .btn-close {
-  filter: invert(1);
-  opacity: .7;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--cl-text-primary);
 }
 
 .modal-cutless-dialog .modal-body {
   padding: var(--cl-space-lg);
-  font-size: var(--cl-fs-sm);
+  font-size: 1rem;
   color: var(--cl-text-secondary);
   line-height: 1.7;
 }
@@ -463,13 +353,13 @@
 .modal-cutless-dialog .modal-footer {
   border-top: 1px solid var(--cl-border);
   padding: var(--cl-space-md) var(--cl-space-lg);
-  background: var(--cl-bg-surface);
+  background: var(--cl-bg-card);
   gap: var(--cl-space-sm);
 }
 
-/* Header azul para modales de info/bienvenida */
+/* Encabezado neutro también en modales informativos. */
 .modal-cutless-dialog .modal-header.bg-primary {
-  background: linear-gradient(135deg, var(--cl-cobalt), var(--cl-blue)) !important;
+  background: var(--cl-bg-card) !important;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -521,21 +411,6 @@
   text-transform: uppercase;
   letter-spacing: .06em;
   color: var(--cl-walnut) !important;
-}
-
-.introjs-button {
-  font-family: var(--cl-font-display) !important;
-  font-weight: 700 !important;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  border-radius: var(--cl-radius-sm) !important;
-  font-size: var(--cl-fs-xs) !important;
-}
-
-.introjs-button.introjs-nextbutton {
-  background: var(--cl-blue) !important;
-  border-color: var(--cl-blue) !important;
-  color: #fff !important;
 }
 
 /* ══════════════════════════════════════════════════════════════

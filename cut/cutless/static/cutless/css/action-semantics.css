@@ -1,49 +1,17 @@
 /* Contrato de acciones compartido por todas las pantallas.
    La semántica se declara en HTML, no se deduce del color ni del texto en JavaScript. */
-:root { --cl-action-danger: #A12A1F; }
-[data-theme="dark"] { --cl-action-danger: #FFB4AA; }
-.btn[data-action], .btn-action[data-action] {
-  min-height: 48px;
-  font: 600 1.0625rem/1.5 var(--cl-font-body) !important;
-  text-transform: none !important;
-  letter-spacing: normal !important;
-  white-space: normal;
-  text-decoration: none;
-}
-.btn[data-action="primary"] {
-  background: var(--cl-blue) !important;
-  color: #FFFFFF !important;
-  border-color: var(--cl-blue) !important;
-}
-.btn[data-action="primary"]:hover { background: var(--cl-cobalt) !important; border-color: var(--cl-cobalt) !important; }
-.btn[data-action="secondary"], .btn-action[data-action="secondary"] {
-  background: var(--cl-bg-card) !important;
-  color: var(--cl-text-primary) !important;
-  border: 1px solid var(--cl-border-strong) !important;
-  box-shadow: none;
-}
-.btn[data-action="secondary"]:hover, .btn-action[data-action="secondary"]:hover { background: var(--cl-bg-surface) !important; }
-.btn[data-action="delete"], .btn-action[data-action="delete"] {
-  background: var(--cl-bg-card) !important;
-  color: var(--cl-action-danger) !important;
-  border: 1px solid var(--cl-action-danger) !important;
-  box-shadow: none;
-}
-.btn[data-action="delete"]:hover, .btn-action[data-action="delete"]:hover { background: var(--cl-danger-bg) !important; }
-.btn.btn-danger[data-action="delete"] { background: var(--cl-danger) !important; color: #FFFFFF !important; border-color: var(--cl-danger) !important; }
-.btn.btn-danger[data-action="delete"]:hover { background: #9E2E22 !important; border-color: #9E2E22 !important; }
+:root { --cl-action-danger: var(--btn-danger); }
+
+.btn[data-action], .btn-action[data-action] { white-space: normal; text-decoration: none; }
 .dropdown-menu .dropdown-item[data-action="delete"] { color: var(--cl-action-danger) !important; }
 .dropdown-menu .dropdown-item[data-action="delete"]:hover { background: var(--cl-danger-bg) !important; }
-.btn[data-action="delete"] img { filter: brightness(0); }
-[data-theme="dark"] .btn[data-action="delete"] img { filter: brightness(0) invert(1); }
 .action-group { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .action-group > [data-action="delete"], .action-group > .action-delete-holder { margin-inline-start: auto; }
 .action-group > form { margin-bottom: 0; }
 .form-action-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; }
 .form-action-bar > [data-action="secondary"]:first-child { margin-inline-end: auto; }
 .form-action-bar > [data-action="delete"] { margin-inline-start: auto; }
-.btn[data-action]:focus-visible, .btn-action[data-action]:focus-visible { outline: 3px solid var(--cl-blue-light); outline-offset: 3px; }
-.btn[data-action]:disabled, .btn[data-action][aria-disabled="true"] { opacity: .55; cursor: not-allowed; box-shadow: none; transform: none; }
+.btn[data-action]:disabled, .btn[data-action][aria-disabled="true"] { cursor: not-allowed; }
 @media (max-width: 600px) {
   .action-group > [data-action="delete"], .action-group > .action-delete-holder { margin-inline-start: auto; }
   .form-action-bar > .btn { flex: 0 1 auto; }
@@ -54,22 +22,7 @@
 :root body .btn[data-action],
 :root body .btn-action[data-action],
 :root body #btnCostosToggle[data-action],
-:root body #add-pieza[data-action] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: .5rem;
-  box-sizing: border-box;
-  min-height: max(48px, 3.125rem) !important;
-  height: auto !important;
-  padding: .625rem 1rem !important;
-  border-width: 1px !important;
-  border-style: solid !important;
-  border-radius: 8px !important;
-  vertical-align: middle;
-  text-align: center;
-  max-width: 100%;
-}
+:root body #add-pieza[data-action] { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; vertical-align: middle; text-align: center; max-width: 100%; }
 :root body .page-header__actions,
 :root body .form-action-bar,
 :root body .action-group,
@@ -102,9 +55,4 @@
   font-weight: 400;
   text-transform: none;
   letter-spacing: normal;
-}
-/* Sobre fondos sólidos conservar el contraste blanco del botón. */
-:root body .btn[data-action="primary"] .text-annotation,
-:root body .btn.btn-danger[data-action="delete"] .text-annotation {
-  color: #FFFFFF;
 }

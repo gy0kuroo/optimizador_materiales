@@ -3,8 +3,8 @@
 {% block body_class %}dashboard-page{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'cutless/css/index.css' %}">
-<link rel="stylesheet" href="{% static 'cutless/css/dashboard-refinement.css' %}?v=5">
+<link rel="stylesheet" href="{% static 'cutless/css/index.css' %}?v=buttons-1">
+<link rel="stylesheet" href="{% static 'cutless/css/dashboard-refinement.css' %}?v=buttons-1">
 {% endblock %}
 
 {% block extra_js %}
@@ -15,7 +15,7 @@
     const materialData = JSON.parse(document.getElementById('materiales-data').textContent);
     window.materialData = materialData;
 </script>
-<script src="{% static 'cutless/js/medidas-pred.js' %}?v=2"></script>
+<script src="{% static 'cutless/js/medidas-pred.js' %}?v=buttons-1"></script>
 {% endblock %}
 
 {% block content %}
@@ -55,10 +55,10 @@
           <img src="{% static 'cutless/icons/tablero-outline.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
           1. Configura el tablero
         </h4>
-        <button type="button" class="btn btn-sm btn-ayuda-seccion ms-auto btn-outline-secondary"
+        <button type="button" class="btn btn-sm btn-ayuda-seccion ms-auto btn-text"
                 onclick="iniciarTutorialSeccion('tablero')"
-                title="Ayuda sobre dimensiones del tablero" aria-label="Cómo medir el tablero" data-action="secondary">
-          <img src="{% static 'cutless/icons/ayuda.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
+                title="Ayuda sobre dimensiones del tablero" aria-label="Cómo medir el tablero" data-action="text" data-icon="help">
+
           Ayuda
         </button>
       </div>
@@ -164,10 +164,10 @@
           <img src="{% static 'cutless/icons/pieza.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
           2. Añade las piezas
         </h4>
-        <button type="button" class="btn btn-sm btn-ayuda-seccion ms-auto btn-outline-secondary"
+        <button type="button" class="btn btn-sm btn-ayuda-seccion ms-auto btn-text"
                 onclick="iniciarTutorialSeccion('piezas')"
-                title="Cómo añadir piezas" data-action="secondary" aria-label="Cómo añadir piezas">
-          <img src="{% static 'cutless/icons/ayuda.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
+                title="Cómo añadir piezas" aria-label="Cómo añadir piezas" data-action="text" data-icon="help">
+
           Ayuda
         </button>
       </div>
@@ -183,8 +183,8 @@
                 <img src="{% static 'cutless/icons/pieza-outline.png' %}" alt="" class="cl-icon cl-icon--mini" onerror="this.style.display='none'">
                 Tipo de pieza <span class="pieza-numero">{{ forloop.counter }}</span>
               </h5>
-              <button type="button" class="btn btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %} btn-outline-danger" data-action="delete">
-                <img src="{% static 'cutless/icons/eliminar.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
+              <button type="button" class="btn btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %} btn-danger" data-action="delete" data-icon="trash">
+
                 Eliminar
               </button>
             </div>
@@ -216,8 +216,8 @@
           {% endfor %}
         </div>
 
-        <button type="button" id="add-pieza" class="btn btn-outline-secondary" data-action="secondary">
-          <img src="{% static 'cutless/icons/agregar.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
+        <button type="button" id="add-pieza" class="btn btn-secondary" data-action="secondary" data-icon="plus">
+
           Añadir otro tipo de pieza
         </button>
       </div>
@@ -231,8 +231,8 @@
           <img src="{% static 'cutless/icons/costos.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
           Costos y datos del proyecto <span class="text-annotation">(opcional)</span>
         </h4>
-        <button id="btnCostosToggle" class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#costosCollapse" aria-expanded="false" aria-controls="costosCollapse" data-action="secondary">
-          <span id="costosToggleIcon">+</span> Añadir costos y datos
+        <button id="btnCostosToggle" class="btn btn-sm btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#costosCollapse" aria-expanded="false" aria-controls="costosCollapse" data-action="secondary" data-icon="plus">
+          Añadir costos y datos
         </button>
       </div>
       <div id="costosCollapse" class="collapse">
@@ -247,9 +247,9 @@
                 <div class="text-danger">{{ tablero_form.material.errors }}</div>
               {% endif %}
               <div class="mt-2">
-                <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-sm btn-outline-secondary" target="_blank" data-action="secondary">
-                  <img src="{% static 'cutless/icons/material.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
-                  Gestionar materiales <span class="text-annotation">(otra pestaña)</span>
+                <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-sm btn-secondary" target="_blank" data-action="secondary" title="Se abre en otra pestaña" data-icon="chevron-right">
+
+                  Gestionar materiales
                 </a>
               </div>
             </div>
@@ -317,8 +317,8 @@
     </div>    {% endif %}
     <!-- Botón de envío -->
     <div class="form-action-bar fade-in">
-      <button type="submit" class="btn btn-lg btn-cta-primary btn-primary" data-action="primary">
-        <img src="{% static 'cutless/icons/calcular.svg' %}" alt="" class="cl-icon cl-icon--cta" onerror="this.style.display='none'">
+      <button type="submit" class="btn btn-cta-primary btn-primary" data-action="primary" data-icon="layout">
+
         Generar plan de corte
       </button>
       <p class="form-action-hint">
@@ -407,11 +407,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (btnCostosToggle && costosCollapse) {
         costosCollapse.addEventListener('shown.bs.collapse', function() {
-            btnCostosToggle.innerHTML = '&#x2212; Ocultar costos y datos'; // menos
+            btnCostosToggle.textContent = 'Ocultar costos y datos';
+            btnCostosToggle.dataset.icon = 'minus'; // menos
         });
 
         costosCollapse.addEventListener('hidden.bs.collapse', function() {
-            btnCostosToggle.innerHTML = '+ Añadir costos y datos';
+            btnCostosToggle.textContent = 'Añadir costos y datos';
+            btnCostosToggle.dataset.icon = 'plus';
         });
     }
 

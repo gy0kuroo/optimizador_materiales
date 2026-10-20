@@ -163,3 +163,7 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Visor horizontal: disposición, cotas y correspondencia de piezas](docs/CAMBIOS_VISOR_HORIZONTAL.md)
 
 - [Historial: mismo visor horizontal que el resultado](docs/CAMBIOS_HISTORIAL_HORIZONTAL.md)
+
+- [Sistema compartido de botones y estados](docs/CAMBIOS_SISTEMA_BOTONES.md)
+
+- [Paneles neutros y vista previa coherente](docs/CAMBIOS_PANELES_NEUTROS.md)
