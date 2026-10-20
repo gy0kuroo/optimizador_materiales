@@ -1,0 +1,2 @@
+# Entrada desde la raíz del repositorio. La lista se mantiene en cut/.
+-r cut/requirements.txt

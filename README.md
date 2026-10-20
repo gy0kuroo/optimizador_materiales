@@ -10,7 +10,9 @@ Necesitas Python (entorno comprobado: 3.13), pip y Git. Desde PowerShell:
 git clone https://github.com/gy0kuroo/optimizador_materiales.git
 cd optimizador_materiales
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r cut/requirements.txt
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip check
 .\.venv\Scripts\python.exe cut/manage.py migrate
 .\.venv\Scripts\python.exe cut/manage.py check
 .\.venv\Scripts\python.exe cut/manage.py createsuperuser
@@ -18,6 +20,8 @@ python -m venv .venv
 ```
 
 Si ya tienes el proyecto, abre la terminal en la carpeta que contiene este README y omite la clonación. Usar directamente el ejecutable del entorno evita activar scripts en PowerShell.
+
+`-r` indica que pip debe leer un archivo con la lista de dependencias. `pip install requirements` busca un paquete llamado `requirements` y no instala las dependencias del proyecto. Desde la raíz usa el comando anterior; desde la carpeta `cut`, usa `python -m pip install -r requirements.txt` con el Python de tu entorno virtual. El archivo de la raíz enlaza la lista de `cut/requirements.txt`, sin duplicar versiones.
 
 Abre [CutLess](http://127.0.0.1:8000/) o [iniciar sesión](http://127.0.0.1:8000/usuarios/login/). La aplicación está en `/cutless/` y el administrador Django en `/admin/`. Ctrl+C detiene el servidor.
 
@@ -146,6 +150,7 @@ El margen se introduce en milímetros: 0 permite corte sin separación; el valor
 
 Git ignora nuevos datos locales, pero los archivos ya versionados siguen en seguimiento. Su retirada y revisión del historial quedan pendientes.
 
+- [Instalación de dependencias desde la raíz](docs/CAMBIOS_DEPENDENCIAS.md)
 - [Configuración inicial del espacio de trabajo](docs/CAMBIOS_CONFIGURACION_INICIAL.md)
 - [Resultado legible y visor de tableros](docs/CAMBIOS_VISOR_TABLEROS.md)
 - [Consistencia de colores y acciones](docs/CAMBIOS_CONSISTENCIA_ACCIONES.md)
