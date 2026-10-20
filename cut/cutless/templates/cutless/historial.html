@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'cutless/css/historial.css' %}">
-<link rel="stylesheet" href="{% static 'cutless/css/history-result-refinement.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'cutless/css/history-result-refinement.css' %}?v=3">
 {% endblock %}
 
 {% block content %}
@@ -316,194 +316,37 @@
     </div>
   {% endif %}
 
-    <!-- Modal para imágenes en pantalla completa -->
-    <div class="modal fade" id="modalImagen" tabindex="-1" aria-labelledby="modalImagenLabel" aria-hidden="true">
-      <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-          <div class="modal-header modal-header-app">
-            <h5 class="modal-title" id="modalImagenLabel">Tableros en Pantalla Completa</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Visor del historial: controles horizontales y desplazamiento nativo. -->
+    <div class="modal fade history-board-viewer" id="modalImagen" tabindex="-1" aria-labelledby="modalImagenLabel" aria-hidden="true">
+      <div class="modal-dialog modal-fullscreen"><div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalImagenLabel">Tableros de la optimización</h2>
+          <button type="button" class="btn btn-outline-secondary" data-action="secondary" data-bs-dismiss="modal">Volver al historial</button>
+        </div>
+        <div class="board-toolbar" aria-label="Controles del visor">
+          <div class="history-board-navigation">
+            <button type="button" id="history-board-previous" class="btn btn-outline-secondary" data-action="secondary">Tablero anterior</button>
+            <output id="history-board-position" aria-live="polite">Cargando…</output>
+            <button type="button" id="history-board-next" class="btn btn-outline-secondary" data-action="secondary">Tablero siguiente</button>
           </div>
-          <div class="modal-body text-center modal-grafico-body">
-            <div class="row h-100">
-              <div class="col-10">
-                <div id="modalImagenContenido" class="d-flex align-items-center justify-content-center gap-3 modal-imagen-contenido">
-                  <!-- Las imágenes se cargarán aquí lado a lado -->
-                </div>
-              </div>
-              <div class="col-2 d-flex flex-column justify-content-center align-items-center zoom-controls">
-                <label for="zoomSliderImagen" class="text-white mb-2 zoom-label">Zoom</label>
-                <input type="range"
-                       class="form-range zoom-slider"
-                       id="zoomSliderImagen"
-                       min="30"
-                       max="200"
-                       value="100"
-                       step="5">
-                <span id="zoomValueImagen" class="text-white mt-2 zoom-value">100%</span>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer modal-footer-app">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" data-action="secondary">Cerrar</button>
-            <button type="button" class="btn btn-primary" onclick="resetearZoomImagen()" data-action="primary">Resetear Zoom</button>
+          <div class="history-board-navigation" aria-label="Ampliación del tablero">
+            <button type="button" id="history-board-out" class="btn btn-outline-secondary" data-action="secondary" aria-label="Reducir tablero">−</button>
+            <output id="history-board-zoom">100%</output>
+            <button type="button" id="history-board-in" class="btn btn-outline-secondary" data-action="secondary" aria-label="Ampliar tablero">+</button>
+            <button type="button" id="history-board-fit" class="btn btn-outline-secondary" data-action="secondary">Ajustar tablero</button>
           </div>
         </div>
-      </div>
+        <div class="modal-body">
+          <p>Amplía con + y recorre el dibujo con las barras de desplazamiento o deslizando con el dedo.</p>
+          <div id="history-board-status" role="status"></div>
+          <div id="history-board-viewport" tabindex="0" aria-label="Dibujo ampliado del tablero">
+            <div id="history-board-canvas"><img id="history-board-image" alt="" hidden></div>
+          </div>
+        </div>
+      </div></div>
     </div>
-
+    <script src="{% static 'cutless/js/history-board-viewer.js' %}?v=1" defer></script>
 <script>
-function abrirModalImagen(urlImagen, optimizacionId, optimizacionNumero) {
-    const modal = new bootstrap.Modal(document.getElementById('modalImagen'));
-    const contenido = document.getElementById('modalImagenContenido');
-    const titulo = document.getElementById('modalImagenLabel');
-
-    // Limpiar contenido anterior
-    contenido.innerHTML = '<div class="text-white">Cargando tableros...</div>';
-
-    // Cargar todas las imágenes de la optimización via AJAX
-    fetch(`/cutless/api/tableros/${optimizacionId}/`)
-        .then(response => response.json())
-        .then(data => {
-            contenido.innerHTML = '';
-
-            const numeroAMostrar = optimizacionNumero || optimizacionId;
-            if (data.imagenes && data.imagenes.length > 0) {
-                titulo.textContent = `Tableros (${data.imagenes.length}) - Optimización #${numeroAMostrar}`;
-
-                data.imagenes.forEach((imgBase64, idx) => {
-                    const contenedorImagen = document.createElement('div');
-                    contenedorImagen.className = 'tablero-modal-item';
-                    contenedorImagen.style.flex = '0 0 auto';
-                    contenedorImagen.style.textAlign = 'center';
-
-                    const label = document.createElement('div');
-                    label.className = 'text-white mb-2';
-                    label.innerHTML = `<strong>Tablero ${idx + 1} de ${data.imagenes.length}</strong>`;
-
-                    const img = document.createElement('img');
-                    img.src = `data:image/png;base64,${imgBase64}`;
-                    img.alt = `Tablero ${idx + 1}`;
-                    img.style.maxHeight = '80vh';
-                    img.style.maxWidth = data.imagenes.length > 1 ? '45vw' : '90vw';
-                    img.style.objectFit = 'contain';
-                    img.style.border = '2px solid #444';
-                    img.style.borderRadius = '8px';
-
-                    contenedorImagen.appendChild(label);
-                    contenedorImagen.appendChild(img);
-                    contenido.appendChild(contenedorImagen);
-                });
-            } else {
-                // Fallback: mostrar imagen guardada
-                titulo.textContent = `Tablero - Optimización #${optimizacionId}`;
-                const img = document.createElement('img');
-                img.src = urlImagen;
-                img.alt = `Optimización #${optimizacionId}`;
-                img.style.maxHeight = '85vh';
-                img.style.maxWidth = '90vw';
-                img.style.objectFit = 'contain';
-                contenido.appendChild(img);
-            }
-        })
-        .catch(error => {
-            // En caso de error, mostrar la imagen guardada
-            contenido.innerHTML = '';
-            const numeroAMostrar = optimizacionNumero || optimizacionId;
-            titulo.textContent = `Tablero - Optimización #${numeroAMostrar}`;
-            const img = document.createElement('img');
-            img.src = urlImagen;
-            img.alt = `Optimización #${optimizacionId}`;
-            img.style.maxHeight = '85vh';
-            img.style.maxWidth = '90vw';
-            img.style.objectFit = 'contain';
-            contenido.appendChild(img);
-        });
-
-    modal.show();
-}
-
-function resetearZoomImagen() {
-    const contenido = document.getElementById('modalImagenContenido');
-    const zoomSlider = document.getElementById('zoomSliderImagen');
-    if (contenido && zoomSlider) {
-        modalZoomLevel = 1;
-        modalTranslateX = 0;
-        modalTranslateY = 0;
-        zoomSlider.value = 100;
-        contenido.style.transform = 'scale(1) translate(0px, 0px)';
-        document.getElementById('zoomValueImagen').textContent = '100%';
-    }
-}
-
-// Variables globales para el arrastre y zoom
-let modalZoomLevel = 1;
-let modalIsDragging = false;
-let modalStartX, modalStartY;
-let modalTranslateX = 0, modalTranslateY = 0;
-
-// Configurar slider de zoom cuando el modal se muestra
-document.getElementById('modalImagen').addEventListener('shown.bs.modal', function() {
-    const zoomSlider = document.getElementById('zoomSliderImagen');
-    const contenido = document.getElementById('modalImagenContenido');
-
-    // Resetear valores
-    modalZoomLevel = 1;
-    modalTranslateX = 0;
-    modalTranslateY = 0;
-    zoomSlider.value = 100;
-    contenido.style.transform = 'scale(1) translate(0px, 0px)';
-    contenido.style.transformOrigin = 'center center';
-    contenido.style.cursor = 'grab';
-
-    zoomSlider.oninput = function() {
-        const zoomPercent = parseInt(this.value);
-        modalZoomLevel = zoomPercent / 100;
-        contenido.style.transform = `scale(${modalZoomLevel}) translate(${modalTranslateX}px, ${modalTranslateY}px)`;
-        document.getElementById('zoomValueImagen').textContent = zoomPercent + '%';
-    };
-});
-
-// Eventos de arrastre solo en el contenido de imágenes
-document.addEventListener('mousedown', function(e) {
-    const contenido = document.getElementById('modalImagenContenido');
-
-    // No activar arrastre si se hace click en el slider o sus controles
-    if (e.target.closest('.zoom-controls')) {
-        return;
-    }
-
-    if (contenido && contenido.contains(e.target)) {
-        modalIsDragging = true;
-        modalStartX = e.clientX;
-        modalStartY = e.clientY;
-        contenido.style.cursor = 'grabbing';
-        e.preventDefault();
-    }
-});
-
-document.addEventListener('mousemove', function(e) {
-    if (!modalIsDragging) return;
-    const contenido = document.getElementById('modalImagenContenido');
-    if (contenido) {
-        const dx = (e.clientX - modalStartX) / modalZoomLevel;
-        const dy = (e.clientY - modalStartY) / modalZoomLevel;
-        modalStartX = e.clientX;
-        modalStartY = e.clientY;
-        modalTranslateX += dx;
-        modalTranslateY += dy;
-        contenido.style.transform = `scale(${modalZoomLevel}) translate(${modalTranslateX}px, ${modalTranslateY}px)`;
-    }
-});
-
-document.addEventListener('mouseup', function() {
-    if (modalIsDragging) {
-        modalIsDragging = false;
-        const contenido = document.getElementById('modalImagenContenido');
-        if (contenido) contenido.style.cursor = 'grab';
-    }
-});
-
 // Función para obtener el token CSRF de las cookies
 function getCookie(name) {
     let cookieValue = null;

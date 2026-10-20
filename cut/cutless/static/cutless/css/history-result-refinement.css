@@ -65,3 +65,18 @@ body.review-page { font-size: 1.125rem; line-height: 1.65; }
   line-height: 1.5;
   vertical-align: baseline;
 }
+
+.history-board-viewer .modal-content { background: var(--cl-bg-card); color: var(--cl-text-primary); }
+.history-board-viewer .modal-header { background: var(--cl-bg-surface); border-color: var(--cl-border); padding: 16px 24px; gap: 12px; flex-wrap: wrap; }
+.history-board-viewer .modal-title { font: 700 1.4rem/1.5 var(--cl-font-body); color: var(--cl-text-primary); }
+.history-board-viewer .board-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 24px; border-bottom: 1px solid var(--cl-border); }
+.history-board-navigation { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.history-board-navigation output { min-width: 64px; text-align: center; font-weight: 600; }
+.history-board-viewer .modal-body { display: flex; flex-direction: column; min-height: 0; overflow: hidden; padding: 16px 24px; }
+.history-board-viewer .modal-body > p { font-size: 1rem; color: var(--cl-text-secondary); }
+#history-board-viewport { flex: 1; min-height: 0; overflow: auto; padding: 16px; border: 1px solid var(--cl-border); border-radius: 10px; background: #FFFFFF; }
+#history-board-canvas { margin: 0 auto; }
+#history-board-image { display: block; width: 100%; height: 100%; max-width: none; object-fit: contain; }
+#history-board-image[hidden] { display: none; }
+#history-board-viewport:focus-visible { outline: 3px solid var(--cl-blue-light); outline-offset: 2px; }
+@media(max-width:600px) { .history-board-viewer .board-toolbar, .history-board-viewer .modal-body, .history-board-viewer .modal-header { padding: 12px; } }
