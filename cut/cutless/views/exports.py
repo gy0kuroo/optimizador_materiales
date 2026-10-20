@@ -9,6 +9,7 @@ from ..services import (
     convertir_info_desperdicio_unidad,
     nombre_descarga_excel,
     obtener_resultado_optimizacion,
+    preparar_contexto_resultado,
     respuesta_png_tablero,
     respuesta_pdf_optimizacion,
 )
@@ -66,21 +67,29 @@ def descargar_excel(request, pk):
 
 def api_tableros_optimizacion(request, pk):
     """
-    API que retorna todas las imágenes de tableros de una optimización en base64.
+    Imágenes guardadas y, opcionalmente, su presentación web compartida.
     """
     from django.http import JsonResponse
 
     optimizacion = get_object_or_404(Optimizacion, pk=pk, usuario=request.user)
-    imagenes_base64, _, _ = obtener_resultado_optimizacion(
+    imagenes_base64, _, info = obtener_resultado_optimizacion(
         optimizacion,
         persistir_si_falta=True,
     )
 
-    return JsonResponse({
+    respuesta = {
         'success': True,
         'imagenes': imagenes_base64,
         'total': len(imagenes_base64)
-    })
+    }
+    if request.GET.get('presentacion') == 'horizontal':
+        from django.template.loader import render_to_string
+        contexto = preparar_contexto_resultado(optimizacion, imagenes_base64, info)
+        respuesta['paneles'] = [
+            render_to_string('cutless/includes/board-layout.html', {**contexto, 'item': item}, request=request)
+            for item in contexto['tableros_con_imagenes']
+        ]
+    return JsonResponse(respuesta)
 
 def descargar_pdf(request, pk):
     optimizacion = get_object_or_404(Optimizacion, pk=pk, usuario=request.user)

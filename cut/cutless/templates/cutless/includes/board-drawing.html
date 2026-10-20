@@ -1,0 +1,20 @@
+{% load l10n %}
+        {% if item.plano %}{% with plano=item.plano %}
+        <svg class="board-drawing" viewBox="{{ plano.origen|unlocalize }} {{ plano.origen|unlocalize }} {{ plano.vista_ancho|unlocalize }} {{ plano.vista_alto|unlocalize }}" role="img" aria-label="Tablero horizontal {{ plano.cota_ancho }} por {{ plano.cota_alto }} {{ unidad_medida }}" xmlns="http://www.w3.org/2000/svg">
+          <defs><pattern id="scrap-{{ item.numero }}" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M-1 1L1-1M0 4L4 0M3 5L5 3" stroke="#263238" stroke-width=".25" opacity=".35"/></pattern></defs>
+          <rect width="{{ plano.ancho|unlocalize }}" height="{{ plano.alto|unlocalize }}" fill="#F4F3EE" stroke="#4E2D01" stroke-width="2" vector-effect="non-scaling-stroke"/>
+          <g class="board-dimensions" font-size="{{ plano.texto_cota|unlocalize }}" text-anchor="middle">
+            <path d="M0 {{ plano.cota|unlocalize }}H{{ plano.ancho|unlocalize }}M0 {{ plano.cota|unlocalize }}V0M{{ plano.ancho|unlocalize }} {{ plano.cota|unlocalize }}V0M{{ plano.cota|unlocalize }} 0V{{ plano.alto|unlocalize }}M{{ plano.cota|unlocalize }} 0H0M{{ plano.cota|unlocalize }} {{ plano.alto|unlocalize }}H0" fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke"/>
+            <text x="{{ plano.centro_x|unlocalize }}" y="{{ plano.cota|unlocalize }}" dy="-.45em">{{ plano.cota_ancho|floatformat:2 }} {{ unidad_medida }}</text>
+            <text transform="translate({{ plano.cota|unlocalize }} {{ plano.centro_y|unlocalize }}) rotate(-90)" dy="-.45em">{{ plano.cota_alto|floatformat:2 }} {{ unidad_medida }}</text>
+          </g>
+          {% for resto in plano.sobrantes %}
+          <rect x="{{ resto.x|unlocalize }}" y="{{ resto.y|unlocalize }}" width="{{ resto.ancho|unlocalize }}" height="{{ resto.alto|unlocalize }}" fill="url(#scrap-{{ item.numero }})"/>
+          <text x="{{ resto.cx|unlocalize }}" y="{{ resto.cy|unlocalize }}" font-size="{{ resto.texto|unlocalize }}" text-anchor="middle" fill="#1C1008"><tspan x="{{ resto.cx|unlocalize }}" dy="-.25em">Sobrante</tspan><tspan x="{{ resto.cx|unlocalize }}" dy="1.3em">{{ resto.medida_ancho|floatformat:2 }} × {{ resto.medida_alto|floatformat:2 }} {{ unidad_medida }}</tspan></text>
+          {% endfor %}
+          {% for pieza in plano.piezas %}
+          <rect x="{{ pieza.x|unlocalize }}" y="{{ pieza.y|unlocalize }}" width="{{ pieza.ancho|unlocalize }}" height="{{ pieza.alto|unlocalize }}" fill="{{ pieza.color }}" stroke="#263238" stroke-width="1.5" vector-effect="non-scaling-stroke"><title>P{{ pieza.numero }} · {{ pieza.nombre }} · {{ pieza.medida_ancho }} × {{ pieza.medida_alto }} {{ unidad_medida }}</title></rect>
+          <text x="{{ pieza.cx|unlocalize }}" y="{{ pieza.cy|unlocalize }}" font-size="{{ pieza.texto|unlocalize }}" text-anchor="middle" fill="#1C1008"><tspan x="{{ pieza.cx|unlocalize }}" dy="-1.1em" font-weight="700">P{{ pieza.numero }}</tspan><tspan x="{{ pieza.cx|unlocalize }}" dy="1.25em">{{ pieza.nombre }}</tspan><tspan x="{{ pieza.cx|unlocalize }}" dy="1.25em">{{ pieza.medida_ancho|floatformat:2 }} × {{ pieza.medida_alto|floatformat:2 }} {{ unidad_medida }}</tspan></text>
+          {% endfor %}
+        </svg>{% endwith %}
+        {% else %}<img class="board-drawing board-legacy" src="data:image/png;base64,{{ item.imagen }}" alt="Distribución guardada del tablero {{ item.numero }}">{% endif %}

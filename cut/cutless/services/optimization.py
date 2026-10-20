@@ -10,6 +10,8 @@ from django.http import FileResponse
 from django.db import transaction
 from django.utils import timezone
 
+from .board_presentation import preparar_plano_horizontal
+
 from ..models import Optimizacion, TableroOptimizacion
 from ..exports.pdf import generar_pdf
 from ..packing import normalizar_info_desperdicio
@@ -370,7 +372,8 @@ def preparar_contexto_resultado(optimizacion, imagenes_base64, info_desperdicio,
         if vista_web:
             catalogo = [{**pieza,
                          'ancho': convertir_desde_cm(pieza['ancho'], unidad),
-                         'alto': convertir_desde_cm(pieza['alto'], unidad)}
+                         'alto': convertir_desde_cm(pieza['alto'], unidad),
+                         'area_m2': pieza['ancho'] * pieza['alto'] * pieza['cantidad'] / 10000}
                         for pieza in vista_web['catalogo']]
         tableros_con_imagenes.append({
             'numero': info['numero'],
@@ -378,6 +381,8 @@ def preparar_contexto_resultado(optimizacion, imagenes_base64, info_desperdicio,
             'info': info,
             'vista_web': vista_web,
             'catalogo': catalogo,
+            'plano': preparar_plano_horizontal(vista_web, unidad, optimizacion.margen_corte),
+            'desperdicio_porcentaje': max(0, 100 - info.get('porcentaje_uso', 0)),
         })
 
     num_tableros = len(imagenes_base64)
@@ -397,6 +402,7 @@ def preparar_contexto_resultado(optimizacion, imagenes_base64, info_desperdicio,
         'info_desperdicio': info_desperdicio_mostrar,
         'tableros_con_imagenes': tableros_con_imagenes,
         'unidad_medida': unidad,
+        'margen_mm': optimizacion.margen_corte * 10,
         'ancho_tablero_mostrar': convertir_desde_cm(optimizacion.ancho_tablero, unidad),
         'alto_tablero_mostrar': convertir_desde_cm(optimizacion.alto_tablero, unidad),
         'simbolo_area': simbolo_area,

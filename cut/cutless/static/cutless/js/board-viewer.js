@@ -40,10 +40,15 @@
 
     function render(index) {
         current = index;
+        document.dispatchEvent(new CustomEvent('cutless:board-selected', {detail: {index}}));
         const card = cards[index];
         drawing = card.querySelector('.board-drawing').cloneNode(true);
         canvas.replaceChildren(drawing);
         data.replaceChildren(card.querySelector('.board-data').cloneNode(true));
+        const pieces = card.querySelector('.cut-pieces');
+        const canvasSection = element.querySelector('.board-canvas-section');
+        canvasSection.querySelector(':scope > .cut-pieces')?.remove();
+        if (pieces) canvasSection.append(pieces.cloneNode(true));
         document.getElementById('modalTableroLabel').textContent = `Tablero ${index + 1} de ${cards.length}`;
         document.getElementById('board-position').textContent = `${index + 1} de ${cards.length}`;
         previous.disabled = index === 0;

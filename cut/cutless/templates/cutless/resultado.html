@@ -6,6 +6,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'cutless/css/resultado.css' %}?v=2">
 <link rel="stylesheet" href="{% static 'cutless/css/history-result-refinement.css' %}?v=3">
+<link rel="stylesheet" href="{% static 'cutless/css/board-landscape.css' %}?v=3">
 {% endblock %}
 
 {% block content %}
@@ -18,6 +19,16 @@
       </p>
     </div>
     <div class="page-header__actions">
+    <a href="{% url 'cutless:descargar_pdf' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-primary" data-carga-texto="Descargando PDF..." data-action="primary">
+      Descargar PDF
+    </a>
+    <a href="{% url 'cutless:descargar_excel' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-outline-secondary" data-carga-texto="Generando archivo Excel..." data-action="secondary">
+      Descargar Excel
+    </a>
+    <a href="{% url 'cutless:imprimir_plan_corte' optimizacion.id %}" class="btn btn-outline-secondary" target="_blank" data-action="secondary">
+      Imprimir <span class="text-annotation">(otra pestaña)</span>
+    </a>
+
       <button type="button" class="btn btn-ayuda-seccion btn-outline-secondary"
               onclick="iniciarTutorialSeccion('resultado')"
               title="Ayuda sobre resultado de optimización" data-action="secondary">
@@ -26,46 +37,85 @@
     </div>
   </header>
 
-  <!-- Resumen general -->
-  <div class="row fade-in">
-    <div class="col-md-4 mb-3">
-      <div class="card text-center metric-card
-           {% if optimizacion.aprovechamiento_total < 30 %}metric-card--danger
-           {% elif optimizacion.aprovechamiento_total < 60 %}metric-card--warning
-           {% else %}metric-card--success{% endif %}">
-        <div class="card-body">
-          <h5 class="card-title mb-3">Aprovechamiento</h5>
-          <p class="metric-value">{{ optimizacion.aprovechamiento_total|stringformat:".2f" }}%</p>
-        </div>
+  <section data-board-deck aria-label="Planos de corte">
+    <div class="board-deck-controls" hidden>
+      <div class="board-deck-heading"><h2>Distribución de las piezas</h2><p>Recorre los tableros sin perder de vista sus medidas.</p></div>
+      <div class="board-deck-navigation">
+        <button type="button" class="btn btn-outline-secondary" id="deck-previous" data-action="secondary" aria-label="Ver tablero anterior">← Anterior</button>
+        <output id="deck-position" aria-live="polite">Tablero 1 de {{ num_tableros }}</output>
+        <button type="button" class="btn btn-outline-secondary" id="deck-next" data-action="secondary" aria-label="Ver tablero siguiente">Siguiente →</button>
       </div>
     </div>
-    <div class="col-md-4 mb-3">
-      <div class="card text-center metric-card metric-card--info">
-        <div class="card-body">
-          <h5 class="card-title mb-3">Área utilizada</h5>
-          <p class="metric-value">{{ info_desperdicio.area_usada_total|stringformat:".1f" }} <small>{{ simbolo_area|default:"cm²" }}</small></p>
+    <div class="board-pages">
+    {% for item in tableros_con_imagenes %}
+    <div class="board-page">
+      <article class="board-card cut-board" data-board="{{ item.numero }}">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Tablero {{ item.numero }} de {{ num_tableros }}</h5>
+          <a href="{% url 'cutless:descargar_png_tablero' optimizacion.id item.numero %}" class="btn btn-outline-secondary" data-carga-texto="Generando imagen..." data-action="secondary">Descargar PNG</a>
         </div>
-      </div>
+        {% include 'cutless/includes/board-layout.html' %}
+      </article>
     </div>
-    <div class="col-md-4 mb-3">
-      <div class="card text-center metric-card
-           {% if optimizacion.aprovechamiento_total < 30 %}metric-card--danger
-           {% elif optimizacion.aprovechamiento_total < 60 %}metric-card--warning
-           {% else %}metric-card--success{% endif %}">
-        <div class="card-body">
-          <h5 class="card-title mb-3">Desperdicio total</h5>
-          <p class="metric-value">{{ info_desperdicio.desperdicio_total|stringformat:".1f" }} <small>{{ simbolo_area|default:"cm²" }}</small></p>
-        </div>
-      </div>
-    </div>
+    {% endfor %}
   </div>
 
-  <div class="text-center mt-4 mb-4">
-    <p class="lead mb-0">
-      Tableros necesarios: <strong class="result-board-count">{{ num_tableros }}</strong>
-    </p>
+</section>
+
+<details class="result-details"><summary>Ver resumen de todos los tableros</summary>
+  <div class="card fade-in">
+  <div class="table-responsive">
+  <table class="table table-striped table-hover mb-0">
+    <thead class="table-dark">
+      <tr>
+        <th>Tablero</th>
+        <th>Piezas</th>
+        <th>Área utilizada</th>
+        <th>Desperdicio</th>
+        <th>Aprovechamiento</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for info in info_desperdicio.info_tableros %}
+      <tr>
+        <td><strong>Tablero {{ info.numero }}</strong></td>
+        <td>{{ info.num_piezas }}</td>
+        <td>{{ info.area_usada|stringformat:".1f" }} {{ simbolo_area|default:"cm²" }}</td>
+        <td class="fw-semibold
+            {% if info.porcentaje_uso < 30 %}text-danger
+            {% elif info.porcentaje_uso < 60 %}text-warning-emphasis
+            {% else %}text-success{% endif %}">
+          {{ info.desperdicio|stringformat:".1f" }} {{ simbolo_area|default:"cm²" }}
+        </td>
+        <td>
+          <div class="progress-utilization">
+            <div class="progress">
+              <div class="progress-bar
+                   {% if info.porcentaje_uso < 30 %}bg-danger
+                   {% elif info.porcentaje_uso < 60 %}bg-warning
+                   {% else %}bg-success{% endif %}{% if info.porcentaje_uso > 0 %} progress-bar-min{% endif %}"
+                   role="progressbar"
+                   style="width: {{ info.porcentaje_uso|unlocalize }}%"
+                   aria-valuenow="{{ info.porcentaje_uso|unlocalize }}"
+                   aria-valuemin="0" aria-valuemax="100">
+              </div>
+            </div>
+            <span class="progress-utilization-label
+                 {% if info.porcentaje_uso < 30 %}text-danger
+                 {% elif info.porcentaje_uso < 60 %}text-warning-emphasis
+                 {% else %}text-success{% endif %}">
+              {{ info.porcentaje_uso|stringformat:".2f" }}%
+            </span>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
   </div>
 
+</details>
   <!-- Sección de Costos -->
   {% if costo_total or precio_tablero or mano_obra %}
   <div class="row mt-4 fade-in">
@@ -150,129 +200,8 @@
   </div>
   {% endif %}
 
-  <hr>
-
-  <!-- Tabla de desperdicio por tablero -->
-  <h4 class="mt-4 fade-in">Detalle por tablero</h4>
-  <div class="card fade-in">
-  <div class="table-responsive">
-  <table class="table table-striped table-hover mb-0">
-    <thead class="table-dark">
-      <tr>
-        <th>Tablero</th>
-        <th>Piezas</th>
-        <th>Área utilizada</th>
-        <th>Desperdicio</th>
-        <th>Aprovechamiento</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for info in info_desperdicio.info_tableros %}
-      <tr>
-        <td><strong>Tablero {{ info.numero }}</strong></td>
-        <td>{{ info.num_piezas }}</td>
-        <td>{{ info.area_usada|stringformat:".1f" }} {{ simbolo_area|default:"cm²" }}</td>
-        <td class="fw-semibold
-            {% if info.porcentaje_uso < 30 %}text-danger
-            {% elif info.porcentaje_uso < 60 %}text-warning-emphasis
-            {% else %}text-success{% endif %}">
-          {{ info.desperdicio|stringformat:".1f" }} {{ simbolo_area|default:"cm²" }}
-        </td>
-        <td>
-          <div class="progress-utilization">
-            <div class="progress">
-              <div class="progress-bar
-                   {% if info.porcentaje_uso < 30 %}bg-danger
-                   {% elif info.porcentaje_uso < 60 %}bg-warning
-                   {% else %}bg-success{% endif %}{% if info.porcentaje_uso > 0 %} progress-bar-min{% endif %}"
-                   role="progressbar"
-                   style="width: {{ info.porcentaje_uso|unlocalize }}%"
-                   aria-valuenow="{{ info.porcentaje_uso|unlocalize }}"
-                   aria-valuemin="0" aria-valuemax="100">
-              </div>
-            </div>
-            <span class="progress-utilization-label
-                 {% if info.porcentaje_uso < 30 %}text-danger
-                 {% elif info.porcentaje_uso < 60 %}text-warning-emphasis
-                 {% else %}text-success{% endif %}">
-              {{ info.porcentaje_uso|stringformat:".2f" }}%
-            </span>
-          </div>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  </div>
-  </div>
-
-  <hr>
-
-  <!-- Mostrar TODOS los tableros -->
-  <h4 class="mt-4 fade-in">Distribución de las piezas</h4>
-  <p class="result-explanation">Lee las medidas y cantidades junto al dibujo. Abre el visor para ampliar el tablero o recorrer los demás.</p>
-  <div class="row fade-in">
-    {% for item in tableros_con_imagenes %}
-    <div class="col-12 mb-4">
-      <article class="card board-card" data-board="{{ item.numero }}">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">Tablero {{ item.numero }} de {{ num_tableros }}</h5>
-          <a href="{% url 'cutless:descargar_png_tablero' optimizacion.id item.numero %}" class="btn btn-outline-secondary" data-carga-texto="Generando imagen..." data-action="secondary">Descargar PNG</a>
-        </div>
-        <div class="card-body board-layout">
-          <button type="button" class="board-open" data-open-board="{{ item.numero }}" aria-label="Abrir visor del tablero {{ item.numero }}">
-            {% if item.vista_web %}
-            <svg class="board-drawing" viewBox="0 0 {{ item.vista_web.ancho|unlocalize }} {{ item.vista_web.alto|unlocalize }}" role="img" aria-label="Distribución de piezas en el tablero {{ item.numero }}" xmlns="http://www.w3.org/2000/svg">
-              <rect width="100%" height="100%" fill="#F4F3EE" stroke="#4E2D01" stroke-width="2" vector-effect="non-scaling-stroke"/>
-              {% for pieza in item.vista_web.piezas %}
-              <rect x="{{ pieza.x|unlocalize }}" y="{{ pieza.y|unlocalize }}" width="{{ pieza.ancho|unlocalize }}" height="{{ pieza.alto|unlocalize }}" fill="{{ pieza.color }}" stroke="#263238" stroke-width="1.5" vector-effect="non-scaling-stroke"><title>{{ pieza.nombre }}{% if pieza.rotada %}, girada 90 grados{% endif %}</title></rect>
-              {% if pieza.mostrar_numero %}<text x="{{ pieza.centro_x|unlocalize }}" y="{{ pieza.centro_y|unlocalize }}" font-size="{{ item.vista_web.tamano_numero|unlocalize }}" text-anchor="middle" dominant-baseline="central" fill="#1C1008" font-weight="700">{{ pieza.numero }}</text>{% endif %}
-              {% endfor %}
-            </svg>
-            {% else %}<img class="board-drawing board-legacy" src="data:image/png;base64,{{ item.imagen }}" alt="Distribución guardada del tablero {{ item.numero }}">{% endif %}
-            <span>Abrir visor del tablero</span>
-          </button>
-          <section class="board-data" aria-label="Información del tablero {{ item.numero }}">
-            <dl class="board-metrics">
-              <div><dt>Medidas del tablero</dt><dd>{{ ancho_tablero_mostrar }} × {{ alto_tablero_mostrar }} {{ unidad_medida }}</dd></div>
-              <div><dt>Aprovechamiento</dt><dd>{{ item.info.porcentaje_uso|floatformat:1 }}%</dd></div>
-              <div><dt>Desperdicio</dt><dd>{{ item.info.desperdicio|floatformat:1 }} {{ simbolo_area }}</dd></div>
-              <div><dt>Piezas en este tablero</dt><dd>{{ item.info.num_piezas }}</dd></div>
-            </dl>
-            {% if item.catalogo %}
-            <h6>Piezas de este tablero</h6>
-            <div class="table-responsive"><table class="table board-pieces"><thead><tr><th scope="col">N.º</th><th scope="col">Pieza y medidas</th><th scope="col">Cantidad</th></tr></thead><tbody>
-              {% for pieza in item.catalogo %}<tr><td><span class="board-color" style="background-color:{{ pieza.color }}" aria-hidden="true"></span>{{ pieza.numero }}</td><td><strong>{{ pieza.nombre }}</strong><span>{{ pieza.ancho }} × {{ pieza.alto }} {{ unidad_medida }}</span></td><td>{{ pieza.cantidad }}</td></tr>{% endfor %}
-            </tbody></table></div>
-            <p class="board-note">Los números y colores relacionan cada pieza con el dibujo. Las medidas corresponden a la orientación solicitada.</p>
-            {% else %}
-            <h6>Piezas solicitadas para todo el corte</h6>
-            <div class="table-responsive"><table class="table board-pieces"><thead><tr><th>Pieza y medidas</th><th>Cantidad</th></tr></thead><tbody>
-              {% for pieza in piezas_con_nombre %}<tr><td><strong>{{ pieza.nombre }}</strong><span>{{ pieza.ancho }} × {{ pieza.alto }} {{ unidad_medida }}</span></td><td>{{ pieza.cantidad }}</td></tr>{% endfor %}
-            </tbody></table></div>
-            <p class="board-note">Resultado anterior: se conserva su dibujo original. Esta lista corresponde al pedido completo, no a la distribución por tablero.</p>
-            {% endif %}
-          </section>
-        </div>
-      </article>
-    </div>
-    {% endfor %}
-  </div>
-
-  <hr>
-
-  <h4 class="mt-4">Guardar o imprimir el resultado</h4>
+  <h2 class="visually-hidden">Continuar trabajando</h2>
   <div class="result-actions fade-in">
-    <a href="{% url 'cutless:descargar_pdf' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-lg btn-outline-secondary" data-carga-texto="Descargando PDF..." data-action="secondary">
-      Descargar PDF
-    </a>
-    <a href="{% url 'cutless:descargar_excel' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-lg btn-outline-secondary" data-carga-texto="Generando archivo Excel..." data-action="secondary">
-      Descargar Excel
-    </a>
-    <a href="{% url 'cutless:imprimir_plan_corte' optimizacion.id %}" class="btn btn-lg btn-outline-secondary" target="_blank" data-action="secondary">
-      Imprimir <span class="text-annotation">(otra pestaña)</span>
-    </a>
-    <span class="w-100 d-block text-center text-muted small mt-1 mb-1">— o —</span>
     <a href="{% url 'cutless:index' %}" class="btn btn-lg btn-outline-secondary" data-action="secondary">
       Preparar otro corte
     </a>
@@ -296,4 +225,4 @@
   </div></div>
 </div>
 {% endblock %}
-{% block extra_js %}<script src="{% static 'cutless/js/board-viewer.js' %}?v=1"></script>{% endblock %}
+{% block extra_js %}<script src="{% static 'cutless/js/board-deck.js' %}?v=1"></script><script src="{% static 'cutless/js/board-viewer.js' %}?v=3"></script>{% endblock %}

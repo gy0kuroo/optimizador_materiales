@@ -27,16 +27,16 @@
     <link rel="stylesheet" href="{% static 'cutless/css/help-redesign.css' %}?v=1">
     <link rel="stylesheet" href="{% static 'cutless/css/action-semantics.css' %}?v=3">
     <link rel="stylesheet" href="{% static 'cutless/css/magnifier.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'cutless/css/reforma-visual.css' %}?v=2">
 </head>
-<body class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
+<body data-app-shell="{{ user.is_authenticated|yesno:'true,false' }}" class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
     {% block navigation %}
     <!-- Navegación -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
+    <nav class="navbar navbar-expand-xl navbar-custom">
         <div class="container-fluid">
             <div class="d-flex align-items-center">
                 <a class="navbar-brand me-3" href="{% url 'cutless:index' %}">
-                    <svg class="brand-mark" width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="2" y="2" width="24" height="24" rx="5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M16 3v22M16 14h9" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                    CutLess
+                    {% include 'cutless/includes/brand.html' %}
                 </a>
             </div>
             <button class="navbar-toggler navbar-toggler-custom" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -44,13 +44,14 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
+                {% if user.is_authenticated %}<p class="nav-section-label">Espacio de trabajo</p>{% endif %}
                 <div class="navbar-nav ms-auto d-flex align-items-center">
                     {% if user.is_authenticated %}
-                        <a class="nav-link{% if request.resolver_match.url_name == 'index' %} active{% endif %}" href="{% url 'cutless:index' %}">Inicio</a>
-                        <a class="nav-link{% if request.resolver_match.url_name == 'historial' %} active{% endif %}" href="{% url 'cutless:historial' %}">Historial</a>
+                        <a class="nav-link{% if request.resolver_match.url_name == 'index' %} active{% endif %}" href="{% url 'cutless:index' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Z"/><path d="M9 20v-7h6v7"/></svg>Inicio</a>
+                        <a class="nav-link{% if request.resolver_match.url_name == 'historial' %} active{% endif %}" href="{% url 'cutless:historial' %}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2 7M3 5v6h6"/><path d="M12 7v5l3 2"/></svg>Historial</a>
                         {% if user.perfil.menu_visible.gestion %}
                         <div class="dropdown">
-                            <button class="nav-link dropdown-toggle" type="button" id="nav-gestion" data-bs-toggle="dropdown" aria-expanded="false">Gestión</button>
+                            <button class="nav-link dropdown-toggle" type="button" id="nav-gestion" data-bs-toggle="dropdown" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Gestión</button>
                             <ul class="dropdown-menu" aria-labelledby="nav-gestion">
                                 {% if user.perfil.menu_visible.materiales %}<li><a class="dropdown-item" href="{% url 'cutless:lista_materiales' %}">Materiales</a></li>{% endif %}
                                 {% if user.perfil.menu_visible.clientes %}<li><a class="dropdown-item" href="{% url 'cutless:lista_clientes' %}">Clientes</a></li>{% endif %}
@@ -62,7 +63,7 @@
                         {% endif %}
                         {% if user.perfil.menu_visible.analisis %}
                         <div class="dropdown">
-                            <button class="nav-link dropdown-toggle" type="button" id="nav-analisis" data-bs-toggle="dropdown" aria-expanded="false">Análisis</button>
+                            <button class="nav-link dropdown-toggle" type="button" id="nav-analisis" data-bs-toggle="dropdown" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v17h17M8 15V9m5 6V5m5 10v-4"/></svg>Análisis</button>
                             <ul class="dropdown-menu" aria-labelledby="nav-analisis">
                                 {% if user.perfil.menu_visible.costos %}<li><a class="dropdown-item" href="{% url 'cutless:historial_costos' %}">Costos</a></li>{% endif %}
                                 {% if user.perfil.menu_visible.comparar %}<li><a class="dropdown-item" href="{% url 'cutless:comparar_optimizaciones' %}">Comparar optimizaciones</a></li>{% endif %}
@@ -70,9 +71,9 @@
                             </ul>
                         </div>
                         {% endif %}
-                        <button type="button" class="nav-link nav-help" id="btn-tutorial">Ayuda</button>
+                        <button type="button" class="nav-link nav-help" id="btn-tutorial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M12 16v1"/></svg>Ayuda</button>
                         <div class="dropdown nav-account">
-                            <button class="nav-link dropdown-toggle" type="button" id="nav-cuenta" data-bs-toggle="dropdown" aria-expanded="false"><span class="nav-account-label">Cuenta · {{ user.username }}</span></button>
+                            <button class="nav-link dropdown-toggle" type="button" id="nav-cuenta" data-bs-toggle="dropdown" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg><span class="nav-account-label">Cuenta · {{ user.username }}</span></button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-cuenta">
                                 <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">Mi perfil</a></li>
                                 <li><a class="dropdown-item" href="{% url 'usuarios:configuracion_inicial' %}">Personalizar mi inicio</a></li>
@@ -879,22 +880,22 @@
                     {
                         title: 'Resumen de la Optimización',
                         intro: 'Aquí puedes ver el resumen de tu optimización: aprovechamiento, área utilizada, desperdicio y número de tableros necesarios.',
-                        element: document.querySelector('.metric-card')?.closest('.row')
+                        element: document.querySelector('.board-page:not([hidden]) .cut-sidebar')
                     },
                     {
                         title: 'Plan de Corte Visual',
                         intro: 'Cada tablero muestra el plan de corte visual con las piezas distribuidas. Puedes ver el número de tablero, área utilizada y desperdicio de cada uno.',
-                        element: document.querySelector('.result-explanation')?.nextElementSibling
+                        element: document.querySelector('.board-page:not([hidden]) .cut-drawing-card')
                     },
                     {
                         title: 'Detalle por tablero',
-                        intro: 'La tabla resume el área utilizada, el desperdicio y el aprovechamiento de cada tablero.',
-                        element: document.querySelector('table')
+                        intro: 'La tabla relaciona cada referencia y color con el nombre, las medidas solicitadas, la cantidad y el área de las piezas de este tablero.',
+                        element: document.querySelector('.board-page:not([hidden]) .cut-pieces')
                     },
                     {
                         title: 'Descargar Resultados',
-                        intro: 'Usa estas acciones para descargar el plan, editar las piezas o preparar otro corte. Cada imagen también permite descargar su tablero.',
-                        element: document.querySelector('.result-actions')
+                        intro: 'Usa estas acciones para descargar el PDF o Excel e imprimir el plan. Cada tablero también permite descargar su PNG.',
+                        element: document.querySelector('.page-header__actions')
                     }
                 ];
             } else if (seccion === 'calcular_tiempo') {
@@ -988,5 +989,6 @@
     <div id="magnifier-lens" class="reading-magnifier__lens" aria-hidden="true" hidden></div>
     <script src="{% static 'cutless/js/magnifier.js' %}?v=3" defer></script>
     {% endif %}
+    <script src="{% static 'cutless/js/visual-shell.js' %}?v=1" defer></script>
 </body>
 </html>

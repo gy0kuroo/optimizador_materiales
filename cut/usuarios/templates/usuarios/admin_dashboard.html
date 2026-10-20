@@ -1,4 +1,5 @@
 {% extends 'cutless/base.html' %}
+{% block body_class %}admin-page{% endblock %}
 
 {% block title %}Admin Dashboard{% endblock %}
 
@@ -16,7 +17,7 @@
     <h5 class="card-title">Crear usuario</h5>
     <form method="post" novalidate>
       {% csrf_token %}
-      {{ form.as_p }}
+      {% include 'cutless/includes/form-fields.html' %}
       <div class="mb-3">
         <label for="id_rol" class="form-label">Rol</label>
         <select id="id_rol" name="rol" class="form-select">

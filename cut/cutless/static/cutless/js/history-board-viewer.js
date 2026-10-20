@@ -11,11 +11,17 @@
   const next = document.getElementById('history-board-next');
   const zoomIn = document.getElementById('history-board-in');
   const zoomOut = document.getElementById('history-board-out');
+  const pieces = document.getElementById('history-board-pieces');
+  const details = document.getElementById('history-board-data');
+  let panels = [], drawing = image;
   let sources = [], index = 0, zoom = 1, request = null, number = '';
 
   function paint(reset = false) {
-    if (!image.naturalWidth || image.hidden) return;
-    const ratio = image.naturalWidth / image.naturalHeight;
+    const box = drawing.tagName.toLowerCase() === 'svg' ? drawing.viewBox.baseVal : null;
+    const widthSource = box ? box.width : drawing.naturalWidth;
+    const heightSource = box ? box.height : drawing.naturalHeight;
+    if (!widthSource || drawing.hidden) return;
+    const ratio = widthSource / heightSource;
     const width = Math.max(1, Math.min(viewport.clientWidth - 32, (viewport.clientHeight - 32) * ratio));
     canvas.style.width = width * zoom + 'px';
     canvas.style.height = width / ratio * zoom + 'px';
@@ -30,6 +36,21 @@
     next.disabled = index === sources.length - 1;
     document.getElementById('history-board-position').textContent = `${index + 1} de ${sources.length}`;
     document.getElementById('modalImagenLabel').textContent = `Tablero ${index + 1} de ${sources.length} · Optimización #${number}`;
+    pieces.replaceChildren(); details.replaceChildren();
+    element.classList.toggle('history-legacy', !panels[index]);
+    if (panels[index]) {
+      const panel = new DOMParser().parseFromString(panels[index], 'text/html');
+      const svg = panel.querySelector('svg.board-drawing');
+      const table = panel.querySelector('.cut-pieces');
+      const summary = panel.querySelector('.board-data');
+      if (table) pieces.append(table);
+      if (summary) details.append(summary);
+      if (svg) {
+        drawing = svg; canvas.replaceChildren(svg);
+        status.textContent = ''; paint(true); return;
+      }
+    }
+    drawing = image; canvas.replaceChildren(image);
     image.alt = `Tablero ${index + 1} de la optimización ${number}`;
     image.hidden = false;
     image.src = sources[index];
@@ -45,7 +66,9 @@
     const controller = new AbortController();
     request = controller;
     number = displayNumber || id;
-    sources = []; index = 0; zoom = 1;
+    sources = []; panels = []; index = 0; zoom = 1;
+    pieces.replaceChildren(); details.replaceChildren();
+    drawing = image; canvas.replaceChildren(image);
     image.hidden = true;
     status.textContent = 'Cargando tableros…';
     previous.disabled = next.disabled = zoomIn.disabled = zoomOut.disabled = true;
@@ -54,9 +77,11 @@
     document.getElementById('modalImagenLabel').textContent = `Tableros · Optimización #${number}`;
     modal.show();
     try {
-      const response = await fetch(`/cutless/api/tableros/${id}/`, {signal: controller.signal});
+      const response = await fetch(`/cutless/api/tableros/${id}/?presentacion=horizontal`, {signal: controller.signal});
       if (!response.ok) throw new Error('No disponible');
       const data = await response.json();
+      if (controller.signal.aborted) return;
+      panels = Array.isArray(data.paneles) ? data.paneles : [];
       sources = Array.isArray(data.imagenes) ? data.imagenes.map(value => `data:image/png;base64,${value}`) : [];
     } catch (error) {
       if (controller.signal.aborted) return;
@@ -80,6 +105,6 @@
   zoomOut.addEventListener('click', () => changeZoom(-.25));
   document.getElementById('history-board-fit').addEventListener('click', () => { zoom = 1; paint(true); });
   element.addEventListener('shown.bs.modal', () => paint(true));
-  element.addEventListener('hidden.bs.modal', () => { request?.abort(); image.hidden = true; });
+  element.addEventListener('hidden.bs.modal', () => { request?.abort(); image.hidden = true; drawing = image; canvas.replaceChildren(image); pieces.replaceChildren(); details.replaceChildren(); });
   window.addEventListener('resize', () => { if (element.classList.contains('show')) paint(); });
 })();

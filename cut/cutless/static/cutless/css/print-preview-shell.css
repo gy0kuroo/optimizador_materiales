@@ -1,0 +1,15 @@
+/* Solo la vista previa en pantalla: el papel y las imágenes se conservan. */
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&display=swap');
+body { background: #F6F5F1; }
+.toolbar { background: #FFFFFF; border-bottom: 1px solid #E1DED5; box-shadow: 0 2px 12px #4E2D010A; }
+.toolbar, .toolbar .btn { font-family: 'Barlow', 'Trebuchet MS', sans-serif; }
+.toolbar-content { gap: 16px; }
+.toolbar-title { color: #302719; font-size: 1.25rem; }
+.toolbar .btn { min-height: 48px; border: 1px solid #B2AA9B; border-radius: 8px; padding: 10px 20px; font-size: 1.125rem; font-weight: 600; color: #302719; background: white; }
+.toolbar .btn:hover { background: #F0EEE7; color: #302719; }
+.toolbar .btn:focus-visible { outline: 3px solid #4558E7; outline-offset: 3px; }
+@media(max-width:600px) {
+  .toolbar-content { flex-direction: column; align-items: stretch; gap: 10px; }
+  .toolbar-buttons .btn { flex: 1; }
+  .tableros-container { margin-top: 160px; }
+}

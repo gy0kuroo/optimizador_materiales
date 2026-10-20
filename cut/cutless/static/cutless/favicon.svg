@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" fill="transparent"/>
-  <text x="50" y="75" font-size="80" text-anchor="middle" dominant-baseline="middle">🪚</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="15" fill="#F4F2EB"/>
+  <path d="M10 16a6 6 0 0 1 6-6h7v44h-7a6 6 0 0 1-6-6V16Z" fill="#4E2D01"/>
+  <path d="M27 10h21a6 6 0 0 1 6 6v8H27V10Z" fill="#7D6344"/>
+  <path d="M27 28h12v12H27z" fill="#B7B8AB"/>
+  <path d="M43 28h11v26L43 43V28Z" fill="#D9CCB8"/>
+  <path d="M27 44h12l10 10H27V44Z" fill="#4E2D01"/>
 </svg>

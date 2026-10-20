@@ -157,3 +157,9 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Lupa de lectura compartida](docs/CAMBIOS_LUPA_LECTURA.md)
 - [Visor del Historial: controles y armonía visual](docs/CAMBIOS_VISOR_HISTORIAL.md)
 - [Leyenda compacta y legible en los planos PNG](docs/CAMBIOS_LEYENDA_PLANOS.md)
+
+- [Reforma visual integral y navegación de tableros](docs/CAMBIOS_REFORMA_VISUAL.md)
+
+- [Visor horizontal: disposición, cotas y correspondencia de piezas](docs/CAMBIOS_VISOR_HORIZONTAL.md)
+
+- [Historial: mismo visor horizontal que el resultado](docs/CAMBIOS_HISTORIAL_HORIZONTAL.md)

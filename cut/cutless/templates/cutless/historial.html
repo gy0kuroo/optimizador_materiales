@@ -6,6 +6,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'cutless/css/historial.css' %}">
 <link rel="stylesheet" href="{% static 'cutless/css/history-result-refinement.css' %}?v=3">
+<link rel="stylesheet" href="{% static 'cutless/css/board-landscape.css' %}?v=4">
 {% endblock %}
 
 {% block content %}
@@ -124,9 +125,14 @@
             {% if optimizacion.imagen %}
               <div class="chart-container chart-container-clickable"
                    onclick="abrirModalImagen('{{ optimizacion.imagen.url }}', {{ optimizacion.id }}, '{{ item.numero }}')">
-                <img src="{{ optimizacion.imagen.url }}"
-                     class="card-img-top chart-thumbnail"
-                     alt="Optimización #{{ item.numero }}">                <div class="chart-overlay">
+                {% if item.miniatura %}
+                  <div class="chart-thumbnail chart-thumbnail-horizontal" role="img" aria-label="Optimización #{{ item.numero }}: primer tablero horizontal">
+                    {% include 'cutless/includes/board-drawing.html' with item=item.miniatura unidad_medida=item.unidad_medida %}
+                  </div>
+                {% else %}
+                  <img src="{{ optimizacion.imagen.url }}" class="card-img-top chart-thumbnail" alt="Optimización #{{ item.numero }}">
+                {% endif %}
+                <div class="chart-overlay">
                   <span class="chart-hint">Ampliar imagen</span>
                 </div>
               </div>
@@ -336,16 +342,21 @@
             <button type="button" id="history-board-fit" class="btn btn-outline-secondary" data-action="secondary">Ajustar tablero</button>
           </div>
         </div>
-        <div class="modal-body">
+        <div class="modal-body history-landscape-body">
+          <section class="history-landscape-main">
+          <h2 class="card-header">Distribución del tablero</h2>
           <p>Amplía con + y recorre el dibujo con las barras de desplazamiento o deslizando con el dedo.</p>
           <div id="history-board-status" role="status"></div>
           <div id="history-board-viewport" tabindex="0" aria-label="Dibujo ampliado del tablero">
             <div id="history-board-canvas"><img id="history-board-image" alt="" hidden></div>
           </div>
+          <div id="history-board-pieces"></div>
+          </section>
+          <aside id="history-board-data" aria-label="Resumen y detalles del tablero"></aside>
         </div>
       </div></div>
     </div>
-    <script src="{% static 'cutless/js/history-board-viewer.js' %}?v=1" defer></script>
+    <script src="{% static 'cutless/js/history-board-viewer.js' %}?v=2" defer></script>
 <script>
 // Función para obtener el token CSRF de las cookies
 function getCookie(name) {

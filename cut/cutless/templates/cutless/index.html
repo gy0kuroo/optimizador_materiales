@@ -47,6 +47,7 @@
   <form method="post" action="{% url 'cutless:index' %}" id="optimizacion-form" onsubmit="mostrarIndicadorCarga('Generando el plan de corte... Esto puede tardar unos segundos.');">
     {% csrf_token %}
 
+    <div class="dashboard-columns"><div class="dashboard-board">
     <!-- Sección: Dimensiones del Tablero -->
     <div class="card mb-4 fade-in" data-intro-title="Dimensiones del Tablero" data-intro="Ingresa el ancho y alto del tablero de madera. Puedes elegir la unidad de medida que prefieras (cm, m, pulgadas o pies).">
       <div class="card-header card-header-step card-header-step-primary text-white">
@@ -56,9 +57,9 @@
         </h4>
         <button type="button" class="btn btn-sm btn-ayuda-seccion ms-auto btn-outline-secondary"
                 onclick="iniciarTutorialSeccion('tablero')"
-                title="Ayuda sobre dimensiones del tablero" data-action="secondary">
+                title="Ayuda sobre dimensiones del tablero" aria-label="Cómo medir el tablero" data-action="secondary">
           <img src="{% static 'cutless/icons/ayuda.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
-          Cómo medir el tablero
+          Ayuda
         </button>
       </div>
       <div class="card-body">
@@ -154,6 +155,7 @@
     </div>
 
 
+    </div><div class="dashboard-pieces">
     <!-- Sección: Piezas a Cortar -->
     <div class="card mb-4 fade-in">
       <div class="card-header card-header-step card-header-step-success text-white">
@@ -164,9 +166,9 @@
         </h4>
         <button type="button" class="btn btn-sm btn-ayuda-seccion ms-auto btn-outline-secondary"
                 onclick="iniciarTutorialSeccion('piezas')"
-                title="Cómo añadir piezas" data-action="secondary">
+                title="Cómo añadir piezas" data-action="secondary" aria-label="Cómo añadir piezas">
           <img src="{% static 'cutless/icons/ayuda.svg' %}" alt="" class="cl-icon cl-icon--btn" onerror="this.style.display='none'">
-          Cómo añadir piezas
+          Ayuda
         </button>
       </div>
       <div class="card-body">
@@ -324,6 +326,7 @@
         Cada fila describe un tipo de pieza. Indica en Cantidad cuántas piezas iguales necesitas. Puedes añadir hasta 20 tipos.
       </p>
     </div>
+    </div></div>
   </form>
 
 <script>

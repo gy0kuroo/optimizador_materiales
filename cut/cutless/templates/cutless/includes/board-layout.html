@@ -1,0 +1,45 @@
+{% load l10n %}
+<div class="cut-layout">
+  <div class="cut-main">
+    <section class="card cut-drawing-card">
+      <h2 class="card-header">Distribución del tablero</h2>
+      <button type="button" class="board-open" data-open-board="{{ item.numero }}" aria-label="Abrir visor del tablero {{ item.numero }}">
+        {% include 'cutless/includes/board-drawing.html' %}
+        <span>Abrir visor del tablero</span>
+      </button>
+    </section>
+    <section class="card cut-pieces">
+      <h2 class="card-header">Detalle de piezas</h2>
+      {% if item.catalogo %}
+      <div class="table-responsive"><table class="table board-pieces mb-0"><thead><tr><th scope="col">#</th><th scope="col">Nombre de la pieza</th><th scope="col">Medidas ({{ unidad_medida }})</th><th scope="col">Cantidad</th><th scope="col">Área (m²)</th><th scope="col">Referencia</th></tr></thead><tbody>
+        {% for pieza in item.catalogo %}<tr><td>{{ forloop.counter }}</td><td><span class="board-color" style="background-color:{{ pieza.color }}" aria-hidden="true"></span><strong>{{ pieza.nombre }}</strong></td><td>{{ pieza.ancho|floatformat:2 }} × {{ pieza.alto|floatformat:2 }}</td><td>{{ pieza.cantidad }}</td><td>{{ pieza.area_m2|floatformat:3 }}</td><td>P{{ pieza.numero }}</td></tr>{% endfor %}
+      </tbody></table></div>
+      <p class="board-note">Área total de cada tipo en este tablero. Las medidas conservan la orientación solicitada.</p>
+      {% else %}
+      <div class="table-responsive"><table class="table"><thead><tr><th>Pieza solicitada</th><th>Medidas ({{ unidad_medida }})</th><th>Cantidad total</th></tr></thead><tbody>{% for pieza in piezas_con_nombre %}<tr><td>{{ pieza.nombre }}</td><td>{{ pieza.ancho }} × {{ pieza.alto }}</td><td>{{ pieza.cantidad }}</td></tr>{% endfor %}</tbody></table></div>
+      <p class="board-note">Resultado anterior sin coordenadas guardadas: se conserva la imagen y la lista del pedido completo.</p>
+      {% endif %}
+    </section>
+  </div>
+  <aside class="board-data cut-sidebar" aria-label="Información del tablero {{ item.numero }}">
+    <section class="card"><h2 class="card-header">Resumen del corte</h2><div class="card-body">
+      <div class="cut-utilization"><svg viewBox="0 0 42 42" role="img" aria-label="Aprovechamiento {{ item.info.porcentaje_uso|floatformat:2 }} por ciento"><circle class="donut-track" cx="21" cy="21" r="15.9155" fill="none" stroke-width="4"/><circle class="donut-value" cx="21" cy="21" r="15.9155" fill="none" stroke-width="4" stroke-dasharray="{{ item.info.porcentaje_uso|unlocalize }} 100" transform="rotate(-90 21 21)"/></svg><div><span>Aprovechamiento del tablero</span><strong>{{ item.info.porcentaje_uso|floatformat:2 }} %</strong><p>{% if item.info.porcentaje_uso >= 85 %}Se aprovecha la mayor parte del tablero.{% elif item.info.porcentaje_uso >= 60 %}Queda espacio sin utilizar en el tablero.{% else %}Una parte importante queda sin utilizar.{% endif %}</p></div></div>
+      <dl class="cut-key-data">
+        <div><dt><span aria-hidden="true">◷</span> Desperdicio</dt><dd>{{ item.desperdicio_porcentaje|floatformat:2 }} %<small>{{ item.info.desperdicio|floatformat:2 }} {{ simbolo_area }}</small></dd></div>
+        <div><dt><span aria-hidden="true">▧</span> Piezas en total</dt><dd>{{ info_desperdicio.num_piezas_colocadas }}</dd></div>
+        <div><dt><span aria-hidden="true">▦</span> Tipos de pieza</dt><dd>{% if item.catalogo %}{{ item.catalogo|length }}{% else %}No disponible{% endif %}</dd></div>
+        <div><dt><span aria-hidden="true">▤</span> Tableros usados</dt><dd>{{ num_tableros }}</dd></div>
+        <div><dt><span aria-hidden="true">↔</span> Ancho de sierra</dt><dd>{{ margen_mm|floatformat:2 }} mm</dd></div>
+        <div><dt><span aria-hidden="true">↻</span> Permite girar piezas</dt><dd>{{ optimizacion.permitir_rotacion|yesno:'Sí,No' }}</dd></div>
+      </dl>
+      <p class="board-note">En este tablero: {{ item.info.num_piezas }} piezas. Área utilizada total: {{ info_desperdicio.area_usada_total|floatformat:2 }} {{ simbolo_area }}. Desperdicio total: {{ info_desperdicio.desperdicio_total|floatformat:2 }} {{ simbolo_area }}.</p>
+    </div></section>
+    <section class="card"><h2 class="card-header">Detalles técnicos</h2><dl class="cut-technical card-body">
+      <div><dt>Tamaño del tablero</dt><dd>{{ ancho_tablero_mostrar }} × {{ alto_tablero_mostrar }} {{ unidad_medida }}</dd></div>
+      <div><dt>Unidad de medida</dt><dd>{{ unidad_medida }}</dd></div>
+      <div><dt>Ancho de sierra</dt><dd>{{ margen_mm|floatformat:2 }} mm</dd></div>
+      <div><dt>Permite girar piezas</dt><dd>{{ optimizacion.permitir_rotacion|yesno:'Sí,No' }}</dd></div>
+      <div><dt>Fecha de generación</dt><dd>{{ optimizacion.fecha|date:'d/m/Y H:i' }}</dd></div>
+    </dl></section>
+  </aside>
+</div>

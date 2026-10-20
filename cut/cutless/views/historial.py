@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 
 from ..models import Optimizacion
+from ..services.board_presentation import preparar_plano_horizontal
 from ..utils import convertir_desde_cm
 
 
@@ -136,8 +137,13 @@ def historial(request):
         unidad_opt = getattr(opt, 'unidad_medida', 'cm') or 'cm'
         ancho_mostrar = round(convertir_desde_cm(opt.ancho_tablero, unidad_opt), 2)
         alto_mostrar = round(convertir_desde_cm(opt.alto_tablero, unidad_opt), 2)
+        # Miniatura derivada del primer tablero, sin regenerar ni guardar archivos.
+        vistas = (opt.resultado_extra or {}).get('vistas_web', {})
+        vista = vistas.get('1')
+        miniatura = preparar_plano_horizontal(vista, unidad_opt, opt.margen_corte) if vista else None
         optimizaciones_con_piezas.append({
             'optimizacion': opt,
+            'miniatura': {'plano': miniatura, 'numero': f'preview-{opt.pk}'} if miniatura else None,
             'piezas': piezas_procesadas,
             'numero': numero_mostrado,
             'ancho_mostrar': ancho_mostrar,
