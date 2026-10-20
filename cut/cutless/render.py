@@ -1,10 +1,12 @@
 """Renderizado de tableros y graficos estadisticos (matplotlib)."""
 import base64
 import io
+import textwrap
 
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.dates as mdates
+from matplotlib.textpath import TextPath
 import matplotlib.patches as patches
 from matplotlib.gridspec import GridSpec
 import matplotlib.pyplot as plt
@@ -56,68 +58,71 @@ def _paleta_tipos_visual(n):
         i += 1
     return out
 
+def _filas_leyenda(catalogo_ord, numero_por_tipo, unidad, cantidad_por_tipo):
+    """Filas compactas, con altura suficiente para conservar nombres completos."""
+    simbolo = obtener_simbolo_unidad(unidad)
+    filas = []
+    for clave in catalogo_ord:
+        cantidad = cantidad_por_tipo.get(clave, 0)
+        if cantidad <= 0:
+            continue
+        nombre, ancho, alto = clave
+        # Medir el texto evita que nombres anchos invadan la columna de medidas.
+        limite = 24
+        original = nombre
+        nombre = textwrap.fill(original, width=limite)
+        while limite > 1 and any(TextPath((0, 0), linea, size=12).get_extents().width > 100
+                                 for linea in nombre.splitlines() if linea.strip()):
+            limite -= 1
+            nombre = textwrap.fill(original, width=limite)
+        medidas = (f"{convertir_desde_cm(ancho, unidad):g} × "
+                   f"{convertir_desde_cm(alto, unidad):g} {simbolo}")
+        lineas = max(1, len(nombre.splitlines()))
+        filas.append((clave, [str(numero_por_tipo[clave]), nombre, medidas, str(cantidad)],
+                      .42 + .20 * (lineas - 1)))
+    return filas
+
+
 def _dibujar_leyenda_tipos_piezas(ax_leg, catalogo_ord, numero_por_tipo, color_por_tipo, unidad, cantidad_por_tipo):
     ax_leg.axis('off')
-    entries = [k for k in catalogo_ord if cantidad_por_tipo.get(k, 0) > 0]
-    n = len(entries)
-    if n == 0:
-        ax_leg.set_xlim(0, 1)
-        ax_leg.set_ylim(0, 1)
+    filas = _filas_leyenda(catalogo_ord, numero_por_tipo, unidad, cantidad_por_tipo)
+    if not filas:
         return
-
-    simbolo = obtener_simbolo_unidad(unidad)
-    fs = 8
-    lh = 11
-    rh = 66
-    top_pad = 16
-    total_h = n * rh + top_pad + 8
-    ax_leg.set_xlim(0, 100)
-    ax_leg.set_ylim(0, total_h)
-
-    ax_leg.text(
-        4, total_h - 4, 'Descripción de piezas',
-        fontsize=11, fontweight='bold', va='top', color='#111',
+    ax_leg.text(0, 1, 'Piezas de este tablero', transform=ax_leg.transAxes,
+                fontsize=15, fontweight='bold', va='top', color='#1C1008')
+    altura_eje = ax_leg.get_position().height * ax_leg.figure.get_figheight()
+    altura_tabla = (.40 + sum(fila[2] for fila in filas)) / altura_eje
+    tabla = ax_leg.table(
+        cellText=[fila[1] for fila in filas],
+        colLabels=['N.º', 'Pieza', 'Medidas', 'Cant.'],
+        colWidths=[.09, .43, .33, .15], cellLoc='left',
+        bbox=[0, 1 - .55 / altura_eje - altura_tabla, 1, altura_tabla],
     )
+    tabla.auto_set_font_size(False)
+    tabla.set_fontsize(12)
+    for (fila, columna), celda in tabla.get_celld().items():
+        celda.set_edgecolor('#C8C5B8')
+        celda.set_linewidth(.7)
+        celda.PAD = .10
+        celda.get_text().set_color('#1C1008')
+        celda.get_text().set_parse_math(False)
+        if fila == 0:
+            celda.set_facecolor('#ECEAE2')
+            celda.get_text().set_fontweight('bold')
+            celda.set_height(.40 / altura_eje)
+        else:
+            clave, _, altura = filas[fila - 1]
+            celda.set_height(altura / altura_eje)
+            celda.set_facecolor('#FFFFFF')
+            if columna == 0:
+                celda.set_facecolor(color_por_tipo[clave])
+                celda.get_text().set_fontweight('bold')
+            if columna in (0, 3):
+                celda.get_text().set_ha('center')
+    ax_leg.text(0, 1 - .55 / altura_eje - altura_tabla - .16 / altura_eje,
+                'Medidas solicitadas · Cantidades en este tablero',
+                transform=ax_leg.transAxes, fontsize=10, color='#5A4535', va='top')
 
-    for i, key in enumerate(entries):
-        nombre_t, wc, hc = key
-        num_t = numero_por_tipo[key]
-        clr = color_por_tipo[key]
-        cantidad = cantidad_por_tipo[key]
-        wd = round(convertir_desde_cm(wc, unidad), 1)
-        hd = round(convertir_desde_cm(hc, unidad), 1)
-        row_top = total_h - top_pad - i * rh
-        y = row_top - 4
-
-        texto_n = nombre_t[:32] + ('…' if len(nombre_t) > 32 else '')
-        lineas = [
-            f'Número: {num_t}',
-            f'Nombre: {texto_n}',
-            f'Medidas: {wd} × {hd} {simbolo}',
-            f'Cantidad de piezas: {cantidad}',
-        ]
-        for j, linea in enumerate(lineas):
-            ax_leg.text(
-                4, y - j * lh, linea,
-                fontsize=fs, va='top', ha='left', color='#111',
-            )
-
-        color_y = y - len(lineas) * lh
-        ax_leg.text(4, color_y, 'Color:', fontsize=fs, va='top', ha='left', color='#111')
-        ax_leg.add_patch(patches.Rectangle(
-            (24, color_y - 7.5),
-            10,
-            8,
-            linewidth=1,
-            edgecolor='#2c3e50',
-            facecolor=clr,
-            alpha=0.9,
-        ))
-        ax_leg.text(38, color_y, clr.upper(), fontsize=fs, va='top', ha='left', color='#444')
-
-        if i < n - 1:
-            sep_y = row_top - rh + 4
-            ax_leg.plot([4, 96], [sep_y, sep_y], color='#ddd', linewidth=0.8)
 
 def _numero_interior_pieza(num_tipo, w_placed_cm, h_placed_cm, ancho_tb_cm, alto_tb_cm):
     """Devuelve (texto o None, fontsize)."""
@@ -187,8 +192,11 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                          for clave in catalogo_ord if clave in cantidades_web],
         }
 
-        fig = plt.figure(figsize=(12.5, 9.8))
-        gs = GridSpec(1, 2, figure=fig, width_ratios=[1, 0.44], wspace=0.10)
+        cantidades_leyenda = cantidades_web
+        filas_leyenda = _filas_leyenda(catalogo_ord, numero_por_tipo, unidad, cantidades_leyenda)
+        altura_figura = max(9.8, (2.1 + sum(fila[2] for fila in filas_leyenda)) / .85)
+        fig = plt.figure(figsize=(11.5, altura_figura))
+        gs = GridSpec(1, 2, figure=fig, width_ratios=[1, 1.15], wspace=0.12)
         ax = fig.add_subplot(gs[0, 0])
         ax_leg = fig.add_subplot(gs[0, 1])
         fig.subplots_adjust(left=0.05, right=0.96, top=0.91, bottom=0.06)
@@ -197,6 +205,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
         ax.set_ylim(0, alto_tablero)
         ax.invert_yaxis()
         ax.set_aspect('equal')
+        ax.set_anchor('E')
         
         # Convertir desperdicio para mostrar
         simbolo = obtener_simbolo_unidad(unidad)
@@ -216,7 +225,7 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
             # Modo normal: con información completa
             ax.set_title(f"Tablero {i} de {num_tableros} - FFD + rect. libres\n"
                         f"Uso: {info_tablero['porcentaje_uso']}% | Desperdicio: {desperdicio_mostrar} {simbolo_area}",
-                        fontsize=13, fontweight='bold', pad=20)
+                        fontsize=15, fontweight='bold', pad=16)
             ax.set_xlabel(f"Ancho ({simbolo})", fontsize=11)
             ax.set_ylabel(f"Alto ({simbolo})", fontsize=11)
             ax.grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
@@ -272,15 +281,6 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
                         color='#102027',
                     )
 
-            # Información detallada (solo en modo normal)
-            area_usada_mostrar = round(info_tablero['area_usada'] * factor_area, 2)
-            info_text = (f"Piezas: {info_tablero['num_piezas']}\n"
-                        f"Área usada: {area_usada_mostrar} {simbolo_area}\n"
-                        f"Desperdicio: {desperdicio_mostrar} {simbolo_area}")
-            ax.text(ancho_tablero * 0.02, alto_tablero * 0.98, info_text,
-                   fontsize=9, verticalalignment='top',
-                   bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.9))
-
         cantidad_por_tipo_tablero = {}
         for ji, pd in enumerate(posiciones):
             key_tv = _tipo_pieza_visual_key(pd, ji)
@@ -291,8 +291,19 @@ def generar_grafico(piezas, ancho_tablero, alto_tablero, unidad='cm', permitir_r
             unidad, cantidad_por_tipo_tablero,
         )
 
+        if not modo_plan_corte:
+            altura_eje = ax_leg.get_position().height * fig.get_figheight()
+            resumen_y = 1 - (1.45 + sum(fila[2] for fila in filas_leyenda)) / altura_eje
+            area_usada_mostrar = round(info_tablero['area_usada'] * factor_area, 2)
+            ax_leg.text(0, resumen_y,
+                        f"Piezas: {info_tablero['num_piezas']}\n"
+                        f"Área usada: {area_usada_mostrar} {simbolo_area}\n"
+                        f"Desperdicio: {desperdicio_mostrar} {simbolo_area}",
+                        transform=ax_leg.transAxes, fontsize=11, color='#5A4535',
+                        va='top', linespacing=1.5)
+
         buf = io.BytesIO()
-        fig.savefig(buf, format="png", dpi=120, bbox_inches='tight', facecolor='white')
+        fig.savefig(buf, format="png", dpi=160, bbox_inches='tight', facecolor='white')
         plt.close(fig)
         buf.seek(0)
         imagenes_base64.append(base64.b64encode(buf.read()).decode("utf-8"))

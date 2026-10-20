@@ -151,3 +151,4 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Consistencia de colores y acciones](docs/CAMBIOS_CONSISTENCIA_ACCIONES.md)
 - [Lupa de lectura compartida](docs/CAMBIOS_LUPA_LECTURA.md)
 - [Visor del Historial: controles y armonía visual](docs/CAMBIOS_VISOR_HISTORIAL.md)
+- [Leyenda compacta y legible en los planos PNG](docs/CAMBIOS_LEYENDA_PLANOS.md)
