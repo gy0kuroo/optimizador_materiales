@@ -26,6 +26,7 @@
     {% block extra_css %}{% endblock %}
     <link rel="stylesheet" href="{% static 'cutless/css/help-redesign.css' %}?v=1">
     <link rel="stylesheet" href="{% static 'cutless/css/action-semantics.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'cutless/css/magnifier.css' %}?v=3">
 </head>
 <body class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
     {% block navigation %}
@@ -969,5 +970,23 @@
 
     {% endif %}
     {% block extra_js %}{% endblock %}
+
+    {% if user.is_authenticated %}
+    <aside id="reading-magnifier" class="reading-magnifier" aria-label="Herramienta de ampliación">
+      <div id="magnifier-hint" class="reading-magnifier__hint" hidden>Mueve el cursor para ampliar. Pulsa Esc para cerrar.</div>
+      <div id="magnifier-options" class="reading-magnifier__controls" hidden>
+        <button type="button" class="btn btn-outline-secondary" data-action="secondary" data-magnifier-step="-0.5" aria-label="Reducir ampliación">−</button>
+        <output id="magnifier-level" class="reading-magnifier__level" aria-label="Nivel de ampliación">200%</output>
+        <button type="button" class="btn btn-outline-secondary" data-action="secondary" data-magnifier-step="0.5" aria-label="Aumentar ampliación">+</button>
+      </div>
+      <button type="button" id="magnifier-toggle" class="btn btn-outline-secondary" data-action="secondary" aria-pressed="false" aria-controls="magnifier-options magnifier-lens">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m15 15 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Lupa
+      </button>
+      <span id="magnifier-status" class="visually-hidden" role="status"></span>
+    </aside>
+    <div id="magnifier-lens" class="reading-magnifier__lens" aria-hidden="true" hidden></div>
+    <script src="{% static 'cutless/js/magnifier.js' %}?v=3" defer></script>
+    {% endif %}
 </body>
 </html>

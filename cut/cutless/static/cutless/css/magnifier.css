@@ -1,0 +1,51 @@
+/* Herramienta de lectura: su posición no depende de la sección abierta. */
+.reading-magnifier {
+  position: fixed; right: 20px; bottom: 20px; z-index: 1090;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+}
+.reading-magnifier__controls {
+  display: flex; align-items: center; gap: 8px; padding: 8px;
+  background: var(--cl-bg-card); color: var(--cl-text-primary);
+  border: 1px solid var(--cl-border-strong); border-radius: 12px;
+  box-shadow: var(--cl-shadow-md);
+}
+.reading-magnifier [hidden] { display: none !important; }
+.reading-magnifier__level { min-width: 4ch; text-align: center; font-weight: 600; }
+.reading-magnifier__hint {
+  max-width: min(340px, calc(100vw - 40px)); padding: 8px 12px;
+  border-radius: 8px; border: 1px solid var(--cl-border);
+  background: var(--cl-bg-card); color: var(--cl-text-primary); font-size: 1rem;
+}
+.reading-magnifier__lens {
+  position: fixed; width: min(360px, calc(100vw - 24px)); height: 220px;
+  overflow: hidden; border: 3px solid var(--cl-blue); border-radius: 12px;
+  background: var(--cl-bg-base); box-shadow: var(--cl-shadow-lg);
+  pointer-events: none; z-index: 1080; contain: layout paint;
+}
+.reading-magnifier__lens[hidden] { display: none !important; }
+.reading-magnifier__scene { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+@media (max-width: 600px) {
+  .reading-magnifier { right: 12px; bottom: 12px; }
+  .reading-magnifier__lens { height: 160px; }
+}
+@media print {
+  .reading-magnifier, .reading-magnifier__lens { display: none !important; }
+}
+
+/* La lupa sustituye visualmente al puntero; los controles siguen siendo
+   reconocibles y utilizables con su cursor habitual. */
+html.magnifier-active, html.magnifier-active * { cursor: none !important; }
+html.magnifier-active #reading-magnifier,
+html.magnifier-active #reading-magnifier * { cursor: auto !important; }
+html.magnifier-active #reading-magnifier button:not(:disabled) { cursor: pointer !important; }
+
+/* Dentro de diálogos, reservar espacio real en su barra en vez de tapar datos. */
+.reading-magnifier.reading-magnifier--docked {
+  position: static; flex-direction: row; flex-wrap: wrap;
+  align-items: center; justify-content: flex-end;
+  max-width: 100%; margin-inline-start: auto;
+}
+.reading-magnifier--docked .reading-magnifier__hint { display: none; }
+.reading-magnifier--docked .reading-magnifier__controls {
+  padding: 0; border: 0; box-shadow: none; background: transparent;
+}

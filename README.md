@@ -149,3 +149,4 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Configuración inicial del espacio de trabajo](docs/CAMBIOS_CONFIGURACION_INICIAL.md)
 - [Resultado legible y visor de tableros](docs/CAMBIOS_VISOR_TABLEROS.md)
 - [Consistencia de colores y acciones](docs/CAMBIOS_CONSISTENCIA_ACCIONES.md)
+- [Lupa de lectura compartida](docs/CAMBIOS_LUPA_LECTURA.md)
