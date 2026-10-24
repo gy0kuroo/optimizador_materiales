@@ -19,9 +19,9 @@
               title="Ayuda sobre editar material" data-action="text" data-icon="help">
         Ayuda sobre materiales
       </button>
-      <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">
+      {% if user.perfil.menu_visible.materiales %}<a href="{% url 'cutless:lista_materiales' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">
         Volver a materiales
-      </a>
+      </a>{% endif %}
     </div>
   </header>
 
@@ -120,7 +120,7 @@
         </div>
 
         <div class="form-action-bar">
-          <a href="{% url 'cutless:lista_materiales' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
+          {% if user.perfil.menu_visible.materiales %}<a href="{% url 'cutless:lista_materiales' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>{% endif %}
           <button type="submit" class="btn btn-success" data-action="success" data-icon="check">Guardar cambios</button>
         </div>
       </form>

@@ -13,6 +13,9 @@
     if (!Number.isInteger(index) || index < 0 || index >= pages.length) return;
     current = index;
     pages.forEach((page, number) => { page.hidden = number !== current; });
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      pages[current].animate([{opacity:.2}, {opacity:1}], {duration:220, easing:'ease-out'});
+    }
     position.textContent = `Tablero ${current + 1} de ${pages.length}`;
     previous.disabled = current === 0;
     next.disabled = current === pages.length - 1;

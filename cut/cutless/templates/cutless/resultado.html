@@ -13,10 +13,6 @@
   <header class="page-header fade-in">
     <div class="page-header__text">
       <h1 class="page-title">Resultado del plan de corte</h1>
-      <p class="page-lead">
-        {% if numero_lista %}Optimización #{{ numero_lista }} · {% endif %}
-        {{ num_tableros }} tablero{{ num_tableros|pluralize }} · {{ optimizacion.aprovechamiento_total|stringformat:".1f" }}% de aprovechamiento
-      </p>
     </div>
     <div class="page-header__actions">
     <div class="button-download-bar">
@@ -39,6 +35,12 @@
     </div>
   </header>
 
+  <section class="card total-utilization" aria-label="Aprovechamiento total de la optimización">
+    <div class="cut-utilization">
+      <svg viewBox="0 0 42 42" role="img" aria-label="Aprovechamiento total {{ optimizacion.aprovechamiento_total|floatformat:2 }} por ciento"><circle class="donut-track" cx="21" cy="21" r="15.9155" fill="none" stroke-width="4"/><circle class="donut-value" cx="21" cy="21" r="15.9155" fill="none" stroke-width="4" stroke-dasharray="{{ optimizacion.aprovechamiento_total|unlocalize }} 100" transform="rotate(-90 21 21)"/></svg>
+      <div><h2>Aprovechamiento total</h2><strong>{{ optimizacion.aprovechamiento_total|floatformat:2 }} %</strong><p>Considera {{ num_tableros }} tablero{{ num_tableros|pluralize }} del plan completo.</p></div>
+    </div>
+  </section>
   <section data-board-deck aria-label="Planos de corte">
     <div class="board-deck-controls" hidden>
       <div class="board-deck-heading"><h2>Distribución de las piezas</h2><p>Recorre los tableros sin perder de vista sus medidas.</p></div>
@@ -187,9 +189,9 @@
             {% endif %}
             {% if costo_total %}
             <div class="mt-4 text-center">
-              <a href="{% url 'cutless:crear_presupuesto' %}?optimizacion={{ optimizacion.pk }}" class="btn btn-primary" data-action="primary" data-icon="plus">
+              {% if user.perfil.menu_visible.presupuestos %}<a href="{% url 'cutless:crear_presupuesto' %}?optimizacion={{ optimizacion.pk }}" class="btn btn-primary" data-action="primary" data-icon="plus">
                  Crear presupuesto
-              </a>
+              </a>{% endif %}
             </div>
             {% endif %}
           </div>
@@ -224,4 +226,4 @@
   </div></div>
 </div>
 {% endblock %}
-{% block extra_js %}<script src="{% static 'cutless/js/board-deck.js' %}?v=1"></script><script src="{% static 'cutless/js/board-viewer.js' %}?v=buttons-1"></script>{% endblock %}
+{% block extra_js %}<script src="{% static 'cutless/js/board-deck.js' %}?v=review-2"></script><script src="{% static 'cutless/js/board-viewer.js' %}?v=review-2"></script>{% endblock %}

@@ -19,9 +19,9 @@
               title="Ayuda sobre clientes" data-action="text" data-icon="help">
         Ayuda sobre clientes
       </button>
-      <a href="{% url 'cutless:crear_cliente' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
+      {% if user.perfil.menu_visible.clientes %}<a href="{% url 'cutless:crear_cliente' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
         Agregar cliente
-      </a>
+      </a>{% endif %}
     </div>
   </header>
 
@@ -43,7 +43,7 @@
         </div>
         {% if busqueda %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:lista_clientes' %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="close">Quitar filtros</a>
+          {% if user.perfil.menu_visible.clientes %}<a href="{% url 'cutless:lista_clientes' %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="close">Quitar filtros</a>{% endif %}
         </div>
         {% endif %}
       </div>
@@ -112,15 +112,15 @@
       {% if busqueda %}
         No se encontraron clientes que coincidan con "{{ busqueda }}".
         <br>
-        <a href="{% url 'cutless:lista_clientes' %}" class="mt-2 d-inline-block">Ver todos los clientes</a>
+        {% if user.perfil.menu_visible.clientes %}<a href="{% url 'cutless:lista_clientes' %}" class="mt-2 d-inline-block">Ver todos los clientes</a>{% endif %}
       {% else %}
         Aún no has registrado clientes. Crea tu primer cliente para comenzar a asociarlo con tus optimizaciones y presupuestos.
       {% endif %}
     </p>
     {% if not busqueda %}
-    <a href="{% url 'cutless:crear_cliente' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
+    {% if user.perfil.menu_visible.clientes %}<a href="{% url 'cutless:crear_cliente' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
        Crear Primer Cliente
-    </a>
+    </a>{% endif %}
     {% endif %}
   </div>
   {% endif %}

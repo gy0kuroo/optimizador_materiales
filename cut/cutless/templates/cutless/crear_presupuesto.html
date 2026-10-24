@@ -19,9 +19,9 @@
               title="Ayuda" data-action="text" data-icon="help">
         Ayuda sobre presupuestos
       </button>
-      <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">
+      {% if user.perfil.menu_visible.presupuestos %}<a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">
         Volver a presupuestos
-      </a>
+      </a>{% endif %}
     </div>
   </header>
 
@@ -60,7 +60,7 @@
               <div class="text-danger small">{{ form.cliente.errors }}</div>
             {% endif %}
             <small class="form-text text-muted">
-              <a href="{% url 'cutless:crear_cliente' %}" target="_blank">Crear nuevo cliente</a>
+              {% if user.perfil.menu_visible.clientes %}<a href="{% url 'cutless:crear_cliente' %}" target="_blank">Crear nuevo cliente</a>{% endif %}
             </small>
           </div>
           <div class="col-md-6">
@@ -208,7 +208,7 @@
         </div>
 
         <div class="form-action-bar">
-          <a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
+          {% if user.perfil.menu_visible.presupuestos %}<a href="{% url 'cutless:lista_presupuestos' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>{% endif %}
           <button type="submit" class="btn btn-success" data-action="success" data-icon="check">Crear presupuesto</button>
         </div>
       </form>

@@ -8,6 +8,17 @@
     let timeoutSeconds = null;
     let warningSeconds = 60; // Mostrar advertencia 1 minuto antes
     let countdownInterval = null;
+    let lastSync = 0;
+    async function syncActivity(force = false) {
+        const interval = Math.min(30000, (timeoutSeconds || 1800) * 1000 / 3);
+        if (!force && Date.now() - lastSync < interval) return;
+        lastSync = Date.now();
+        const csrf = document.cookie.split('; ').find(item => item.startsWith('csrftoken='))?.split('=').slice(1).join('=');
+        try {
+            const response = await fetch('/usuarios/actividad/', {method:'POST', credentials:'same-origin', headers:{'X-CSRFToken':decodeURIComponent(csrf || '')}});
+            if (response.status === 401) window.location.assign('/usuarios/login/?next=' + encodeURIComponent(location.pathname + location.search));
+        } catch (_) { lastSync = 0; }
+    }
 
     // Obtener timeout desde el atributo data del body o usar valor por defecto
     function initializeTimeout() {
@@ -72,6 +83,7 @@
         if (warningShown) {
             return;
         }
+        syncActivity();
 
         clearTimeout(inactivityTimer);
         clearTimeout(warningTimer);
@@ -213,14 +225,28 @@
     }
 
     // Agregar listeners de actividad
+    let lastBroadcast = 0;
     activityEvents.forEach(function(event) {
-        document.addEventListener(event, resetTimer, true);
+        document.addEventListener(event, function () {
+            resetTimer();
+            if (timeoutSeconds && !warningShown && Date.now() - lastBroadcast > 10000) {
+                lastBroadcast = Date.now();
+                try { localStorage.setItem('cutless:last-activity', String(lastBroadcast)); } catch (_) {}
+            }
+        }, true);
+    });
+    window.addEventListener('storage', function (event) {
+        if (event.key === 'cutless:last-activity' && timeoutSeconds) {
+            warningShown = false;
+            resetTimer();
+        }
     });
 
     // Agregar listeners del modal usando event delegation
-    document.body.addEventListener('click', function(e) {
-        if (e.target && e.target.id === 'session-stay-active') {
+    document.body.addEventListener('click', async function(e) {
+        if (e.target.closest('#session-stay-active')) {
             e.preventDefault();
+            await syncActivity(true);
             if (countdownInterval) {
                 clearInterval(countdownInterval);
                 countdownInterval = null;
@@ -238,7 +264,7 @@
             // Resetear el flag de advertencia y reiniciar timer
             warningShown = false;
             resetTimer();
-        } else if (e.target && e.target.id === 'session-logout-now') {
+        } else if (e.target.closest('#session-logout-now')) {
             e.preventDefault();
             if (countdownInterval) {
                 clearInterval(countdownInterval);

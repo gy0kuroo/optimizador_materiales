@@ -11,7 +11,7 @@
       <p class="page-lead">Confirma que deseas eliminar «{{ plantilla.nombre }}». Esta acción no se puede deshacer.</p>
     </div>
     <div class="page-header__actions">
-      <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Volver a plantillas</a>
+      {% if user.perfil.menu_visible.plantillas %}<a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Volver a plantillas</a>{% endif %}
     </div>
   </header>
 
@@ -23,7 +23,7 @@
       <form method="post" data-tipo="plantilla" data-confirm-delete="true">
         {% csrf_token %}
         <div class="form-action-bar">
-          <a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
+          {% if user.perfil.menu_visible.plantillas %}<a href="{% url 'cutless:lista_plantillas' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>{% endif %}
           <button type="submit" class="btn btn-danger" data-tipo="plantilla" data-action="delete" data-icon="trash">Sí, eliminar plantilla</button>
         </div>
       </form>

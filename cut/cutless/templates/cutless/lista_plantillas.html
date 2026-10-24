@@ -55,7 +55,7 @@
         </div>
         {% if busqueda or categoria_filtro %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:lista_plantillas' %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="close">Quitar filtros</a>
+          {% if user.perfil.menu_visible.plantillas %}<a href="{% url 'cutless:lista_plantillas' %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="close">Quitar filtros</a>{% endif %}
         </div>
         {% endif %}
       </div>

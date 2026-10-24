@@ -21,6 +21,20 @@
   function snapshot() {
     if (!active) return;
     const clonedBody = document.body.cloneNode(true);
+    // El Shadow DOM no satisface selectores como ':root body .btn'. Copiar el
+    // aspecto calculado mantiene dimensiones, tipografía y trazos de los SVG.
+    const properties = ['display','box-sizing','position','inset','top','left','right','bottom','width','height','min-width','min-height','max-width','max-height','margin','padding','border','border-radius','background','color','font-family','font-size','font-weight','line-height','letter-spacing','text-align','white-space','overflow','gap','grid-template-columns','grid-template-rows','grid-column','grid-row','flex','flex-direction','flex-wrap','align-items','justify-content','align-self','transform','transform-origin','visibility','opacity','fill','stroke','stroke-width','stroke-linecap','stroke-linejoin','vertical-align','box-shadow'];
+    const originalsForStyle = [document.body, ...document.body.querySelectorAll('*')];
+    [clonedBody, ...clonedBody.querySelectorAll('*')].forEach((copy, index) => {
+      const computed = getComputedStyle(originalsForStyle[index]);
+      properties.forEach(property => copy.style.setProperty(property, computed.getPropertyValue(property), 'important'));
+      if (computed.display === 'flex' && computed.flexWrap === 'wrap' && computed.flexDirection === 'row') {
+        const boxes = Array.from(originalsForStyle[index].children).map(child => child.getBoundingClientRect()).filter(box => box.width && box.height);
+        // getComputedStyle redondea anchos: unas milésimas bastaban para que
+        // una fila ajustada saltara de línea solo en la copia de la lupa.
+        if (boxes.length && boxes.every(box => Math.abs(box.top - boxes[0].top) < 1)) copy.style.setProperty('flex-wrap', 'nowrap', 'important');
+      }
+    });
     // Reservar el espacio de los controles integrados sin copiarlos a la lupa.
     if (controls.classList.contains('reading-magnifier--docked')) {
       const placeholder = document.createElement('div');
@@ -83,7 +97,7 @@
   function position() {
     frame = 0;
     if (!active) return;
-    const width = lens.offsetWidth, height = lens.offsetHeight;
+    const width = lens.clientWidth, height = lens.clientHeight;
     // Centrar sobre el punto señalado, limitando el cuadro en los bordes.
     const left = Math.max(12, Math.min(point.x - width / 2, innerWidth - width - 12));
     const top = Math.max(12, Math.min(point.y - height / 2, innerHeight - height - 12));

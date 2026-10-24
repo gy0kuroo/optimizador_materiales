@@ -44,6 +44,7 @@
         const card = cards[index];
         drawing = card.querySelector('.board-drawing').cloneNode(true);
         canvas.replaceChildren(drawing);
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) canvas.animate([{opacity:.2},{opacity:1}], {duration:220});
         data.replaceChildren(card.querySelector('.board-data').cloneNode(true));
         const pieces = card.querySelector('.cut-pieces');
         const canvasSection = element.querySelector('.board-canvas-section');

@@ -27,6 +27,13 @@ class RevisionUsabilidadTests(TestCase):
                 self.assertFalse(form['permitir_rotacion'].value())
                 self.assertEqual(response.context['pieza_formset'].forms[0]['ancho'].value(), .4)
 
+    def test_actividad_renueva_sesion_y_exige_post_autenticado(self):
+        with patch('django.contrib.sessions.backends.db.SessionStore.save', autospec=True) as save:
+            self.assertEqual(self.client.post(reverse('usuarios:actividad_sesion')).status_code, 200)
+            self.assertTrue(save.called)
+        self.assertEqual(self.client.get(reverse('usuarios:actividad_sesion')).status_code, 405)
+        self.client.logout()
+        self.assertEqual(self.client.post(reverse('usuarios:actividad_sesion')).status_code, 401)
 
     def test_exportaciones_no_recalculan_impresion_y_conservan_color(self):
         opt = Optimizacion.objects.create(usuario=self.user, ancho_tablero=122,
@@ -35,3 +42,11 @@ class RevisionUsabilidadTests(TestCase):
         with patch('cutless.views.exports.obtener_resultado_optimizacion', return_value=([], 0, info)):
             response = self.client.get(reverse('cutless:imprimir_plan_corte', args=[opt.pk]))
         self.assertEqual(response.status_code, 200)
+
+    def test_accesos_secundarios_respetan_preferencias(self):
+        perfil = self.user.perfil
+        perfil.preferencias_menu = {'presupuestos': False, 'costos': False}
+        perfil.save()
+        response = self.client.get(reverse('cutless:index'))
+        self.assertNotContains(response, 'id="btnCostosToggle"')
+        self.assertNotContains(response, reverse('cutless:lista_presupuestos'))

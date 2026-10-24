@@ -230,7 +230,7 @@
         {% if periodo != 'todos' %}
           No hay optimizaciones en el período seleccionado.
           <br>
-          <a href="{% url 'cutless:estadisticas' %}?periodo=todos" class="mt-2 d-inline-block">Ver todas las optimizaciones</a>
+          {% if user.perfil.menu_visible.estadisticas %}<a href="{% url 'cutless:estadisticas' %}?periodo=todos" class="mt-2 d-inline-block">Ver todas las optimizaciones</a>{% endif %}
         {% else %}
           Aún no tienes optimizaciones guardadas para mostrar estadísticas. Prepara tu primer corte para comenzar.
         {% endif %}

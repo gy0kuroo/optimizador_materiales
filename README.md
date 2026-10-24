@@ -169,3 +169,5 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Paneles neutros y vista previa coherente](docs/CAMBIOS_PANELES_NEUTROS.md)
 
 - [Revisión de exportaciones y duplicación](docs/CAMBIOS_EXPORTACIONES_Y_DUPLICACION.md)
+
+- [Revisión de sesión y usabilidad](docs/CAMBIOS_REVISION_USABILIDAD.md)

@@ -19,9 +19,9 @@
               title="Ayuda sobre crear cliente" data-action="text" data-icon="help">
         Ayuda sobre clientes
       </button>
-      <a href="{% url 'cutless:lista_clientes' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">
+      {% if user.perfil.menu_visible.clientes %}<a href="{% url 'cutless:lista_clientes' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">
         Volver a clientes
-      </a>
+      </a>{% endif %}
     </div>
   </header>
 
@@ -112,7 +112,7 @@
         </div>
 
         <div class="form-action-bar">
-          <a href="{% url 'cutless:lista_clientes' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
+          {% if user.perfil.menu_visible.clientes %}<a href="{% url 'cutless:lista_clientes' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>{% endif %}
           <button type="submit" class="btn btn-success" data-action="success" data-icon="check">Crear cliente</button>
         </div>
       </form>

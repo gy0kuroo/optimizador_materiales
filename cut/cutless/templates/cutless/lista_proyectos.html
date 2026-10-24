@@ -19,9 +19,9 @@
               title="Ayuda sobre proyectos" data-action="text" data-icon="help">
         Ayuda sobre proyectos
       </button>
-      <a href="{% url 'cutless:crear_proyecto' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
+      {% if user.perfil.menu_visible.proyectos %}<a href="{% url 'cutless:crear_proyecto' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
         Crear proyecto
-      </a>
+      </a>{% endif %}
     </div>
   </header>
 
@@ -53,7 +53,7 @@
         </div>
         {% if busqueda or estado_filtro %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:lista_proyectos' %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="close">Quitar filtros</a>
+          {% if user.perfil.menu_visible.proyectos %}<a href="{% url 'cutless:lista_proyectos' %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="close">Quitar filtros</a>{% endif %}
         </div>
         {% endif %}
       </div>
@@ -125,15 +125,15 @@
       {% if busqueda or estado_filtro %}
         No se encontraron proyectos que coincidan con los filtros aplicados.
         <br>
-        <a href="{% url 'cutless:lista_proyectos' %}" class="mt-2 d-inline-block">Ver todos los proyectos</a>
+        {% if user.perfil.menu_visible.proyectos %}<a href="{% url 'cutless:lista_proyectos' %}" class="mt-2 d-inline-block">Ver todos los proyectos</a>{% endif %}
       {% else %}
         Aún no has creado proyectos. Crea tu primer proyecto para comenzar a organizar tus optimizaciones.
       {% endif %}
     </p>
     {% if not busqueda and not estado_filtro %}
-    <a href="{% url 'cutless:crear_proyecto' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
+    {% if user.perfil.menu_visible.proyectos %}<a href="{% url 'cutless:crear_proyecto' %}" class="btn btn-primary" data-action="primary" data-icon="plus">
        Crear Primer Proyecto
-    </a>
+    </a>{% endif %}
     {% endif %}
   </div>
   {% endif %}

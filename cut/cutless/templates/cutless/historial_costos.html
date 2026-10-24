@@ -20,7 +20,7 @@
         Cómo consultar los costos
       </button>
       {% if optimizaciones_con_costo %}
-      <a href="{% url 'cutless:historial_costos' %}?export=excel&amp;fecha_desde={{ fecha_desde|urlencode }}&amp;fecha_hasta={{ fecha_hasta|urlencode }}" class="btn btn-secondary" data-action="secondary" data-icon="sheet">Exportar Excel</a>
+      {% if user.perfil.menu_visible.costos %}<a href="{% url 'cutless:historial_costos' %}?export=excel&amp;fecha_desde={{ fecha_desde|urlencode }}&amp;fecha_hasta={{ fecha_hasta|urlencode }}" class="btn btn-secondary" data-action="secondary" data-icon="sheet">Exportar Excel</a>{% endif %}
       {% endif %}
     </div>
   </header>
@@ -52,9 +52,9 @@
         </div>
         {% if fecha_desde or fecha_hasta %}
         <div class="col-md-2">
-          <a href="{% url 'cutless:historial_costos' %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="close">
+          {% if user.perfil.menu_visible.costos %}<a href="{% url 'cutless:historial_costos' %}" class="btn w-100 btn-secondary" data-action="secondary" data-icon="close">
             Quitar filtros
-          </a>
+          </a>{% endif %}
         </div>
         {% endif %}
       </div>

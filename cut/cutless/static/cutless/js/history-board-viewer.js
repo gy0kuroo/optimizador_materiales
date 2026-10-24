@@ -31,6 +31,7 @@
     if (reset) { viewport.scrollTop = 0; viewport.scrollLeft = 0; }
   }
   function render() {
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) viewport.animate([{opacity:.2},{opacity:1}], {duration:220});
     zoom = 1;
     previous.disabled = index === 0;
     next.disabled = index === sources.length - 1;

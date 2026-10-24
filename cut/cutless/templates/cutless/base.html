@@ -27,8 +27,8 @@
     <link rel="stylesheet" href="{% static 'cutless/css/help-redesign.css' %}?v=buttons-1">
     <link rel="stylesheet" href="{% static 'cutless/css/action-semantics.css' %}?v=buttons-1">
     <link rel="stylesheet" href="{% static 'cutless/css/magnifier.css' %}?v=3">
-    <link rel="stylesheet" href="{% static 'cutless/css/reforma-visual.css' %}?v=panels-1">
-    <link rel="stylesheet" href="{% static 'cutless/css/buttons.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'cutless/css/reforma-visual.css' %}?v=review-2">
+    <link rel="stylesheet" href="{% static 'cutless/css/buttons.css' %}?v=review-2">
 </head>
 <body data-button-icons="{% static 'cutless/button-icons.svg' %}?v=2" data-app-shell="{{ user.is_authenticated|yesno:'true,false' }}" class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
     {% block navigation %}
@@ -103,7 +103,7 @@
     <div class="container app-main">
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <div class="alert alert-{% if message.tags == "error" %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
                     {{ message }}
                     <button type="button" class="btn btn-icon btn-text" data-bs-dismiss="alert" aria-label="Close" data-action="text" data-icon="close"></button>
                 </div>
@@ -145,6 +145,8 @@
             const alerts = document.querySelectorAll('.alert.alert-dismissible');
 
             alerts.forEach(function(alert) {
+                // Los errores requieren lectura y una corrección; los cierra el usuario.
+                if (alert.classList.contains('alert-danger')) return;
                 // Determinar tiempo según el tipo de mensaje
                 let tiempoCierre = 5000; // Por defecto 5 segundos
 
@@ -175,9 +177,9 @@
 
     <!-- JavaScript Personalizado -->
     <script src="{% static 'cutless/js/theme.js' %}?v=3"></script>
-    <script src="{% static 'cutless/js/confirmaciones.js' %}?v=buttons-2"></script>
+    <script src="{% static 'cutless/js/confirmaciones.js' %}?v=review-2"></script>
     {% if user.is_authenticated %}
-    <script src="{% static 'cutless/js/session-timeout.js' %}?v=panels-1"></script>
+    <script src="{% static 'cutless/js/session-timeout.js' %}?v=review-2"></script>
     {% endif %}
     {% if user.is_authenticated and not ocultar_tutorial %}
     <script>
@@ -246,18 +248,23 @@
                 visibles.push({title: 'Ayuda', intro: 'No hay controles disponibles para guiar en esta pantalla. Puedes volver a Inicio para preparar un corte o a Historial para consultar los anteriores.'});
             }
             if (guiaActiva) guiaActiva.exit(true);
+            document.body.classList.add('tutorial-running');
             guiaActiva = introJs().setOptions({
                 steps: visibles, showProgress: true, showBullets: false,
                 exitOnOverlayClick: false, exitOnEsc: true,
                 nextLabel: 'Siguiente', prevLabel: 'Anterior', skipLabel: '×',
                 doneLabel: 'Finalizar', tooltipClass: 'customTooltip',
-                highlightClass: 'customHighlight', scrollPadding: 24
+                highlightClass: 'customHighlight', scrollPadding: 24, scrollToElement: true, scrollTo: 'tooltip', positionPrecedence: ['bottom', 'top', 'left', 'right']
             });
-            if (completarBienvenida) guiaActiva.oncomplete(marcarTutorialCompletado);
+            guiaActiva.oncomplete(() => {
+                document.body.classList.remove('tutorial-running');
+                if (completarBienvenida) marcarTutorialCompletado();
+            });
             guiaActiva.onafterchange(function() {
                 const cerrar = document.querySelector('.introjs-skipbutton');
                 if (cerrar) { cerrar.setAttribute('aria-label', 'Cerrar ayuda'); cerrar.setAttribute('title', 'Cerrar ayuda'); }
             });
+            guiaActiva.onexit(() => document.body.classList.remove('tutorial-running'));
             guiaActiva.start();
         }
 
@@ -881,7 +888,7 @@
                     {
                         title: 'Resumen de la Optimización',
                         intro: 'Aquí puedes ver el resumen de tu optimización: aprovechamiento, área utilizada, desperdicio y número de tableros necesarios.',
-                        element: document.querySelector('.board-page:not([hidden]) .cut-sidebar')
+                        element: document.querySelector('.total-utilization')
                     },
                     {
                         title: 'Plan de Corte Visual',
@@ -987,9 +994,9 @@
       <span id="magnifier-status" class="visually-hidden" role="status"></span>
     </aside>
     <div id="magnifier-lens" class="reading-magnifier__lens" aria-hidden="true" hidden></div>
-    <script src="{% static 'cutless/js/magnifier.js' %}?v=3" defer></script>
+    <script src="{% static 'cutless/js/magnifier.js' %}?v=review-3" defer></script>
     {% endif %}
     <script src="{% static 'cutless/js/visual-shell.js' %}?v=1" defer></script>
-    <script src="{% static 'cutless/js/buttons.js' %}?v=2" defer></script>
+    <script src="{% static 'cutless/js/buttons.js' %}?v=review-2" defer></script>
 </body>
 </html>

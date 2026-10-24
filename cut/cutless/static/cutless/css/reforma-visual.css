@@ -342,3 +342,19 @@ body .modal-header, body .modal-footer { border-width:1px; background:var(--cl-b
 body .modal-title { text-transform:none; letter-spacing:normal; color:var(--cl-text-primary); }
 body #session-warning-modal .modal-header { background:var(--cl-bg-card)!important; color:var(--cl-text-primary); }
 body .cl-table thead tr { background:var(--cl-bg-surface); color:var(--cl-text-primary); }
+
+/* Revisión de usabilidad: avisos legibles y ayuda sobre tarjetas con overflow. */
+body .alert-danger { font-size:1.125rem; line-height:1.65; padding:22px 56px 22px 24px; border-width:2px; border-inline-start-width:6px; }
+body .errorlist { font-size:1.0625rem; line-height:1.6; font-weight:600; }
+body .total-utilization { padding:24px; margin-bottom:24px; }
+.total-utilization h2 { font-size:1.15rem; margin:0 0 8px; }
+.total-utilization .cut-utilization { margin:0; }
+body.tutorial-running .cut-layout .introjs-showElement { overflow:visible; }
+body.tutorial-running .introjs-tooltip { max-width:min(420px,calc(100vw - 32px)); min-width:min(280px,calc(100vw - 32px)); font-size:1.0625rem; line-height:1.6; }
+body.tutorial-running .introjs-tooltiptext { overflow-wrap:anywhere; }
+
+.error-page { min-height:65vh; align-items:center; }
+.error-page__body { padding-inline:clamp(24px,5vw,64px); }
+.error-page__code { font-size:clamp(4rem,12vw,7rem); font-weight:700; line-height:1.1; color:var(--cl-blue); margin-bottom:24px; }
+body .error-page h1 { font-size:clamp(1.8rem,4vw,2.6rem); }
+body .error-page p, body .error-page .alert { font-size:1.125rem; line-height:1.7; }

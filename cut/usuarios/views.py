@@ -16,6 +16,15 @@ from django.views.decorators.http import require_POST
 from .forms import RegistroForm, PerfilForm, UsuarioEdicionForm, PermisosUsuarioForm, CambiarPasswordForm
 from .models import PerfilUsuario
 
+@require_POST
+def actividad_sesion(request):
+    """Renueva la sesión solo cuando el navegador informa actividad real."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'active': False}, status=401)
+    request.session.modified = True
+    return JsonResponse({'active': True})
+
+
 def registro(request):
     if request.method == "POST":
         form = RegistroForm(request.POST)

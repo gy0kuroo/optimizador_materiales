@@ -195,7 +195,7 @@
   </div>
 
   <div class="form-action-bar mb-4">
-    <a href="{% url 'cutless:comparar_optimizaciones' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-right">Comparar otras optimizaciones</a>
+    {% if user.perfil.menu_visible.comparar %}<a href="{% url 'cutless:comparar_optimizaciones' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-right">Comparar otras optimizaciones</a>{% endif %}
   </div>
   {% endif %}
 {% endblock %}

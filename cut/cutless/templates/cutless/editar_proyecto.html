@@ -19,9 +19,9 @@
               title="Ayuda" data-action="text" data-icon="help">
         Ayuda sobre proyectos
       </button>
-      <a href="{% url 'cutless:lista_proyectos' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">
+      {% if user.perfil.menu_visible.proyectos %}<a href="{% url 'cutless:lista_proyectos' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">
         Volver a proyectos
-      </a>
+      </a>{% endif %}
     </div>
   </header>
 
@@ -75,7 +75,7 @@
               <div class="text-danger small">{{ form.cliente.errors }}</div>
             {% endif %}
             <small class="form-text text-muted">
-              <a href="{% url 'cutless:crear_cliente' %}" target="_blank">Crear nuevo cliente</a>
+              {% if user.perfil.menu_visible.clientes %}<a href="{% url 'cutless:crear_cliente' %}" target="_blank">Crear nuevo cliente</a>{% endif %}
             </small>
           </div>
           <div class="col-md-6">
