@@ -94,14 +94,14 @@ body {
     border: none;
     page-break-inside: avoid;
     background: #fff;
-    filter: grayscale(100%);
-    -webkit-filter: grayscale(100%);
+    filter: none;
+    -webkit-filter: none;
 }
 
 /* Estilos específicos para impresión */
 @media print {
     @page {
-        size: A4 landscape;
+        size: letter portrait;
         margin: 0;
     }
 
@@ -123,8 +123,8 @@ body {
         page-break-after: always;
         margin: 0;
         padding: 0;
-        min-height: 100vh;
-        height: 100vh;
+        min-height: auto;
+        height: auto;
     }
 
     .tablero-page:last-child {
@@ -167,3 +167,18 @@ body {
     }
 }
 
+
+.tablero-imagen { flex-direction:column; gap:20px; height:auto; }
+.tablero-imagen svg { width:100%; height:auto; color:#1C1008; }
+.tablero-imagen table { width:100%; border-collapse:collapse; font-size:12pt; }
+.tablero-imagen :is(th,td) { text-align:left; padding:8px; border-bottom:1px solid #B7B8AB; }
+@media print {
+ @page { size:letter portrait; margin:12mm; }
+ .tablero-page { display:block; min-height:0; height:auto; break-after:page; }
+ .tablero-page:last-child { break-after:auto; }
+ .tablero-imagen-container { padding:0; display:block; }
+ .tablero-imagen { display:block; }
+ .tablero-imagen svg { max-height:115mm; margin:6mm 0; }
+ tr { break-inside:avoid; }
+ thead { display:table-header-group; }
+}

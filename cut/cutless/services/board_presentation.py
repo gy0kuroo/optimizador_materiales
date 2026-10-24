@@ -21,6 +21,10 @@ def preparar_plano_horizontal(vista, unidad, margen):
                  medida_ancho=convertir_desde_cm(tipo['ancho'], unidad),
                  medida_alto=convertir_desde_cm(tipo['alto'], unidad),
                  texto=min(h/5, w/(max(8, len(p['nombre']), len(medidas))*.65), height*.035))
+        # No reducir toda la descripción hasta volverla ilegible. En piezas
+        # pequeñas, una referencia mayor enlaza con el detalle de la tabla.
+        p['texto_detallado'] = p['texto'] >= width*.008
+        p['texto_referencia'] = min(h*.32, w/max(3, len(str(p['numero']))+2), height*.035)
         piezas.append(p)
     # Complemento geométrico por franjas: rectángulos disjuntos, sin atribuir
     # al algoritmo sobrantes reutilizables ni incluir las ranuras de la sierra.
@@ -51,6 +55,7 @@ def preparar_plano_horizontal(vista, unidad, margen):
                  medida_ancho=convertir_desde_cm(r['ancho'], unidad),
                  medida_alto=convertir_desde_cm(r['alto'], unidad),
                  texto=min(r['alto']/4, r['ancho']/18, height*.03))
+        r['mostrar_texto'] = r['texto'] >= width*.008 and min(r['ancho'], r['alto']) >= height*.1
         sobrantes.append(r)
     pad = height*.14
     return dict(ancho=width, alto=height, piezas=piezas, sobrantes=sobrantes,

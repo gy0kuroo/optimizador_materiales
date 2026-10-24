@@ -57,7 +57,7 @@
 :root body .btn[hidden] { display:none!important; }
 :root body .btn-icon { width:44px!important; min-width:44px; padding:10px!important; flex:0 0 44px; }
 :root body .btn-icon.btn-sm { width:34px!important; min-width:34px; padding:7px!important; flex-basis:34px; }
-:root body .btn > .button-icon { display:block; width:18px; height:18px; flex:0 0 18px; color:inherit; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+:root body :is(.btn,.introjs-button) > .button-icon { display:block; width:18px; height:18px; flex:0 0 18px; color:inherit; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
 :root body .btn-secondary > .button-icon { color:var(--btn-brand-soft); }
 :root body .btn[data-busy="true"] { cursor:wait; }
 .button-spinner { width:18px; height:18px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; flex:0 0 18px; animation:button-spin .7s linear infinite; }

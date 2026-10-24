@@ -6,7 +6,7 @@ from uuid import uuid4
 from decimal import Decimal
 
 from PIL import Image
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import A4, letter
 from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
 
@@ -42,8 +42,8 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
     if archivo_salida is None:
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
-    c = canvas.Canvas(archivo_salida if archivo_salida is not None else filepath, pagesize=A4)
-    width, height = A4
+    c = canvas.Canvas(archivo_salida if archivo_salida is not None else filepath, pagesize=letter)
+    width, height = letter
 
     # === PÁGINA 1: Información general ===
     c.setFont("Helvetica-Bold", 18)
@@ -265,47 +265,24 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
                 c.drawString(col_x, y_pos, "-")
         y_pos -= 12
 
-    # === PÁGINAS SIGUIENTES: Un tablero por página ===
+    # Los planos usan la misma geometría horizontal que la web. Las imágenes
+    # antiguas solo se conservan como respaldo cuando no existe geometría guardada.
+    from .board_pdf import dibujar_tablero
+    from reportlab.lib.utils import ImageReader
     for i, img_base64 in enumerate(imagenes_base64, start=1):
-        if not img_base64 or img_base64.isspace():
-            continue
-
-        try:
-            c.showPage()
-            
-            c.setFont("Helvetica-Bold", 16)
-            c.drawCentredString(width / 2, height - 40, f"Tablero {i} de {len(imagenes_base64)}")
-
-            image_data = base64.b64decode(img_base64)
-            img_temp = os.path.join(settings.MEDIA_ROOT, f"temp_img_{optimizacion.id}_{i}.png")
-            with open(img_temp, "wb") as f:
-                f.write(image_data)
-
-            with Image.open(img_temp) as im:
-                img_width, img_height = im.size
-                max_width = 18 * cm
-                max_height = 23 * cm
-                ratio = min(max_width / img_width, max_height / img_height)
-                final_width = img_width * ratio
-                final_height = img_height * ratio
-
-            x_pos = (width - final_width) / 2
-            y_pos = (height - final_height - 3*cm) / 2
-            
-            c.drawImage(img_temp, x_pos, y_pos, width=final_width, height=final_height, 
-                       preserveAspectRatio=True, mask='auto')
-
-            c.setFont("Helvetica-Oblique", 9)
-            c.drawCentredString(width / 2, 1.5*cm, f"Página {i+1} de {len(imagenes_base64)+1}")
-
-            try:
-                os.remove(img_temp)
-            except Exception:
-                pass
-
-        except Exception as e:
-            c.setFont("Helvetica-Oblique", 10)
-            c.drawString(2*cm, height / 2, f"Error: {str(e)}")
+        c.showPage()
+        vista = info_tableros[i-1].get('vista_web') if i <= len(info_tableros) else None
+        if vista:
+            dibujar_tablero(c, vista, unidad, optimizacion.margen_corte, i,
+                            len(imagenes_base64), width, height, info_tableros[i-1])
+        elif img_base64 and not img_base64.isspace():
+            image = ImageReader(io.BytesIO(base64.b64decode(img_base64)))
+            iw, ih = image.getSize()
+            ratio = min((width-80)/iw, (height-120)/ih)
+            c.setFont('Helvetica-Bold', 16)
+            c.drawCentredString(width/2, height-40, f'Tablero {i} de {len(imagenes_base64)}')
+            c.drawImage(image, (width-iw*ratio)/2, (height-ih*ratio)/2,
+                        width=iw*ratio, height=ih*ratio, mask='auto')
 
     # Pie de página final
     c.setStrokeColorRGB(0.3, 0.3, 0.3)
@@ -329,7 +306,7 @@ def generar_pdf_presupuesto(presupuesto):
     Returns:
         str: Ruta del archivo PDF generado
     """
-    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.pagesizes import A4, letter
     from reportlab.lib.units import cm
     from reportlab.pdfgen import canvas
     from reportlab.lib import colors
@@ -587,7 +564,7 @@ def generar_pdf_resumen_desperdicio(optimizaciones, estadisticas, periodo='todos
     Returns:
         str: Ruta del archivo PDF generado
     """
-    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.pagesizes import A4, letter
     from reportlab.lib.units import cm
     from reportlab.pdfgen import canvas
     from reportlab.lib import colors

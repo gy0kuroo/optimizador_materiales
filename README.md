@@ -167,3 +167,5 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Sistema compartido de botones y estados](docs/CAMBIOS_SISTEMA_BOTONES.md)
 
 - [Paneles neutros y vista previa coherente](docs/CAMBIOS_PANELES_NEUTROS.md)
+
+- [Revisión de exportaciones y duplicación](docs/CAMBIOS_EXPORTACIONES_Y_DUPLICACION.md)

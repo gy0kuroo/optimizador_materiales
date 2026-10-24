@@ -423,67 +423,31 @@ def pdf_path_para_template(optimizacion):
 def respuesta_pdf_optimizacion(optimizacion, numero_lista=None):
     """Devuelve FileResponse del PDF persistido o lo regenera si falta."""
     nombre_descarga = nombre_descarga_pdf(numero_lista, optimizacion)
-    ruta = _ruta_pdf_en_disco(optimizacion)
-    if ruta:
-        return FileResponse(
-            open(ruta, 'rb'),
-            as_attachment=True,
-            filename=nombre_descarga,
-        )
-
-    imagenes, _, info = obtener_resultado_optimizacion(
-        optimizacion,
-        numero_lista=numero_lista,
-        persistir_si_falta=True,
-    )
-
-    optimizacion.refresh_from_db()
-    ruta = _ruta_pdf_en_disco(optimizacion)
-    if not ruta:
-        ruta = _generar_y_guardar_pdf(optimizacion, imagenes, info, numero_lista=numero_lista)
-
-    ruta = _normalizar_ruta_absoluta(ruta)
-    if not ruta or not os.path.isfile(ruta):
-        raise FileNotFoundError(f'No se pudo generar el PDF de la optimización #{optimizacion.pk}')
-
-    return FileResponse(
-        open(ruta, 'rb'),
-        as_attachment=True,
-        filename=nombre_descarga,
-    )
+    # Exportar la presentación actual también para resultados con PDF antiguo.
+    # No sustituir los archivos previos ni volver a ejecutar el algoritmo.
+    imagenes, _, info = obtener_resultado_optimizacion(optimizacion, numero_lista=numero_lista, persistir_si_falta=False)
+    buffer = io.BytesIO()
+    generar_pdf(optimizacion, imagenes, numero_lista=numero_lista,
+                info_desperdicio=info, archivo_salida=buffer)
+    buffer.seek(0)
+    return FileResponse(buffer, as_attachment=True, filename=nombre_descarga)
 
 
 def respuesta_png_tablero(optimizacion, tablero_num, numero_lista=None):
-    """Devuelve FileResponse del PNG persistido de un tablero."""
-    nombre_descarga = nombre_descarga_png_tablero(numero_lista, optimizacion, tablero_num)
-    tablero = optimizacion.tableros.filter(numero=tablero_num).first()
-    if tablero and tablero.imagen:
-        return FileResponse(
-            tablero.imagen.open('rb'),
-            as_attachment=True,
-            filename=nombre_descarga,
-        )
-
-    imagenes, _, _ = obtener_resultado_optimizacion(
-        optimizacion,
-        numero_lista=numero_lista,
-        persistir_si_falta=True,
+    """Exporta el plano actual, compartido por todas las rutas de descarga PNG."""
+    nombre = nombre_descarga_png_tablero(numero_lista, optimizacion, tablero_num)
+    imagenes, _, info = obtener_resultado_optimizacion(
+        optimizacion, numero_lista=numero_lista, persistir_si_falta=False,
     )
-    tablero = optimizacion.tableros.filter(numero=tablero_num).first()
-    if tablero and tablero.imagen:
-        return FileResponse(
-            tablero.imagen.open('rb'),
-            as_attachment=True,
-            filename=nombre_descarga,
-        )
-
     if tablero_num < 1 or tablero_num > len(imagenes):
         return None
-
-    from django.core.files.base import ContentFile
-    image_data = base64.b64decode(imagenes[tablero_num - 1])
-    return FileResponse(
-        ContentFile(image_data),
-        as_attachment=True,
-        filename=nombre_descarga,
-    )
+    datos = next((tb for tb in info['info_tableros'] if tb['numero'] == tablero_num), {})
+    vista = datos.get('vista_web')
+    if vista:
+        from ..exports.board_png import generar_png_tablero
+        buffer = generar_png_tablero(vista, optimizacion.unidad_medida or 'cm',
+            optimizacion.margen_corte, tablero_num, len(imagenes), datos)
+    else:
+        # Un registro histórico sin coordenadas solo permite recuperar su imagen.
+        buffer = io.BytesIO(base64.b64decode(imagenes[tablero_num-1]))
+    return FileResponse(buffer, as_attachment=True, filename=nombre, content_type='image/png')

@@ -99,6 +99,9 @@
                 credentials: 'same-origin'
             });
 
+            if (response.redirected || response.headers.get('content-type')?.includes('text/html')) {
+                throw new Error('La sesión ha expirado. Inicia sesión antes de descargar.');
+            }
             if (!response.ok) {
                 throw new Error('Error en la descarga: ' + response.status + ' ' + response.statusText);
             }
@@ -119,7 +122,7 @@
             if (typeof window.cutlessAlerta === 'function') {
                 await window.cutlessAlerta({
                     titulo: 'Error de descarga',
-                    mensaje: 'No se pudo descargar el archivo. Intenta de nuevo.'
+                    mensaje: error.message || 'No se pudo descargar el archivo. Intenta de nuevo.'
                 });
             } else {
                 alert('No se pudo descargar el archivo. Intenta de nuevo.');

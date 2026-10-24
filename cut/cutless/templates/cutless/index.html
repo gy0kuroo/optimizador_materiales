@@ -1,5 +1,5 @@
 {% extends 'cutless/base.html' %}
-{% load static %}
+{% load static l10n %}
 {% block body_class %}dashboard-page{% endblock %}
 
 {% block extra_css %}
@@ -91,7 +91,7 @@
                    class="form-control"
                    placeholder="Ej: 122"
                    step="0.01"
-                   value="{{ tablero_form.ancho.value|default:'' }}">
+                   value="{{ tablero_form.ancho.value|default_if_none:''|unlocalize }}">
             <small class="form-text text-muted">Medida horizontal del tablero completo.</small>
             {% if tablero_form.ancho.errors %}
               <div class="text-danger">{{ tablero_form.ancho.errors }}</div>
@@ -108,7 +108,7 @@
                    class="form-control"
                    placeholder="Ej: 244"
                    step="0.01"
-                   value="{{ tablero_form.alto.value|default:'' }}">
+                   value="{{ tablero_form.alto.value|default_if_none:''|unlocalize }}">
             <small class="form-text text-muted">Medida vertical del tablero completo.</small>
             {% if tablero_form.alto.errors %}
               <div class="text-danger">{{ tablero_form.alto.errors }}</div>
@@ -144,7 +144,7 @@
                    step="0.1"
                    min="0"
                    max="10"
-                   value="{{ tablero_form.margen_corte.value|default_if_none:'3' }}">
+                   value="{{ tablero_form.margen_corte.value|default_if_none:'3'|unlocalize }}">
             <small class="form-text text-muted">Ancho que consume la sierra en cada corte. Siempre en milímetros; 0 significa sin separación.</small>
             {% if tablero_form.margen_corte.errors %}
               <div class="text-danger">{{ tablero_form.margen_corte.errors }}</div>
@@ -261,7 +261,7 @@
                      class="form-control"
                      step="0.01"
                      min="0"
-                     value="{{ tablero_form.precio_tablero.value|default:'' }}">
+                     value="{{ tablero_form.precio_tablero.value|default_if_none:''|unlocalize }}">
               <small class="form-text text-muted">{{ tablero_form.precio_tablero.help_text }}</small>
               {% if tablero_form.precio_tablero.errors %}
                 <div class="text-danger">{{ tablero_form.precio_tablero.errors }}</div>
@@ -275,7 +275,7 @@
                      class="form-control"
                      step="0.01"
                      min="0"
-                     value="{{ tablero_form.mano_obra.value|default:'' }}">
+                     value="{{ tablero_form.mano_obra.value|default_if_none:''|unlocalize }}">
               <small class="form-text text-muted">{{ tablero_form.mano_obra.help_text }}</small>
               {% if tablero_form.mano_obra.errors %}
                 <div class="text-danger">{{ tablero_form.mano_obra.errors }}</div>

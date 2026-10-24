@@ -7,6 +7,13 @@
     svg.classList.add('button-icon');
     svg.setAttribute('aria-hidden', 'true');
     svg.setAttribute('focusable', 'false');
+    svg.setAttribute('width', '18');
+    svg.setAttribute('height', '18');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '1.6');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
     const use = document.createElementNS(svg.namespaceURI, 'use');
     use.setAttribute('href', `${sprite}#${name}`);
     svg.append(use);

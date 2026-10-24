@@ -836,17 +836,21 @@ def duplicar_optimizacion(request, pk):
     ancho_mostrar = convertir_desde_cm(optimizacion.ancho_tablero, unidad_original)
     alto_mostrar = convertir_desde_cm(optimizacion.alto_tablero, unidad_original)
     
-    # Convertir piezas de cm a la unidad original
-    for pieza in piezas_data:
-        pieza['ancho'] = round(convertir_desde_cm(float(pieza['ancho']), unidad_original), 2)
-        pieza['alto'] = round(convertir_desde_cm(float(pieza['alto']), unidad_original), 2)
+    # El texto de piezas ya conserva la unidad ingresada; solo el tablero está en cm.
     
     # Crear formularios con datos prellenados
     tablero_form = TableroForm(initial={
         'ancho': ancho_mostrar,
         'alto': alto_mostrar,
-        'unidad_medida': unidad_original
-    })
+        'unidad_medida': unidad_original,
+        'permitir_rotacion': optimizacion.permitir_rotacion,
+        'margen_corte': optimizacion.margen_corte * 10,
+        'material': optimizacion.material_id,
+        'precio_tablero': optimizacion.precio_tablero,
+        'mano_obra': optimizacion.mano_obra,
+        'cliente': optimizacion.cliente_id,
+        'proyecto': optimizacion.proyecto_id,
+    }, user=request.user)
     
     pieza_formset = PiezaFormSet(initial=piezas_data)
     

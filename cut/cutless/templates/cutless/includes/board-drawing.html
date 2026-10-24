@@ -9,12 +9,20 @@
             <text transform="translate({{ plano.cota|unlocalize }} {{ plano.centro_y|unlocalize }}) rotate(-90)" dy="-.45em">{{ plano.cota_alto|floatformat:2 }} {{ unidad_medida }}</text>
           </g>
           {% for resto in plano.sobrantes %}
-          <rect x="{{ resto.x|unlocalize }}" y="{{ resto.y|unlocalize }}" width="{{ resto.ancho|unlocalize }}" height="{{ resto.alto|unlocalize }}" fill="url(#scrap-{{ item.numero }})"/>
-          <text x="{{ resto.cx|unlocalize }}" y="{{ resto.cy|unlocalize }}" font-size="{{ resto.texto|unlocalize }}" text-anchor="middle" fill="#1C1008"><tspan x="{{ resto.cx|unlocalize }}" dy="-.25em">Sobrante</tspan><tspan x="{{ resto.cx|unlocalize }}" dy="1.3em">{{ resto.medida_ancho|floatformat:2 }} × {{ resto.medida_alto|floatformat:2 }} {{ unidad_medida }}</tspan></text>
+          <rect x="{{ resto.x|unlocalize }}" y="{{ resto.y|unlocalize }}" width="{{ resto.ancho|unlocalize }}" height="{{ resto.alto|unlocalize }}" fill="url(#scrap-{{ item.numero }})"><title>Sobrante · {{ resto.medida_ancho }} × {{ resto.medida_alto }} {{ unidad_medida }}</title></rect>
+          {% if resto.mostrar_texto %}
+          <defs><clipPath id="scrap-label-{{ item.numero }}-{{ forloop.counter }}"><rect x="{{ resto.x|unlocalize }}" y="{{ resto.y|unlocalize }}" width="{{ resto.ancho|unlocalize }}" height="{{ resto.alto|unlocalize }}"/></clipPath></defs>
+          <text pointer-events="none" clip-path="url(#scrap-label-{{ item.numero }}-{{ forloop.counter }})" x="{{ resto.cx|unlocalize }}" y="{{ resto.cy|unlocalize }}" font-size="{{ resto.texto|unlocalize }}" text-anchor="middle" fill="#1C1008"><tspan x="{{ resto.cx|unlocalize }}" dy="-.25em">Sobrante</tspan><tspan x="{{ resto.cx|unlocalize }}" dy="1.3em">{{ resto.medida_ancho|floatformat:2 }} × {{ resto.medida_alto|floatformat:2 }} {{ unidad_medida }}</tspan></text>
+          {% endif %}
           {% endfor %}
           {% for pieza in plano.piezas %}
           <rect x="{{ pieza.x|unlocalize }}" y="{{ pieza.y|unlocalize }}" width="{{ pieza.ancho|unlocalize }}" height="{{ pieza.alto|unlocalize }}" fill="{{ pieza.color }}" stroke="#263238" stroke-width="1.5" vector-effect="non-scaling-stroke"><title>P{{ pieza.numero }} · {{ pieza.nombre }} · {{ pieza.medida_ancho }} × {{ pieza.medida_alto }} {{ unidad_medida }}</title></rect>
-          <text x="{{ pieza.cx|unlocalize }}" y="{{ pieza.cy|unlocalize }}" font-size="{{ pieza.texto|unlocalize }}" text-anchor="middle" fill="#1C1008"><tspan x="{{ pieza.cx|unlocalize }}" dy="-1.1em" font-weight="700">P{{ pieza.numero }}</tspan><tspan x="{{ pieza.cx|unlocalize }}" dy="1.25em">{{ pieza.nombre }}</tspan><tspan x="{{ pieza.cx|unlocalize }}" dy="1.25em">{{ pieza.medida_ancho|floatformat:2 }} × {{ pieza.medida_alto|floatformat:2 }} {{ unidad_medida }}</tspan></text>
+          <defs><clipPath id="piece-label-{{ item.numero }}-{{ forloop.counter }}"><rect x="{{ pieza.x|unlocalize }}" y="{{ pieza.y|unlocalize }}" width="{{ pieza.ancho|unlocalize }}" height="{{ pieza.alto|unlocalize }}"/></clipPath></defs>
+          {% if pieza.texto_detallado %}
+          <text pointer-events="none" clip-path="url(#piece-label-{{ item.numero }}-{{ forloop.counter }})" x="{{ pieza.cx|unlocalize }}" y="{{ pieza.cy|unlocalize }}" font-size="{{ pieza.texto|unlocalize }}" text-anchor="middle" fill="#1C1008"><tspan x="{{ pieza.cx|unlocalize }}" dy="-1.1em" font-weight="700">P{{ pieza.numero }}</tspan><tspan x="{{ pieza.cx|unlocalize }}" dy="1.25em">{{ pieza.nombre }}</tspan><tspan x="{{ pieza.cx|unlocalize }}" dy="1.25em">{{ pieza.medida_ancho|floatformat:2 }} × {{ pieza.medida_alto|floatformat:2 }} {{ unidad_medida }}</tspan></text>
+          {% else %}
+          <text pointer-events="none" clip-path="url(#piece-label-{{ item.numero }}-{{ forloop.counter }})" x="{{ pieza.cx|unlocalize }}" y="{{ pieza.cy|unlocalize }}" dominant-baseline="central" font-size="{{ pieza.texto_referencia|unlocalize }}" text-anchor="middle" font-weight="700" fill="#1C1008">P{{ pieza.numero }}</text>
+          {% endif %}
           {% endfor %}
         </svg>{% endwith %}
         {% else %}<img class="board-drawing board-legacy" src="data:image/png;base64,{{ item.imagen }}" alt="Distribución guardada del tablero {{ item.numero }}">{% endif %}
