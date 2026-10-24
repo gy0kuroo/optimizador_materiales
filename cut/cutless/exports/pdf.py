@@ -24,8 +24,7 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
     Args:
         optimizacion: Objeto Optimizacion
         imagenes_base64: Lista de imágenes en base64
-        numero_lista: Número de la lista en el historial (opcional). Si se proporciona,
-                     se usará en el nombre del archivo en lugar del ID.
+        numero_lista: Parámetro legado; el código permanente identifica la exportación.
         archivo_salida: Buffer opcional; evita crear un PDF temporal en MEDIA_ROOT.
         info_desperdicio: Dict igual al tercer retorno de generar_grafico (areas en cm²).
                          Si es None, se regenera desde la optimización guardada (más costoso).
@@ -36,8 +35,7 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
     if not imagenes_base64:
         return None
     
-    numero = numero_lista if numero_lista is not None else optimizacion.id
-    filename = f"optimizacion_{numero}.pdf"
+    filename = f"{optimizacion.codigo}.pdf"
     filepath = os.path.join(settings.MEDIA_ROOT, "pdfs", filename)
     if archivo_salida is None:
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
@@ -47,9 +45,16 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
 
     # === PÁGINA 1: Información general ===
     c.setFont("Helvetica-Bold", 18)
-    c.drawCentredString(width / 2, height - 50, "Reporte de Optimización - CutLess")
+    c.drawCentredString(width / 2, height - 50, f"Reporte {optimizacion.codigo} - CutLess")
     c.setFont("Helvetica-Oblique", 10)
     c.drawCentredString(width / 2, height - 70, "Algoritmo: First Fit Decreasing (FFD)")
+    if optimizacion.nombre:
+        nombre = optimizacion.nombre
+        c.setFont('Helvetica', 11)
+        while c.stringWidth(nombre, 'Helvetica', 11) > width-100:
+            nombre = nombre[:-2] + '…'
+        c.drawCentredString(width/2, height-90, nombre)
+
 
     c.setFont("Helvetica-Bold", 12)
     c.drawString(2*cm, height - 110, "Información General:")
@@ -274,7 +279,7 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
         vista = info_tableros[i-1].get('vista_web') if i <= len(info_tableros) else None
         if vista:
             dibujar_tablero(c, vista, unidad, optimizacion.margen_corte, i,
-                            len(imagenes_base64), width, height, info_tableros[i-1])
+                            len(imagenes_base64), width, height, info_tableros[i-1], codigo=optimizacion.codigo, nombre=optimizacion.nombre)
         elif img_base64 and not img_base64.isspace():
             image = ImageReader(io.BytesIO(base64.b64decode(img_base64)))
             iw, ih = image.getSize()
@@ -387,7 +392,7 @@ def generar_pdf_presupuesto(presupuesto):
         alto_mostrar = convertir_desde_cm(optimizacion.alto_tablero, unidad)
         simbolo = obtener_simbolo_unidad(unidad)
         
-        c.drawString(2.5*cm, y_pos, f"Optimización #{idx}:")
+        c.drawString(2.5*cm, y_pos, f"Optimización {optimizacion.codigo}:")
         y_pos -= 15
         c.drawString(3*cm, y_pos, f"• Dimensiones: {ancho_mostrar:.2f} × {alto_mostrar:.2f} {simbolo}")
         y_pos -= 15
@@ -472,8 +477,6 @@ def generar_pdf_presupuesto(presupuesto):
     data = [['Concepto', 'Cantidad', 'Precio Unitario', 'Subtotal']]
     
     # Calcular número de lista para cada optimización (basado en orden por fecha descendente)
-    todas_optimizaciones_usuario = Optimizacion.objects.filter(usuario=presupuesto.usuario).order_by('-fecha')
-    total_optimizaciones_usuario = todas_optimizaciones_usuario.count()
     
     # Agregar fila por cada optimización
     total_tableros = 0
@@ -483,15 +486,8 @@ def generar_pdf_presupuesto(presupuesto):
         costo_tableros = presupuesto.precio_tablero * Decimal(str(num_tableros))
         
         # Calcular el número de lista (basado en orden por fecha descendente)
-        numero_lista = optimizacion.pk  # Por defecto usar el ID
-        for idx, opt in enumerate(todas_optimizaciones_usuario, start=1):
-            if opt.id == optimizacion.id:
-                # Para orden descendente: numero = total - idx + 1
-                numero_lista = total_optimizaciones_usuario - idx + 1
-                break
-        
         data.append([
-            f'Tableros (Optimización #{numero_lista})',
+            f'Tableros ({optimizacion.codigo})',
             str(num_tableros),
             f"${presupuesto.precio_tablero:,.0f}",
             f"${costo_tableros:,.0f}"

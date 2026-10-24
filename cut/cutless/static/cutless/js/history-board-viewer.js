@@ -36,7 +36,7 @@
     previous.disabled = index === 0;
     next.disabled = index === sources.length - 1;
     document.getElementById('history-board-position').textContent = `Tablero ${index + 1} de ${sources.length}`;
-    document.getElementById('modalImagenLabel').textContent = `Optimización #${number}`;
+    document.getElementById('modalImagenLabel').textContent = `Optimización ${number}`;
     pieces.replaceChildren(); details.replaceChildren();
     element.classList.toggle('history-legacy', !panels[index]);
     if (panels[index]) {
@@ -66,7 +66,7 @@
     request?.abort();
     const controller = new AbortController();
     request = controller;
-    number = displayNumber || id;
+    number = displayNumber || `OPT-${String(id).padStart(4, '0')}`;
     sources = []; panels = []; index = 0; zoom = 1;
     pieces.replaceChildren(); details.replaceChildren();
     drawing = image; canvas.replaceChildren(image);
@@ -75,7 +75,7 @@
     previous.disabled = next.disabled = zoomIn.disabled = zoomOut.disabled = true;
     document.getElementById('history-board-position').textContent = 'Cargando…';
     document.getElementById('history-board-zoom').textContent = '100%';
-    document.getElementById('modalImagenLabel').textContent = `Tableros · Optimización #${number}`;
+    document.getElementById('modalImagenLabel').textContent = `Tableros · ${number}`;
     modal.show();
     try {
       const response = await fetch(`/cutless/api/tableros/${id}/?presentacion=horizontal`, {signal: controller.signal});

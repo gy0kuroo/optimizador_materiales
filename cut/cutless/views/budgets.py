@@ -131,16 +131,10 @@ def crear_presupuesto(request):
         optimizaciones_seleccionadas_ids = [optimizacion.pk]
     
     if form.fields['optimizaciones'].queryset:
-        todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
-        total_optimizaciones = todas_optimizaciones.count()
         
         for opt in form.fields['optimizaciones'].queryset:
-            # Calcular número de lista
+            # Referencia estable del registro
             numero_lista = opt.pk
-            for idx, optimizacion_lista in enumerate(todas_optimizaciones, start=1):
-                if optimizacion_lista.id == opt.id:
-                    numero_lista = total_optimizaciones - idx + 1
-                    break
             
             # Extraer nombres de piezas
             nombres_piezas = []
@@ -209,21 +203,14 @@ def detalle_presupuesto(request, pk):
     
     # Calcular información adicional para el template
     # Obtener todas las optimizaciones del usuario ordenadas por fecha descendente (igual que en historial)
-    todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
-    total_optimizaciones = todas_optimizaciones.count()
     
     optimizaciones_con_costos = []
     for opt in presupuesto.optimizaciones.all():
         num_tableros = opt.num_tableros or 0
         costo_tableros = presupuesto.precio_tablero * Decimal(str(num_tableros))
         
-        # Calcular el número de lista (basado en orden por fecha descendente)
-        numero_lista = opt.pk  # Por defecto usar el ID
-        for idx, optimizacion in enumerate(todas_optimizaciones, start=1):
-            if optimizacion.id == opt.id:
-                # Para orden descendente: numero = total - idx + 1
-                numero_lista = total_optimizaciones - idx + 1
-                break
+        # Referencia estable del registro
+        numero_lista = opt.pk
         
         optimizaciones_con_costos.append({
             'optimizacion': opt,
@@ -291,16 +278,10 @@ def editar_presupuesto(request, pk):
     optimizaciones_seleccionadas_ids = list(presupuesto.optimizaciones.values_list('pk', flat=True))
     
     if form.fields['optimizaciones'].queryset:
-        todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
-        total_optimizaciones = todas_optimizaciones.count()
         
         for opt in form.fields['optimizaciones'].queryset:
-            # Calcular número de lista
+            # Referencia estable del registro
             numero_lista = opt.pk
-            for idx, optimizacion_lista in enumerate(todas_optimizaciones, start=1):
-                if optimizacion_lista.id == opt.id:
-                    numero_lista = total_optimizaciones - idx + 1
-                    break
             
             # Extraer nombres de piezas
             nombres_piezas = []

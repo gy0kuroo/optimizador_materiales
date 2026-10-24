@@ -113,17 +113,13 @@ def _generar_y_guardar_pdf(optimizacion, imagenes_base64, info_desperdicio, nume
     return _ruta_pdf_en_disco(optimizacion)
 
 
-def _numero_descarga(numero_lista, optimizacion):
-    return numero_lista if numero_lista is not None else optimizacion.pk
-
-
 def nombre_descarga_pdf(numero_lista, optimizacion):
-    return f"optimizacion_{_numero_descarga(numero_lista, optimizacion)}.pdf"
+    return f"{optimizacion.codigo}.pdf"
 
 
 def nombre_descarga_png(numero_lista, optimizacion, tablero_num=None):
-    """Nombre al descargar PNG (tablero_num no se incluye en el nombre)."""
-    return f"optimizacion_{_numero_descarga(numero_lista, optimizacion)}.png"
+    suffix = f"_tablero-{tablero_num}" if tablero_num is not None else ''
+    return f"{optimizacion.codigo}{suffix}.png"
 
 
 def nombre_descarga_png_tablero(numero_lista, optimizacion, tablero_num):
@@ -131,34 +127,17 @@ def nombre_descarga_png_tablero(numero_lista, optimizacion, tablero_num):
 
 
 def nombre_descarga_excel(numero_lista, optimizacion):
-    return f"optimizacion_{_numero_descarga(numero_lista, optimizacion)}.xlsx"
+    return f"{optimizacion.codigo}.xlsx"
 
 
 def calcular_numero_lista(usuario, optimizacion_id, ordenar_por='fecha_desc'):
-    """Calcula el número de visualización en el historial."""
-    queryset = Optimizacion.objects.filter(usuario=usuario)
+    """Compatibilidad con llamadas anteriores: el número ahora es la clave estable.
 
-    if ordenar_por == 'fecha_desc':
-        queryset = queryset.order_by('-fecha')
-    elif ordenar_por == 'fecha_asc':
-        queryset = queryset.order_by('fecha')
-    elif ordenar_por == 'aprovechamiento_desc':
-        queryset = queryset.order_by('-aprovechamiento_total')
-    elif ordenar_por == 'aprovechamiento_asc':
-        queryset = queryset.order_by('aprovechamiento_total')
-    else:
-        queryset = queryset.order_by('-fecha')
-
-    total = queryset.count()
-    es_descendente = ordenar_por in ('fecha_desc', 'aprovechamiento_desc')
-
-    for idx, opt in enumerate(queryset, start=1):
-        if opt.id == optimizacion_id:
-            if es_descendente:
-                return total - idx + 1
-            return idx
-
+    La propiedad `codigo` da formato a la referencia visible. La autorización
+    continúa en las vistas, que consultan cada registro por su propietario.
+    """
     return optimizacion_id
+
 
 
 def _imagen_a_base64(file_field):
@@ -446,7 +425,7 @@ def respuesta_png_tablero(optimizacion, tablero_num, numero_lista=None):
     if vista:
         from ..exports.board_png import generar_png_tablero
         buffer = generar_png_tablero(vista, optimizacion.unidad_medida or 'cm',
-            optimizacion.margen_corte, tablero_num, len(imagenes), datos)
+            optimizacion.margen_corte, tablero_num, len(imagenes), datos, codigo=optimizacion.codigo, nombre=optimizacion.nombre)
     else:
         # Un registro histórico sin coordenadas solo permite recuperar su imagen.
         buffer = io.BytesIO(base64.b64decode(imagenes[tablero_num-1]))

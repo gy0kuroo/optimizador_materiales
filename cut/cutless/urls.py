@@ -38,6 +38,7 @@ urlpatterns = [
     # Acciones sobre optimizaciones (propias del usuario)
     path('editar/<int:pk>/', auth(views.editar_optimizacion), name='editar_optimizacion'),
     path('duplicar/<int:pk>/', auth(views.duplicar_optimizacion), name='duplicar_optimizacion'),
+    path('renombrar/<int:pk>/', auth(views.renombrar_optimizacion), name='renombrar_optimizacion'),
     path('toggle-favorito/<int:pk>/', auth(views.toggle_favorito), name='toggle_favorito'),
     path('borrar/<int:pk>/', auth(views.borrar_optimizacion), name='borrar_optimizacion'),
     path('borrar-historial/', auth(views.borrar_historial), name='borrar_historial'),

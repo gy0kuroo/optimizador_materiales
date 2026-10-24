@@ -46,6 +46,7 @@
 
   <form method="post" action="{% url 'cutless:index' %}" id="optimizacion-form" onsubmit="mostrarIndicadorCarga('Generando el plan de corte... Esto puede tardar unos segundos.');">
     {% csrf_token %}
+    {% include 'cutless/includes/optimization-name-field.html' with field=tablero_form.nombre_optimizacion %}
 
     <div class="dashboard-columns"><div class="dashboard-board">
     <!-- Sección: Dimensiones del Tablero -->

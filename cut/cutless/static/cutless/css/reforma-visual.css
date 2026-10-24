@@ -358,3 +358,10 @@ body.tutorial-running .introjs-tooltiptext { overflow-wrap:anywhere; }
 .error-page__code { font-size:clamp(4rem,12vw,7rem); font-weight:700; line-height:1.1; color:var(--cl-blue); margin-bottom:24px; }
 body .error-page h1 { font-size:clamp(1.8rem,4vw,2.6rem); }
 body .error-page p, body .error-page .alert { font-size:1.125rem; line-height:1.7; }
+
+/* Nombre opcional sin desplazar los controles de la tarjeta. */
+.optimizacion-card .form-check { min-width:0; }
+.optimization-name { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; overflow-wrap:anywhere; font-weight:600; }
+.optimization-name-field { max-width:720px; }
+
+.result-page .page-header__text > p, .management-page .page-title { overflow-wrap:anywhere; }

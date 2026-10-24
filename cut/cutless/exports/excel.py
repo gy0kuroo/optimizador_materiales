@@ -11,7 +11,7 @@ def generar_excel(optimizacion, info_desperdicio, piezas_con_nombre, numero_list
         optimizacion: Objeto Optimizacion
         info_desperdicio: Diccionario con información de desperdicio
         piezas_con_nombre: Lista de diccionarios con información de piezas
-        numero_lista: Número de lista de la optimización (opcional)
+        numero_lista: Parámetro legado; se usa el código permanente
     
     Returns:
         BytesIO: Buffer con el archivo Excel
@@ -39,7 +39,7 @@ def generar_excel(optimizacion, info_desperdicio, piezas_con_nombre, numero_list
     ws1.title = "Resumen"
     
     # Título
-    ws1['A1'] = f"Optimización #{numero_lista if numero_lista else optimizacion.id}"
+    ws1['A1'] = f"Optimización {optimizacion.codigo}"
     ws1['A1'].font = title_font
     ws1.merge_cells('A1:B1')
     
@@ -49,7 +49,7 @@ def generar_excel(optimizacion, info_desperdicio, piezas_con_nombre, numero_list
     area_total_disponible = info_desperdicio.get('area_usada_total', 0) + info_desperdicio.get('desperdicio_total', 0)
     porcentaje_desperdicio = (info_desperdicio.get('desperdicio_total', 0) / area_total_disponible * 100) if area_total_disponible > 0 else 0
     
-    datos_generales = [
+    datos_generales = ([['Nombre:', optimizacion.nombre]] if optimizacion.nombre else []) + [
         ['Fecha:', optimizacion.fecha.strftime('%d/%m/%Y %H:%M')],
         ['Hora:', optimizacion.fecha.strftime('%H:%M') + ' (Chile)'],
         ['Tablero:', f"{round(convertir_desde_cm(optimizacion.ancho_tablero, optimizacion.unidad_medida), 2)} × {round(convertir_desde_cm(optimizacion.alto_tablero, optimizacion.unidad_medida), 2)} {obtener_simbolo_unidad(optimizacion.unidad_medida)}"],
@@ -66,6 +66,7 @@ def generar_excel(optimizacion, info_desperdicio, piezas_con_nombre, numero_list
         ws1[f'A{row}'] = label
         ws1[f'A{row}'].font = Font(bold=True)
         ws1[f'B{row}'] = valor
+        if label == 'Nombre:': ws1[f'B{row}'].data_type = 's'
         row += 1
     
     # Información de costos (si existe)

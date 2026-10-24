@@ -5,8 +5,10 @@ from django.contrib import messages
 from django.db.models import Q
 from django.forms import formset_factory
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.views.decorators.http import require_http_methods
 
-from ..forms import TableroForm, PiezaForm
+from ..forms import TableroForm, PiezaForm, NombreOptimizacionForm
 from ..models import Optimizacion, Material
 from ..services import (
     calcular_numero_lista,
@@ -33,6 +35,22 @@ def _ejecutar_con_aviso_error(request, funcion, *args, **kwargs):
         enviar_notificacion(request, 'error', 'No se pudo completar el plan de corte',
                             'Ocurrió un problema al calcular o guardar el resultado. Inténtalo de nuevo.')
         raise
+
+
+@require_http_methods(['GET', 'POST'])
+def renombrar_optimizacion(request, pk):
+    optimizacion = get_object_or_404(Optimizacion, pk=pk, usuario=request.user)
+    volver = (reverse('cutless:historial') if request.GET.get('volver') == 'historial'
+              else reverse('cutless:resultado', args=[pk]))
+    form = NombreOptimizacionForm(request.POST if request.method == 'POST' else None,
+        initial={'nombre_optimizacion':optimizacion.nombre})
+    if request.method == 'POST' and form.is_valid():
+        optimizacion.nombre = form.cleaned_data['nombre_optimizacion']
+        optimizacion.save(update_fields=['nombre'])
+        messages.success(request, f'Nombre actualizado para {optimizacion.codigo}.')
+        return redirect(volver)
+    return render(request, 'cutless/renombrar_optimizacion.html',
+        {'optimizacion':optimizacion, 'form':form, 'volver_url':volver})
 
 
 def _avisar_sin_piezas(request, mensaje):
@@ -186,6 +204,7 @@ def editar_optimizacion(request, pk):
                 for p in piezas_con_nombre
             ])
             
+            optimizacion.nombre = tablero_form.cleaned_data['nombre_optimizacion']
             optimizacion.ancho_tablero = ancho
             optimizacion.alto_tablero = alto
             optimizacion.unidad_medida = unidad
@@ -215,12 +234,12 @@ def editar_optimizacion(request, pk):
                 imagenes_base64,
                 info_desperdicio,
             )
-            contexto['numero_lista'] = numero_lista
+            contexto['numero_lista'] = optimizacion.pk
 
             return render(request, "cutless/resultado.html", contexto)
         else:
             if not tablero_form.is_valid():
-                messages.error(request, "❌ Error en las dimensiones del tablero.")
+                messages.error(request, "Revisa los datos del trabajo y del tablero.")
             if not pieza_formset.is_valid():
                 messages.error(request, "❌ Error en los datos de las piezas.")
     else:
@@ -231,6 +250,7 @@ def editar_optimizacion(request, pk):
         
         # Crear formulario con datos iniciales
         initial_tablero = {
+            'nombre_optimizacion': optimizacion.nombre,
             'unidad_medida': unidad_opt,
             'ancho': ancho_mostrar,
             'alto': alto_mostrar,
@@ -445,6 +465,7 @@ def index(request):
             
             optimizacion = Optimizacion(
                 usuario=request.user,
+                nombre=tablero_form.cleaned_data['nombre_optimizacion'],
                 ancho_tablero=ancho,  # Guardado en cm
                 alto_tablero=alto,  # Guardado en cm
                 unidad_medida=unidad,  # Guardar unidad original
@@ -460,7 +481,7 @@ def index(request):
                 proyecto=proyecto_seleccionado
             )
 
-            numero_lista = Optimizacion.objects.filter(usuario=request.user).count() + 1
+            numero_lista = optimizacion.pk
             _ejecutar_con_aviso_error(request, persistir_resultado_optimizacion,
                 optimizacion,
                 imagenes_base64,
@@ -474,14 +495,14 @@ def index(request):
                 imagenes_base64,
                 info_desperdicio,
             )
-            contexto['numero_lista'] = numero_lista
+            contexto['numero_lista'] = optimizacion.pk
             
             # Enviar notificación de optimización completada (cuando se crea desde index)
             enviar_notificacion(
                 request,
                 'optimizacion_completada',
                 'Optimización Completada',
-                f'Tu optimización #{numero_lista} ha sido completada exitosamente con un aprovechamiento del {aprovechamiento:.2f}%.',
+                f'Tu optimización {optimizacion.codigo} ha sido completada exitosamente con un aprovechamiento del {aprovechamiento:.2f}%.',
                 {'optimizacion_id': optimizacion.id, 'aprovechamiento': aprovechamiento}
             )
             
@@ -489,7 +510,7 @@ def index(request):
         else:
             # Mostrar errores de validación
             if not tablero_form.is_valid():
-                messages.error(request, "❌ Error en las dimensiones del tablero.")
+                messages.error(request, "Revisa los datos del trabajo y del tablero.")
             if not pieza_formset.is_valid():
                 messages.error(request, "❌ Error en los datos de las piezas.")
             
@@ -591,10 +612,14 @@ def resultado_view(request, pk=None):
             imagenes_base64,
             info_desperdicio,
         )
-        contexto['numero_lista'] = numero_lista
+        contexto['numero_lista'] = optimizacion.pk
         return render(request, "cutless/resultado.html", contexto)
     
     if request.method == "POST":
+        nombre_form = NombreOptimizacionForm(request.POST)
+        if not nombre_form.is_valid():
+            messages.error(request, 'Revisa el nombre del trabajo: admite hasta 100 caracteres.')
+            return redirect('cutless:index')
         piezas_texto = request.POST.get("piezas") or ""
 
         unidad_resultado = request.POST.get('unidad_medida', 'cm')
@@ -720,6 +745,7 @@ def resultado_view(request, pk=None):
 
         optimizacion = Optimizacion(
             usuario=request.user,
+            nombre=nombre_form.cleaned_data['nombre_optimizacion'],
             ancho_tablero=ancho_cm,
             alto_tablero=alto_cm,
             unidad_medida=unidad_resultado,
@@ -733,7 +759,7 @@ def resultado_view(request, pk=None):
             num_tableros=num_tableros
         )
 
-        numero_lista = Optimizacion.objects.filter(usuario=request.user).count() + 1
+        numero_lista = optimizacion.pk
         _ejecutar_con_aviso_error(request, persistir_resultado_optimizacion,
             optimizacion,
             imagenes_base64,
@@ -746,7 +772,7 @@ def resultado_view(request, pk=None):
             request,
             'optimizacion_completada',
             'Optimización Completada',
-            f'Tu optimización #{numero_lista} ha sido completada exitosamente con un aprovechamiento del {aprovechamiento:.2f}%.',
+            f'Tu optimización {optimizacion.codigo} ha sido completada exitosamente con un aprovechamiento del {aprovechamiento:.2f}%.',
             {'optimizacion_id': optimizacion.id, 'aprovechamiento': aprovechamiento}
         )
 
@@ -755,7 +781,7 @@ def resultado_view(request, pk=None):
             imagenes_base64,
             info_desperdicio,
         )
-        contexto['numero_lista'] = numero_lista
+        contexto['numero_lista'] = optimizacion.pk
         return render(request, "cutless/resultado.html", contexto)
 
 def duplicar_optimizacion(request, pk):
@@ -763,47 +789,6 @@ def duplicar_optimizacion(request, pk):
     Duplica una optimización existente y carga sus datos en el formulario.
     """
     optimizacion = get_object_or_404(Optimizacion, pk=pk, usuario=request.user)
-    
-    # Obtener el ordenamiento actual desde los parámetros GET (si existe)
-    ordenar_por = request.GET.get('ordenar_por', 'fecha_desc')
-    
-    # Calcular el número de visualización igual que en historial
-    todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user)
-    
-    # Aplicar filtros si existen (para mantener consistencia)
-    solo_favoritos = request.GET.get('solo_favoritos', '').strip()
-    if solo_favoritos == 'true':
-        todas_optimizaciones = todas_optimizaciones.filter(favorito=True)
-    
-    nombre_pieza = request.GET.get('nombre_pieza', '').strip()
-    if nombre_pieza:
-        todas_optimizaciones = todas_optimizaciones.filter(piezas__icontains=nombre_pieza)
-    
-    # Aplicar el mismo ordenamiento que se usa en historial
-    if ordenar_por == 'fecha_desc':
-        todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
-    elif ordenar_por == 'fecha_asc':
-        todas_optimizaciones = todas_optimizaciones.order_by('fecha')
-    elif ordenar_por == 'aprovechamiento_desc':
-        todas_optimizaciones = todas_optimizaciones.order_by('-aprovechamiento_total')
-    elif ordenar_por == 'aprovechamiento_asc':
-        todas_optimizaciones = todas_optimizaciones.order_by('aprovechamiento_total')
-    else:
-        todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
-    
-    total_optimizaciones = todas_optimizaciones.count()
-    es_descendente = ordenar_por in ['fecha_desc', 'aprovechamiento_desc']
-    
-    # Encontrar la posición de esta optimización en la lista
-    numero_mostrado = optimizacion.id  # Por defecto usar el ID real
-    for idx, opt in enumerate(todas_optimizaciones, start=1):
-        if opt.id == optimizacion.id:
-            # Calcular número de lista según el ordenamiento (igual que en historial)
-            if es_descendente:
-                numero_mostrado = total_optimizaciones - idx + 1
-            else:
-                numero_mostrado = idx
-            break
     
     # Parsear las piezas guardadas
     piezas_data = []
@@ -840,6 +825,7 @@ def duplicar_optimizacion(request, pk):
     
     # Crear formularios con datos prellenados
     tablero_form = TableroForm(initial={
+        'nombre_optimizacion': optimizacion.nombre,
         'ancho': ancho_mostrar,
         'alto': alto_mostrar,
         'unidad_medida': unidad_original,
@@ -856,7 +842,7 @@ def duplicar_optimizacion(request, pk):
     
     # Usar el número de visualización calculado (igual que se muestra en historial)
     # Esto asegura que el mensaje muestre el mismo número que se ve en la pantalla
-    messages.info(request, f"📋 Cargando datos de la optimización #{numero_mostrado}. Puedes modificarlos antes de calcular.")
+    messages.info(request, f"📋 Cargando datos de la optimización {optimizacion.codigo}. Puedes modificarlos antes de calcular.")
     
     return render(request, "cutless/index.html", {
         "tablero_form": tablero_form,

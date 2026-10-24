@@ -83,7 +83,7 @@
           <tbody>
             {% for opt in presupuesto.optimizaciones.all %}
             <tr>
-              <td>{{ opt.fecha|date:"d/m/Y H:i" }}</td>
+              <td><strong>{{ opt.etiqueta }}</strong><br>{{ opt.fecha|date:"d/m/Y H:i" }}</td>
               <td>{{ opt.ancho_tablero }} × {{ opt.alto_tablero }} cm</td>
               <td>
                 <span class="badge bg-{% if opt.aprovechamiento_total >= 80 %}success{% elif opt.aprovechamiento_total >= 60 %}warning{% else %}danger{% endif %}">
@@ -132,7 +132,7 @@
         <tbody>
           {% for item in optimizaciones_con_costos %}
           <tr>
-            <td>Tableros <span class="text-annotation">(Optimización #{{ item.numero_lista }})</span></td>
+            <td>Tableros <span class="text-annotation">({{ item.optimizacion.etiqueta }})</span></td>
             <td>{{ item.num_tableros }}</td>
             <td>${{ presupuesto.precio_tablero|floatformat:0 }}</td>
             <td>${{ item.costo_tableros|floatformat:0 }}</td>

@@ -184,7 +184,7 @@
               <tbody>
                 {% for item in top_optimizaciones %}
                   <tr>
-                    <td><strong>{{ item.posicion }}</strong></td>
+                    <td><strong>{{ item.posicion }}</strong><br><span class="text-muted">{{ item.optimizacion.etiqueta }}</span></td>
                     <td>{{ item.optimizacion.fecha|date:"d/m/Y H:i" }}</td>
                     <td>
                       <span class="stats-percentage">{{ item.optimizacion.aprovechamiento_total|floatformat:2 }}%</span>

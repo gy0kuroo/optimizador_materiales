@@ -10,3 +10,5 @@ body { background: #F6F5F1; }
   .toolbar-buttons .btn { flex: 1; }
   .tableros-container { margin-top: 160px; }
 }
+
+.toolbar-title { min-width:0; overflow-wrap:anywhere; }

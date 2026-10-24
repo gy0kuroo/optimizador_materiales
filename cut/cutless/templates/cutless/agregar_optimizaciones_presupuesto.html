@@ -62,9 +62,9 @@
               {% for opt in optimizaciones_disponibles %}
               <tr>
                 <td>
-                  <input type="checkbox" name="optimizaciones" value="{{ opt.pk }}" class="optimizacion-checkbox" aria-label="Seleccionar optimización del {{ opt.fecha|date:'d/m/Y H:i' }}">
+                  <input type="checkbox" name="optimizaciones" value="{{ opt.pk }}" class="optimizacion-checkbox" aria-label="Seleccionar {{ opt.etiqueta }}, del {{ opt.fecha|date:'d/m/Y H:i' }}">
                 </td>
-                <td>{{ opt.fecha|date:"d/m/Y H:i" }}</td>
+                <td><strong>{{ opt.etiqueta }}</strong><br>{{ opt.fecha|date:"d/m/Y H:i" }}</td>
                 <td>{{ opt.ancho_tablero }} × {{ opt.alto_tablero }} cm</td>
                 <td>
                   <span class="badge bg-{% if opt.aprovechamiento_total >= 80 %}success{% elif opt.aprovechamiento_total >= 60 %}warning{% else %}danger{% endif %}">

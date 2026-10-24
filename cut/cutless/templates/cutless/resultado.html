@@ -13,8 +13,10 @@
   <header class="page-header fade-in">
     <div class="page-header__text">
       <h1 class="page-title">Resultado del plan de corte</h1>
+      <p class="text-muted mb-0">{{ optimizacion.etiqueta }}</p>
     </div>
     <div class="page-header__actions">
+      <a href="{% url 'cutless:renombrar_optimizacion' optimizacion.id %}" class="btn btn-secondary" data-action="secondary" data-icon="edit">{% if optimizacion.nombre %}Cambiar nombre{% else %}Nombrar trabajo{% endif %}</a>
     <div class="button-download-bar">
 <a href="{% url 'cutless:descargar_excel' optimizacion.id %}{% if numero_lista %}?ordenar_por=fecha_desc{% endif %}" class="btn btn-secondary" data-carga-texto="Generando archivo Excel..." data-action="secondary" data-icon="sheet">
       Descargar Excel
@@ -212,7 +214,7 @@
   </div>
 
 <!-- Visor de tableros: datos legibles independientes del dibujo. -->
-<div class="modal board-viewer" id="modalTablero" tabindex="-1" aria-labelledby="modalTableroLabel" aria-hidden="true" data-result-id="{{ optimizacion.pk }}">
+<div class="modal board-viewer" id="modalTablero" tabindex="-1" aria-labelledby="modalTableroLabel" aria-hidden="true" data-result-id="{{ optimizacion.pk }}" data-result-code="{{ optimizacion.codigo }}">
   <div class="modal-dialog modal-fullscreen"><div class="modal-content">
     <div class="modal-header"><h2 class="modal-title" id="modalTableroLabel">Visor del tablero</h2><button type="button" class="btn btn-secondary" data-close-viewer data-action="secondary" data-icon="chevron-left">Volver al resultado</button></div>
     <div class="board-toolbar" aria-label="Controles del visor">
@@ -226,4 +228,4 @@
   </div></div>
 </div>
 {% endblock %}
-{% block extra_js %}<script src="{% static 'cutless/js/board-deck.js' %}?v=review-2"></script><script src="{% static 'cutless/js/board-viewer.js' %}?v=review-2"></script>{% endblock %}
+{% block extra_js %}<script src="{% static 'cutless/js/board-deck.js' %}?v=review-2"></script><script src="{% static 'cutless/js/board-viewer.js' %}?v=ids-1"></script>{% endblock %}

@@ -45,7 +45,7 @@
               <option value="">Seleccionar...</option>
               {% for opt in optimizaciones %}
               <option value="{{ opt.pk }}" {% if optimizacion1 and optimizacion1.pk == opt.pk %}selected{% endif %}>
-                {{ opt.fecha|date:"d/m/Y H:i" }} - {{ opt.ancho_tablero }}×{{ opt.alto_tablero }} cm ({{ opt.aprovechamiento_total|floatformat:1 }}%)
+                {{ opt.etiqueta }} · {{ opt.fecha|date:"d/m/Y H:i" }} - {{ opt.ancho_tablero }}×{{ opt.alto_tablero }} cm ({{ opt.aprovechamiento_total|floatformat:1 }}%)
               </option>
               {% endfor %}
             </select>
@@ -56,7 +56,7 @@
               <option value="">Seleccionar...</option>
               {% for opt in optimizaciones %}
               <option value="{{ opt.pk }}" {% if optimizacion2 and optimizacion2.pk == opt.pk %}selected{% endif %}>
-                {{ opt.fecha|date:"d/m/Y H:i" }} - {{ opt.ancho_tablero }}×{{ opt.alto_tablero }} cm ({{ opt.aprovechamiento_total|floatformat:1 }}%)
+                {{ opt.etiqueta }} · {{ opt.fecha|date:"d/m/Y H:i" }} - {{ opt.ancho_tablero }}×{{ opt.alto_tablero }} cm ({{ opt.aprovechamiento_total|floatformat:1 }}%)
               </option>
               {% endfor %}
             </select>

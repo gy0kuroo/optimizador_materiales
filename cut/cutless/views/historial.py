@@ -1,4 +1,6 @@
 from django.contrib import messages
+from django.db.models import Q
+import re
 from django.shortcuts import render, redirect, get_object_or_404
 
 from ..models import Optimizacion
@@ -39,11 +41,11 @@ def borrar_historial(request):
         return redirect('cutless:historial')
 
 def historial(request):
-    # Obtener TODAS las optimizaciones del usuario para calcular números absolutos
+    # Las posiciones del listado no intervienen en la identidad del registro.
     todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user)
     total_absoluto = todas_optimizaciones.count()
     
-    # Ordenamiento (aplicar a todas para calcular números correctos)
+    # Ordenamiento de presentación
     ordenar_por = request.GET.get('ordenar_por', 'fecha_desc')
     
     if ordenar_por == 'fecha_desc':
@@ -57,17 +59,6 @@ def historial(request):
     else:
         todas_optimizaciones = todas_optimizaciones.order_by('-fecha')
     
-    # Determinar si el ordenamiento es descendente o ascendente
-    es_descendente = ordenar_por in ['fecha_desc', 'aprovechamiento_desc']
-    
-    # Crear diccionario de ID -> número absoluto
-    numeros_absolutos = {}
-    for idx, opt in enumerate(todas_optimizaciones, start=1):
-        if es_descendente:
-            numeros_absolutos[opt.id] = total_absoluto - idx + 1
-        else:
-            numeros_absolutos[opt.id] = idx
-    
     # Ahora aplicar filtros para mostrar
     optimizaciones = todas_optimizaciones
     
@@ -80,7 +71,11 @@ def historial(request):
     nombre_pieza = request.GET.get('nombre_pieza', '').strip()
     if nombre_pieza:
         # Buscar en el campo piezas que contiene el nombre
-        optimizaciones = optimizaciones.filter(piezas__icontains=nombre_pieza)
+        codigo_buscado = re.fullmatch(r'OPT-(\d+)', nombre_pieza, flags=re.I)
+        if codigo_buscado:
+            optimizaciones = optimizaciones.filter(pk=int(codigo_buscado.group(1)))
+        else:
+            optimizaciones = optimizaciones.filter(Q(piezas__icontains=nombre_pieza) | Q(nombre__icontains=nombre_pieza))
     
     # Filtro por fecha
     fecha_desde = request.GET.get('fecha_desde', '').strip()
@@ -115,7 +110,7 @@ def historial(request):
 
     optimizaciones_con_piezas = []
     for opt in optimizaciones_page:
-        numero_mostrado = numeros_absolutos.get(opt.id, 0)
+        numero_mostrado = opt.pk
         piezas_procesadas = []
         for linea in opt.piezas.splitlines():
             if linea.strip():
@@ -168,24 +163,16 @@ def borrar_optimizacion(request, pk):
     Elimina una optimización individual del usuario actual.
     """
     optimizacion = get_object_or_404(Optimizacion, pk=pk, usuario=request.user)
-    todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
-    total_absoluto = todas_optimizaciones.count()
-    numero_mostrado = None
-    for idx, opt in enumerate(todas_optimizaciones, start=1):
-        if opt.id == pk:
-            numero_mostrado = total_absoluto - idx + 1
-            break
-    if numero_mostrado is None:
-        numero_mostrado = pk
+    codigo = optimizacion.codigo
 
     if request.method == "POST":
         optimizacion.delete()
-        messages.success(request, f"Optimización #{numero_mostrado} eliminada correctamente.")
+        messages.success(request, f"Optimización {codigo} eliminada correctamente.")
         return redirect('cutless:historial')
     else:
         return render(request, 'cutless/eliminar_optimizacion.html', {
             'optimizacion': optimizacion,
-            'numero_mostrado': numero_mostrado,
+            'numero_mostrado': optimizacion.pk,
         })
 
 def toggle_favorito(request, pk):
@@ -203,14 +190,14 @@ def toggle_favorito(request, pk):
         return JsonResponse({
             'success': True,
             'favorito': optimizacion.favorito,
-            'message': f"⭐ Optimización #{pk} marcada como favorita." if optimizacion.favorito else f"Optimización #{pk} eliminada de favoritos."
+            'message': f"⭐ Optimización {optimizacion.codigo} marcada como favorita." if optimizacion.favorito else f"Optimización {optimizacion.codigo} eliminada de favoritos."
         })
     
     # Si no es AJAX, comportamiento normal con mensajes
     if optimizacion.favorito:
-        messages.success(request, f"⭐ Optimización #{pk} marcada como favorita.")
+        messages.success(request, f"⭐ Optimización {optimizacion.codigo} marcada como favorita.")
     else:
-        messages.info(request, f"Optimización #{pk} eliminada de favoritos.")
+        messages.info(request, f"Optimización {optimizacion.codigo} eliminada de favoritos.")
     
     # Redirigir de vuelta a historial, manteniendo los filtros (solo si no es AJAX)
     return redirect(request.META.get('HTTP_REFERER', 'cutless:historial'))

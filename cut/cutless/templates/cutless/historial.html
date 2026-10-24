@@ -31,12 +31,12 @@
     <form method="GET" action="{% url 'cutless:historial' %}" id="filtros-form">
       <div class="row">
         <div class="col-md-3 mb-3">
-          <label for="nombre_pieza" class="form-label">Nombre de pieza</label>
+          <label for="nombre_pieza" class="form-label">Nombre de trabajo o pieza</label>
           <input type="text"
                  class="form-control"
                  id="nombre_pieza"
                  name="nombre_pieza"
-                 placeholder="Ej: Puerta, Cajón, Estante..."
+                 placeholder="Ej.: Cocina, puerta, OPT-0006..."
                  value="{{ nombre_pieza }}">
         </div>
         <div class="col-md-2 mb-3">
@@ -82,7 +82,7 @@
           Quitar filtros
         </a>
         {% if nombre_pieza %}
-          <span class="filter-badge">Pieza: {{ nombre_pieza }}</span>
+          <span class="filter-badge">Búsqueda: {{ nombre_pieza }}</span>
         {% endif %}
         {% if fecha_desde %}
           <span class="filter-badge">Desde: {{ fecha_desde }}</span>
@@ -124,13 +124,13 @@
           <div class="optimizacion-card">
             {% if optimizacion.imagen %}
               <div class="chart-container chart-container-clickable"
-                   onclick="abrirModalImagen('{{ optimizacion.imagen.url }}', {{ optimizacion.id }}, '{{ item.numero }}')">
+                   onclick="abrirModalImagen('{{ optimizacion.imagen.url }}', {{ optimizacion.id }}, '{{ optimizacion.codigo }}')">
                 {% if item.miniatura %}
-                  <div class="chart-thumbnail chart-thumbnail-horizontal" role="img" aria-label="Optimización #{{ item.numero }}: primer tablero horizontal">
+                  <div class="chart-thumbnail chart-thumbnail-horizontal" role="img" aria-label="{{ optimizacion.codigo }}: primer tablero horizontal">
                     {% include 'cutless/includes/board-drawing.html' with item=item.miniatura unidad_medida=item.unidad_medida %}
                   </div>
                 {% else %}
-                  <img src="{{ optimizacion.imagen.url }}" class="card-img-top chart-thumbnail" alt="Optimización #{{ item.numero }}">
+                  <img src="{{ optimizacion.imagen.url }}" class="card-img-top chart-thumbnail" alt="{{ optimizacion.codigo }}">
                 {% endif %}
                 <div class="chart-overlay">
                   <span class="chart-hint">Ampliar imagen</span>
@@ -145,7 +145,7 @@
                          id="check-opt-{{ optimizacion.id }}"
                          value="{{ optimizacion.id }}">
                   <label class="form-check-label" for="check-opt-{{ optimizacion.id }}">
-                    Optimización #{{ item.numero }}
+                    {% if optimizacion.nombre %}<span class="optimization-name" title="{{ optimizacion.nombre }}">{{ optimizacion.nombre }}</span><small class="text-muted d-block">{{ optimizacion.codigo }}</small>{% else %}{{ optimizacion.codigo }}{% endif %}
                   </label>
                 </div>
                 <button type="button"
@@ -197,7 +197,7 @@
                    title="Editar esta optimización" data-action="secondary" data-icon="edit">
                    Editar
                 </a>
-                <a href="{% url 'cutless:duplicar_optimizacion' optimizacion.id %}?ordenar_por={{ ordenar_por }}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}"
+                <a href="{% url 'cutless:duplicar_optimizacion' optimizacion.id %}?ordenar_por={{ ordenar_por }}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza|urlencode }}{% endif %}"
                    class="btn btn-action btn-duplicar flex-fill btn-secondary"
                    title="Duplicar esta optimización" data-action="secondary" data-icon="copy">
                   <span class="icon"></span> Duplicar
@@ -214,6 +214,7 @@
                     <span class="icon"></span> Más opciones
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ optimizacion.id }}">
+                    <li><a class="dropdown-item" href="{% url 'cutless:renombrar_optimizacion' optimizacion.id %}?volver=historial">Cambiar nombre</a></li>
                     <li>
                       <a class="dropdown-item" href="{% url 'cutless:calcular_tiempo_corte' optimizacion.id %}">
                          Estimar tiempo de corte
@@ -262,12 +263,12 @@
       <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
           <li class="page-item">
-            <a class="page-link" href="?page=1{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Primera">
+            <a class="page-link" href="?page=1{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza|urlencode }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Primera">
               <span aria-hidden="true">&laquo;&laquo;</span>
             </a>
           </li>
           <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Anterior">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza|urlencode }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Anterior">
               <span aria-hidden="true">&laquo;</span>
             </a>
           </li>
@@ -280,18 +281,18 @@
           {% if page_obj.number == num %}
             <li class="page-item active"><span class="page-link">{{ num }}</span></li>
           {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-            <li class="page-item"><a class="page-link" href="?page={{ num }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}">{{ num }}</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ num }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza|urlencode }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}">{{ num }}</a></li>
           {% endif %}
         {% endfor %}
 
         {% if page_obj.has_next %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Siguiente">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza|urlencode }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Siguiente">
               <span aria-hidden="true">&raquo;</span>
             </a>
           </li>
           <li class="page-item">
-            <a class="page-link" href="?page={{ paginator.num_pages }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Última">
+            <a class="page-link" href="?page={{ paginator.num_pages }}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza|urlencode }}{% endif %}{% if fecha_desde %}&fecha_desde={{ fecha_desde }}{% endif %}{% if fecha_hasta %}&fecha_hasta={{ fecha_hasta }}{% endif %}{% if ordenar_por %}&ordenar_por={{ ordenar_por }}{% endif %}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}" aria-label="Última">
               <span aria-hidden="true">&raquo;&raquo;</span>
             </a>
           </li>
@@ -356,7 +357,7 @@
         </div>
       </div></div>
     </div>
-    <script src="{% static 'cutless/js/history-board-viewer.js' %}?v=review-2" defer></script>
+    <script src="{% static 'cutless/js/history-board-viewer.js' %}?v=ids-1" defer></script>
 <script>
 // Función para obtener el token CSRF de las cookies
 function getCookie(name) {

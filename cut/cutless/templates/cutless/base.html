@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="{% static 'cutless/css/help-redesign.css' %}?v=buttons-1">
     <link rel="stylesheet" href="{% static 'cutless/css/action-semantics.css' %}?v=buttons-1">
     <link rel="stylesheet" href="{% static 'cutless/css/magnifier.css' %}?v=3">
-    <link rel="stylesheet" href="{% static 'cutless/css/reforma-visual.css' %}?v=review-2">
+    <link rel="stylesheet" href="{% static 'cutless/css/reforma-visual.css' %}?v=names-1">
     <link rel="stylesheet" href="{% static 'cutless/css/buttons.css' %}?v=review-2">
 </head>
 <body data-button-icons="{% static 'cutless/button-icons.svg' %}?v=2" data-app-shell="{{ user.is_authenticated|yesno:'true,false' }}" class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
@@ -289,7 +289,7 @@
                     {
                         title: 'Agregar Piezas',
                         intro: 'Agrega las piezas que necesitas cortar. Puedes darle un nombre a cada pieza para identificarla mejor. Haz clic en "Añadir otro tipo de pieza" para añadir más.',
-                        element: document.querySelector('input[name*="nombre"]') || document.querySelector('.formset')
+                        element: document.querySelector('input[name$="-nombre"]') || document.querySelector('.formset')
                     },
                     {
                         title: 'Generar plan de corte',
@@ -400,7 +400,7 @@
                     {
                         title: 'Piezas a Cortar',
                         intro: 'Agrega las piezas que necesitas cortar del tablero. Para cada pieza, ingresa un nombre (opcional), ancho, alto y cantidad. Puedes agregar hasta 20 piezas diferentes.',
-                        element: document.querySelector('input[name*="nombre"]') || document.querySelector('.pieza-form')
+                        element: document.querySelector('input[name$="-nombre"]') || document.querySelector('.pieza-form')
                     },
                     {
                         title: 'Agregar Más Piezas',

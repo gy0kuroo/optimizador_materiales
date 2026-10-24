@@ -171,3 +171,7 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Revisión de exportaciones y duplicación](docs/CAMBIOS_EXPORTACIONES_Y_DUPLICACION.md)
 
 - [Revisión de sesión y usabilidad](docs/CAMBIOS_REVISION_USABILIDAD.md)
+
+- [Identificadores permanentes de optimización](docs/CAMBIOS_IDENTIFICADORES_PERMANENTES.md)
+
+- [Nombres opcionales de los trabajos](docs/CAMBIOS_NOMBRES_OPTIMIZACIONES.md)

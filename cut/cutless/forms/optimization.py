@@ -3,7 +3,17 @@ from django.db.models import Q
 
 from ..models import Material, Cliente, Proyecto
 
-class TableroForm(forms.Form):
+class NombreOptimizacionForm(forms.Form):
+    nombre_optimizacion = forms.CharField(label='Nombre del trabajo (opcional)',
+        max_length=100, required=False,
+        widget=forms.TextInput(attrs={'class':'form-control', 'id':'nombre_optimizacion',
+            'placeholder':'Ej.: Mueble de cocina', 'aria-describedby':'nombre_optimizacion_ayuda'}))
+
+    def clean_nombre_optimizacion(self):
+        return ' '.join(self.cleaned_data.get('nombre_optimizacion', '').split())
+
+
+class TableroForm(NombreOptimizacionForm):
     UNIDADES_CHOICES = [
         ('cm', 'Centímetros (cm)'),
         ('m', 'Metros (m)'),

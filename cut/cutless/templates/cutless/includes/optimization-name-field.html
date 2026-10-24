@@ -1,0 +1,6 @@
+<div class="optimization-name-field mb-4">
+  <label for="{{ field.id_for_label }}">Nombre del trabajo <span class="text-annotation">(opcional)</span></label>
+  {{ field }}
+  <small id="nombre_optimizacion_ayuda" class="form-text text-muted">Hasta 100 caracteres. Puedes dejarlo vacío o cambiarlo después sin modificar el plan de corte.</small>
+  {% if field.errors %}<div class="text-danger" role="alert">{{ field.errors }}</div>{% endif %}
+</div>

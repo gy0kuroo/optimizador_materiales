@@ -50,7 +50,7 @@
         const canvasSection = element.querySelector('.board-canvas-section');
         canvasSection.querySelector(':scope > .cut-pieces')?.remove();
         if (pieces) canvasSection.append(pieces.cloneNode(true));
-        document.getElementById('modalTableroLabel').textContent = 'Visor del tablero';
+        document.getElementById('modalTableroLabel').textContent = `Visor del tablero · ${element.dataset.resultCode}`;
         document.getElementById('board-position').textContent = `Tablero ${index + 1} de ${cards.length}`;
         previous.disabled = index === 0;
         next.disabled = index === cards.length - 1;

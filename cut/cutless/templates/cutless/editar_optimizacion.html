@@ -13,7 +13,7 @@
 {% block content %}
   <header class="page-header fade-in">
     <div class="page-header__text">
-      <h1 class="page-title">Editar optimización #{{ optimizacion.id }}</h1>
+      <h1 class="page-title">Editar optimización {{ optimizacion.etiqueta }}</h1>
       <p class="page-lead">Modifica tablero y piezas, luego recalcula el plan de corte.</p>
     </div>
     <div class="page-header__actions">
@@ -23,6 +23,7 @@
 
 <form method="post" action="{% url 'cutless:editar_optimizacion' optimizacion.id %}" id="optimizacion-form">
     {% csrf_token %}
+    {% include 'cutless/includes/optimization-name-field.html' with field=tablero_form.nombre_optimizacion %}
 
     <!-- Sección: Dimensiones del Tablero -->
     <div class="card mb-4 fade-in">

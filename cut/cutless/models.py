@@ -58,6 +58,18 @@ class Material(models.Model):
         return self.ancho * self.alto
 
 class Optimizacion(models.Model):
+    nombre = models.CharField(max_length=100, blank=True, default='',
+        help_text='Nombre opcional del trabajo; no sustituye su código permanente.')
+
+    @property
+    def etiqueta(self):
+        return f'{self.nombre} · {self.codigo}' if self.nombre else self.codigo
+
+    @property
+    def codigo(self):
+        """Referencia permanente basada en la clave guardada, nunca en una posición."""
+        return f'OPT-{self.pk:04d}' if self.pk is not None else ''
+
     UNIDADES_CHOICES = [
         ('cm', 'Centímetros (cm)'),
         ('m', 'Metros (m)'),
@@ -132,7 +144,7 @@ class Optimizacion(models.Model):
     )
 
     def __str__(self):
-        return f"Optimización de {self.usuario.username} ({self.fecha.strftime('%d/%m/%Y %H:%M')})"
+        return f"{self.etiqueta} · {self.fecha.strftime('%d/%m/%Y %H:%M')}"
     
     def calcular_costo_total(self):
         """
@@ -191,7 +203,7 @@ class TableroOptimizacion(models.Model):
         unique_together = [['optimizacion', 'numero']]
 
     def __str__(self):
-        return f"Tablero {self.numero} — Optimización #{self.optimizacion_id}"
+        return f"Tablero {self.numero} — OPT-{self.optimizacion_id:04d}"
 
 
 class Cliente(models.Model):

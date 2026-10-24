@@ -175,7 +175,7 @@
           {% for item in optimizaciones_con_costo %}
           <tr>
             <td>
-              <div>{{ item.optimizacion.fecha|date:"d/m/Y" }}</div>
+              <div><strong>{{ item.optimizacion.etiqueta }}</strong><br>{{ item.optimizacion.fecha|date:"d/m/Y" }}</div>
               <small class="text-muted">{{ item.optimizacion.fecha|date:"H:i" }}</small>
             </td>
             <td>

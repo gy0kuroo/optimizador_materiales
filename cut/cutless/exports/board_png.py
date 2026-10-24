@@ -10,19 +10,23 @@ from ..services.board_presentation import preparar_plano_horizontal
 from ..units import convertir_desde_cm
 
 
-def generar_png_tablero(vista, unidad, margen, numero, total, info):
+def generar_png_tablero(vista, unidad, margen, numero, total, info, codigo=None, nombre=None):
     plano = preparar_plano_horizontal(vista, unidad, margen)
     catalogo = vista['catalogo']
     # Altura por contenido: la tabla crece sin reducir la letra del plano.
     rows = [max(1, len(textwrap.wrap(p['nombre'], 32))) for p in catalogo]
     table_height = .45 + sum(.34 * lines for lines in rows)
     board_height = 12 * plano['alto'] / plano['ancho'] + .8
-    height = 1 + board_height + table_height + .7
+    name_lines = textwrap.wrap(nombre or "", 72)
+    name_height = .26*len(name_lines) + (.1 if name_lines else 0)
+    height = 1 + board_height + table_height + .7 + name_height
     fig = Figure(figsize=(14, height), dpi=180, facecolor='white')
     FigureCanvasAgg(fig)
-    fig.text(.055, 1-.35/height, f'Tablero {numero} de {total}',
+    fig.text(.055, 1-.35/height, f'{codigo} · Tablero {numero} de {total}' if codigo else f'Tablero {numero} de {total}',
              fontsize=17, weight='bold', color='#1C1008')
-    fig.text(.055, 1-.65/height,
+    if name_lines:
+        fig.text(.055, 1-.65/height, '\n'.join(name_lines), fontsize=12, va='top')
+    fig.text(.055, 1-(.65+name_height)/height,
              f"Aprovechamiento: {info.get('porcentaje_uso', 0):.2f}% · "
              f"Piezas: {info.get('num_piezas', 0)} · "
              f"Desperdicio: {info.get('desperdicio', 0):.2f} cm²", fontsize=11)

@@ -1,0 +1,18 @@
+{% extends 'cutless/base.html' %}
+{% block body_class %}management-page{% endblock %}
+{% block content %}
+<header class="page-header"><div class="page-header__text">
+  <h1 class="page-title">Cambiar nombre del trabajo</h1>
+  <p class="page-lead">Su código {{ optimizacion.codigo }} y su plan de corte se conservan.</p>
+</div></header>
+<section class="card"><div class="card-body">
+  <form method="post">
+    {% csrf_token %}
+    {% include 'cutless/includes/optimization-name-field.html' with field=form.nombre_optimizacion %}
+    <div class="form-action-bar">
+      <a href="{{ volver_url }}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
+      <button type="submit" class="btn btn-success" data-action="success" data-icon="check">Guardar nombre</button>
+    </div>
+  </form>
+</div></section>
+{% endblock %}

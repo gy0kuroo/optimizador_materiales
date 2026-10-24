@@ -27,7 +27,7 @@
 
 {% if optimizacion %}
   <div class="alert alert-info fade-in mb-4">
-    <strong>Optimización seleccionada:</strong> Tablero {{ optimizacion.ancho_tablero }}×{{ optimizacion.alto_tablero }} cm
+    <strong>Optimización {{ optimizacion.etiqueta }}:</strong> Tablero {{ optimizacion.ancho_tablero }}×{{ optimizacion.alto_tablero }} cm
     ({{ optimizacion.aprovechamiento_total|floatformat:1 }}% aprovechamiento)
     <a href="{% url 'cutless:resultado' optimizacion.pk %}" class="btn btn-sm ms-2 btn-secondary" data-action="secondary" data-icon="eye">Ver optimización</a>
   </div>

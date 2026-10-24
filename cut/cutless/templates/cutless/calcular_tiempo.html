@@ -9,7 +9,7 @@
   <header class="page-header fade-in">
     <div class="page-header__text">
       <h1 class="page-title">Calculadora de tiempo de corte</h1>
-      <p class="page-lead">Estimación orientativa según piezas y tableros de la optimización #{{ optimizacion.id }}.</p>
+      <p class="page-lead">Estimación orientativa según piezas y tableros de la optimización {{ optimizacion.etiqueta }}.</p>
     </div>
     <div class="page-header__actions">
       <button type="button" class="btn btn-ayuda-seccion btn-text"
@@ -30,7 +30,7 @@
         <div class="card-body">
           <div class="mb-4">
             <h5>Información de la Optimización</h5>
-            <p class="mb-1"><strong>Optimización #{{ optimizacion.id }}</strong></p>
+            <p class="mb-1"><strong>Optimización {{ optimizacion.etiqueta }}</strong></p>
             <p class="mb-1"><strong>Tablero:</strong> {{ ancho_mostrar }} × {{ alto_mostrar }} {{ unidad_medida }}</p>
             <p class="mb-1"><strong>Aprovechamiento:</strong> {{ optimizacion.aprovechamiento_total|floatformat:2 }}%</p>
             <p class="mb-1"><strong>Fecha:</strong> {{ optimizacion.fecha|date:"d/m/Y H:i" }}</p>

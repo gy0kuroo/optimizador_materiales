@@ -3,17 +3,24 @@ from reportlab.lib.colors import HexColor
 from cutless.services.board_presentation import preparar_plano_horizontal
 
 
-def dibujar_tablero(c, vista, unidad, margen, numero, total, width, height, info=None):
+def dibujar_tablero(c, vista, unidad, margen, numero, total, width, height, info=None, codigo=None, nombre=None):
     plano = preparar_plano_horizontal(vista, unidad, margen)
     c.setFillColor(HexColor('#1C1008'))
     c.setFont('Helvetica-Bold', 16)
-    c.drawString(40, height - 45, f'Tablero {numero} de {total}')
+    c.drawString(40, height - 45, f'{codigo} · Tablero {numero} de {total}' if codigo else f'Tablero {numero} de {total}')
+    extra = 20 if nombre else 0
+    if nombre:
+        texto = nombre
+        c.setFont('Helvetica', 11)
+        while c.stringWidth(texto, 'Helvetica', 11) > width-80:
+            texto = texto[:-2] + '…'
+        c.drawString(40, height-65, texto)
     if info:
         c.setFont('Helvetica', 10)
-        c.drawString(40, height-65, f"Aprovechamiento: {info.get('porcentaje_uso', 0):.2f}% · Piezas: {info.get('num_piezas', 0)} · Desperdicio: {info.get('desperdicio', 0):.2f} cm²")
+        c.drawString(40, height-65-extra, f"Aprovechamiento: {info.get('porcentaje_uso', 0):.2f}% · Piezas: {info.get('num_piezas', 0)} · Desperdicio: {info.get('desperdicio', 0):.2f} cm²")
     scale = min((width - 100) / plano['ancho'], (height * .44) / plano['alto'])
     left = (width - plano['ancho'] * scale) / 2
-    top = height - 100
+    top = height - 100 - extra
     bottom = top - plano['alto'] * scale
     def rect(p, fill):
         c.setFillColor(HexColor(fill))

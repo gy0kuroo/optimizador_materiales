@@ -52,16 +52,10 @@ def crear_proyecto(request):
     optimizaciones_seleccionadas_ids = []
     
     if form.fields['optimizaciones'].queryset:
-        todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
-        total_optimizaciones = todas_optimizaciones.count()
         
         for opt in form.fields['optimizaciones'].queryset:
-            # Calcular número de lista
+            # Referencia estable del registro
             numero_lista = opt.pk
-            for idx, optimizacion_lista in enumerate(todas_optimizaciones, start=1):
-                if optimizacion_lista.id == opt.id:
-                    numero_lista = total_optimizaciones - idx + 1
-                    break
             
             # Extraer nombres de piezas
             nombres_piezas = []
@@ -258,16 +252,10 @@ def editar_proyecto(request, pk):
     optimizaciones_seleccionadas_ids = list(proyecto.optimizacion_set.values_list('pk', flat=True))
     
     if form.fields['optimizaciones'].queryset:
-        todas_optimizaciones = Optimizacion.objects.filter(usuario=request.user).order_by('-fecha')
-        total_optimizaciones = todas_optimizaciones.count()
         
         for opt in form.fields['optimizaciones'].queryset:
-            # Calcular número de lista
+            # Referencia estable del registro
             numero_lista = opt.pk
-            for idx, optimizacion_lista in enumerate(todas_optimizaciones, start=1):
-                if optimizacion_lista.id == opt.id:
-                    numero_lista = total_optimizaciones - idx + 1
-                    break
             
             # Extraer nombres de piezas
             nombres_piezas = []

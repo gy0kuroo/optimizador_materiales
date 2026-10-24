@@ -116,7 +116,7 @@
         <tbody>
           {% for opt in optimizaciones %}
           <tr>
-            <td>{{ opt.fecha|date:"d/m/Y H:i" }}</td>
+            <td><strong>{{ opt.etiqueta }}</strong><br>{{ opt.fecha|date:"d/m/Y H:i" }}</td>
             <td>{{ opt.ancho_tablero }} × {{ opt.alto_tablero }} cm</td>
             <td>
               <span class="badge bg-{% if opt.aprovechamiento_total >= 80 %}success{% elif opt.aprovechamiento_total >= 60 %}warning{% else %}danger{% endif %}">
