@@ -44,7 +44,7 @@ class TableroForm(NombreOptimizacionForm):
             'class': 'form-control',
             'placeholder': 'Ej: 122',
             'id': 'ancho_tablero',
-            'step': '0.01'
+            'step': 'any'
         }),
         help_text="Ingresa el ancho del tablero"
     )
@@ -58,7 +58,7 @@ class TableroForm(NombreOptimizacionForm):
             'class': 'form-control',
             'placeholder': 'Ej: 244',
             'id': 'alto_tablero',
-            'step': '0.01'
+            'step': 'any'
         }),
         help_text="Ingresa el alto del tablero"
     )
@@ -372,7 +372,7 @@ class PiezaForm(forms.Form):
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
             'placeholder': 'Ancho',
-            'step': '0.01'
+            'step': 'any'
         })
     )
     alto = forms.FloatField(
@@ -383,7 +383,7 @@ class PiezaForm(forms.Form):
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
             'placeholder': 'Alto',
-            'step': '0.01'
+            'step': 'any'
         })
     )
     cantidad = forms.IntegerField(

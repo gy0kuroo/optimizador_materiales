@@ -24,9 +24,13 @@ def pieza_cabe_en_tablero(pieza_ancho_cm, pieza_alto_cm, tablero_ancho_cm, table
 
 
 def _kern_block(w, h, x, y, W, H, m):
-    """Hueco ocupado tras colocar pieza; kerf solo si no toca borde derecho/inferior."""
-    bw = float(w + (m if x + float(w) < W - EPS else 0))
-    bh = float(h + (m if y + float(h) < H - EPS else 0))
+    """Reserva la sierra sin prolongarla fuera del perímetro del tablero.
+
+    Solo se recorta la reserva en el borde exterior; nunca las dimensiones
+    de la pieza ni la separación necesaria respecto de otras piezas.
+    """
+    bw = min(float(w) + m, max(0.0, W - x))
+    bh = min(float(h) + m, max(0.0, H - y))
     return bw, bh
 
 

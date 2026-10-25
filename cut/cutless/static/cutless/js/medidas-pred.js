@@ -21,7 +21,7 @@
             'in': 1/2.54,
             'ft': 1/30.48,
         };
-        return round(valor * (conversiones[unidad] || 1.0), 2);
+        return round(valor * (conversiones[unidad] || 1.0), 6);
     }
 
     function round(valor, decimales) {

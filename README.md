@@ -175,3 +175,5 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Identificadores permanentes de optimización](docs/CAMBIOS_IDENTIFICADORES_PERMANENTES.md)
 
 - [Nombres opcionales de los trabajos](docs/CAMBIOS_NOMBRES_OPTIMIZACIONES.md)
+
+- [Corrección de precisión dimensional RNF-09 y pruebas de regresión](docs/CAMBIOS_PRECISION_DIMENSIONAL_RNF09.md)

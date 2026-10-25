@@ -16,7 +16,7 @@ def preparar_plano_horizontal(vista, unidad, margen):
         if girar:
             x, y, w, h = alto-y-h, x, h, w
         tipo = catalogo[p['numero']]
-        medidas = f"{convertir_desde_cm(tipo['ancho'], unidad):.2f} × {convertir_desde_cm(tipo['alto'], unidad):.2f} {unidad}"
+        medidas = f"{convertir_desde_cm(tipo['ancho'], unidad):g} × {convertir_desde_cm(tipo['alto'], unidad):g} {unidad}"
         p.update(x=x, y=y, ancho=w, alto=h, cx=x+w/2, cy=y+h/2,
                  medida_ancho=convertir_desde_cm(tipo['ancho'], unidad),
                  medida_alto=convertir_desde_cm(tipo['alto'], unidad),

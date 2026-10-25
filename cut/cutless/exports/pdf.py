@@ -183,8 +183,8 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
             area_unit_mostrar = round(area_unit_cm2 * factor_area, 2)
             area_total_mostrar = round(area_total_cm2 * factor_area, 2)
             
-            ancho_mostrar = round(convertir_desde_cm(ancho_cm, optimizacion.unidad_medida), 1)
-            alto_mostrar = round(convertir_desde_cm(alto_cm, optimizacion.unidad_medida), 1)
+            ancho_mostrar = convertir_desde_cm(ancho_cm, optimizacion.unidad_medida)
+            alto_mostrar = convertir_desde_cm(alto_cm, optimizacion.unidad_medida)
             
             # Dibujar fila
             c.drawString(2.5*cm, y_pos, str(cantidad))
@@ -394,7 +394,7 @@ def generar_pdf_presupuesto(presupuesto):
         
         c.drawString(2.5*cm, y_pos, f"Optimización {optimizacion.codigo}:")
         y_pos -= 15
-        c.drawString(3*cm, y_pos, f"• Dimensiones: {ancho_mostrar:.2f} × {alto_mostrar:.2f} {simbolo}")
+        c.drawString(3*cm, y_pos, f"• Dimensiones: {ancho_mostrar:g} × {alto_mostrar:g} {simbolo}")
         y_pos -= 15
         c.drawString(3*cm, y_pos, f"• Tableros: {optimizacion.num_tableros or 0}")
         y_pos -= 15
@@ -422,9 +422,9 @@ def generar_pdf_presupuesto(presupuesto):
                         ancho_pieza = float(partes[1].strip())
                         alto_pieza = float(partes[2].strip())
                         cantidad = int(partes[3].strip())
-                        # Convertir dimensiones a la unidad de la optimización
-                        ancho_mostrar_pieza = round(convertir_desde_cm(ancho_pieza, unidad), 2)
-                        alto_mostrar_pieza = round(convertir_desde_cm(alto_pieza, unidad), 2)
+                        # Las piezas ya están expresadas en la unidad original.
+                        ancho_mostrar_pieza = ancho_pieza
+                        alto_mostrar_pieza = alto_pieza
                         piezas_list.append({
                             'nombre': nombre,
                             'ancho': ancho_mostrar_pieza,
@@ -435,8 +435,8 @@ def generar_pdf_presupuesto(presupuesto):
                         ancho_pieza = float(partes[0].strip())
                         alto_pieza = float(partes[1].strip())
                         cantidad = int(partes[2].strip())
-                        ancho_mostrar_pieza = round(convertir_desde_cm(ancho_pieza, unidad), 2)
-                        alto_mostrar_pieza = round(convertir_desde_cm(alto_pieza, unidad), 2)
+                        ancho_mostrar_pieza = ancho_pieza
+                        alto_mostrar_pieza = alto_pieza
                         piezas_list.append({
                             'nombre': f"Pieza {len(piezas_list) + 1}",
                             'ancho': ancho_mostrar_pieza,
@@ -448,7 +448,7 @@ def generar_pdf_presupuesto(presupuesto):
             for pieza in piezas_list[:5]:
                 if y_pos < 150:  # Si se acerca al final de la página, salir
                     break
-                texto_pieza = f"  - {pieza['nombre']}: {pieza['ancho']:.2f} × {pieza['alto']:.2f} {simbolo} (x{pieza['cantidad']})"
+                texto_pieza = f"  - {pieza['nombre']}: {pieza['ancho']:g} × {pieza['alto']:g} {simbolo} (x{pieza['cantidad']})"
                 # Truncar si es muy largo
                 if len(texto_pieza) > 70:
                     texto_pieza = texto_pieza[:67] + "..."
@@ -649,8 +649,8 @@ def generar_pdf_resumen_desperdicio(optimizaciones, estadisticas, periodo='todos
         
         fecha_str = opt.fecha.strftime('%d/%m/%Y')
         unidad_opt = getattr(opt, 'unidad_medida', 'cm') or 'cm'
-        ancho_mostrar = round(convertir_desde_cm(opt.ancho_tablero, unidad_opt), 2)
-        alto_mostrar = round(convertir_desde_cm(opt.alto_tablero, unidad_opt), 2)
+        ancho_mostrar = convertir_desde_cm(opt.ancho_tablero, unidad_opt)
+        alto_mostrar = convertir_desde_cm(opt.alto_tablero, unidad_opt)
         simbolo = obtener_simbolo_unidad(unidad_opt)
         dim_str = f"{ancho_mostrar}×{alto_mostrar}{simbolo}"
         

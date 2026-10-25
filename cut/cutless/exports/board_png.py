@@ -49,7 +49,7 @@ def generar_png_tablero(vista, unidad, margen, numero, total, info, codigo=None,
         ax.add_patch(patch)
         if resto['mostrar_texto']:
             label = ax.text(resto['cx'], resto['cy'],
-                    f"Sobrante\n{resto['medida_ancho']:.1f} × {resto['medida_alto']:.1f} {unidad}",
+                    f"Sobrante\n{resto['medida_ancho']:g} × {resto['medida_alto']:g} {unidad}",
                     ha='center', va='center', fontsize=7, clip_on=True)
             label.set_clip_path(patch)
     for p in plano['piezas']:

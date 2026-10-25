@@ -12,7 +12,7 @@
       <h2 class="card-header">Detalle de piezas</h2>
       {% if item.catalogo %}
       <div class="table-responsive"><table class="table board-pieces mb-0"><thead><tr><th scope="col">#</th><th scope="col">Nombre de la pieza</th><th scope="col">Medidas ({{ unidad_medida }})</th><th scope="col">Cantidad</th><th scope="col">Área (m²)</th><th scope="col">Referencia</th></tr></thead><tbody>
-        {% for pieza in item.catalogo %}<tr><td>{{ forloop.counter }}</td><td><span class="board-color" style="background-color:{{ pieza.color }}" aria-hidden="true"></span><strong>{{ pieza.nombre }}</strong></td><td>{{ pieza.ancho|floatformat:2 }} × {{ pieza.alto|floatformat:2 }}</td><td>{{ pieza.cantidad }}</td><td>{{ pieza.area_m2|floatformat:3 }}</td><td>P{{ pieza.numero }}</td></tr>{% endfor %}
+        {% for pieza in item.catalogo %}<tr><td>{{ forloop.counter }}</td><td><span class="board-color" style="background-color:{{ pieza.color }}" aria-hidden="true"></span><strong>{{ pieza.nombre }}</strong></td><td>{{ pieza.ancho|floatformat:"-6" }} × {{ pieza.alto|floatformat:"-6" }}</td><td>{{ pieza.cantidad }}</td><td>{{ pieza.area_m2|floatformat:3 }}</td><td>P{{ pieza.numero }}</td></tr>{% endfor %}
       </tbody></table></div>
       <p class="board-note">Área total de cada tipo en este tablero. Las medidas conservan la orientación solicitada.</p>
       {% else %}

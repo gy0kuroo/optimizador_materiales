@@ -245,8 +245,8 @@ def editar_optimizacion(request, pk):
     else:
         # Cargar datos existentes en el formulario
         unidad_opt = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
-        ancho_mostrar = round(convertir_desde_cm(optimizacion.ancho_tablero, unidad_opt), 2)
-        alto_mostrar = round(convertir_desde_cm(optimizacion.alto_tablero, unidad_opt), 2)
+        ancho_mostrar = convertir_desde_cm(optimizacion.ancho_tablero, unidad_opt)
+        alto_mostrar = convertir_desde_cm(optimizacion.alto_tablero, unidad_opt)
         
         # Crear formulario con datos iniciales
         initial_tablero = {
@@ -271,11 +271,9 @@ def editar_optimizacion(request, pk):
                 partes = linea.split(',')
                 if len(partes) == 4:
                     nombre, ancho, alto, cantidad = partes
-                    # Convertir dimensiones de pieza a la unidad del tablero
-                    ancho_cm = float(ancho.strip())
-                    alto_cm = float(alto.strip())
-                    ancho_mostrar = round(convertir_desde_cm(ancho_cm, unidad_opt), 2)
-                    alto_mostrar = round(convertir_desde_cm(alto_cm, unidad_opt), 2)
+                    # Las piezas se guardan en la unidad original; solo el tablero está en cm.
+                    ancho_mostrar = float(ancho.strip())
+                    alto_mostrar = float(alto.strip())
                     piezas_data.append({
                         'nombre': nombre.strip(),
                         'ancho': ancho_mostrar,

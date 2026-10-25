@@ -91,7 +91,7 @@
                    id="ancho_tablero"
                    class="form-control"
                    placeholder="Ej: 122"
-                   step="0.01"
+                   step="any"
                    value="{{ tablero_form.ancho.value|default_if_none:''|unlocalize }}">
             <small class="form-text text-muted">Medida horizontal del tablero completo.</small>
             {% if tablero_form.ancho.errors %}
@@ -108,7 +108,7 @@
                    id="alto_tablero"
                    class="form-control"
                    placeholder="Ej: 244"
-                   step="0.01"
+                   step="any"
                    value="{{ tablero_form.alto.value|default_if_none:''|unlocalize }}">
             <small class="form-text text-muted">Medida vertical del tablero completo.</small>
             {% if tablero_form.alto.errors %}
@@ -435,8 +435,8 @@ function convertirDesdeCm(valorCm, unidad) {
         'in': 1/2.54,
         'ft': 1/30.48
     };
-    // Redondear a 2 decimales como en medidas-pred.js
-    return redondear(valorCm * (conversiones[unidad] || 1.0), 2);
+    // Conservar seis decimales como en medidas-pred.js
+    return redondear(valorCm * (conversiones[unidad] || 1.0), 6);
 }
 
 // Función para obtener el símbolo de la unidad
@@ -468,9 +468,9 @@ function actualizarOpcionesMaterial() {
             if (material.ancho && material.alto) {
                 const anchoConvertido = convertirDesdeCm(material.ancho, unidad);
                 const altoConvertido = convertirDesdeCm(material.alto, unidad);
-                // Formatear los números: si es entero, mostrarlo sin decimales; si no, con máximo 2 decimales
-                const anchoFormateado = anchoConvertido % 1 === 0 ? anchoConvertido.toString() : anchoConvertido.toFixed(2).replace(/\.?0+$/, '');
-                const altoFormateado = altoConvertido % 1 === 0 ? altoConvertido.toString() : altoConvertido.toFixed(2).replace(/\.?0+$/, '');
+                // Formatear los números: si es entero, mostrarlo sin decimales; si no, con máximo 6 decimales
+                const anchoFormateado = anchoConvertido % 1 === 0 ? anchoConvertido.toString() : anchoConvertido.toFixed(6).replace(/\.?0+$/, '');
+                const altoFormateado = altoConvertido % 1 === 0 ? altoConvertido.toString() : altoConvertido.toFixed(6).replace(/\.?0+$/, '');
                 option.textContent = `${material.nombre} (${anchoFormateado}×${altoFormateado} ${simbolo})`;
             }
         }
@@ -579,10 +579,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         // Actualizar campos de ancho y alto
                         if (anchoTableroInput) {
-                            anchoTableroInput.value = anchoConvertido.toFixed(2);
+                            anchoTableroInput.value = anchoConvertido.toFixed(6);
                         }
                         if (altoTableroInput) {
-                            altoTableroInput.value = altoConvertido.toFixed(2);
+                            altoTableroInput.value = altoConvertido.toFixed(6);
                         }
 
                         // Si se cambió de material, resetear la bandera de medidas manuales

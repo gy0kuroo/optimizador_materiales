@@ -23,7 +23,8 @@ def convertir_a_cm(valor, unidad):
         'ft': 30.48,         # 1 pie = 30.48 cm
     }
     factor = conversiones.get(unidad, 1.0)
-    return round(valor * factor, 2)
+    # Seis decimales conservan la tolerancia de 0,01 cm en todas las unidades.
+    return round(valor * factor, 6)
 
 def convertir_desde_cm(valor_cm, unidad_destino):
     """
@@ -48,7 +49,7 @@ def convertir_desde_cm(valor_cm, unidad_destino):
         'ft': 1/30.48,       # 1 cm = 1/30.48 pies
     }
     factor = conversiones.get(unidad_destino, 1.0)
-    return round(valor_cm * factor, 2)
+    return round(valor_cm * factor, 6)
 
 def obtener_factor_area_desde_cm2(unidad):
     """Factor de cm² a la unidad², sin redondear el factor lineal."""

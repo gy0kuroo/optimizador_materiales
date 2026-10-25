@@ -53,7 +53,7 @@ def dibujar_tablero(c, vista, unidad, margen, numero, total, width, height, info
         if resto['mostrar_texto'] and w > 44 and h > 24:
             c.setFillColor(HexColor('#1C1008')); c.setFont('Helvetica', 7)
             c.drawCentredString(x+w/2, y+h/2+3, 'Sobrante')
-            c.drawCentredString(x+w/2, y+h/2-7, f"{resto['medida_ancho']:.1f} × {resto['medida_alto']:.1f} {unidad}")
+            c.drawCentredString(x+w/2, y+h/2-7, f"{resto['medida_ancho']:g} × {resto['medida_alto']:g} {unidad}")
         c.restoreState()
     for pieza in plano['piezas']:
         rect(pieza, pieza['color'])

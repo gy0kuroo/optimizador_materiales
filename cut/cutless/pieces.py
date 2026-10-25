@@ -66,8 +66,8 @@ def mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad='cm'):
         cuenta[key] += 1
     partes_desc = []
     for (nombre, aw, ah), cnt in cuenta.items():
-        wu = round(convertir_desde_cm(aw, unidad), 2)
-        hu = round(convertir_desde_cm(ah, unidad), 2)
+        wu = convertir_desde_cm(aw, unidad)
+        hu = convertir_desde_cm(ah, unidad)
         partes_desc.append(f"{nombre} ×{cnt} ({wu}×{hu} {simbolo})")
     partes_desc.sort()
     max_items = 12
