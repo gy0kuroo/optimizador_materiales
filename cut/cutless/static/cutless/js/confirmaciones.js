@@ -33,25 +33,24 @@
         mensaje = mensaje || 'Generando...';
         window.ocultarIndicadorCarga();
 
-        var overlay = document.createElement('div');
-        overlay.id = 'loading-overlay';
-        overlay.style.cssText =
-            'position:fixed;top:0;left:0;width:100%;height:100%;' +
-            'background:rgba(0,0,0,0.7);display:flex;justify-content:center;' +
-            'align-items:center;z-index:9999;flex-direction:column;';
+        var template = document.getElementById('cutless-loading-template');
+        var overlay;
+        if (template) {
+            overlay = template.content.firstElementChild.cloneNode(true);
+            overlay.querySelector('[data-loading-message]').textContent = mensaje;
+        } else {
+            // Respaldo accesible si esta utilidad se carga sin la plantilla base.
+            overlay = document.createElement('div');
+            overlay.id = 'loading-overlay';
+            overlay.className = 'cutless-loading';
+            overlay.setAttribute('role', 'status');
+            overlay.setAttribute('aria-live', 'polite');
+            var texto = document.createElement('p');
+            texto.className = 'cutless-loading__card cutless-loading__message';
+            texto.textContent = mensaje;
+            overlay.appendChild(texto);
+        }
 
-        var spinner = document.createElement('div');
-        spinner.className = 'spinner-border text-light';
-        spinner.style.cssText = 'width:3rem;height:3rem;';
-        spinner.setAttribute('role', 'status');
-
-        var texto = document.createElement('div');
-        texto.className = 'text-light mt-3';
-        texto.style.cssText = 'font-size:1.2rem;';
-        texto.textContent = mensaje;
-
-        overlay.appendChild(spinner);
-        overlay.appendChild(texto);
         document.body.appendChild(overlay);
 
         if (window._loadingOverlayTimeoutId) {
@@ -177,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    var generateForms = document.querySelectorAll('form[action*="index"], form[action*="optimizar"]');
+    var generateForms = document.querySelectorAll('form[action*="index"], form[action*="optimizar"], form[data-loading-optimization]');
     generateForms.forEach(function (form) {
         if (!form.getAttribute('onsubmit')) {
             form.addEventListener('submit', function () {

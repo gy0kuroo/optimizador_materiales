@@ -29,6 +29,7 @@
     <link rel="stylesheet" href="{% static 'cutless/css/magnifier.css' %}?v=3">
     <link rel="stylesheet" href="{% static 'cutless/css/reforma-visual.css' %}?v=names-1">
     <link rel="stylesheet" href="{% static 'cutless/css/buttons.css' %}?v=review-2">
+    <link rel="stylesheet" href="{% static 'cutless/css/loading.css' %}?v=4">
 </head>
 <body data-button-icons="{% static 'cutless/button-icons.svg' %}?v=2" data-app-shell="{{ user.is_authenticated|yesno:'true,false' }}" class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
     {% block navigation %}
@@ -114,6 +115,8 @@
         {% endblock %}
     </div>
 
+    {% include 'cutless/includes/loading.html' %}
+
     <!-- Diálogo global: confirmaciones y avisos (centrado) -->
     <div class="modal fade modal-cutless-dialog" id="cutlessModalDialogo" tabindex="-1" aria-labelledby="cutlessModalDialogoTitulo" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -177,7 +180,7 @@
 
     <!-- JavaScript Personalizado -->
     <script src="{% static 'cutless/js/theme.js' %}?v=3"></script>
-    <script src="{% static 'cutless/js/confirmaciones.js' %}?v=review-2"></script>
+    <script src="{% static 'cutless/js/confirmaciones.js' %}?v=brand-loading-1"></script>
     {% if user.is_authenticated %}
     <script src="{% static 'cutless/js/session-timeout.js' %}?v=review-2"></script>
     {% endif %}

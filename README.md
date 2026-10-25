@@ -179,3 +179,5 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Corrección de precisión dimensional RNF-09 y pruebas de regresión](docs/CAMBIOS_PRECISION_DIMENSIONAL_RNF09.md)
 
 - [Animación y escala de color del aprovechamiento](docs/CAMBIOS_ANIMACION_APROVECHAMIENTO.md)
+
+- [Indicador de carga con el símbolo de CutLess](docs/CAMBIOS_CARGA_MARCA.md)

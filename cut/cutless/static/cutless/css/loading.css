@@ -1,0 +1,41 @@
+/* Pantalla compartida: misma marca, paleta y tipografía del resto de CutLess. */
+.cutless-loading {
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:rgb(25 26 24 / 65%);
+  backdrop-filter:blur(4px);
+}
+.cutless-loading__card {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:24px;
+  width:min(100%, 420px);
+  max-height:calc(100dvh - 48px);
+  overflow:auto;
+  padding:clamp(24px, 5vw, 40px);
+  background:transparent;
+  color:#fff;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  text-align:center;
+}
+.cutless-loading__logo { width:216px; max-width:100%; height:auto; flex-shrink:0; }
+.cutless-loading__message { margin:0; font-size:1.125rem; line-height:1.6; overflow-wrap:anywhere; }
+.cutless-loading__piece {
+  fill:var(--piece-fill);
+  animation:cutless-loading-piece 1.6s linear infinite;
+  animation-delay:calc(var(--piece-order) * 320ms);
+}
+@keyframes cutless-loading-piece {
+  0%, 16% { fill:#4558E7; }
+  20%, 100% { fill:var(--piece-fill); }
+}
+@media(prefers-reduced-motion:reduce) { .cutless-loading__piece { animation:none; } }
+@media print { .cutless-loading { display:none; } }

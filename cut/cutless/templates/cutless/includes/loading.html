@@ -1,0 +1,15 @@
+<!-- Geometría del símbolo de marca; cada pieza se resalta por turno. -->
+<template id="cutless-loading-template">
+  <div id="loading-overlay" class="cutless-loading" role="status" aria-live="polite" aria-atomic="true">
+    <div class="cutless-loading__card">
+      <svg class="cutless-loading__logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" aria-hidden="true" focusable="false">
+        <path class="cutless-loading__piece" style="--piece-order:0;--piece-fill:#4E2D01" d="M10 16a6 6 0 0 1 6-6h7v44h-7a6 6 0 0 1-6-6V16Z"/>
+        <path class="cutless-loading__piece" style="--piece-order:1;--piece-fill:#7D6344" d="M27 10h21a6 6 0 0 1 6 6v8H27V10Z"/>
+        <path class="cutless-loading__piece" style="--piece-order:4;--piece-fill:#B7B8AB" d="M27 28h12v12H27z"/>
+        <path class="cutless-loading__piece" style="--piece-order:2;--piece-fill:#D9CCB8" d="M43 28h11v26L43 43V28Z"/>
+        <path class="cutless-loading__piece" style="--piece-order:3;--piece-fill:#4E2D01" d="M27 44h12l10 10H27V44Z"/>
+      </svg>
+      <p class="cutless-loading__message" data-loading-message>Preparando tu plan de corte…</p>
+    </div>
+  </div>
+</template>

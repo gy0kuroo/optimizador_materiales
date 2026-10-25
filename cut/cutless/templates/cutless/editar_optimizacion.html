@@ -21,7 +21,7 @@
     </div>
   </header>
 
-<form method="post" action="{% url 'cutless:editar_optimizacion' optimizacion.id %}" id="optimizacion-form">
+<form method="post" action="{% url 'cutless:editar_optimizacion' optimizacion.id %}" id="optimizacion-form" data-loading-optimization>
     {% csrf_token %}
     {% include 'cutless/includes/optimization-name-field.html' with field=tablero_form.nombre_optimizacion %}
 
