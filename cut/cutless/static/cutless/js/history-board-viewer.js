@@ -46,6 +46,7 @@
       const summary = panel.querySelector('.board-data');
       if (table) pieces.append(table);
       if (summary) details.append(summary);
+      window.CutlessUtilization?.show(details, 'history');
       if (svg) {
         drawing = svg; canvas.replaceChildren(svg);
         status.textContent = ''; paint(true); return;

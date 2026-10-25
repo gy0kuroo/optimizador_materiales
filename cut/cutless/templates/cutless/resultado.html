@@ -38,7 +38,7 @@
   </header>
 
   <section class="card total-utilization" aria-label="Aprovechamiento total de la optimización">
-    <div class="cut-utilization">
+    <div class="cut-utilization" data-utilization="{{ optimizacion.aprovechamiento_total|unlocalize }}">
       <svg viewBox="0 0 42 42" role="img" aria-label="Aprovechamiento total {{ optimizacion.aprovechamiento_total|floatformat:2 }} por ciento"><circle class="donut-track" cx="21" cy="21" r="15.9155" fill="none" stroke-width="4"/><circle class="donut-value" cx="21" cy="21" r="15.9155" fill="none" stroke-width="4" stroke-dasharray="{{ optimizacion.aprovechamiento_total|unlocalize }} 100" transform="rotate(-90 21 21)"/></svg>
       <div><h2>Aprovechamiento total</h2><strong>{{ optimizacion.aprovechamiento_total|floatformat:2 }} %</strong><p>Considera {{ num_tableros }} tablero{{ num_tableros|pluralize }} del plan completo.</p></div>
     </div>
@@ -228,4 +228,4 @@
   </div></div>
 </div>
 {% endblock %}
-{% block extra_js %}<script src="{% static 'cutless/js/board-deck.js' %}?v=review-2"></script><script src="{% static 'cutless/js/board-viewer.js' %}?v=ids-1"></script>{% endblock %}
+{% block extra_js %}<script src="{% static 'cutless/js/utilization.js' %}?v=1"></script><script src="{% static 'cutless/js/board-deck.js' %}?v=utilization-1"></script><script src="{% static 'cutless/js/board-viewer.js' %}?v=utilization-1"></script>{% endblock %}
