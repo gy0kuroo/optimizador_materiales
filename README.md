@@ -187,3 +187,5 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Paleta clara, notificaciones y alcance de la lupa](docs/CAMBIOS_PALETA_CLARA_AVISOS_LUPA.md)
 
 - [Jerarquía visual de eliminar y guardar](docs/CAMBIOS_JERARQUIA_ELIMINAR_GUARDAR.md)
+
+- [Mensajes y ayuda progresiva de login y registro](docs/CAMBIOS_MENSAJES_LOGIN_REGISTRO.md)

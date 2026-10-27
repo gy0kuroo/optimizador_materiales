@@ -1,12 +1,77 @@
 from django import forms
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, PasswordChangeForm
+from django.contrib.auth.password_validation import get_default_password_validators, MinimumLengthValidator, NumericPasswordValidator
+from django.core.exceptions import ValidationError
 from decimal import Decimal, InvalidOperation
 from .models import PerfilUsuario
 
-class RegistroForm(UserCreationForm):
+class MensajesAccesoMixin:
+    """Presentación accesible de errores, conservando las validaciones de Django."""
+    mensajes = {
+        'required': 'Completa este campo para continuar.',
+        'password_mismatch': 'Las contraseñas no coinciden. Repite la misma contraseña.',
+        'password_too_short': 'Usa al menos %(min_length)s caracteres.',
+        'password_too_common': 'Esta contraseña es muy común. Elige una menos fácil de adivinar.',
+        'password_entirely_numeric': 'Añade letras o símbolos: la contraseña no puede contener solo números.',
+        'password_too_similar': 'Elige una contraseña que no se parezca tanto a tus datos de cuenta.',
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            field.widget.attrs['aria-describedby'] = f'id_{name}_help id_{name}_errors'
+            field.widget.attrs['autocomplete'] = ('new-password' if name.startswith('password') else name)
+
+    def full_clean(self):
+        super().full_clean()
+        for name, errors in self._errors.items():
+            friendly = []
+            for error in errors.as_data():
+                message = self.mensajes.get(error.code)
+                if name == 'email' and error.code == 'invalid':
+                    message = 'Escribe un correo válido, por ejemplo nombre@correo.cl.'
+                if name == 'username' and error.code == 'unique':
+                    message = 'Este nombre de usuario ya está en uso. Prueba con otro.'
+                if name == 'username' and error.code == 'invalid':
+                    message = 'Usa letras, números o estos símbolos: @ . + - _'
+                friendly.append(ValidationError(message, code=error.code, params=error.params) if message else error)
+            self._errors[name] = self.error_class(friendly)
+            if name in self.fields:
+                self.fields[name].widget.attrs['aria-invalid'] = 'true'
+
+
+class AccesoForm(MensajesAccesoMixin, AuthenticationForm):
+    error_messages = {
+        'invalid_login': 'No pudimos iniciar sesión. Revisa tu usuario y contraseña.',
+        'inactive': 'No pudimos iniciar sesión. Revisa tu usuario y contraseña.',
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password'].widget.attrs['autocomplete'] = 'current-password'
+
+
+class RegistroForm(MensajesAccesoMixin, UserCreationForm):
     email = forms.EmailField(required=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, label in {'username':'Nombre de usuario', 'email':'Correo electrónico',
+                            'password1':'Contraseña', 'password2':'Repite la contraseña'}.items():
+            self.fields[name].label = label
+
+    @property
+    def password_rejects_numeric(self):
+        return any(isinstance(validator, NumericPasswordValidator)
+                   for validator in get_default_password_validators())
+
+    @property
+    def password_min_length(self):
+        lengths = [validator.min_length for validator in get_default_password_validators()
+                   if isinstance(validator, MinimumLengthValidator)]
+        return max(lengths, default=0)
 
     class Meta:
         model = User

@@ -6,7 +6,9 @@
 {% block navigation %}{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'usuarios/css/login-redesign.css' %}?v=buttons-1">
+<link rel="stylesheet" href="{% static 'usuarios/css/auth-feedback.css' %}?v=1">
 {% endblock %}
+{% block flash_messages %}{% endblock %}
 {% block show_auth_buttons %}{% endblock %}
 
 {% block content %}
@@ -26,21 +28,13 @@
   <section class="login-panel" aria-labelledby="login-title">
     <h1 id="login-title">Bienvenido de nuevo</h1>
     <p class="login-intro">Inicia sesión para continuar con tus proyectos.</p>
-    <form method="post" class="login-form">
+    {% for message in messages %}<div class="alert alert-{{ message.tags }} auth-notice" role="status">{{ message }}</div>{% endfor %}
+    <form method="post" class="login-form" data-auth-feedback="login" novalidate>
       {% csrf_token %}
       {% if form.non_field_errors %}
-      <div class="login-errors" role="alert">{{ form.non_field_errors }}</div>
-      {% endif %}
-      <div class="login-field">
-        <label for="{{ form.username.id_for_label }}">Usuario</label>
-        {{ form.username }}
-        {% if form.username.errors %}<div class="login-field-errors" role="alert">{{ form.username.errors }}</div>{% endif %}
-      </div>
-      <div class="login-field">
-        <label for="{{ form.password.id_for_label }}">Contraseña</label>
-        {{ form.password }}
-        {% if form.password.errors %}<div class="login-field-errors" role="alert">{{ form.password.errors }}</div>{% endif %}
-      </div>
+      <div class="login-errors auth-summary" role="alert" tabindex="-1" data-auth-summary>{{ form.non_field_errors }}<p>Puedes volver a intentarlo o recuperar tu contraseña.</p></div>
+      {% else %}<div class="login-errors auth-summary" role="alert" tabindex="-1" data-auth-summary hidden></div>{% endif %}
+      {% for field in form %}{% include 'usuarios/includes/auth-field.html' with registration=False %}{% endfor %}
       <a class="login-recovery" href="{% url 'usuarios:recuperar_password' %}">¿Olvidaste tu contraseña?</a>
       <button type="submit" class="btn login-submit btn-primary" data-action="primary" data-icon="chevron-right">Iniciar sesión</button>
     </form>
@@ -48,3 +42,4 @@
   </section>
 </div>
 {% endblock %}
+{% block extra_js %}<script src="{% static 'usuarios/js/auth-feedback.js' %}?v=1"></script>{% endblock %}

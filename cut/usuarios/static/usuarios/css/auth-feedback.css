@@ -1,0 +1,24 @@
+/* Mensajes de acceso: informan sin competir con el formulario. */
+.login-panel .auth-summary { color:var(--danger-notice); background:var(--danger-tint); border-color:var(--danger-text); }
+.login-panel .auth-summary p { margin:8px 0 0; }
+.login-panel .auth-summary:focus { outline:3px solid var(--accent-ring); outline-offset:3px; }
+.login-panel .auth-summary ul { list-style:none; padding:0; }
+.login-panel .auth-field-errors { color:var(--danger-text); font-size:1rem; line-height:1.5; margin-top:10px; }
+.auth-field-errors p { margin:0 0 6px; }
+.auth-field-errors span { display:inline-flex; align-items:center; justify-content:center; border:1px solid currentColor; border-radius:50%; width:1.2em; height:1.2em; font-weight:700; }
+.login-page .app-main input[aria-invalid="true"]:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]) { border-color:var(--danger-text)!important; }
+.auth-field-help { font-size:1rem; line-height:1.5; }
+.login-panel [hidden] { display:none!important; }
+/* Sin JS, toda la ayuda sigue disponible. Con JS se revela al enfocar o revisar. */
+.auth-feedback-ready .auth-field-help { display:none; }
+.auth-feedback-ready [data-auth-field]:focus-within .auth-field-help,
+.auth-feedback-ready [data-auth-field][data-touched="true"]:has(.auth-password-guide) .auth-field-help { display:block; }
+.auth-password-guide { border:1px solid var(--border); border-radius:10px; padding:14px; background:var(--surface-subtle); }
+.auth-password-guide ul { list-style:none; padding:0; margin:8px 0; }
+.auth-password-guide li { margin:6px 0; }
+.auth-password-guide p { font-size:.95rem; margin:8px 0 0; color:var(--text-secondary); }
+.auth-password-guide [data-satisfied="true"], .auth-match { color:var(--success-text); }
+.auth-match { font-size:1rem; margin:8px 0 0; }
+.auth-notice { margin:0 0 24px; }
+@media(prefers-reduced-motion:no-preference) { .auth-field-errors:not([hidden]), .auth-match:not([hidden]) { animation:auth-feedback-in 140ms ease-out; } }
+@keyframes auth-feedback-in { from { opacity:0; transform:translateY(-3px); } to { opacity:1; transform:none; } }

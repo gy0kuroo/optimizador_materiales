@@ -103,6 +103,7 @@
 
     <!-- Contenido Principal -->
     <div class="container app-main">
+        {% block flash_messages %}
         {% if messages %}
             {% for message in messages %}
                 <div class="alert alert-{% if message.tags == "error" %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
@@ -111,6 +112,8 @@
                 </div>
             {% endfor %}
         {% endif %}
+
+        {% endblock flash_messages %}
 
         {% block content %}
         {% endblock %}

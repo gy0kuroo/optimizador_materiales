@@ -1,7 +1,7 @@
 ﻿from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, SetPasswordForm
+from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -13,7 +13,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.http import require_POST
-from .forms import RegistroForm, PerfilForm, UsuarioEdicionForm, PermisosUsuarioForm, CambiarPasswordForm
+from .forms import AccesoForm, RegistroForm, PerfilForm, UsuarioEdicionForm, PermisosUsuarioForm, CambiarPasswordForm
 from .models import PerfilUsuario
 
 @require_POST
@@ -32,7 +32,7 @@ def registro(request):
             user = form.save()
             # Asegurar la existencia de perfil
             PerfilUsuario.objects.get_or_create(usuario=user)
-            messages.success(request, '¡Cuenta creada exitosamente! Por favor inicia sesión.')
+            messages.success(request, 'Tu cuenta está lista. Ahora inicia sesión.')
             return redirect('usuarios:login')
     else:
         form = RegistroForm()
@@ -155,7 +155,7 @@ def login_view(request):
     if request.user.is_authenticated:
         return redirect('cutless:index' if request.user.perfil.inicio_personalizado else 'usuarios:configuracion_inicial')
     if request.method == "POST":
-        form = AuthenticationForm(request, data=request.POST)
+        form = AccesoForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
@@ -181,7 +181,7 @@ def login_view(request):
             request.session['mostrar_bienvenida_cutless'] = perfil.inicio_personalizado
             return redirect('cutless:index' if perfil.inicio_personalizado else 'usuarios:configuracion_inicial')
     else:
-        form = AuthenticationForm()
+        form = AccesoForm()
     return render(request, 'usuarios/login.html', {'form': form})
 
 @login_required

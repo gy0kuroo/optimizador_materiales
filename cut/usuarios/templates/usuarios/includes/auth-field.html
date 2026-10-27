@@ -1,0 +1,23 @@
+<div class="login-field" data-auth-field>
+  <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+  {{ field }}
+  <div id="{{ field.id_for_label }}_errors" class="login-field-errors auth-field-errors" aria-live="polite" data-field-errors {% if not field.errors %}hidden{% endif %}>
+    {% for error in field.errors %}<p><span aria-hidden="true">!</span> {{ error }}</p>{% endfor %}
+  </div>
+  <div id="{{ field.id_for_label }}_help" class="register-help auth-field-help">
+    {% if registration %}
+      {% if field.name == 'username' %}Hasta {{ field.field.max_length }} caracteres. Usa letras, números o @ . + - _
+      {% elif field.name == 'email' %}Escribe un correo al que tengas acceso, por ejemplo nombre@correo.cl.
+      {% elif field.name == 'password1' %}
+        <div class="auth-password-guide">
+          <strong>Para tu contraseña</strong>
+          <ul>{% if form.password_min_length %}<li data-password-rule="length"><span aria-hidden="true" data-rule-icon>○</span> Al menos {{ form.password_min_length }} caracteres.</li>{% endif %}
+          {% if form.password_rejects_numeric %}<li data-password-rule="numeric"><span aria-hidden="true" data-rule-icon>○</span> No usar solo números.</li>{% endif %}</ul>
+          <p>Al crear la cuenta también comprobaremos que no sea muy común ni se parezca a tus datos.</p>
+        </div>
+      {% elif field.name == 'password2' %}Vuelve a escribir la misma contraseña, respetando mayúsculas y minúsculas.
+      {% endif %}
+    {% else %}{% if field.name == 'username' %}Escribe tu nombre de usuario.{% else %}Escribe la contraseña de tu cuenta.{% endif %}{% endif %}
+  </div>
+  {% if field.name == 'password2' %}<p class="auth-match" data-password-match aria-live="polite" hidden></p>{% endif %}
+</div>
