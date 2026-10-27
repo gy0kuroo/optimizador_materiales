@@ -5,7 +5,7 @@
 {% block title %}Mi perfil · CutLess{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'usuarios/css/profile-redesign.css' %}?v=buttons-1">
+<link rel="stylesheet" href="{% static 'usuarios/css/profile-redesign.css' %}?v=actions-2">
 {% endblock %}
 
 {% block content %}
@@ -97,7 +97,7 @@
                   {% endif %}
                 </div>
 
-                <div class="text-center">
+                <div class="profile-form-actions">
                   <button type="submit" class="btn btn-auth btn-success" data-action="success" data-icon="check">
                     Guardar preferencias
                   </button>
@@ -137,7 +137,7 @@
                     {% endif %}
                   </div>
 
-                  <div class="text-center mb-3">
+                  <div class="profile-form-actions mb-3">
                     <button type="submit" class="btn btn-auth btn-success" data-action="success" data-icon="check">
                       Guardar datos de cuenta
                     </button>
@@ -190,7 +190,7 @@
                   {% endif %}
                 </div>
 
-                <div class="text-center">
+                <div class="profile-form-actions">
                   <button type="submit" class="btn btn-auth btn-success" data-action="success" data-icon="check">
                     Actualizar contraseña
                   </button>

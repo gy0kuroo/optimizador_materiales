@@ -141,3 +141,12 @@
 [data-theme] body .alert-dismissible .btn[data-bs-dismiss="alert"] {
   position:absolute; inset-inline-end:16px; top:50%; transform:translateY(-50%)!important;
 }
+
+/* Eliminación secundaria: visible sin competir con la acción principal. */
+[data-theme] body .btn.btn-outline-danger { --btn-tone:var(--danger-text); --btn-fill:transparent; --btn-ink:var(--danger-text); }
+[data-theme] body .btn.btn-outline-danger:not(:disabled):not([aria-disabled="true"]):not(.disabled):hover {
+  background:var(--danger-tint)!important; border-color:var(--danger-text)!important; color:var(--danger-text)!important; filter:none!important;
+}
+[data-theme] body .btn.btn-outline-danger:not(:disabled):not([aria-disabled="true"]):not(.disabled):active {
+  background:var(--danger)!important; border-color:var(--danger)!important; color:var(--on-semantic)!important; filter:none!important;
+}

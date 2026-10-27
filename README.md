@@ -185,3 +185,5 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Modo oscuro: superficies cálidas y acento ámbar](docs/CAMBIOS_MODO_OSCURO_AMBAR.md)
 
 - [Paleta clara, notificaciones y alcance de la lupa](docs/CAMBIOS_PALETA_CLARA_AVISOS_LUPA.md)
+
+- [Jerarquía visual de eliminar y guardar](docs/CAMBIOS_JERARQUIA_ELIMINAR_GUARDAR.md)

@@ -21,3 +21,7 @@ body.profile-page { font-size: 1.125rem; line-height: 1.65; }
 .profile-page .text-danger.small { font-size: 1rem; }
 .profile-page hr { border-color: var(--cl-border); margin: 28px 0; }
 @media (max-width: 767px) { .profile-page .page-header { flex-wrap: wrap; } .profile-page .page-header__actions { margin-left: 0; } .profile-page .btn-auth { width: 100%; } }
+
+/* El guardado cierra el formulario alineado con su borde derecho. */
+.profile-page .profile-form-actions { display:flex; justify-content:flex-end; margin-top:24px; }
+@media(max-width:767px) { .profile-page .profile-form-actions > .btn { width:100%; } }

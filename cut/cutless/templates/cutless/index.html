@@ -184,7 +184,7 @@
                 <img src="{% static 'cutless/icons/pieza-outline.png' %}" alt="" class="cl-icon cl-icon--mini" onerror="this.style.display='none'">
                 Tipo de pieza <span class="pieza-numero">{{ forloop.counter }}</span>
               </h5>
-              <button type="button" class="btn btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %} btn-danger" data-action="delete" data-icon="trash">
+              <button type="button" class="btn btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %} btn-outline-danger" data-action="delete" data-icon="trash">
 
                 Eliminar
               </button>

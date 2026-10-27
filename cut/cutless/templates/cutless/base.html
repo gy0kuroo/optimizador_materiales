@@ -30,7 +30,7 @@
     <link rel="stylesheet" href="{% static 'cutless/css/reforma-visual.css' %}?v=names-1">
     <link rel="stylesheet" href="{% static 'cutless/css/buttons.css' %}?v=review-2">
     <link rel="stylesheet" href="{% static 'cutless/css/loading.css' %}?v=5">
-    <link rel="stylesheet" href="{% static 'cutless/css/theme-colors.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'cutless/css/theme-colors.css' %}?v=2">
 </head>
 <body data-button-icons="{% static 'cutless/button-icons.svg' %}?v=2" data-app-shell="{{ user.is_authenticated|yesno:'true,false' }}" class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
     {% block navigation %}
