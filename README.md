@@ -181,3 +181,7 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Animación y escala de color del aprovechamiento](docs/CAMBIOS_ANIMACION_APROVECHAMIENTO.md)
 
 - [Indicador de carga con el símbolo de CutLess](docs/CAMBIOS_CARGA_MARCA.md)
+
+- [Modo oscuro: superficies cálidas y acento ámbar](docs/CAMBIOS_MODO_OSCURO_AMBAR.md)
+
+- [Paleta clara, notificaciones y alcance de la lupa](docs/CAMBIOS_PALETA_CLARA_AVISOS_LUPA.md)

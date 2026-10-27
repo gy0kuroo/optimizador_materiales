@@ -17,21 +17,7 @@
   --cl-shell-width: 242px;
   --cl-info-bg: #EFF0FB;
 }
-[data-theme="dark"] {
-  --cl-bg-base: #191A18;
-  --cl-bg-surface: #292A25;
-  --cl-bg-card: #22231F;
-  --cl-text-primary: #F2F0E8;
-  --cl-text-secondary: #C4C0B3;
-  --cl-text-muted: #C4C0B3;
-  --cl-text-label: #E1D4BA;
-  --cl-border: #3C3D34;
-  --cl-border-strong: #7C7D6D;
-  --cl-shadow-sm: none;
-  --cl-shadow-md: 0 8px 24px #0002;
-  --cl-shadow-lg: 0 20px 64px #0005;
-  --cl-info-bg: #282D4B;
-}
+/* Los tokens del modo oscuro se definen en theme-colors.css. */
 /* Alias de pantallas anteriores: una sola paleta compartida. */
 body {
   --bg-primary: var(--cl-bg-base); --bg-secondary: var(--cl-bg-card);

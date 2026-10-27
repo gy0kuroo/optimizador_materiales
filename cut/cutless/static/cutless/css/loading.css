@@ -34,7 +34,7 @@
   animation-delay:calc(var(--piece-order) * 320ms);
 }
 @keyframes cutless-loading-piece {
-  0%, 16% { fill:#4558E7; }
+  0%, 16% { fill:var(--cl-blue); }
   20%, 100% { fill:var(--piece-fill); }
 }
 @media(prefers-reduced-motion:reduce) { .cutless-loading__piece { animation:none; } }

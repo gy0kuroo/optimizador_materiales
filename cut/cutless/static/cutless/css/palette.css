@@ -98,27 +98,4 @@
 }
 
 /* ── Modo oscuro ──────────────────────────────────────────── */
-[data-theme="dark"] {
-  --cl-bg-base:      #120C04;
-  --cl-bg-surface:   #1C1008;
-  --cl-bg-card:      #251508;
-  --cl-bg-nav:       #0D0804;
-
-  --cl-text-primary:   #F0EEE8;
-  --cl-text-secondary: #C4AE92;
-  --cl-text-muted:     #8A7A6A;
-  --cl-text-label:     #C4AE92;
-
-  --cl-border:         #3A2A1A;
-  --cl-border-strong:  #5A4535;
-
-  --cl-bg-card:  #1F1208;
-  --cl-shadow-sm: 0 1px 3px rgba(0,0,0,.4);
-  --cl-shadow-md: 0 4px 12px rgba(0,0,0,.5);
-  --cl-shadow-lg: 0 8px 24px rgba(0,0,0,.6);
-
-  --cl-success-bg: #0D2E14;
-  --cl-warning-bg: #2A1C00;
-  --cl-danger-bg:  #2A0A08;
-  --cl-info-bg:    #0E1240;
-}
+/* Los tokens del modo oscuro se definen en theme-colors.css. */

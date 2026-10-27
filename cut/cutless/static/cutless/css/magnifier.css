@@ -49,3 +49,6 @@ html.magnifier-active #reading-magnifier button:not(:disabled) { cursor: pointer
 .reading-magnifier--docked .reading-magnifier__controls {
   padding: 0; border: 0; box-shadow: none; background: transparent;
 }
+
+/* Ocultar también el contenedor completo durante confirmaciones y bloqueos. */
+.reading-magnifier[hidden] { display:none!important; }

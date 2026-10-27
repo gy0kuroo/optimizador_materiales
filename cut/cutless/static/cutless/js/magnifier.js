@@ -147,18 +147,37 @@
       setActive(false); toggle.focus();
     }
   }, true);
-  // Los controles deben pertenecer al diálogo abierto para respetar su foco.
-  document.addEventListener('shown.bs.modal', event => {
-    controls.classList.add('reading-magnifier--docked');
-    (event.target.querySelector('.board-toolbar') || event.target.querySelector('.modal-header') || event.target).append(controls);
-    refresh();
+  // La lupa se reserva para lectura: nunca entra en confirmaciones o formularios modales.
+  const readingDialogs = '.board-viewer, .history-board-viewer, #modalGrafico';
+  const transitioningDialogs = new Set();
+  function syncAvailability() {
+    const dialogs = Array.from(document.querySelectorAll('.modal.show'));
+    const readingDialog = dialogs.find(dialog => dialog.matches(readingDialogs));
+    const blocked = transitioningDialogs.size > 0 || dialogs.some(dialog => !dialog.matches(readingDialogs)) ||
+      Boolean(document.querySelector('#loading-overlay, .introjs-overlay, .offcanvas.show, .offcanvas.showing, dialog[open]'));
+    if (blocked && active) setActive(false);
+    if (controls.hidden !== blocked) controls.hidden = blocked;
+    const parent = !blocked && readingDialog ?
+      (readingDialog.querySelector('.board-toolbar') || readingDialog.querySelector('.modal-header') || readingDialog) : document.body;
+    controls.classList.toggle('reading-magnifier--docked', !blocked && Boolean(readingDialog));
+    if (controls.parentElement !== parent) parent.append(controls);
+  }
+  document.addEventListener('show.bs.modal', event => {
+    transitioningDialogs.add(event.target);
+    if (active) setActive(false);
+    controls.hidden = true;
   });
-  document.addEventListener('hidden.bs.modal', () => {
-    const remaining = document.querySelector('.modal.show');
-    controls.classList.toggle('reading-magnifier--docked', Boolean(remaining));
-    (remaining?.querySelector('.board-toolbar') || remaining?.querySelector('.modal-header') || remaining || document.body).append(controls);
-    refresh();
+  document.addEventListener('shown.bs.modal', event => { transitioningDialogs.delete(event.target); syncAvailability(); refresh(); });
+  document.addEventListener('hide.bs.modal', event => { transitioningDialogs.add(event.target); if (active) setActive(false); controls.hidden = true; });
+  document.addEventListener('hidden.bs.modal', event => { transitioningDialogs.delete(event.target); syncAvailability(); refresh(); });
+  document.addEventListener('show.bs.offcanvas', event => {
+    transitioningDialogs.add(event.target);
+    if (active) setActive(false);
+    controls.hidden = true;
   });
+  document.addEventListener('shown.bs.offcanvas', event => { transitioningDialogs.delete(event.target); syncAvailability(); });
+  document.addEventListener('hide.bs.offcanvas', event => { transitioningDialogs.add(event.target); if (active) setActive(false); controls.hidden = true; });
+  document.addEventListener('hidden.bs.offcanvas', event => { transitioningDialogs.delete(event.target); syncAvailability(); });
   function refresh() {
     if (!active) return;
     clearTimeout(refreshTimer);
@@ -169,6 +188,8 @@
   document.addEventListener('scroll', refresh, true);
   window.addEventListener('resize', refresh);
   new MutationObserver(records => {
+    syncAvailability();
     if (records.some(record => !controls.contains(record.target) && record.target !== lens)) refresh();
   }).observe(document.body, {subtree: true, childList: true, attributes: true, characterData: true});
+  syncAvailability();
 })();
