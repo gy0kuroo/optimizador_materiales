@@ -1,0 +1,6 @@
+@media(max-width:1199px) {
+  html.mobile-nav-open { overflow:hidden; }
+  html.mobile-nav-open body { position:fixed; top:var(--mobile-scroll-offset); inset-inline:0; width:100%; overflow:hidden; }
+  body .navbar-custom #navbarNav { background:var(--cl-bg-card); border:1px solid var(--cl-border); border-radius:12px; padding:12px; overflow-y:auto; overscroll-behavior-y:contain; touch-action:pan-y; }
+  body .navbar-custom .dropdown-menu { position:static!important; transform:none!important; width:100%; max-width:100%; box-shadow:none; }
+}

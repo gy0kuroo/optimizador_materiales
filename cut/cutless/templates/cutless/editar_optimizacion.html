@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'cutless/js/piece-formset.js' %}?v=1"></script>
 {{ materiales_data|json_script:"materiales-data" }}
 <script src="{% static 'cutless/js/medidas-pred.js' %}?v=buttons-1"></script>
 {% endblock %}
@@ -238,6 +239,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Función para actualizar números de piezas
     function actualizarNumeros() {
+        // Actualizar también for/ID/nombres: evita enfocar la primera fila
+        // y evita índices repetidos tras eliminar una fila intermedia.
+        formCount = window.CutlessPieceForms.reindex(container);
+        totalFormsInput.value = formCount;
         document.querySelectorAll('.pieza-numero').forEach((elem, index) => {
             elem.textContent = index + 1;
         });

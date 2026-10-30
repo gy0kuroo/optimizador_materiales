@@ -189,3 +189,7 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Jerarquía visual de eliminar y guardar](docs/CAMBIOS_JERARQUIA_ELIMINAR_GUARDAR.md)
 
 - [Mensajes y ayuda progresiva de login y registro](docs/CAMBIOS_MENSAJES_LOGIN_REGISTRO.md)
+
+- [Foco correcto en las filas de piezas](docs/CAMBIOS_FOCO_FILAS_PIEZAS.md)
+
+- [Menú móvil y lupa reservada a escritorio](docs/CAMBIOS_MENU_LUPA_MOVIL.md)

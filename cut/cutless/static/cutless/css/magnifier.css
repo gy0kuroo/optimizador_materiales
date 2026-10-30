@@ -52,3 +52,8 @@ html.magnifier-active #reading-magnifier button:not(:disabled) { cursor: pointer
 
 /* Ocultar también el contenedor completo durante confirmaciones y bloqueos. */
 .reading-magnifier[hidden] { display:none!important; }
+
+/* En móvil se utiliza el zoom nativo del navegador con dos dedos. */
+@media(max-width:1199px), (hover:none) and (pointer:coarse) {
+  .reading-magnifier, .reading-magnifier__lens { display:none!important; }
+}

@@ -4,8 +4,8 @@ const {readFileSync} = require('node:fs');
 const {resolve} = require('node:path');
 const vm = require('node:vm');
 
-function setup() {
-  const events = new Map(), state = {dialogs: [], blocked: false};
+function setup(mobile=false) {
+  const events = new Map(), state = {dialogs: [], blocked: false, menu:false};
   function element() {
     return {hidden:false,style:{},dataset:{},classList:{toggle(){},contains(){return false;}},
       addEventListener(){},querySelectorAll(){return [];},contains(){return false;},
@@ -15,12 +15,13 @@ function setup() {
   const ids = Object.fromEntries(['magnifier-toggle','magnifier-options','magnifier-hint','magnifier-level','magnifier-status','magnifier-lens'].map(id=>[id,element()]));
   ids['reading-magnifier']=controls;
   ids['magnifier-lens'].attachShadow=()=>element();
-  const context={window:{addEventListener(){}},innerWidth:1280,innerHeight:720,
+  const context={window:{addEventListener(){},matchMedia:()=>({matches:mobile,addEventListener(){}})},innerWidth:1280,innerHeight:720,
     performance:{now:()=>0},setTimeout,clearTimeout,cancelAnimationFrame(){},
     MutationObserver:class {constructor(fn){state.mutate=()=>fn([]);}observe(){}},
     document:{body,documentElement:element(),getElementById:id=>ids[id],createElement:element,
       addEventListener(name,fn){events.set(name,fn);},
       querySelectorAll:()=>state.dialogs,querySelector:()=>state.blocked?{}:null}};
+  context.document.documentElement.classList.contains = name => name === 'mobile-nav-open' && state.menu;
   vm.runInNewContext(readFileSync(resolve(__dirname,'../../static/cutless/js/magnifier.js'),'utf8'),context);
   return {state,controls,body,emit:(name,target)=>events.get(name)({target}),
     dialog(reading=false){const toolbar=element();return {toolbar,matches:()=>reading,querySelector:()=>toolbar};}};
@@ -65,4 +66,20 @@ test('los paneles offcanvas tampoco muestran la lupa durante su apertura',()=>{
   assert.equal(env.controls.hidden,true);
   env.state.blocked=false;env.emit('hidden.bs.offcanvas',panel);
   assert.equal(env.controls.hidden,false);
+});
+
+test('el menú plegable oculta la lupa y la devuelve al cerrarse',()=>{
+  const env=setup();env.state.menu=true;env.state.mutate();
+  assert.equal(env.controls.hidden,true);
+  env.state.menu=false;env.state.mutate();
+  assert.equal(env.controls.hidden,false);
+});
+
+test('en vista móvil la lupa permanece oculta incluso dentro del visor',()=>{
+  const env=setup(true), viewer=env.dialog(true);
+  assert.equal(env.controls.hidden,true);
+  env.state.dialogs=[viewer];env.emit('shown.bs.modal',viewer);
+  assert.equal(env.controls.hidden,true);
+  env.state.dialogs=[];env.emit('hidden.bs.modal',viewer);
+  assert.equal(env.controls.hidden,true);
 });

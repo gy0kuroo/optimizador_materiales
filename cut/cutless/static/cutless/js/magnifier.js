@@ -16,6 +16,7 @@
   shadow.append(scene);
   let active = false, scale = 2, frame = 0, refreshTimer = 0;
   let lastPointerDown = -Infinity;
+  const mobileProfile = window.matchMedia?.('(max-width: 1199px), (hover: none) and (pointer: coarse)');
   let point = {x: innerWidth / 2, y: innerHeight / 2};
 
   function snapshot() {
@@ -106,6 +107,7 @@
   }
 
   function setActive(value) {
+    if (value && mobileProfile?.matches) return;
     active = value;
     document.documentElement.classList.toggle('magnifier-active', active);
     toggle.setAttribute('aria-pressed', String(active));
@@ -129,7 +131,7 @@
     });
   });
   document.addEventListener('pointermove', event => {
-    if (!active || controls.contains(event.target)) return;
+    if (!active || controls.contains(event.target) || event.pointerType === 'touch') return;
     point = {x: event.clientX, y: event.clientY};
     if (!frame) frame = requestAnimationFrame(position);
   }, {passive: true});
@@ -153,7 +155,7 @@
   function syncAvailability() {
     const dialogs = Array.from(document.querySelectorAll('.modal.show'));
     const readingDialog = dialogs.find(dialog => dialog.matches(readingDialogs));
-    const blocked = transitioningDialogs.size > 0 || dialogs.some(dialog => !dialog.matches(readingDialogs)) ||
+    const blocked = Boolean(mobileProfile?.matches) || document.documentElement.classList.contains('mobile-nav-open') || transitioningDialogs.size > 0 || dialogs.some(dialog => !dialog.matches(readingDialogs)) ||
       Boolean(document.querySelector('#loading-overlay, .introjs-overlay, .offcanvas.show, .offcanvas.showing, dialog[open]'));
     if (blocked && active) setActive(false);
     if (controls.hidden !== blocked) controls.hidden = blocked;
@@ -186,10 +188,12 @@
   document.addEventListener('input', refresh, true);
   document.addEventListener('change', refresh, true);
   document.addEventListener('scroll', refresh, true);
-  window.addEventListener('resize', refresh);
+  window.addEventListener('resize', () => { syncAvailability(); refresh(); });
+  mobileProfile?.addEventListener('change', syncAvailability);
   new MutationObserver(records => {
     syncAvailability();
     if (records.some(record => !controls.contains(record.target) && record.target !== lens)) refresh();
   }).observe(document.body, {subtree: true, childList: true, attributes: true, characterData: true});
+  new MutationObserver(syncAvailability).observe(document.documentElement, {attributes:true, attributeFilter:['class']});
   syncAvailability();
 })();
