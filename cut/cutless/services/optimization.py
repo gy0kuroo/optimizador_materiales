@@ -292,7 +292,7 @@ def convertir_info_desperdicio_unidad(info_desperdicio, unidad, optimizacion=Non
     }
 
 
-def preparar_contexto_resultado(optimizacion, imagenes_base64, info_desperdicio, piezas_parseadas=None):
+def preparar_contexto_resultado(optimizacion, imagenes_base64, info_desperdicio, piezas_parseadas=None, tablero_num=None):
     """Construye el contexto de visualización para resultado.html."""
     unidad = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
     simbolo_area = obtener_simbolo_area(unidad)
@@ -317,6 +317,8 @@ def preparar_contexto_resultado(optimizacion, imagenes_base64, info_desperdicio,
 
     tableros_con_imagenes = []
     for imagen, info in zip(imagenes_base64, info_tableros_convertida):
+        if tablero_num is not None and info['numero'] != tablero_num:
+            continue
         vista_web = info.get('vista_web')
         catalogo = []
         if vista_web:
@@ -401,3 +403,19 @@ def respuesta_png_tablero(optimizacion, tablero_num, numero_lista=None):
         # Un registro histórico sin coordenadas solo permite recuperar su imagen.
         buffer = io.BytesIO(base64.b64decode(imagenes[tablero_num-1]))
     return FileResponse(buffer, as_attachment=True, filename=nombre, content_type='image/png')
+
+
+def contexto_tablero_visor(optimizacion, numero):
+    """Presentación de un tablero guardado, sin generar imágenes ni recalcular."""
+    if not optimizacion.resultado_generado:
+        return None
+    info = _info_desperdicio_desde_modelo(optimizacion)
+    tableros = info['info_tableros']
+    if not tableros:
+        return None
+    tablero = next((item for item in tableros if item['numero'] == numero), None)
+    if tablero is None:
+        raise IndexError('El tablero solicitado no existe.')
+    if not tablero.get('vista_web'):
+        return None
+    return preparar_contexto_resultado(optimizacion, [None] * len(tableros), info, tablero_num=numero)

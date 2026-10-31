@@ -65,6 +65,28 @@ def api_tableros_optimizacion(request, pk):
     from django.http import JsonResponse
 
     optimizacion = get_object_or_404(Optimizacion, pk=pk, usuario=request.user)
+
+    if request.GET.get('modo') == 'visor':
+        from ..services.optimization import contexto_tablero_visor
+        from django.template.loader import render_to_string
+        try:
+            numero = int(request.GET.get('tablero', '1'))
+        except (ValueError, TypeError):
+            return JsonResponse({'success': False, 'error': 'Número de tablero inválido.'}, status=400)
+        if numero < 1:
+            return JsonResponse({'success': False, 'error': 'El tablero no existe.'}, status=404)
+        try:
+            contexto = contexto_tablero_visor(optimizacion, numero)
+        except IndexError:
+            return JsonResponse({'success': False, 'error': 'El tablero no existe.'}, status=404)
+        if contexto is not None:
+            item = contexto['tableros_con_imagenes'][0]
+            html = render_to_string('cutless/includes/board-layout.html', {**contexto, 'item': item}, request=request)
+            response = JsonResponse({'success': True, 'panel': html, 'numero': numero,
+                                     'total': contexto['num_tableros'], 'modo': 'geometria'})
+            response['Cache-Control'] = 'private, no-store'
+            return response
+        # Compatibilidad de resultados anteriores sin geometría; conservar su lectura original.
     imagenes_base64, _, info = obtener_resultado_optimizacion(
         optimizacion,
         persistir_si_falta=True,

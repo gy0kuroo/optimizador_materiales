@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="{% static 'cutless/css/historial.css' %}?v=buttons-1">
 <link rel="stylesheet" href="{% static 'cutless/css/history-result-refinement.css' %}?v=buttons-1">
 <link rel="stylesheet" href="{% static 'cutless/css/board-landscape.css' %}?v=4">
+<link rel="stylesheet" href="{% static 'cutless/css/board-loading.css' %}?v=1">
 {% endblock %}
 
 {% block content %}
@@ -348,7 +349,8 @@
           <section class="history-landscape-main">
           <h2 class="card-header">Distribución del tablero</h2>
           <p>Amplía con + y recorre el dibujo con las barras de desplazamiento o deslizando con el dedo.</p>
-          <div id="history-board-status" role="status"></div>
+          <div id="history-board-status" role="status" aria-live="polite"></div>
+          <div id="history-board-recovery" class="board-load-recovery" hidden><button type="button" id="history-board-retry" class="btn btn-secondary" data-action="secondary" data-icon="refresh">{% button_icon 'refresh' %}Volver a intentar</button><a href="{% url 'usuarios:login' %}" id="history-board-login" class="btn btn-secondary" hidden>Iniciar sesión</a></div>
           <div id="history-board-viewport" tabindex="0" aria-label="Dibujo ampliado del tablero">
             <div id="history-board-canvas"><img id="history-board-image" alt="" hidden></div>
           </div>
@@ -358,8 +360,9 @@
         </div>
       </div></div>
     </div>
-    <script src="{% static 'cutless/js/utilization.js' %}?v=1"></script>
-<script src="{% static 'cutless/js/history-board-viewer.js' %}?v=utilization-1-ids-1" defer></script>
+    {% include 'cutless/includes/board-loading.html' %}
+    <script src="{% static 'cutless/js/utilization.js' %}?v=2"></script>
+<script src="{% static 'cutless/js/history-board-viewer.js' %}?v=progressive-1" defer></script>
 <script>
 // Función para obtener el token CSRF de las cookies
 function getCookie(name) {

@@ -43,7 +43,12 @@
     state.frame = requestAnimationFrame(tick);
   }
 
-  window.CutlessUtilization = {show};
+  function reset(channel) {
+    const previous = channels.get(channel);
+    if (previous) cancelAnimationFrame(previous.frame);
+    channels.delete(channel);
+  }
+  window.CutlessUtilization = {show, reset};
   const total = document.querySelector('.total-utilization');
   if (total) show(total, 'total');
 })();
