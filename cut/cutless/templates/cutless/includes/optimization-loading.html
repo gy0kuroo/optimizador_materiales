@@ -1,0 +1,21 @@
+<template id="cutless-optimization-loading-template">
+  <section id="optimization-loading-overlay" class="optimization-loading" role="dialog" aria-modal="true" aria-labelledby="optimization-loading-title">
+    <header class="optimization-loading-header">
+      <div><p class="optimization-loading-eyebrow">Preparando tu plan de corte</p><h1 id="optimization-loading-title" tabindex="-1">Calculando la distribución de las piezas</h1></div>
+      <p class="optimization-loading-count" data-optimization-loading-count></p>
+    </header>
+    <p class="optimization-loading-status" role="status" aria-live="polite" data-optimization-loading-status>Estamos procesando tus medidas. El resultado aparecerá cuando termine el cálculo.</p>
+    <div class="optimization-loading-total" aria-hidden="true"><span class="board-skeleton board-skeleton-donut"></span><div><span class="board-skeleton board-skeleton-line"></span><span class="board-skeleton board-skeleton-line board-skeleton-short"></span></div></div>
+    <div class="optimization-loading-layout" aria-hidden="true">
+      <div class="optimization-loading-main">
+        <section class="optimization-loading-card"><h2>Distribución del tablero</h2><div class="board-skeleton board-skeleton-drawing"><div class="board-skeleton-plan"><i></i><i></i><i></i><i></i><i></i><i></i></div></div></section>
+        <section class="optimization-loading-card"><h2>Detalle de piezas</h2><span class="board-skeleton board-skeleton-line"></span><span class="board-skeleton board-skeleton-line"></span><span class="board-skeleton board-skeleton-line board-skeleton-short"></span></section>
+      </div>
+      <aside class="optimization-loading-aside">
+        <section class="optimization-loading-card"><h2>Resumen del corte</h2><div class="board-skeleton-summary"><span class="board-skeleton board-skeleton-donut"></span><div><span class="board-skeleton board-skeleton-line"></span><span class="board-skeleton board-skeleton-line board-skeleton-short"></span></div></div><div class="board-skeleton-grid"><span class="board-skeleton"></span><span class="board-skeleton"></span><span class="board-skeleton"></span><span class="board-skeleton"></span></div></section>
+        <section class="optimization-loading-card"><h2>Detalles técnicos</h2><span class="board-skeleton board-skeleton-line"></span><span class="board-skeleton board-skeleton-line"></span><span class="board-skeleton board-skeleton-line board-skeleton-short"></span></section>
+      </aside>
+    </div>
+    <p class="optimization-loading-note">Los espacios animados representan información pendiente, no un resultado provisional.</p>
+  </section>
+</template>

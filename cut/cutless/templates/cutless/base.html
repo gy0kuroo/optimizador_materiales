@@ -59,6 +59,8 @@
     <link rel="stylesheet" href="{% static 'cutless/css/reforma-visual.css' %}?v=names-1">
     <link rel="stylesheet" href="{% static 'cutless/css/buttons.css' %}?v=review-2">
     <link rel="stylesheet" href="{% static 'cutless/css/loading.css' %}?v=5">
+    <link rel="stylesheet" href="{% static 'cutless/css/board-loading.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'cutless/css/optimization-loading.css' %}?v=1">
     <link rel="stylesheet" href="{% static 'cutless/css/theme-colors.css' %}?v=4">
     <link rel="stylesheet" href="{% static 'cutless/css/mobile-navigation.css' %}?v=1">
     <link rel="stylesheet" href="{% static 'cutless/css/sidebar-navigation.css' %}?v=1">
@@ -152,6 +154,7 @@
     </div>
 
     {% include 'cutless/includes/loading.html' %}
+    {% include 'cutless/includes/optimization-loading.html' %}
 
     <!-- Diálogo global: confirmaciones y avisos (centrado) -->
     <div class="modal fade modal-cutless-dialog" id="cutlessModalDialogo" tabindex="-1" aria-labelledby="cutlessModalDialogoTitulo" aria-hidden="true">
@@ -216,7 +219,8 @@
 
     <!-- JavaScript Personalizado -->
     <script src="{% static 'cutless/js/theme.js' %}?v=3"></script>
-    <script src="{% static 'cutless/js/confirmaciones.js' %}?v=brand-loading-1"></script>
+    <script src="{% static 'cutless/js/optimization-loading.js' %}?v=1"></script>
+    <script src="{% static 'cutless/js/confirmaciones.js' %}?v=optimization-skeleton-1"></script>
     {% if user.is_authenticated %}
     <script src="{% static 'cutless/js/session-timeout.js' %}?v=review-2"></script>
     {% endif %}

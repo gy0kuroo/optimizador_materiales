@@ -178,10 +178,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var generateForms = document.querySelectorAll('form[action*="index"], form[action*="optimizar"], form[data-loading-optimization]');
     generateForms.forEach(function (form) {
-        if (!form.getAttribute('onsubmit')) {
-            form.addEventListener('submit', function () {
-                window.mostrarIndicadorCarga('Procesando optimización... Esto puede tardar unos segundos.');
+        form.addEventListener('submit', function (event) {
+            if (form.getAttribute('aria-busy') === 'true') { event.preventDefault(); return; }
+            // Esperar al resto de validadores antes de presentar la espera.
+            queueMicrotask(function () {
+                if (event.defaultPrevented) return;
+                if (typeof window.mostrarSkeletonOptimizacion === 'function') window.mostrarSkeletonOptimizacion(form);
+                else window.mostrarIndicadorCarga('Procesando optimización... Esto puede tardar unos segundos.');
             });
-        }
+        });
     });
 });
