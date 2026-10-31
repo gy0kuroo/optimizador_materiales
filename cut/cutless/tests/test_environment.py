@@ -21,6 +21,9 @@ class ConfiguracionEntornoTests(SimpleTestCase):
         for variables, esperado in casos:
             with self.subTest(variables=variables):
                 entorno = {'CUTLESS_SECRET_KEY': self.env['CUTLESS_SECRET_KEY'], **variables}
+                if variables.get('CUTLESS_ENV') == 'production':
+                    entorno.update(CUTLESS_DB_NAME='test', CUTLESS_DB_USER='test',
+                                   CUTLESS_DB_PASSWORD='test', CUTLESS_DB_HOST='db.example.invalid')
                 with patch.dict(os.environ, entorno, clear=True):
                     config = runpy.run_path(str(archivo), run_name='cutless_project._settings_test')
                 self.assertEqual(config['ALLOWED_HOSTS'], esperado)

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class DatabaseHealthCheckMiddleware:
     """
     Verifica si la base de datos está correctamente configurada.
-    Si faltan migraciones, intenta reparar o muestra un error útil.
+    Solo informa; no intenta reparar ni ejecuta migraciones.
     """
     
     def __init__(self, get_response):
@@ -32,22 +32,16 @@ class DatabaseHealthCheckMiddleware:
     def _check_database(self):
         """Verifica si existen las tablas necesarias."""
         try:
-            cursor = connection.cursor()
-            # Verificar tabla de usuarios (django.contrib.auth)
-            cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='auth_user';"
-            )
-            self._has_tables = cursor.fetchone() is not None
+            self._has_tables = 'auth_user' in connection.introspection.table_names()
             
             if not self._has_tables:
                 logger.warning(
                     "⚠️  DATABASE WARNING: Las migraciones no han sido ejecutadas. "
                     "Ejecuta: python manage.py migrate"
                 )
-        except OperationalError as e:
+        except OperationalError:
             logger.error(
-                f"❌ DATABASE ERROR: {e}. "
-                "Ejecuta: python manage.py migrate"
+                "DATABASE ERROR: no se pudo consultar el estado de la base de datos."
             )
-        except Exception as e:
-            logger.error(f"Error verificando BD: {e}")
+        except Exception:
+            logger.error('Error verificando la base de datos; revisar su configuración privada.')

@@ -1,0 +1,2 @@
+# El script se ejecuta con bash en Linux, también tras un checkout desde Windows.
+/build.sh text eol=lf

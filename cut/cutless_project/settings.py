@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 
 from .environment import configuracion_entorno
+from .database import configuracion_base_datos
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -72,12 +73,7 @@ WSGI_APPLICATION = 'cutless_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': Path(os.environ.get('CUTLESS_DB_PATH', BASE_DIR / 'db.sqlite3')),
-    }
-}
+DATABASES = {'default': configuracion_base_datos(BASE_DIR, produccion=CUTLESS_ENV == 'production')}
 
 
 # Password validation

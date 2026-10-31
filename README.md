@@ -60,7 +60,7 @@ Si aparece `no such table`, detén el servidor, ejecuta `migrate` con el mismo e
 .\.venv\Scripts\python.exe cut/manage.py check_database
 ```
 
-`showmigrations` muestra las migraciones aplicadas. `check_database` comprueba tres tablas esenciales de SQLite; no valida todo el esquema ni los datos.
+`showmigrations` muestra las migraciones aplicadas. `check_database` comprueba tres tablas esenciales mediante introspección portable; no valida todo el esquema ni los datos.
 
 Si falta una dependencia, repite la instalación con el ejecutable del entorno virtual. Para otro puerto usa `runserver 8001` y abre `http://127.0.0.1:8001/`.
 
@@ -205,3 +205,5 @@ La base local y los archivos generados se excluyen del seguimiento de Git. Los c
 - [Datos locales y archivos generados fuera de Git](docs/CAMBIOS_DATOS_FUERA_GIT.md)
 
 - [Historial y exportaciones bajo demanda](docs/CAMBIOS_EXPORTACIONES_BAJO_DEMANDA.md)
+
+- [Preparación local de PostgreSQL y despliegue](docs/CAMBIOS_PREPARACION_POSTGRESQL.md)
