@@ -119,6 +119,10 @@ def exportar_pdf_desperdicio(request):
         
         # Obtener período seleccionado
         periodo = request.GET.get('periodo', 'todos')
+        if periodo not in ('todos', 'semanal', 'mensual', 'anual'):
+            messages.warning(request, 'Período no reconocido. Se muestra todo el historial.')
+            periodo = 'todos'
+
         
         # Filtrar por período
         ahora = timezone.now()
@@ -183,6 +187,10 @@ def exportar_excel_desperdicio(request):
         
         # Obtener período seleccionado
         periodo = request.GET.get('periodo', 'todos')
+        if periodo not in ('todos', 'semanal', 'mensual', 'anual'):
+            messages.warning(request, 'Período no reconocido. Se muestra todo el historial.')
+            periodo = 'todos'
+
         
         # Filtrar por período
         ahora = timezone.now()
@@ -259,6 +267,10 @@ def estadisticas(request):
     
     # Obtener período seleccionado
     periodo = request.GET.get('periodo', 'todos')
+    if periodo not in ('todos', 'semanal', 'mensual', 'anual'):
+        messages.warning(request, 'Período no reconocido. Se muestra todo el historial.')
+        periodo = 'todos'
+
     
     # Filtrar por período
     ahora = timezone.now()
@@ -386,22 +398,25 @@ def historial_costos(request):
     fecha_desde = request.GET.get('fecha_desde', '').strip()
     fecha_hasta = request.GET.get('fecha_hasta', '').strip()
     
-    if fecha_desde:
-        try:
-            from datetime import datetime
-            fecha_desde_obj = datetime.strptime(fecha_desde, '%Y-%m-%d')
-            optimizaciones = optimizaciones.filter(fecha__gte=fecha_desde_obj)
-        except ValueError:
-            pass
-    
-    if fecha_hasta:
-        try:
-            from datetime import datetime, timedelta
-            fecha_hasta_obj = datetime.strptime(fecha_hasta, '%Y-%m-%d') + timedelta(days=1)
-            optimizaciones = optimizaciones.filter(fecha__lt=fecha_hasta_obj)
-        except ValueError:
-            pass
-    
+    from django.utils.dateparse import parse_date
+    fechas = {}
+    for campo, valor in (('desde', fecha_desde), ('hasta', fecha_hasta)):
+        if valor:
+            try:
+                fechas[campo] = parse_date(valor)
+            except ValueError:
+                fechas[campo] = None
+            if fechas[campo] is None:
+                messages.error(request, 'Fecha no válida. Usa el selector de calendario.')
+                optimizaciones = optimizaciones.none()
+    if fechas.get('desde') and fechas.get('hasta') and fechas['desde'] > fechas['hasta']:
+        messages.error(request, 'La fecha inicial no puede ser posterior a la fecha final.')
+        optimizaciones = optimizaciones.none()
+    if fechas.get('desde'):
+        optimizaciones = optimizaciones.filter(fecha__date__gte=fechas['desde'])
+    if fechas.get('hasta'):
+        optimizaciones = optimizaciones.filter(fecha__date__lte=fechas['hasta'])
+
     # Calcular estadísticas
     total_optimizaciones = optimizaciones.count()
     costo_total = Decimal('0.00')
@@ -546,83 +561,16 @@ def comparar_optimizaciones(request):
             optimizacion1 = Optimizacion.objects.get(pk=opt1_id, usuario=request.user)
             optimizacion2 = Optimizacion.objects.get(pk=opt2_id, usuario=request.user)
             
-            # Calcular num_tableros si no está guardado (para optimizaciones antiguas)
-            def obtener_num_tableros(optimizacion):
-                """Obtiene el número de tableros, calculándolo si no está guardado"""
-                if optimizacion.num_tableros and optimizacion.num_tableros > 0:
-                    return optimizacion.num_tableros
-                
-                # Si no está guardado, calcularlo desde las piezas (tuplas ancho×alto×cantidad en cm)
-                try:
-                    piezas_para_grafico = []
-                    unidad = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
-                    for linea in optimizacion.piezas.splitlines():
-                        if linea.strip():
-                            partes = linea.split(',')
-                            if len(partes) >= 3:
-                                cantidad = int(partes[-1]) if len(partes) >= 4 else int(partes[2])
-                                ancho_idx = 1 if len(partes) >= 4 else 0
-                                alto_idx = 2 if len(partes) >= 4 else 1
-                                ancho = float(partes[ancho_idx])
-                                alto = float(partes[alto_idx])
-                                piezas_para_grafico.append((
-                                    convertir_a_cm(ancho, unidad),
-                                    convertir_a_cm(alto, unidad),
-                                    cantidad,
-                                ))
+            # Consultar resultados persistidos; comparar nunca recalcula ni modifica el historial.
+            num_tableros1 = optimizacion1.num_tableros
+            num_tableros2 = optimizacion2.num_tableros
+            if not num_tableros1 or not num_tableros2:
+                messages.error(request, 'Uno de los planes no tiene un resultado completo guardado. Genera nuevamente ese plan antes de compararlo.')
+                return redirect('cutless:comparar_optimizaciones')
+            if (optimizacion1.piezas != optimizacion2.piezas or
+                    optimizacion1.unidad_medida != optimizacion2.unidad_medida):
+                messages.warning(request, 'Estos planes tienen piezas o unidades diferentes. Las diferencias son informativas y no determinan cuál es mejor para el mismo trabajo.')
 
-                    if piezas_para_grafico:
-                        margen = getattr(optimizacion, 'margen_corte', 0.3)
-                        if margen is None:
-                            margen = 0.3
-                        permitir_rot = getattr(optimizacion, 'permitir_rotacion', True)
-                        imagenes_calc, _, _ = generar_grafico(
-                            piezas_para_grafico,
-                            optimizacion.ancho_tablero,
-                            optimizacion.alto_tablero,
-                            unidad='cm',
-                            permitir_rotacion=permitir_rot,
-                            margen_corte=margen
-                        )
-                        return len(imagenes_calc)
-                except Exception:
-                    pass
-                
-                # Fallback: estimar desde el área
-                try:
-                    area_tablero = optimizacion.ancho_tablero * optimizacion.alto_tablero
-                    area_total = 0
-                    for linea in optimizacion.piezas.splitlines():
-                        if linea.strip():
-                            partes = linea.split(',')
-                            if len(partes) >= 3:
-                                cantidad = int(partes[-1]) if len(partes) >= 4 else int(partes[2])
-                                ancho_idx = 1 if len(partes) >= 4 else 0
-                                alto_idx = 2 if len(partes) >= 4 else 1
-                                ancho = float(partes[ancho_idx])
-                                alto = float(partes[alto_idx])
-                                unidad = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
-                                ancho_cm = convertir_a_cm(ancho, unidad)
-                                alto_cm = convertir_a_cm(alto, unidad)
-                                area_total += (ancho_cm * alto_cm) * cantidad
-                    if area_tablero > 0:
-                        return max(1, int(area_total / area_tablero) + 1)
-                except Exception:
-                    pass
-                
-                return 1  # Valor por defecto
-            
-            num_tableros1 = obtener_num_tableros(optimizacion1)
-            num_tableros2 = obtener_num_tableros(optimizacion2)
-            
-            # Actualizar num_tableros si estaba en 0 (para guardarlo en la BD)
-            if optimizacion1.num_tableros == 0 and num_tableros1 > 0:
-                optimizacion1.num_tableros = num_tableros1
-                optimizacion1.save(update_fields=['num_tableros'])
-            if optimizacion2.num_tableros == 0 and num_tableros2 > 0:
-                optimizacion2.num_tableros = num_tableros2
-                optimizacion2.save(update_fields=['num_tableros'])
-            
             # Calcular diferencias
             diferencia_aprovechamiento = optimizacion2.aprovechamiento_total - optimizacion1.aprovechamiento_total
             diferencia_tableros = num_tableros2 - num_tableros1

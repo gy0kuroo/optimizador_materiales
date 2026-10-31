@@ -74,3 +74,21 @@ def button_icon(name):
     })
     root.extend(deepcopy(list(symbol)))
     return mark_safe(ET.tostring(root, encoding='unicode'))
+
+
+@register.simple_tag(takes_context=True)
+def navigation_state(context):
+    request = context.get('request')
+    match = getattr(request, 'resolver_match', None)
+    route = getattr(match, 'url_name', '') or ''
+    for token, item, group in (
+        ('material', 'materiales', 'gestion'), ('cliente', 'clientes', 'gestion'),
+        ('proyecto', 'proyectos', 'gestion'), ('presupuesto', 'presupuestos', 'gestion'),
+        ('plantilla', 'plantillas', 'gestion'), ('costos', 'costos', 'analisis'),
+        ('comparar', 'comparar', 'analisis'), ('estadisticas', 'estadisticas', 'analisis'),
+    ):
+        if token in route:
+            return {'item': item, 'group': group}
+    if route in ('perfil', 'configuracion_inicial', 'configuracion_sistema', 'admin_dashboard'):
+        return {'item': route, 'group': 'cuenta'}
+    return {'item': route, 'group': ''}

@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=buttons-1">
+<link rel="stylesheet" href="{% static 'cutless/css/project-selection.css' %}?v=1">
 {% endblock %}
 
 {% block content %}
@@ -34,7 +35,7 @@
     </div>
   </div>
 
-  {% if optimizaciones_disponibles %}
+  {% if total_disponibles %}
   <div class="card fade-in">
     <div class="card-header card-header-section">
       <h4 class="mb-0">Optimizaciones disponibles</h4>
@@ -42,15 +43,27 @@
     <div class="card-body">
       <form method="post">
         {% csrf_token %}
+        <input type="hidden" name="pagina" value="{{ pagina.number }}">
+        {% for id in seleccionadas_ocultas %}<input type="hidden" name="optimizaciones" value="{{ id }}" class="selection-preserved">{% endfor %}
+        <div class="selection-search">
+          <div><label for="project-plan-search" class="form-label">Buscar optimización</label>
+          <input id="project-plan-search" type="search" name="busqueda" value="{{ busqueda }}" class="form-control" placeholder="Nombre, OPT-0128 o nombre de pieza" maxlength="100"></div>
+          <button type="submit" name="operacion" value="buscar" class="btn btn-secondary" data-action="secondary" data-icon="search">Buscar</button>
+        </div>
+        <p class="text-muted">{{ pagina.paginator.count }} resultado{{ pagina.paginator.count|pluralize }} · Hasta 8 por página. Solo se muestran planes sin proyecto.</p>
+        <div class="selection-actions">
+          <span id="selection-count" role="status" aria-live="polite">{{ seleccionadas|length }} seleccionada{{ seleccionadas|length|pluralize }}</span>
+          <button type="submit" name="operacion" value="agregar" class="btn btn-success" data-action="success" data-icon="check">Agregar al proyecto</button>
+        </div>
 
         <div class="table-responsive">
           <table class="table table-hover">
             <thead>
               <tr>
                 <th class="checkbox-column">
-                  <input type="checkbox" id="select-all" aria-label="Seleccionar todas las optimizaciones" title="Seleccionar todas">
+                  <input type="checkbox" id="select-all" aria-label="Seleccionar las optimizaciones de esta página" title="Seleccionar esta página">
                 </th>
-                <th>Fecha</th>
+                <th>Optimización y fecha</th>
                 <th>Dimensiones</th>
                 <th>Aprovechamiento</th>
                 <th>Tableros</th>
@@ -62,7 +75,7 @@
               {% for opt in optimizaciones_disponibles %}
               <tr>
                 <td>
-                  <input type="checkbox" name="optimizaciones" value="{{ opt.pk }}" class="optimizacion-checkbox" aria-label="Seleccionar {{ opt.etiqueta }}, del {{ opt.fecha|date:'d/m/Y H:i' }}">
+                  <input type="checkbox" name="optimizaciones" value="{{ opt.pk }}" class="optimizacion-checkbox"{% if opt.pk in seleccionadas %} checked{% endif %} aria-label="Seleccionar {{ opt.etiqueta }}, del {{ opt.fecha|date:'d/m/Y H:i' }}">
                 </td>
                 <td><strong>{{ opt.etiqueta }}</strong><br>{{ opt.fecha|date:"d/m/Y H:i" }}</td>
                 <td>{{ opt.ancho_tablero }} × {{ opt.alto_tablero }} cm</td>
@@ -83,51 +96,28 @@
                   <a href="{% url 'cutless:resultado' opt.pk %}" class="btn btn-sm btn-secondary" target="_blank" data-action="secondary" data-icon="eye">Ver resultado</a>
                 </td>
               </tr>
+              {% empty %}
+              <tr><td colspan="7">No hay coincidencias. Prueba otro nombre o identificador; tu selección se conserva.</td></tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
 
-        <div class="alert alert-info mt-3">
-          <strong>Selección:</strong> Marca las casillas individualmente o usa la casilla del encabezado para seleccionar todos los registros.
-        </div>
-
-        <div class="d-flex justify-content-between mt-4">
-          <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
-          <button type="submit" class="btn btn-success" data-action="success" data-icon="check">Agregar Optimizaciones Seleccionadas</button>
-        </div>
+        <nav class="selection-pagination" aria-label="Páginas de optimizaciones">
+          <button type="submit" name="operacion" value="anterior" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left"{% if not pagina.has_previous %} disabled{% endif %}>Anterior</button>
+          <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+          <button type="submit" name="operacion" value="siguiente" class="btn btn-secondary" data-action="secondary" data-icon="chevron-right"{% if not pagina.has_next %} disabled{% endif %}>Siguiente</button>
+        </nav>
+        <p class="text-muted mt-3">La casilla del encabezado marca solo esta página. Lo seleccionado se conserva al buscar o cambiar de página y se guarda al pulsar «Agregar al proyecto».</p>
+        <a href="{% url 'cutless:detalle_proyecto' proyecto.pk %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
       </form>
     </div>
   </div>
   {% else %}
   <div class="alert alert-info fade-in">
-    <p class="mb-0">No hay optimizaciones disponibles para agregar a este proyecto. Todas tus optimizaciones ya están asociadas a este proyecto o no tienes optimizaciones creadas.</p>
+    <p class="mb-0">No hay optimizaciones disponibles para agregar a este proyecto. Tus optimizaciones ya tienen un proyecto asignado o todavía no has creado ninguna.</p>
   </div>
   {% endif %}
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const selectAll = document.getElementById('select-all');
-  const checkboxes = document.querySelectorAll('.optimizacion-checkbox');
-
-  if (selectAll) {
-    selectAll.addEventListener('change', function() {
-      checkboxes.forEach(checkbox => {
-        checkbox.checked = selectAll.checked;
-      });
-    });
-
-    // Actualizar el estado del checkbox "Seleccionar todas"
-    checkboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', function() {
-        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-        const someChecked = Array.from(checkboxes).some(cb => cb.checked);
-        selectAll.checked = allChecked;
-        selectAll.indeterminate = someChecked && !allChecked;
-      });
-    });
-  }
-});
-</script>
+<script src="{% static 'cutless/js/project-selection.js' %}?v=1" defer></script>
 {% endblock %}
-

@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.contrib import messages
 from django.db.models import Avg, Q
 from django.shortcuts import render, redirect, get_object_or_404
@@ -7,6 +8,7 @@ from ..models import Proyecto, Optimizacion
 from ..services import enviar_notificacion
 
 
+@transaction.atomic
 def crear_proyecto(request):
     """
     Crea un nuevo proyecto con opción de agregar optimizaciones.
@@ -49,7 +51,7 @@ def crear_proyecto(request):
     
     # Preparar información adicional de optimizaciones para el template
     optimizaciones_info = []
-    optimizaciones_seleccionadas_ids = []
+    optimizaciones_seleccionadas_ids = [int(pk) for pk in request.POST.getlist('optimizaciones') if pk.isdecimal()] if form.is_bound else []
     
     if form.fields['optimizaciones'].queryset:
         
@@ -84,6 +86,7 @@ def crear_proyecto(request):
         'optimizaciones_info': optimizaciones_info,
     })
 
+@transaction.atomic
 def eliminar_proyecto(request, pk):
     """
     Elimina un proyecto.
@@ -98,6 +101,9 @@ def eliminar_proyecto(request, pk):
     
     if request.method == "POST":
         accion = request.POST.get('accion', 'mover')
+        if accion not in ('mover', 'eliminar'):
+            messages.error(request, 'Selecciona si deseas conservar o eliminar las optimizaciones.')
+            return redirect('cutless:eliminar_proyecto', pk=pk)
         
         if accion == 'eliminar':
             # Eliminar todas las optimizaciones del proyecto
@@ -114,40 +120,65 @@ def eliminar_proyecto(request, pk):
         'optimizaciones_count': optimizaciones_count,
     })
 
+@transaction.atomic
 def agregar_optimizaciones_proyecto(request, pk):
-    """
-    Permite agregar múltiples optimizaciones a un proyecto existente.
-    """
+    """Selección paginada; navegar y buscar conserva lo marcado sin guardarlo aún."""
+    from django.core.paginator import Paginator
+
     proyecto = get_object_or_404(Proyecto, pk=pk, usuario=request.user)
-    
-    # Obtener optimizaciones que aún no están en el proyecto
-    optimizaciones_en_proyecto = proyecto.optimizacion_set.values_list('pk', flat=True)
-    optimizaciones_disponibles = Optimizacion.objects.filter(
-        usuario=request.user
-    ).exclude(pk__in=optimizaciones_en_proyecto).order_by('-fecha')
-    
-    if request.method == "POST":
-        optimizaciones_ids = request.POST.getlist('optimizaciones')
-        if optimizaciones_ids:
-            optimizaciones_seleccionadas = Optimizacion.objects.filter(
-                pk__in=optimizaciones_ids,
-                usuario=request.user
-            )
-            # Asignar el proyecto a las optimizaciones seleccionadas
-            optimizaciones_seleccionadas.update(proyecto=proyecto)
-            
-            messages.success(
-                request, 
-                f'✅ {optimizaciones_seleccionadas.count()} optimización(es) agregada(s) al proyecto "{proyecto.nombre}".'
-            )
-            return redirect('cutless:detalle_proyecto', pk=proyecto.pk)
-        else:
-            messages.warning(request, "Debes seleccionar al menos una optimización.")
-    
+    disponibles = Optimizacion.objects.filter(usuario=request.user, proyecto__isnull=True).order_by('-fecha', '-pk')
+    datos = request.POST if request.method == 'POST' else request.GET
+    busqueda = datos.get('busqueda', '').strip()[:100]
+    seleccionadas = set()
+    operacion = datos.get('operacion', 'agregar') if request.method == 'POST' else 'buscar'
+    if request.method == 'POST':
+        valores = request.POST.getlist('optimizaciones')
+        if any(not valor.isascii() or not valor.isdecimal() or len(valor) > 18 for valor in valores):
+            messages.error(request, 'La selección contiene identificadores inválidos. Vuelve a seleccionar los planes.')
+            return redirect(request.path)
+        seleccionadas = {int(valor) for valor in valores}
+        if operacion == 'agregar':
+            if seleccionadas:
+                elegidas = disponibles.filter(pk__in=seleccionadas)
+                if set(elegidas.values_list('pk', flat=True)) != seleccionadas:
+                    messages.error(request, 'Algún plan ya no está disponible. Actualiza la lista y vuelve a elegir.')
+                else:
+                    cantidad = elegidas.update(proyecto=proyecto)
+                    messages.success(request, f'{cantidad} optimización(es) agregada(s) al proyecto "{proyecto.nombre}".')
+                    return redirect('cutless:detalle_proyecto', pk=proyecto.pk)
+            else:
+                messages.warning(request, 'Selecciona al menos una optimización para agregar.')
+        elif operacion not in ('buscar', 'anterior', 'siguiente'):
+            messages.error(request, 'La acción solicitada no es válida.')
+            return redirect(request.path)
+
+    filtradas = disponibles
+    if busqueda:
+        filtro = Q(nombre__icontains=busqueda) | Q(piezas__icontains=busqueda)
+        identificador = busqueda.upper().rsplit('OPT-', 1)[-1].strip()
+        if identificador.isascii() and identificador.isdecimal() and len(identificador) <= 18:
+            filtro |= Q(pk=int(identificador))
+        filtradas = filtradas.filter(filtro)
+    try:
+        numero = int(datos.get('pagina', '1'))
+    except (ValueError, TypeError):
+        numero = 1
+    if operacion == 'buscar':
+        numero = 1
+    elif operacion == 'anterior':
+        numero -= 1
+    elif operacion == 'siguiente':
+        numero += 1
+    paginas = Paginator(filtradas, 8)
+    pagina = paginas.get_page(max(1, numero))
+    visibles = list(pagina.object_list)
+    ids_visibles = {opt.pk for opt in visibles}
     return render(request, 'cutless/agregar_optimizaciones_proyecto.html', {
-        'proyecto': proyecto,
-        'optimizaciones_disponibles': optimizaciones_disponibles,
+        'proyecto': proyecto, 'optimizaciones_disponibles': visibles,
+        'pagina': pagina, 'busqueda': busqueda, 'total_disponibles': disponibles.count(),
+        'seleccionadas': seleccionadas, 'seleccionadas_ocultas': sorted(seleccionadas - ids_visibles),
     })
+
 
 def lista_proyectos(request):
     """
@@ -212,6 +243,7 @@ def detalle_proyecto(request, pk):
         'total_tableros': total_tableros,
     })
 
+@transaction.atomic
 def editar_proyecto(request, pk):
     """
     Edita un proyecto existente.
@@ -249,7 +281,7 @@ def editar_proyecto(request, pk):
     
     # Preparar información adicional de optimizaciones para el template
     optimizaciones_info = []
-    optimizaciones_seleccionadas_ids = list(proyecto.optimizacion_set.values_list('pk', flat=True))
+    optimizaciones_seleccionadas_ids = ([int(pk) for pk in request.POST.getlist('optimizaciones') if pk.isdecimal()] if form.is_bound else list(proyecto.optimizacion_set.values_list('pk', flat=True)))
     
     if form.fields['optimizaciones'].queryset:
         

@@ -26,10 +26,26 @@ class PlantillaForm(forms.ModelForm):
             for campo in ('ancho_tablero', 'alto_tablero'):
                 valor = datos.get(campo)
                 if valor is not None:
-                    if not math.isfinite(valor) or valor <= 0:
-                        self.add_error(campo, 'La medida debe ser un número mayor que cero.')
+                    if not math.isfinite(valor) or not 10 <= convertir_a_cm(valor, unidad) <= 300:
+                        self.add_error(campo, 'Cada lado del tablero debe medir entre 10 y 300 cm; revisa la unidad seleccionada.')
                     else:
                         datos[campo] = convertir_a_cm(valor, unidad)
+        piezas = datos.get('piezas')
+        if piezas and unidad:
+            lineas = [linea for linea in piezas.splitlines() if linea.strip()]
+            if len(lineas) > 20:
+                self.add_error('piezas', 'Puedes guardar hasta 20 tipos de pieza.')
+            for numero, linea in enumerate(lineas, 1):
+                nombre_pieza, ancho, alto, cantidad = linea.split(',')
+                ancho, alto = convertir_a_cm(float(ancho), unidad), convertir_a_cm(float(alto), unidad)
+                if not .1 <= ancho <= 300 or not .1 <= alto <= 300:
+                    self.add_error('piezas', f'Pieza {numero}: cada lado debe medir entre 0,1 y 300 cm.')
+                elif datos.get('ancho_tablero') and datos.get('alto_tablero'):
+                    w, h = datos['ancho_tablero'], datos['alto_tablero']
+                    cabe = ancho <= w and alto <= h
+                    girada = datos.get('permitir_rotacion') and alto <= w and ancho <= h
+                    if not (cabe or girada):
+                        self.add_error('piezas', f'Pieza {numero}: no cabe en el tablero con la rotación elegida.')
         nombre = datos.get('nombre')
         if self.user and nombre:
             existentes = Plantilla.objects.filter(usuario=self.user, nombre=nombre)
@@ -97,6 +113,7 @@ class PlantillaForm(forms.ModelForm):
     
     def clean_piezas(self):
         piezas = self.cleaned_data.get('piezas', '').strip()
+        piezas = '\n'.join(('Pieza,' + linea if len(linea.split(',')) == 3 else linea) for linea in piezas.splitlines() if linea.strip())
         if not piezas:
             raise forms.ValidationError("Debes ingresar al menos una pieza.")
         
@@ -131,6 +148,10 @@ class PlantillaForm(forms.ModelForm):
                         f"- Alto: número\n"
                         f"- Cantidad: número entero"
                     )
+                if not partes[0].strip() or len(partes[0].strip()) > 50:
+                    raise forms.ValidationError('Cada pieza necesita un nombre de hasta 50 caracteres.')
+                if cantidad > 100:
+                    raise forms.ValidationError('La cantidad debe estar entre 1 y 100 por tipo de pieza.')
                 lineas_validas += 1
         
         if lineas_validas == 0:

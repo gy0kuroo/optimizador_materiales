@@ -1,0 +1,41 @@
+/* Navegación integrada: los destinos no compiten con las acciones del contenido. */
+body[data-app-shell="true"] .navbar-custom :is(.nav-link,.nav-sub-link) {
+  justify-content:flex-start; text-align:left; box-shadow:none!important;
+  border:0!important; background:transparent; text-decoration:none;
+  color:var(--cl-text-secondary)!important; transition:background-color .15s,color .15s;
+}
+body[data-app-shell="true"] .navbar-custom .nav-link { border-radius:8px; }
+body[data-app-shell="true"] .navbar-custom .nav-group { width:100%; margin:4px 0; }
+body[data-app-shell="true"] .navbar-custom .nav-group-toggle {
+  list-style:none; cursor:pointer; font-weight:600!important; user-select:none;
+}
+.nav-group-toggle::-webkit-details-marker { display:none; }
+.nav-group-toggle::after {
+  content:""; width:7px; height:7px; border-right:1.5px solid currentColor;
+  border-bottom:1.5px solid currentColor; transform:rotate(45deg);
+  margin:-4px 4px 0 auto; flex-shrink:0;
+}
+.nav-group[open] > .nav-group-toggle::after { transform:rotate(225deg); margin-top:4px; }
+body[data-app-shell="true"] .navbar-custom .nav-group-items {
+  list-style:none; margin:2px 0 8px 23px; padding:0 0 0 15px;
+  border:0; border-left:1px solid var(--cl-border); background:transparent;
+}
+body[data-app-shell="true"] .navbar-custom .nav-sub-link {
+  display:flex; align-items:center; min-height:44px; padding:9px 10px;
+  border-radius:7px; font:500 1rem/1.5 var(--cl-font-body); white-space:normal;
+}
+body[data-app-shell="true"] .navbar-custom :is(.nav-link,.nav-sub-link):hover {
+  background:var(--cl-bg-surface)!important; color:var(--cl-text-primary)!important;
+}
+body[data-app-shell="true"] .navbar-custom :is(.nav-link,.nav-sub-link).active {
+  background:var(--accent-tint)!important; color:var(--accent-text,var(--accent))!important;
+  font-weight:600!important; border:0!important;
+}
+body[data-app-shell="true"] .navbar-custom :is(.nav-link,.nav-sub-link):focus-visible {
+  outline:2px solid var(--accent)!important; outline-offset:2px;
+}
+body[data-app-shell="true"] .navbar-custom .nav-help { cursor:pointer; }
+.nav-group-divider { border:0; border-top:1px solid var(--cl-border); margin:8px 0; opacity:1; }
+@media(prefers-reduced-motion:reduce) {
+  body[data-app-shell="true"] .navbar-custom :is(.nav-link,.nav-sub-link) { transition:none; }
+}

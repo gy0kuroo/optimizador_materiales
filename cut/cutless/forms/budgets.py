@@ -73,18 +73,17 @@ class PresupuestoForm(forms.ModelForm):
         
         # Hacer el campo cliente opcional
         self.fields['cliente'].required = False
+        self.fields['fecha_validez'].widget.format = '%Y-%m-%d'
         
+        for campo in ('cliente', 'optimizaciones', 'proyecto'):
+            self.fields[campo].queryset = self.fields[campo].queryset.none()
         if user:
             # Filtrar clientes del usuario
             self.fields['cliente'].queryset = Cliente.objects.filter(usuario=user).order_by('nombre')
             # Filtrar optimizaciones del usuario
             if instance:
-                # Si es edición, mostrar optimizaciones que ya están en este presupuesto o que no tienen presupuesto
-                optimizaciones_queryset = Optimizacion.objects.filter(
-                    usuario=user
-                ).filter(
-                    Q(presupuestos__isnull=True) | Q(presupuestos=instance)
-                ).distinct().order_by('-fecha')
+                # Una optimización puede cotizarse en varios presupuestos, igual que al crear.
+                optimizaciones_queryset = Optimizacion.objects.filter(usuario=user).order_by('-fecha')
                 # Pre-seleccionar las optimizaciones que ya están en el presupuesto
                 self.fields['optimizaciones'].initial = list(instance.optimizaciones.values_list('pk', flat=True))
             else:
@@ -99,6 +98,21 @@ class PresupuestoForm(forms.ModelForm):
             # Convertir la fecha a formato ISO (YYYY-MM-DD) para el campo type='date'
             self.fields['fecha_validez'].initial = instance.fecha_validez.strftime('%Y-%m-%d')
         
-        # Si es edición y hay cliente, prellenar el nombre
-        if instance and instance.cliente:
-            self.fields['nombre_cliente_nuevo'].initial = instance.cliente.nombre
+        # No duplicar el cliente seleccionado en la alternativa de creación.
+        self.fields['nombre_cliente_nuevo'].initial = ''
+
+    def clean(self):
+        from decimal import Decimal
+        datos = super().clean()
+        if datos.get('cliente') and datos.get('nombre_cliente_nuevo'):
+            self.add_error('nombre_cliente_nuevo', 'Selecciona un cliente o escribe uno nuevo, no ambos.')
+        for campo in ('precio_tablero', 'mano_obra'):
+            if datos.get(campo) is not None and datos[campo] < 0:
+                self.add_error(campo, 'El importe no puede ser negativo.')
+        precio, mano = datos.get('precio_tablero'), datos.get('mano_obra')
+        seleccion = datos.get('optimizaciones')
+        if precio is not None and mano is not None and seleccion is not None:
+            total = precio * sum(opt.num_tableros for opt in seleccion) + mano
+            if total > Decimal('99999999.99'):
+                self.add_error('precio_tablero', 'El total supera el máximo admitido: $99.999.999,99.')
+        return datos

@@ -137,6 +137,19 @@ def usar_plantilla(request, pk):
         messages.error(request, "No tienes permiso para usar esta plantilla.")
         return redirect('cutless:lista_plantillas')
     
+    # Las plantillas antiguas también deben cumplir las reglas actuales antes de cargarse.
+    validacion = PlantillaForm({
+        'nombre': plantilla.nombre, 'descripcion': plantilla.descripcion,
+        'categoria': plantilla.categoria, 'unidad_medida': plantilla.unidad_medida,
+        'ancho_tablero': convertir_desde_cm(plantilla.ancho_tablero, plantilla.unidad_medida),
+        'alto_tablero': convertir_desde_cm(plantilla.alto_tablero, plantilla.unidad_medida),
+        'margen_corte': plantilla.margen_corte * 10,
+        'permitir_rotacion': plantilla.permitir_rotacion, 'piezas': plantilla.piezas,
+    }, instance=plantilla)
+    if not validacion.is_valid():
+        messages.error(request, 'Esta plantilla contiene datos incompatibles. Corrige los campos indicados antes de usarla.')
+        return render(request, 'cutless/editar_plantilla.html', {'form': validacion, 'plantilla': plantilla})
+
     # Convertir dimensiones a la unidad de la plantilla
     unidad = plantilla.unidad_medida
     ancho_mostrar = convertir_desde_cm(plantilla.ancho_tablero, unidad)
@@ -148,7 +161,7 @@ def usar_plantilla(request, pk):
     PiezaFormSet = formset_factory(PiezaForm, extra=0, max_num=20)
     
     piezas_data = plantilla.get_piezas_list()
-    pieza_formset = PiezaFormSet(initial=piezas_data)
+    pieza_formset = PiezaFormSet(initial=piezas_data, form_kwargs={'unidad_medida': unidad})
     
     tablero_form = TableroForm(user=request.user, initial={
         'ancho': ancho_mostrar,

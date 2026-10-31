@@ -75,13 +75,13 @@ def editar_cliente(request, pk):
         return redirect('cutless:lista_clientes')
     
     if request.method == "POST":
-        form = ClienteForm(request.POST, instance=cliente)
+        form = ClienteForm(request.POST, instance=cliente, user=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, f'✅ Cliente "{cliente.nombre}" actualizado exitosamente.')
             return redirect('cutless:lista_clientes')
     else:
-        form = ClienteForm(instance=cliente)
+        form = ClienteForm(instance=cliente, user=request.user)
     
     return render(request, 'cutless/editar_cliente.html', {
         'form': form,
@@ -93,7 +93,7 @@ def crear_cliente(request):
     Crea un nuevo cliente.
     """
     if request.method == "POST":
-        form = ClienteForm(request.POST)
+        form = ClienteForm(request.POST, user=request.user)
         if form.is_valid():
             cliente = form.save(commit=False)
             cliente.usuario = request.user
@@ -101,7 +101,7 @@ def crear_cliente(request):
             messages.success(request, f'✅ Cliente "{cliente.nombre}" creado exitosamente.')
             return redirect('cutless:lista_clientes')
     else:
-        form = ClienteForm()
+        form = ClienteForm(user=request.user)
     
     return render(request, 'cutless/crear_cliente.html', {
         'form': form,

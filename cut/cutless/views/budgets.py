@@ -1,3 +1,4 @@
+from django.db import transaction
 from decimal import Decimal
 
 
@@ -40,6 +41,7 @@ def lista_presupuestos(request):
         'busqueda': busqueda,
     })
 
+@transaction.atomic
 def crear_presupuesto(request):
     """
     Crea un nuevo presupuesto desde una optimización.
@@ -124,8 +126,8 @@ def crear_presupuesto(request):
     
     # Preparar información adicional de optimizaciones para el template
     optimizaciones_info = []
-    optimizaciones_seleccionadas_ids = []
-    if optimizacion:
+    optimizaciones_seleccionadas_ids = [int(pk) for pk in request.POST.getlist('optimizaciones') if pk.isdecimal()] if form.is_bound else []
+    if optimizacion and not form.is_bound:
         optimizaciones_seleccionadas_ids = [optimizacion.pk]
     
     if form.fields['optimizaciones'].queryset:
@@ -219,6 +221,7 @@ def detalle_presupuesto(request, pk):
         'total_tableros': presupuesto.get_total_tableros(),
     })
 
+@transaction.atomic
 def editar_presupuesto(request, pk):
     """
     Edita un presupuesto existente.
@@ -269,7 +272,7 @@ def editar_presupuesto(request, pk):
     
     # Preparar información adicional de optimizaciones para el template
     optimizaciones_info = []
-    optimizaciones_seleccionadas_ids = list(presupuesto.optimizaciones.values_list('pk', flat=True))
+    optimizaciones_seleccionadas_ids = ([int(pk) for pk in request.POST.getlist('optimizaciones') if pk.isdecimal()] if form.is_bound else list(presupuesto.optimizaciones.values_list('pk', flat=True)))
     
     if form.fields['optimizaciones'].queryset:
         
@@ -305,6 +308,7 @@ def editar_presupuesto(request, pk):
         'optimizaciones_info': optimizaciones_info,
     })
 
+@transaction.atomic
 def agregar_optimizaciones_presupuesto(request, pk):
     """
     Permite agregar múltiples optimizaciones a un presupuesto existente.
@@ -326,11 +330,23 @@ def agregar_optimizaciones_presupuesto(request, pk):
     
     if request.method == "POST":
         optimizaciones_ids = request.POST.getlist('optimizaciones')
+        if any(not valor.isdecimal() for valor in optimizaciones_ids):
+            messages.error(request, 'La selección contiene identificadores inválidos. Vuelve a seleccionar los planes.')
+            return redirect(request.path)
         if optimizaciones_ids:
             optimizaciones_seleccionadas = Optimizacion.objects.filter(
                 pk__in=optimizaciones_ids,
                 usuario=request.user
             )
+            if set(optimizaciones_seleccionadas.values_list('pk', flat=True)) != {int(valor) for valor in optimizaciones_ids}:
+                messages.error(request, 'Algún plan ya no está disponible para esta selección. Actualiza la lista y vuelve a elegir.')
+                return redirect(request.path)
+            actuales = presupuesto.optimizaciones.all()
+            ids = set(actuales.values_list('pk', flat=True))
+            tableros = sum(opt.num_tableros for opt in actuales) + sum(opt.num_tableros for opt in optimizaciones_seleccionadas if opt.pk not in ids)
+            if presupuesto.precio_tablero * tableros + presupuesto.mano_obra > Decimal('99999999.99'):
+                messages.error(request, 'El total supera el máximo admitido: $99.999.999,99.')
+                return redirect(request.path)
             # Agregar las optimizaciones al presupuesto (ManyToMany)
             presupuesto.optimizaciones.add(*optimizaciones_seleccionadas)
             
@@ -349,5 +365,6 @@ def agregar_optimizaciones_presupuesto(request, pk):
     return render(request, 'cutless/agregar_optimizaciones_presupuesto.html', {
         'presupuesto': presupuesto,
         'optimizaciones_disponibles': optimizaciones_disponibles,
+        'optimizaciones_info': [{'optimizacion': opt, 'seleccionada': False} for opt in optimizaciones_disponibles],
     })
 

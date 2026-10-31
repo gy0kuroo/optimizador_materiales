@@ -1,0 +1,15 @@
+.budget-plan-selector { border:1px solid var(--cl-border); border-radius:12px; padding:20px; }
+.budget-selector-tools { display:flex; flex-wrap:wrap; align-items:end; gap:16px; margin:16px 0; }
+.budget-selector-tools[hidden] { display:none; }
+.budget-selector-search { flex:1; min-width:220px; }
+#budget-selection-count { margin:0 0 10px; font-weight:600; }
+.budget-selector-pages { display:flex; align-items:center; flex-wrap:wrap; gap:12px; width:100%; }
+.budget-plan-table [hidden] { display:none!important; }
+.budget-plan-table td { vertical-align:middle; }
+.budget-plan-table label { cursor:pointer; }
+@media(max-width:575px) {
+ .budget-plan-selector { padding:12px; }
+ .budget-selector-search { min-width:0; flex-basis:100%; }
+ .budget-selector-pages { gap:8px; }
+ .budget-selector-pages > span { order:3; width:100%; }
+}

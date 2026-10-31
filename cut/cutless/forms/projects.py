@@ -61,6 +61,7 @@ class ProyectoForm(forms.ModelForm):
         instance = kwargs.get('instance', None)
         super().__init__(*args, **kwargs)
         
+        self.fields['cliente'].queryset = Cliente.objects.none()
         if user:
             # Filtrar clientes del usuario
             self.fields['cliente'].queryset = Cliente.objects.filter(usuario=user).order_by('nombre')
@@ -90,3 +91,10 @@ class ProyectoForm(forms.ModelForm):
                 self.fields['fecha_inicio'].initial = instance.fecha_inicio.strftime('%Y-%m-%d')
             if instance.fecha_fin:
                 self.fields['fecha_fin'].initial = instance.fecha_fin.strftime('%Y-%m-%d')
+
+    def clean(self):
+        datos = super().clean()
+        inicio, fin = datos.get('fecha_inicio'), datos.get('fecha_fin')
+        if inicio and fin and fin < inicio:
+            self.add_error('fecha_fin', 'La finalización no puede ser anterior al inicio.')
+        return datos

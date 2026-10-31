@@ -1,0 +1,9 @@
+.selection-search { display:flex; align-items:end; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+.selection-search > div { flex:1; min-width:220px; }
+.selection-actions { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; padding:12px 0 18px; }
+.selection-actions [role="status"] { font-weight:600; }
+.selection-pagination { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:16px; margin-top:20px; }
+@media(max-width:575px) {
+  .selection-actions > .btn { width:100%; }
+  .selection-search > div { min-width:0; width:100%; flex-basis:100%; }
+}

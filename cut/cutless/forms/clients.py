@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 
 from ..models import Cliente
@@ -5,6 +7,16 @@ from ..models import Cliente
 class ClienteForm(forms.ModelForm):
     """Formulario para crear y editar clientes"""
     
+    def __init__(self, *args, user=None, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_nombre(self):
+        nombre = self.cleaned_data['nombre']
+        if self.user and Cliente.objects.filter(usuario=self.user, nombre=nombre).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError('Ya tienes un cliente con este nombre.')
+        return nombre
+
     class Meta:
         model = Cliente
         fields = ['nombre', 'rut', 'email', 'telefono', 'direccion', 'notas']
@@ -15,7 +27,7 @@ class ClienteForm(forms.ModelForm):
             }),
             'rut': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ej: 12.345.678-9'
+                'placeholder': 'Ej.: 12345678-9'
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'form-control',
@@ -38,7 +50,7 @@ class ClienteForm(forms.ModelForm):
         }
         labels = {
             'nombre': 'Nombre o Razón Social',
-            'rut': 'RUT / Identificación',
+            'rut': 'RUT',
             'email': 'Correo Electrónico',
             'telefono': 'Teléfono',
             'direccion': 'Dirección',
@@ -46,11 +58,12 @@ class ClienteForm(forms.ModelForm):
         }
     
     def clean_rut(self):
-        rut = self.cleaned_data.get('rut', '').strip()
-        # Validación básica de RUT chileno (opcional, puede estar vacío)
-        if rut:
-            # Remover puntos y guiones para validar
-            rut_limpio = rut.replace('.', '').replace('-', '')
-            if not rut_limpio[:-1].isdigit() or (rut_limpio[-1] not in '0123456789Kk'):
-                raise forms.ValidationError('Formato de RUT inválido. Use formato: 12.345.678-9')
-        return rut
+        rut = self.cleaned_data.get('rut', '').strip().upper()
+        if not rut:
+            return ''
+        # Aceptar escritura anterior con puntos; guardar siempre un formato único.
+        compacto = rut.replace('.', '')
+        coincidencia = re.fullmatch(r'([0-9]{1,8})-?([0-9K])', compacto)
+        if not coincidencia:
+            raise forms.ValidationError('Escribe el RUT sin puntos y con guion antes del dígito verificador. Ejemplo: 12345678-9.')
+        return f'{coincidencia[1]}-{coincidencia[2]}'

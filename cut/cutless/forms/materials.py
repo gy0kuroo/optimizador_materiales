@@ -69,7 +69,11 @@ class MaterialForm(forms.ModelForm):
                 if not math.isfinite(valor) or valor <= 0:
                     self.add_error(campo, 'La medida debe ser un número mayor que cero.')
                 elif unidad:
-                    datos[campo] = convertir_a_cm(valor, unidad)
+                    medida = convertir_a_cm(valor, unidad)
+                    if not 10 <= medida <= 300:
+                        self.add_error(campo, 'Cada lado debe medir entre 10 y 300 cm; revisa la unidad seleccionada.')
+                    else:
+                        datos[campo] = medida
         precio = datos.get('precio')
         if precio is not None and precio < 0:
             self.add_error('precio', 'El precio no puede ser negativo.')

@@ -6,7 +6,6 @@
     if (new URL(link.href, location.href).pathname !== location.pathname) return;
     link.classList.add('active');
     link.setAttribute('aria-current', 'page');
-    const group = link.closest('.dropdown');
-    if (group) group.querySelector(':scope > button')?.classList.add('active');
+    // El grupo queda abierto desde el servidor; solo el destino se destaca.
   });
 })();
