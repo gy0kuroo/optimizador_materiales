@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'cutless/css/analysis-refinement.css' %}?v=buttons-1">
-<link rel="stylesheet" href="{% static 'cutless/css/comparison-decision.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'cutless/css/comparison-decision.css' %}?v=2">
 {% endblock %}
 
 {% block content %}
@@ -15,6 +15,7 @@
       <p class="page-lead">Evalúa cuánto material y dinero necesita cada alternativa para el mismo trabajo.</p>
     </div>
     <div class="page-header__actions">
+      {% if comparacion %}<a href="#comparison-charts-title" class="btn btn-secondary" data-action="secondary" data-icon="layout">Ver gráficos</a>{% endif %}
       <button type="button" class="btn btn-ayuda-seccion btn-text"
               onclick="iniciarTutorialSeccion('comparar')"
               title="Ayuda" data-action="text" data-icon="help">
@@ -78,7 +79,24 @@
     <div class="card-body">
       <p>{{ comparacion.motivo }}</p>
       {% if comparacion.conclusiones %}<ul class="comparison-conclusions">{% for texto in comparacion.conclusiones %}<li>{{ texto }}</li>{% endfor %}</ul>{% endif %}
-      <p class="analysis-note mb-0">{% if comparacion.cambios %}Cambian: {{ comparacion.cambios|join:', ' }}.{% else %}No cambian las condiciones de tablero, material, sierra, rotación ni precios registrados.{% endif %} Revisa que el material y sus características sirvan para tu trabajo. Los costos son estimaciones, no cotizaciones actualizadas.</p>
+      <p class="analysis-note mb-0">{% if comparacion.cambios %}Cambian: {{ comparacion.cambios|join:', ' }}.{% else %}No se registran diferencias en las condiciones guardadas.{% endif %} Revisa que el material y sus características sirvan para tu trabajo. Los costos son estimaciones, no cotizaciones actualizadas.</p>
+    </div>
+  </section>
+
+  <section class="card mb-4" aria-labelledby="comparison-charts-title">
+    <div class="card-header"><h2 id="comparison-charts-title" class="h4 mb-0">Gráficos de comparación</h2></div>
+    <div class="card-body"><p class="analysis-note">Cada gráfico compara A y B en la misma escala. Las barras más cortas representan menos material o menor costo; no indican por sí solas la calidad del material.</p>
+      <div class="comparison-charts">
+      {% for grafico in comparacion.graficos %}
+        <figure class="comparison-chart"><figcaption>{{ grafico.titulo }}</figcaption>
+        {% for barra in grafico.barras %}
+          <div class="comparison-bar-label"><strong>{{ barra.alternativa }}</strong><span>{{ barra.valor|floatformat:"2g" }} {{ grafico.unidad }}</span></div>
+          <div class="comparison-bar-track" aria-hidden="true"><span class="comparison-bar comparison-bar--{{ barra.alternativa }}" style="width:{{ barra.ancho }}%"></span></div>
+        {% endfor %}
+        </figure>
+      {% endfor %}
+      </div>
+    {% if diferencia_costo == None %}<p class="analysis-note mt-3 mb-0">El gráfico de costos no está disponible porque falta el precio en alguna alternativa. El gráfico de material no necesita precios.</p>{% endif %}
     </div>
   </section>
 
@@ -97,16 +115,7 @@
         </tbody>
       </table></div>
       <p class="analysis-note">El material fuera de las piezas incluye sobrantes y ancho de corte; no indica cuánto sobrante es reutilizable. El aprovechamiento corresponde al resultado guardado.</p>
-      <div class="comparison-charts">
-      {% for grafico in comparacion.graficos %}
-        <figure class="comparison-chart"><figcaption>{{ grafico.titulo }}</figcaption>
-        {% for barra in grafico.barras %}
-          <div class="comparison-bar-label"><strong>{{ barra.alternativa }}</strong><span>{{ barra.valor|floatformat:"2g" }} {{ grafico.unidad }}</span></div>
-          <div class="comparison-bar-track" aria-hidden="true"><span class="comparison-bar comparison-bar--{{ barra.alternativa }}" style="width:{{ barra.ancho }}%"></span></div>
-        {% endfor %}
-        </figure>
-      {% endfor %}
-      </div>
+
     </div>
   </section>
 
@@ -115,7 +124,7 @@
     <div class="card-body table-responsive"><table class="table">
       <thead><tr><th>Condición</th><th>Alternativa A</th><th>Alternativa B</th></tr></thead><tbody>
         <tr><th>Tablero</th><td>{{ optimizacion1.ancho_tablero }} × {{ optimizacion1.alto_tablero }} cm</td><td>{{ optimizacion2.ancho_tablero }} × {{ optimizacion2.alto_tablero }} cm</td></tr>
-        <tr><th>Material</th><td>{{ optimizacion1.material.nombre|default:'Sin especificar' }}</td><td>{{ optimizacion2.material.nombre|default:'Sin especificar' }}</td></tr>
+        <tr><th>Material</th><td>{{ comparacion.a.material_descripcion.nombre }}<br><small class="text-muted">{{ comparacion.a.material_descripcion.origen }}</small></td><td>{{ comparacion.b.material_descripcion.nombre }}<br><small class="text-muted">{{ comparacion.b.material_descripcion.origen }}</small></td></tr>
         <tr><th>Ancho de sierra</th><td>{{ comparacion.a.sierra_mm|floatformat:2 }} mm</td><td>{{ comparacion.b.sierra_mm|floatformat:2 }} mm</td></tr>
         <tr><th>Permitir girar</th><td>{{ optimizacion1.permitir_rotacion|yesno:'Sí,No' }}</td><td>{{ optimizacion2.permitir_rotacion|yesno:'Sí,No' }}</td></tr>
         <tr><th>Precio por tablero</th><td>{% if optimizacion1.precio_tablero != None %}${{ optimizacion1.precio_tablero|floatformat:"2g" }}{% else %}Sin precio{% endif %}</td><td>{% if optimizacion2.precio_tablero != None %}${{ optimizacion2.precio_tablero|floatformat:"2g" }}{% else %}Sin precio{% endif %}</td></tr>

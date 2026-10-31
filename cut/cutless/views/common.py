@@ -53,7 +53,7 @@ def _materiales_data_index(user):
         filtro = Q(usuario=user) | Q(es_predefinido=True)
     for material in Material.objects.filter(filtro):
         materiales_data[str(material.pk)] = {
-            'precio': float(material.precio) if material.precio else None,
+            'precio': float(material.precio) if material.precio is not None else None,
             'nombre': material.nombre,
             'ancho': float(material.ancho) if material.ancho else None,
             'alto': float(material.alto) if material.alto else None,

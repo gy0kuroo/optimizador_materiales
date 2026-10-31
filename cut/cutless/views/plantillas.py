@@ -177,7 +177,7 @@ def usar_plantilla(request, pk):
         Q(usuario=request.user) | Q(es_predefinido=True)
     ):
         materiales_data[str(material.pk)] = {
-            'precio': float(material.precio) if material.precio else None,
+            'precio': float(material.precio) if material.precio is not None else None,
             'nombre': material.nombre
         }
     

@@ -1,5 +1,6 @@
 {% load l10n %}
 <div id="medidas-pred-container">
+  {{ tablero_form.medida_habitual }}
   <label class="form-label mb-2" for="tableros-dropdown">Usar medidas habituales (opcional)</label>
   <div class="dropdown mb-3">
     <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button"
@@ -13,5 +14,5 @@
       {% endfor %}
     </ul>
   </div>
-  <p class="form-text">Puedes elegir una medida habitual o escribir tus propias medidas abajo. Si hay un material coincidente, también se seleccionará y se actualizará su precio.</p>
+  <p class="form-text">Puedes elegir un tipo y medida habitual o escribir tus propias medidas abajo. La selección habitual se guarda con el corte. Si hay un material coincidente, también se seleccionará y se actualizará su precio.</p>
 </div>

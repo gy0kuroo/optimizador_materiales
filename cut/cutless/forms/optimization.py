@@ -2,6 +2,7 @@ from django import forms
 from django.db.models import Q
 
 from ..models import Material, Cliente, Proyecto
+from ..board_presets import CATALOGO, medida_valida
 
 class NombreOptimizacionForm(forms.Form):
     nombre_optimizacion = forms.CharField(label='Nombre del trabajo (opcional)',
@@ -63,6 +64,9 @@ class MedidasClarasMixin:
 
 
 class TableroForm(MedidasClarasMixin, NombreOptimizacionForm):
+    medida_habitual = forms.ChoiceField(required=False,
+        choices=[('', 'Personalizado')] + [(clave, nombre) for clave, nombre, _, _ in CATALOGO],
+        widget=forms.HiddenInput(attrs={'id': 'medida_habitual'}))
     UNIDADES_CHOICES = [
         ('cm', 'Centímetros (cm)'),
         ('m', 'Metros (m)'),
@@ -77,14 +81,7 @@ class TableroForm(MedidasClarasMixin, NombreOptimizacionForm):
         unidad = self['unidad_medida'].value() or 'cm'
         if unidad not in dict(self.UNIDADES_CHOICES):
             unidad = 'cm'
-        catalogo = [
-            ('osb-122x244', 'OSB', 122, 244),
-            ('mdf-122x244', 'MDF', 122, 244),
-            ('mdf-183x244', 'MDF', 183, 244),
-            ('melamina-183x244', 'Melamina', 183, 244),
-            ('contrachapado', 'Contrachapado', 122, 244),
-            ('tablero-152x244', 'Tablero', 152, 244),
-        ]
+        catalogo = CATALOGO
         return [dict(clave=clave, nombre=nombre, ancho_cm=ancho, alto_cm=alto,
                      ancho=convertir_desde_cm(ancho, unidad), alto=convertir_desde_cm(alto, unidad), unidad=unidad,
                      ancho_texto=format(convertir_desde_cm(ancho, unidad), '.6f').rstrip('0').rstrip('.').replace('.', ','),
@@ -390,7 +387,14 @@ class TableroForm(MedidasClarasMixin, NombreOptimizacionForm):
         self.configurar_medidas()
 
     def clean(self):
-        return self.validar_medidas(super().clean())
+        datos = self.validar_medidas(super().clean())
+        clave = datos.get('medida_habitual')
+        if clave and datos.get('ancho') is not None and datos.get('alto') is not None:
+            from ..units import convertir_a_cm
+            unidad = datos.get('unidad_medida', 'cm')
+            if not medida_valida(clave, convertir_a_cm(datos['ancho'], unidad), convertir_a_cm(datos['alto'], unidad)):
+                datos['medida_habitual'] = ''
+        return datos
 
 class PiezaForm(MedidasClarasMixin, forms.Form):
     minimo_cm = 0.1

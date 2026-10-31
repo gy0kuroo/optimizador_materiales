@@ -164,7 +164,7 @@ def _regenerar_grafico(optimizacion):
     )
 
 
-def persistir_resultado_optimizacion(optimizacion, imagenes_base64, info_desperdicio, aprovechamiento, numero_lista=None):
+def persistir_resultado_optimizacion(optimizacion, imagenes_base64, info_desperdicio, aprovechamiento, numero_lista=None, medida_habitual=None):
     """Reemplaza el resultado completo; conserva el anterior si la operación falla."""
     info = normalizar_info_desperdicio(info_desperdicio)
     if not imagenes_base64 or len(imagenes_base64) != len(info['info_tableros']):
@@ -202,9 +202,14 @@ def persistir_resultado_optimizacion(optimizacion, imagenes_base64, info_desperd
             optimizacion.num_tableros = len(info['info_tableros'])
             optimizacion.resultado_generado = True
             optimizacion.resultado_generado_en = timezone.now()
+            from ..board_presets import medida_valida
+            clave_medida = (optimizacion.resultado_extra or {}).get('medida_habitual', '') if medida_habitual is None else medida_habitual
+            medida = medida_valida(clave_medida, optimizacion.ancho_tablero, optimizacion.alto_tablero)
             optimizacion.resultado_extra = {
                 clave: info[clave] for clave in ('piezas_no_colocadas', 'num_piezas_solicitadas', 'num_piezas_colocadas')
             }
+            if medida:
+                optimizacion.resultado_extra['medida_habitual'] = medida['clave']
             optimizacion.resultado_extra['vistas_web'] = {
                 str(tablero['numero']): tablero['vista_web']
                 for tablero in info['info_tableros'] if tablero.get('vista_web')

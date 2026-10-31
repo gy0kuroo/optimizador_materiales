@@ -171,7 +171,7 @@ def editar_optimizacion(request, pk):
             mano_obra = tablero_form.cleaned_data.get('mano_obra') or 0
             
             # Si se seleccionó un material y no hay precio manual, usar el del material
-            if material_seleccionado and not precio_tablero:
+            if material_seleccionado and precio_tablero is None:
                 precio_tablero = material_seleccionado.precio
             
             # Obtener cliente y proyecto si se seleccionaron
@@ -237,6 +237,7 @@ def editar_optimizacion(request, pk):
                 info_desperdicio,
                 aprovechamiento,
                 numero_lista=numero_lista,
+                medida_habitual=tablero_form.cleaned_data.get('medida_habitual', ''),
             )
 
             messages.success(request, f"✅ Optimización actualizada exitosamente. Aprovechamiento: {aprovechamiento:.2f}%")
@@ -260,6 +261,7 @@ def editar_optimizacion(request, pk):
         # Crear formulario con datos iniciales
         initial_tablero = {
             'nombre_optimizacion': optimizacion.nombre,
+            'medida_habitual': (optimizacion.resultado_extra or {}).get('medida_habitual', ''),
             'unidad_medida': unidad_opt,
             'ancho': ancho_mostrar,
             'alto': alto_mostrar,
@@ -397,7 +399,7 @@ def index(request):
                     Q(usuario=request.user) | Q(es_predefinido=True)
                 ):
                     materiales_data[str(material.pk)] = {
-                        'precio': float(material.precio) if material.precio else None,
+                        'precio': float(material.precio) if material.precio is not None else None,
                         'nombre': material.nombre
                     }
                 return render(request, "cutless/index.html", {
@@ -427,7 +429,7 @@ def index(request):
                 proyecto_seleccionado = None
             else:
                 # Si se seleccionó un material y no hay precio manual, usar el del material
-                if material_seleccionado and not precio_tablero:
+                if material_seleccionado and precio_tablero is None:
                     precio_tablero = material_seleccionado.precio
                 cliente_seleccionado = tablero_form.cleaned_data.get('cliente')
                 proyecto_seleccionado = tablero_form.cleaned_data.get('proyecto')
@@ -495,6 +497,7 @@ def index(request):
                 info_desperdicio,
                 aprovechamiento,
                 numero_lista=numero_lista,
+                medida_habitual=tablero_form.cleaned_data.get('medida_habitual', ''),
             )
 
             contexto = preparar_contexto_resultado(
@@ -524,7 +527,7 @@ def index(request):
                 Q(usuario=request.user) | Q(es_predefinido=True)
             ):
                 materiales_data[str(material.pk)] = {
-                    'precio': float(material.precio) if material.precio else None,
+                    'precio': float(material.precio) if material.precio is not None else None,
                     'nombre': material.nombre
                 }
     else:
@@ -583,7 +586,7 @@ def index(request):
             Q(usuario=request.user) | Q(es_predefinido=True)
         ):
             materiales_data[str(material.pk)] = {
-                'precio': float(material.precio) if material.precio else None,
+                'precio': float(material.precio) if material.precio is not None else None,
                 'nombre': material.nombre,
                 'ancho': float(material.ancho) if material.ancho else None,
                 'alto': float(material.alto) if material.alto else None,
@@ -830,6 +833,7 @@ def duplicar_optimizacion(request, pk):
     # Crear formularios con datos prellenados
     tablero_form = TableroForm(initial={
         'nombre_optimizacion': optimizacion.nombre,
+        'medida_habitual': (optimizacion.resultado_extra or {}).get('medida_habitual', ''),
         'ancho': ancho_mostrar,
         'alto': alto_mostrar,
         'unidad_medida': unidad_original,

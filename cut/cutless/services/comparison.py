@@ -2,6 +2,7 @@
 from collections import Counter
 from decimal import Decimal, InvalidOperation
 from ..units import convertir_a_cm
+from ..board_presets import descripcion_material
 
 
 def piezas_normalizadas(opt):
@@ -50,6 +51,7 @@ def comparar_trabajos(a, b):
                 'cantidad': sum(piezas.values()) if piezas else None, 'costo': opt.get_costo_total()}
 
     ma, mb = metricas(a, pa), metricas(b, pb)
+    ma['material_descripcion'], mb['material_descripcion'] = descripcion_material(a), descripcion_material(b)
     diferencia_area = mb['material'] - ma['material']
     diferencia_costo = mb['costo'] - ma['costo'] if ma['costo'] is not None and mb['costo'] is not None else None
     conclusiones = []
@@ -74,7 +76,8 @@ def comparar_trabajos(a, b):
             conclusiones.append('No se puede comparar el costo: falta el precio en alguna alternativa. Un precio ausente no se interpreta como cero.')
     cambios = []
     if (a.ancho_tablero, a.alto_tablero) != (b.ancho_tablero, b.alto_tablero): cambios.append('tamaño del tablero')
-    if a.material_id != b.material_id: cambios.append('material')
+    if ma['material_descripcion']['identidad'] != mb['material_descripcion']['identidad']:
+        cambios.append('material o procedencia de su selección')
     if a.margen_corte != b.margen_corte: cambios.append('ancho de sierra')
     if a.permitir_rotacion != b.permitir_rotacion: cambios.append('permiso de rotación')
     if a.precio_tablero != b.precio_tablero: cambios.append('precio por tablero')
