@@ -552,6 +552,7 @@ def comparar_optimizaciones(request):
     desperdicio1 = None
     desperdicio2 = None
     diferencia_costo = None
+    comparacion = None
     
     if opt1_id and opt2_id:
         if opt1_id == opt2_id:
@@ -560,6 +561,9 @@ def comparar_optimizaciones(request):
         try:
             optimizacion1 = Optimizacion.objects.get(pk=opt1_id, usuario=request.user)
             optimizacion2 = Optimizacion.objects.get(pk=opt2_id, usuario=request.user)
+            if optimizacion1.pk == optimizacion2.pk:
+                messages.error(request, 'Selecciona dos optimizaciones diferentes para comparar.')
+                return redirect('cutless:comparar_optimizaciones')
             
             # Consultar resultados persistidos; comparar nunca recalcula ni modifica el historial.
             num_tableros1 = optimizacion1.num_tableros
@@ -567,9 +571,8 @@ def comparar_optimizaciones(request):
             if not num_tableros1 or not num_tableros2:
                 messages.error(request, 'Uno de los planes no tiene un resultado completo guardado. Genera nuevamente ese plan antes de compararlo.')
                 return redirect('cutless:comparar_optimizaciones')
-            if (optimizacion1.piezas != optimizacion2.piezas or
-                    optimizacion1.unidad_medida != optimizacion2.unidad_medida):
-                messages.warning(request, 'Estos planes tienen piezas o unidades diferentes. Las diferencias son informativas y no determinan cuál es mejor para el mismo trabajo.')
+            from ..services.comparison import comparar_trabajos
+            comparacion = comparar_trabajos(optimizacion1, optimizacion2)
 
             # Calcular diferencias
             diferencia_aprovechamiento = optimizacion2.aprovechamiento_total - optimizacion1.aprovechamiento_total
@@ -598,5 +601,6 @@ def comparar_optimizaciones(request):
         'desperdicio1': desperdicio1,
         'desperdicio2': desperdicio2,
         'diferencia_costo': diferencia_costo,
+        'comparacion': comparacion,
     })
 

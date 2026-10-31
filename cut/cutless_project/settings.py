@@ -162,3 +162,6 @@ EMAIL_HOST_PASSWORD = os.environ.get('CUTLESS_EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('CUTLESS_DEFAULT_FROM_EMAIL', 'CutLess <noreply@localhost>')
 
 # ALLOWED_HOSTS procede de configuracion_entorno; no sobrescribirlo aquí.
+
+# Explicación y recuperación seguras para formularios antiguos o solicitudes CSRF rechazadas.
+CSRF_FAILURE_VIEW = 'usuarios.views.csrf_failure'

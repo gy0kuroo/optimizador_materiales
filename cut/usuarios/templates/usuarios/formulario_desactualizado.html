@@ -1,0 +1,19 @@
+{% extends 'cutless/base.html' %}
+{% load static initial_assets %}
+{% block title %}Vuelve a abrir el formulario · CutLess{% endblock %}
+{% block body_class %}login-page{% endblock %}
+{% block navigation %}{% endblock %}
+{% block flash_messages %}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'usuarios/css/auth-recovery.css' %}?v=1">{% endblock %}
+{% block content %}
+<main class="auth-recovery" aria-labelledby="recovery-title">
+  <div class="auth-recovery-brand">{% include 'cutless/includes/brand.html' %}</div>
+  <p class="auth-recovery-eyebrow">Formulario desactualizado</p>
+  <h1 id="recovery-title">Necesitamos abrir una página actualizada</h1>
+  <p>{{ mensaje_recuperacion }}</p>
+  <div class="auth-recovery-note"><strong>Este envío no se procesó.</strong> Por seguridad, CutLess lo detuvo. Este aviso no significa que tu contraseña sea incorrecta.</div>
+  <p>{% if user.is_authenticated %}Tu sesión sigue activa. Puedes continuar en Inicio y volver a abrir el apartado que estabas usando.{% else %}Abre de nuevo el inicio de sesión para continuar. Si vuelve a ocurrir, comprueba que tu navegador permita las cookies de este sitio.{% endif %}</p>
+  <a class="btn btn-primary" href="{{ recovery_url }}" data-action="primary" data-icon="chevron-right">{% button_icon 'chevron-right' %}{{ recovery_label }}</a>
+  <p class="auth-recovery-footnote">No necesitas reenviar la página anterior. Referencia: 403 · Protección del formulario.</p>
+</main>
+{% endblock %}

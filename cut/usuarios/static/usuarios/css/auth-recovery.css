@@ -1,0 +1,9 @@
+.auth-recovery { max-width:680px; margin:clamp(24px,8vh,80px) auto; padding:clamp(24px,5vw,44px); background:var(--cl-bg-card); color:var(--cl-text-primary); border:1px solid var(--cl-border); border-radius:18px; box-shadow:var(--cl-shadow-sm); }
+.auth-recovery-brand { display:flex; align-items:center; gap:12px; margin-bottom:32px; }
+.auth-recovery-eyebrow { color:var(--accent); font-weight:600; }
+.auth-recovery h1 { font-size:clamp(1.7rem,4vw,2.2rem); margin-bottom:20px; }
+.auth-recovery p { line-height:1.65; }
+.auth-recovery-note { padding:16px; margin:24px 0; background:var(--warning-tint); border-radius:10px; line-height:1.65; }
+.auth-recovery-note strong { display:block; }
+.auth-recovery-footnote { font-size:1rem; color:var(--cl-text-secondary); margin:24px 0 0; }
+@media(max-width:575px) { .auth-recovery .btn { width:100%; } }

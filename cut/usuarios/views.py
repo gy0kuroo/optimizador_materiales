@@ -13,6 +13,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.http import require_POST
+from django.views.decorators.cache import never_cache
 from .forms import AccesoForm, RegistroForm, PerfilForm, UsuarioEdicionForm, PermisosUsuarioForm, CambiarPasswordForm
 from .models import PerfilUsuario
 
@@ -25,6 +26,7 @@ def actividad_sesion(request):
     return JsonResponse({'active': True})
 
 
+@never_cache
 def registro(request):
     if request.method == "POST":
         form = RegistroForm(request.POST)
@@ -151,6 +153,7 @@ def actualizar_rol(request, pk):
     return redirect('usuarios:admin_dashboard')
 
 
+@never_cache
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('cutless:index' if request.user.perfil.inicio_personalizado else 'usuarios:configuracion_inicial')
@@ -200,6 +203,7 @@ def configuracion_inicial(request):
     })
 
 
+@never_cache
 def logout_view(request):
     logout(request)
     request.session.flush()
@@ -453,3 +457,17 @@ def reset_password_confirm(request, uidb64, token):
     else:
         messages.error(request, 'El enlace de recuperación no es válido o ha expirado. Por favor solicita uno nuevo.')
         return redirect('usuarios:recuperar_password')
+
+
+@never_cache
+def csrf_failure(request, reason=''):
+    """Rechazar el envío y ofrecer navegación GET segura, sin reintentar la operación."""
+    destino = reverse('cutless:index') if request.user.is_authenticated else reverse('usuarios:login')
+    mensaje = 'Este formulario ya no es válido. Puede ocurrir al retroceder después de iniciar sesión, abrir otra sesión o dejar una página abierta durante mucho tiempo.'
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+        return JsonResponse({'error': 'formulario_desactualizado', 'message': mensaje, 'recovery_url': destino}, status=403)
+    return render(request, 'usuarios/formulario_desactualizado.html', {
+        'ocultar_tutorial': True, 'recovery_url': destino,
+        'recovery_label': 'Continuar en Inicio' if request.user.is_authenticated else 'Volver a iniciar sesión',
+        'mensaje_recuperacion': mensaje,
+    }, status=403)
