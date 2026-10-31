@@ -89,17 +89,19 @@ class MediaPrivadaTests(TestCase):
         self.client.force_login(self.otro)
         self.assertEqual(self.client.get(reverse('media_privada', args=[presupuestos[0].pdf.name])).status_code, 404)
 
-    def test_descarga_presupuesto_guarda_referencia_relativa(self):
+    def test_descarga_presupuesto_en_memoria_sin_guardar_archivo(self):
         presupuesto = Presupuesto.objects.create(usuario=self.usuario, numero='PRE-2026-0002', precio_tablero=100, costo_total=100, fecha_validez=date(2026, 12, 31))
         presupuesto.optimizaciones.add(self.opt)
         self.client.force_login(self.usuario)
+        antes = {str(p): p.read_bytes() for p in Path(settings.MEDIA_ROOT).rglob('*') if p.is_file()}
         response = self.client.get(reverse('cutless:generar_pdf_presupuesto', args=[presupuesto.pk]))
         self.assertEqual(response.status_code, 200)
+        contenido = b''.join(response.streaming_content)
         response.close()
         presupuesto.refresh_from_db()
-        self.assertTrue(presupuesto.pdf.name.startswith('presupuestos/'))
-        self.assertFalse(Path(presupuesto.pdf.name).is_absolute())
-        self.assertTrue(Path(presupuesto.pdf.path).is_file())
+        self.assertFalse(presupuesto.pdf)
+        self.assertTrue(contenido.startswith(b'%PDF'))
+        self.assertEqual(antes, {str(p): p.read_bytes() for p in Path(settings.MEDIA_ROOT).rglob('*') if p.is_file()})
 
     def test_referencia_heredada_compartida_se_bloquea(self):
         Optimizacion.objects.create(usuario=self.otro, ancho_tablero=100, alto_tablero=100, piezas='50,50,1', imagen=self.opt.imagen.name)
@@ -107,3 +109,15 @@ class MediaPrivadaTests(TestCase):
             with self.subTest(usuario=usuario.username):
                 self.client.force_login(usuario)
                 self.assertEqual(self.client.get(self.url).status_code, 404)
+
+    def test_pdf_estadisticas_no_crea_archivos(self):
+        from cutless.views.analytics import exportar_pdf_desperdicio
+        from django.test import RequestFactory
+        request = RequestFactory().get('/estadisticas/exportar-pdf-desperdicio/')
+        request.user = self.usuario
+        antes = {str(p): p.read_bytes() for p in Path(settings.MEDIA_ROOT).rglob('*') if p.is_file()}
+        response = exportar_pdf_desperdicio(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(b''.join(response.streaming_content).startswith(b'%PDF'))
+        response.close()
+        self.assertEqual(antes, {str(p): p.read_bytes() for p in Path(settings.MEDIA_ROOT).rglob('*') if p.is_file()})

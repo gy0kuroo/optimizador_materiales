@@ -1,7 +1,5 @@
-import os
 from decimal import Decimal
 
-from django.conf import settings
 
 from django.contrib import messages
 from django.db.models import Q
@@ -177,16 +175,12 @@ def generar_pdf_presupuesto(request, pk):
         messages.error(request, "Presupuesto no encontrado.")
         return redirect('cutless:lista_presupuestos')
     
-    # Generar PDF usando la función de utils
-    pdf_path = construir_pdf_presupuesto(presupuesto)
-    
-    if pdf_path:
-        presupuesto.pdf = os.path.relpath(pdf_path, settings.MEDIA_ROOT).replace(os.sep, '/')
-        presupuesto.save()
-        return FileResponse(open(pdf_path, 'rb'), content_type='application/pdf', filename=f'presupuesto_{presupuesto.numero}.pdf')
-    else:
-        messages.error(request, "Error al generar el PDF del presupuesto.")
-        return redirect('cutless:detalle_presupuesto', pk=presupuesto.pk)
+    import io
+    buffer = io.BytesIO()
+    construir_pdf_presupuesto(presupuesto, archivo_salida=buffer)
+    buffer.seek(0)
+    return FileResponse(buffer, as_attachment=True, content_type='application/pdf',
+                        filename=f'presupuesto_{presupuesto.numero}.pdf')
 
 def detalle_presupuesto(request, pk):
     """

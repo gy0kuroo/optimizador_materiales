@@ -2,10 +2,8 @@ import base64
 import io
 import logging
 import os
-from uuid import uuid4
 
 from django.conf import settings
-from django.core.files.base import ContentFile
 from django.http import FileResponse
 from django.db import transaction
 from django.utils import timezone
@@ -68,49 +66,6 @@ def _eliminar_archivos(archivos):
             storage.delete(nombre)
         except Exception:
             logger.exception("No se pudo retirar el archivo %s", nombre)
-
-
-def _guardar_archivo(field, nombre, contenido, archivos_nuevos):
-    # Registrar el nombre antes de escribir permite retirar una escritura parcial.
-    ruta = field.field.generate_filename(field.instance, nombre)
-    archivos_nuevos.append((field.storage, ruta))
-    guardado = field.storage.save(ruta, ContentFile(contenido))
-    if guardado != ruta:
-        archivos_nuevos.append((field.storage, guardado))
-    field.name = guardado
-    field._committed = True
-
-
-def _crear_pdf(optimizacion, imagenes_base64, info_desperdicio, archivos_nuevos, numero_lista=None):
-    buffer = io.BytesIO()
-    resultado = generar_pdf(
-        optimizacion, imagenes_base64,
-        numero_lista=numero_lista if numero_lista is not None else optimizacion.pk,
-        info_desperdicio=info_desperdicio,
-        archivo_salida=buffer,
-    )
-    if resultado is None or not buffer.getvalue():
-        raise ValueError("No se generó el PDF de la optimización.")
-    _guardar_archivo(
-        optimizacion.pdf, f"opt_{optimizacion.pk}_{uuid4().hex}.pdf",
-        buffer.getvalue(), archivos_nuevos,
-    )
-
-
-def _generar_y_guardar_pdf(optimizacion, imagenes_base64, info_desperdicio, numero_lista=None):
-    nuevos = []
-    try:
-        with transaction.atomic():
-            anterior = Optimizacion.objects.select_for_update().get(pk=optimizacion.pk)
-            antiguos = [(anterior.pdf.storage, anterior.pdf.name)] if anterior.pdf else []
-            _crear_pdf(optimizacion, imagenes_base64, info_desperdicio, nuevos, numero_lista)
-            optimizacion.save(update_fields=['pdf'])
-            transaction.on_commit(lambda: _eliminar_archivos(antiguos))
-    except Exception:
-        _eliminar_archivos(nuevos)
-        optimizacion.refresh_from_db()
-        raise
-    return _ruta_pdf_en_disco(optimizacion)
 
 
 def nombre_descarga_pdf(numero_lista, optimizacion):
@@ -214,8 +169,11 @@ def persistir_resultado_optimizacion(optimizacion, imagenes_base64, info_desperd
     info = normalizar_info_desperdicio(info_desperdicio)
     if not imagenes_base64 or len(imagenes_base64) != len(info['info_tableros']):
         raise ValueError("Las imágenes no coinciden con los tableros del resultado.")
-    imagenes = [base64.b64decode(imagen, validate=True) for imagen in imagenes_base64]
-    nuevos = []
+    # Las imágenes se validan, pero no se guardan: la geometría es el resultado durable.
+    for imagen in imagenes_base64:
+        base64.b64decode(imagen, validate=True)
+    if any(not datos.get('vista_web') for datos in info['info_tableros']):
+        raise ValueError('El resultado requiere las coordenadas de todos los tableros.')
     pk_original = optimizacion.pk
     try:
         with transaction.atomic():
@@ -227,22 +185,21 @@ def persistir_resultado_optimizacion(optimizacion, imagenes_base64, info_desperd
                 antiguos = [(campo.storage, campo.name) for campo in (anterior.imagen, anterior.pdf) if campo]
                 antiguos.extend((tb.imagen.storage, tb.imagen.name) for tb in anterior.tableros.all() if tb.imagen)
 
-            version = uuid4().hex
             tableros = []
-            for imagen, datos in zip(imagenes, info['info_tableros']):
+            for datos in info['info_tableros']:
                 numero = datos['numero']
                 tablero = TableroOptimizacion(
                     optimizacion=optimizacion, numero=numero,
                     area_usada=datos.get('area_usada', 0), desperdicio=datos.get('desperdicio', 0),
                     porcentaje_uso=datos.get('porcentaje_uso', 0), num_piezas=datos.get('num_piezas', 0),
                 )
-                _guardar_archivo(tablero.imagen, f"opt_{optimizacion.pk}_{version}_tablero_{numero}.png", imagen, nuevos)
                 tableros.append(tablero)
-            _guardar_archivo(optimizacion.imagen, f"opt_{optimizacion.pk}_{version}_preview.png", imagenes[0], nuevos)
+            optimizacion.imagen = ''
+            optimizacion.pdf = ''
             optimizacion.aprovechamiento_total = aprovechamiento
             optimizacion.area_usada_total = info['area_usada_total']
             optimizacion.desperdicio_total = info['desperdicio_total']
-            optimizacion.num_tableros = len(imagenes)
+            optimizacion.num_tableros = len(info['info_tableros'])
             optimizacion.resultado_generado = True
             optimizacion.resultado_generado_en = timezone.now()
             optimizacion.resultado_extra = {
@@ -252,14 +209,12 @@ def persistir_resultado_optimizacion(optimizacion, imagenes_base64, info_desperd
                 str(tablero['numero']): tablero['vista_web']
                 for tablero in info['info_tableros'] if tablero.get('vista_web')
             }
-            _crear_pdf(optimizacion, imagenes_base64, info, nuevos, numero_lista)
             optimizacion.tableros.all().delete()
             for tablero in tableros:
                 tablero.save()
             optimizacion.save()
             transaction.on_commit(lambda: _eliminar_archivos(antiguos))
     except Exception:
-        _eliminar_archivos(nuevos)
         if pk_original is not None:
             optimizacion.refresh_from_db()
         else:
@@ -275,15 +230,26 @@ def persistir_resultado_optimizacion(optimizacion, imagenes_base64, info_desperd
 def obtener_resultado_optimizacion(optimizacion, numero_lista=None, persistir_si_falta=True):
     """
     Devuelve (imagenes_base64, aprovechamiento, info_desperdicio en cm²).
-    Usa datos persistidos o regenera (y opcionalmente persiste) para registros legacy.
+    Renderiza las coordenadas guardadas sin recalcular ni escribir archivos.
+    Solo calcula cuando el registro aún no tiene un resultado persistido.
     """
     if optimizacion.resultado_generado and optimizacion.tableros.exists():
+        info = _info_desperdicio_desde_modelo(optimizacion)
+        if all(tb.get('vista_web') for tb in info['info_tableros']):
+            from ..exports.board_png import generar_png_tablero
+            imagenes = []
+            for tb in info['info_tableros']:
+                buffer = generar_png_tablero(tb['vista_web'], optimizacion.unidad_medida or 'cm',
+                    optimizacion.margen_corte, tb['numero'], len(info['info_tableros']), tb,
+                    codigo=optimizacion.codigo, nombre=optimizacion.nombre)
+                imagenes.append(base64.b64encode(buffer.getvalue()).decode('ascii'))
+                buffer.close()
+            return imagenes, optimizacion.aprovechamiento_total, info
+        # Compatibilidad de lectura: no recalcular resultados históricos sin coordenadas.
         imagenes = _cargar_imagenes_persistidas(optimizacion)
         if imagenes is not None:
-            info = _info_desperdicio_desde_modelo(optimizacion)
-            if persistir_si_falta and not _ruta_pdf_en_disco(optimizacion) and imagenes:
-                _generar_y_guardar_pdf(optimizacion, imagenes, info, numero_lista=numero_lista)
             return imagenes, optimizacion.aprovechamiento_total, info
+        raise ValueError('El resultado guardado no tiene coordenadas ni imágenes disponibles.')
 
     imagenes, aprovechamiento, info = _regenerar_grafico(optimizacion)
     info = normalizar_info_desperdicio(info)
@@ -400,7 +366,7 @@ def pdf_path_para_template(optimizacion):
 
 
 def respuesta_pdf_optimizacion(optimizacion, numero_lista=None):
-    """Devuelve FileResponse del PDF persistido o lo regenera si falta."""
+    """Genera el PDF en memoria a partir de la distribución guardada."""
     nombre_descarga = nombre_descarga_pdf(numero_lista, optimizacion)
     # Exportar la presentación actual también para resultados con PDF antiguo.
     # No sustituir los archivos previos ni volver a ejecutar el algoritmo.

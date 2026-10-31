@@ -203,3 +203,5 @@ La base local y los archivos generados se excluyen del seguimiento de Git. Los c
 - [Preparación de producción: Render y Supabase](docs/PREPARACION_RENDER_SUPABASE.md)
 
 - [Datos locales y archivos generados fuera de Git](docs/CAMBIOS_DATOS_FUERA_GIT.md)
+
+- [Historial y exportaciones bajo demanda](docs/CAMBIOS_EXPORTACIONES_BAJO_DEMANDA.md)

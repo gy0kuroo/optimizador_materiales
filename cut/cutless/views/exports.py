@@ -60,7 +60,7 @@ def descargar_excel(request, pk):
 
 def api_tableros_optimizacion(request, pk):
     """
-    Imágenes guardadas y, opcionalmente, su presentación web compartida.
+    Imágenes generadas en memoria y presentación web de la geometría guardada.
     """
     from django.http import JsonResponse
 

@@ -301,7 +301,7 @@ def generar_pdf(optimizacion, imagenes_base64, numero_lista=None, info_desperdic
         return archivo_salida
     return os.path.join("pdfs", filename)
 
-def generar_pdf_presupuesto(presupuesto):
+def generar_pdf_presupuesto(presupuesto, archivo_salida=None):
     """
     Genera un PDF profesional del presupuesto.
     
@@ -322,9 +322,10 @@ def generar_pdf_presupuesto(presupuesto):
     
     filename = f"presupuesto_{presupuesto.pk}_{uuid4().hex}.pdf"
     filepath = os.path.join(settings.MEDIA_ROOT, "presupuestos", filename)
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    if archivo_salida is None:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
     
-    c = canvas.Canvas(filepath, pagesize=A4)
+    c = canvas.Canvas(archivo_salida if archivo_salida is not None else filepath, pagesize=A4)
     width, height = A4
     
     # === ENCABEZADO ===
@@ -546,9 +547,9 @@ def generar_pdf_presupuesto(presupuesto):
     c.drawCentredString(width / 2, 30, f"Generado el {timezone.now().strftime('%d/%m/%Y %H:%M')} - CutLess")
     
     c.save()
-    return filepath
+    return archivo_salida if archivo_salida is not None else filepath
 
-def generar_pdf_resumen_desperdicio(optimizaciones, estadisticas, periodo='todos'):
+def generar_pdf_resumen_desperdicio(optimizaciones, estadisticas, periodo='todos', archivo_salida=None):
     """
     Genera un PDF con el resumen de desperdicio desde estadísticas.
     
@@ -570,12 +571,13 @@ def generar_pdf_resumen_desperdicio(optimizaciones, estadisticas, periodo='todos
     
     filename = f"resumen_desperdicio_{timezone.now().strftime('%Y%m%d_%H%M%S')}.pdf"
     filepath = os.path.join(settings.MEDIA_ROOT, "pdfs", filename)
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    if archivo_salida is None:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
     
     # Retornar path relativo para compatibilidad con FileResponse
     relative_path = os.path.join("pdfs", filename)
     
-    c = canvas.Canvas(filepath, pagesize=A4)
+    c = canvas.Canvas(archivo_salida if archivo_salida is not None else filepath, pagesize=A4)
     width, height = A4
     
     # === PÁGINA 1: RESUMEN ===
@@ -682,4 +684,4 @@ def generar_pdf_resumen_desperdicio(optimizaciones, estadisticas, periodo='todos
     c.drawCentredString(width / 2, 30, f"Generado el {timezone.now().strftime('%d/%m/%Y %H:%M')} - CutLess")
     
     c.save()
-    return relative_path
+    return archivo_salida if archivo_salida is not None else relative_path

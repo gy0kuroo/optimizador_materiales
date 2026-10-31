@@ -122,9 +122,9 @@
         {% with optimizacion=item.optimizacion piezas=item.piezas %}
         <div class="col-md-6 col-lg-4 mb-4 fade-in">
           <div class="optimizacion-card">
-            {% if optimizacion.imagen %}
+            {% if item.miniatura or optimizacion.imagen %}
               <div class="chart-container chart-container-clickable"
-                   onclick="abrirModalImagen('{{ optimizacion.imagen.url }}', {{ optimizacion.id }}, '{{ optimizacion.codigo }}')">
+                   onclick="abrirModalImagen('{% if optimizacion.imagen %}{{ optimizacion.imagen.url }}{% endif %}', {{ optimizacion.id }}, '{{ optimizacion.codigo }}')">
                 {% if item.miniatura %}
                   <div class="chart-thumbnail chart-thumbnail-horizontal" role="img" aria-label="{{ optimizacion.codigo }}: primer tablero horizontal">
                     {% include 'cutless/includes/board-drawing.html' with item=item.miniatura unidad_medida=item.unidad_medida %}

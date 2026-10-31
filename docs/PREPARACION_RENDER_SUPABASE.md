@@ -2,7 +2,7 @@
 
 Fecha: 30 de octubre de 2026.
 
-Estado: guía de configuración pendiente de aplicar. No autoriza ni realiza un despliegue. La aplicación aún utiliza SQLite; faltan PostgreSQL, validación PostgreSQL y Linux. La adaptación de exportaciones bajo demanda corresponde al siguiente commit.
+Estado: guía de configuración pendiente de aplicar. No autoriza ni realiza un despliegue. La aplicación aún utiliza SQLite; faltan PostgreSQL, validación PostgreSQL y Linux. La lógica de exportación bajo demanda está implementada localmente; ver CAMBIOS_EXPORTACIONES_BAJO_DEMANDA.md.
 
 ## Directorio y comandos acordados
 
@@ -53,12 +53,12 @@ El código no carga archivos `.env` automáticamente. `.env.example` es una refe
 
 WhiteNoise sirve únicamente estáticos de la aplicación recopilados en STATIC_ROOT. No utilizarlo para publicar MEDIA_ROOT ni crear un alias público para PDF e imágenes de usuarios: la ruta /media/ comprueba autenticación y propietario.
 
-Se acordó conservar la geometría en la base y generar las exportaciones en memoria. La implementación se publicará en el siguiente commit; producción comenzará limpia.
+La base de datos conservará la geometría. Las vistas de exportación generan PDF, PNG y Excel en memoria; no se necesita almacenar permanentemente esas nuevas descargas. Los campos y las rutas de archivos históricos se mantienen por compatibilidad; producción comenzará limpia.
 
 ## Comprobación antes de autorizar el despliegue
 
 1. Retirada del seguimiento Git preparada: ver CAMBIOS_DATOS_FUERA_GIT.md. Por decisión del usuario se comenzará con datos limpios; no se migrará el histórico de prueba. Publicación autorizada junto con esta guía.
-2. Implementar exportaciones bajo demanda para no depender de archivos permanentes y validarlas en Render.
+2. Exportaciones bajo demanda implementadas: las nuevas descargas no requieren archivos permanentes. Validar sus recursos y funcionamiento en Render.
 3. Preparar PostgreSQL, revisar consultas exclusivas de SQLite y crear el esquema limpio mediante migraciones; sin importar el histórico de prueba.
 4. Instalar y verificar dependencias y Gunicorn en Linux.
 5. Ejecutar las comprobaciones Django de producción con las variables del entorno, sin mostrar secretos.

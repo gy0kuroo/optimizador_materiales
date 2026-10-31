@@ -1,8 +1,6 @@
-import os
 from datetime import timedelta
 from decimal import Decimal
 
-from django.conf import settings
 from django.contrib import messages
 from django.db.models import Avg
 from django.http import FileResponse
@@ -162,13 +160,12 @@ def exportar_pdf_desperdicio(request):
             'promedio_desperdicio': promedio_desperdicio,
         }
         
-        # Generar PDF
-        pdf_path = generar_pdf_resumen_desperdicio(optimizaciones_filtradas, estadisticas, periodo)
-        
-        # pdf_path ya es relativo (pdfs/filename.pdf)
-        full_path = os.path.join(settings.MEDIA_ROOT, pdf_path)
-        filename = os.path.basename(pdf_path)
-        return FileResponse(open(full_path, "rb"), as_attachment=True, filename=filename)
+        import io
+        buffer = io.BytesIO()
+        generar_pdf_resumen_desperdicio(optimizaciones_filtradas, estadisticas, periodo, archivo_salida=buffer)
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, content_type='application/pdf',
+                            filename='resumen_desperdicio.pdf')
         
     except Exception as e:
         messages.error(request, f"Error generando PDF: {e}")
