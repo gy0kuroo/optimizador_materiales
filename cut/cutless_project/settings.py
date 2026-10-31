@@ -37,6 +37,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -117,6 +118,15 @@ LOCALE_PATHS = [BASE_DIR / 'locale']
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {
+        'BACKEND': (
+            'django.contrib.staticfiles.storage.StaticFilesStorage'
+            if DEBUG else 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+        ),
+    },
+}
 # STATICFILES_DIRS se elimina porque los archivos estáticos están en las apps
 # STATICFILES_DIRS = [
 #     BASE_DIR / 'static',
@@ -154,3 +164,5 @@ EMAIL_USE_TLS = bool(EMAIL_HOST)
 EMAIL_HOST_USER = os.environ.get('CUTLESS_EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('CUTLESS_EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('CUTLESS_DEFAULT_FROM_EMAIL', 'CutLess <noreply@localhost>')
+
+# ALLOWED_HOSTS procede de configuracion_entorno; no sobrescribirlo aquí.

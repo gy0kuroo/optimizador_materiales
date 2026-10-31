@@ -2,6 +2,8 @@
 
 Fecha: 3 de octubre de 2026.
 
+Actualización del 30 de octubre: la guía vigente de preparación para Render y Supabase está en [PREPARACION_RENDER_SUPABASE.md](PREPARACION_RENDER_SUPABASE.md). Este documento conserva el detalle de la etapa inicial; las dependencias y tareas posteriores han avanzado.
+
 ## Objetivo
 
 Preparar una configuración diferenciada para producción y evitar que los archivos generados se puedan descargar públicamente por su ruta. Esta etapa no despliega el proyecto ni configura un servidor real.

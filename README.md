@@ -25,7 +25,7 @@ Si ya tienes el proyecto, abre la terminal en la carpeta que contiene este READM
 
 Abre [CutLess](http://127.0.0.1:8000/) o [iniciar sesión](http://127.0.0.1:8000/usuarios/login/). La aplicación está en `/cutless/` y el administrador Django en `/admin/`. Ctrl+C detiene el servidor.
 
-`createsuperuser` solicita las credenciales que elijas; no hay contraseña predeterminada. Es opcional si ya tienes una cuenta. El repositorio puede incluir una base histórica: migrar conserva sus registros.
+`createsuperuser` solicita las credenciales que elijas; no hay contraseña predeterminada. Es opcional si ya tienes una cuenta. La base local y los resultados de prueba se excluyen del repositorio; en una instalación nueva, migrate crea las tablas sin importar los registros locales anteriores.
 
 Para inicializar el catálogo compartido, opcionalmente:
 
@@ -148,7 +148,7 @@ El margen se introduce en milímetros: 0 permite corte sin separación; el valor
 - [Clientes: revisión visual y claridad](docs/CAMBIOS_VISUALES_CLIENTES.md)
 - [Materiales: revisión visual y claridad](docs/CAMBIOS_VISUALES_MATERIALES.md)
 
-Git ignora nuevos datos locales, pero los archivos ya versionados siguen en seguimiento. Su retirada y revisión del historial quedan pendientes.
+La base local y los archivos generados se excluyen del seguimiento de Git. Los commits anteriores conservan sus copias; no se reescribió el historial.
 
 - [Instalación de dependencias desde la raíz](docs/CAMBIOS_DEPENDENCIAS.md)
 - [Configuración inicial del espacio de trabajo](docs/CAMBIOS_CONFIGURACION_INICIAL.md)
@@ -193,3 +193,13 @@ Git ignora nuevos datos locales, pero los archivos ya versionados siguen en segu
 - [Foco correcto en las filas de piezas](docs/CAMBIOS_FOCO_FILAS_PIEZAS.md)
 
 - [Menú móvil y lupa reservada a escritorio](docs/CAMBIOS_MENU_LUPA_MOVIL.md)
+
+- [Hosts permitidos por entorno](docs/CAMBIOS_HOSTS_ENTORNO.md)
+
+- [Versión de Python para Render](docs/CAMBIOS_VERSION_PYTHON.md)
+
+- [Servidor de producción y archivos estáticos](docs/CAMBIOS_SERVIDOR_ESTATICOS.md)
+
+- [Preparación de producción: Render y Supabase](docs/PREPARACION_RENDER_SUPABASE.md)
+
+- [Datos locales y archivos generados fuera de Git](docs/CAMBIOS_DATOS_FUERA_GIT.md)

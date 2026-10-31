@@ -1,6 +1,12 @@
 # Framework web
 django==5.2.8
 
+# Servidor de producción (Gunicorn requiere un sistema Unix, como Render)
+gunicorn==26.2.0; sys_platform != "win32"
+
+# Archivos estáticos en producción
+whitenoise==6.12.0
+
 # Generación de gráficos
 matplotlib==3.9.2
 

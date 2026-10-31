@@ -1,5 +1,8 @@
 import tempfile
+import os
+import runpy
 from pathlib import Path
+from unittest.mock import patch
 
 from django.core.exceptions import ImproperlyConfigured
 from django.test import SimpleTestCase
@@ -8,6 +11,20 @@ from cutless_project.environment import configuracion_entorno
 
 
 class ConfiguracionEntornoTests(SimpleTestCase):
+    def test_settings_conserva_hosts_del_entorno(self):
+        archivo = Path(__file__).resolve().parents[2] / 'cutless_project' / 'settings.py'
+        casos = (
+            ({}, ['localhost', '127.0.0.1']),
+            ({'CUTLESS_ALLOWED_HOSTS': 'localhost, 192.0.2.10'}, ['localhost', '192.0.2.10']),
+            ({'CUTLESS_ENV': 'production', 'CUTLESS_ALLOWED_HOSTS': 'cutless.example.com'}, ['cutless.example.com']),
+        )
+        for variables, esperado in casos:
+            with self.subTest(variables=variables):
+                entorno = {'CUTLESS_SECRET_KEY': self.env['CUTLESS_SECRET_KEY'], **variables}
+                with patch.dict(os.environ, entorno, clear=True):
+                    config = runpy.run_path(str(archivo), run_name='cutless_project._settings_test')
+                self.assertEqual(config['ALLOWED_HOSTS'], esperado)
+
     def setUp(self):
         self.env = {
             'CUTLESS_ENV': 'production',
