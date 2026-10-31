@@ -1,0 +1,17 @@
+{% load l10n %}
+<div id="medidas-pred-container">
+  <label class="form-label mb-2" for="tableros-dropdown">Usar medidas habituales (opcional)</label>
+  <div class="dropdown mb-3">
+    <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button"
+            data-action="secondary" id="tableros-dropdown" data-bs-toggle="dropdown"
+            data-bs-auto-close="true" aria-expanded="false">Elegir medidas habituales</button>
+    <ul class="dropdown-menu w-100" aria-labelledby="tableros-dropdown">
+      {% for medida in tablero_form.medidas_habituales %}
+      <li><a class="dropdown-item" href="#" data-medida="{{ medida.clave }}"
+             data-nombre="{{ medida.nombre }}" data-ancho-cm="{{ medida.ancho_cm|unlocalize }}"
+             data-alto-cm="{{ medida.alto_cm|unlocalize }}">{{ medida.nombre }} ({{ medida.ancho_texto }}×{{ medida.alto_texto }} {{ medida.unidad }})</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+  <p class="form-text">Puedes elegir una medida habitual o escribir tus propias medidas abajo. Si hay un material coincidente, también se seleccionará y se actualizará su precio.</p>
+</div>

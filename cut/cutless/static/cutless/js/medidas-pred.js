@@ -1,16 +1,7 @@
 // Gestión de medidas predefinidas de tableros
 (function() {
-    // Medidas predefinidas en centímetros (unidad base)
-    const medidasPredefinidas = {
-        // Tableros muy comunes en carpintería (Chile / Latam)
-        'osb-122x244':      { ancho: 122, alto: 244, nombre: 'OSB' },
-        'mdf-122x244':      { ancho: 122, alto: 244, nombre: 'MDF' },
-        'mdf-183x244':      { ancho: 183, alto: 244, nombre: 'MDF' },
-        'melamina-183x244': { ancho: 183, alto: 244, nombre: 'Melamina' },
-        'contrachapado':    { ancho: 122, alto: 244, nombre: 'Contrachapado' },
-        'tablero-152x244':  { ancho: 152, alto: 244, nombre: 'Tablero' },
-        'custom': { ancho: null, alto: null, nombre: 'Personalizado' }
-    };
+    // Catálogo renderizado por Django: una sola fuente para HTML y comportamiento.
+    const medidasPredefinidas = {};
 
     // Funciones de conversión
     function convertirDesdeCm(valor, unidad) {
@@ -101,86 +92,19 @@
         const unidadSelector = document.getElementById('unidad_medida_selector');
         const container = document.getElementById('medidas-pred-container');
 
-        // Verificar que todos los elementos necesarios existan
-        if (!anchoInput || !altoInput || !container) {
-            console.log('Esperando elementos del DOM...', {
-                anchoInput: !!anchoInput,
-                altoInput: !!altoInput,
-                container: !!container
-            });
-            // Reintentar después de un breve delay si los elementos no están listos
-            setTimeout(inicializarDropdown, 100);
-            return;
-        }
+        const dropdownButton = document.getElementById('tableros-dropdown');
+        if (!anchoInput || !altoInput || !container || !dropdownButton) return;
+        if (container.dataset.medidasReady) return;
+        container.dataset.medidasReady = 'true';
 
-        console.log('Inicializando dropdown de tableros predefinidos...');
-
-        // Limpiar completamente el contenedor para eliminar cualquier código antiguo (botones)
-        container.innerHTML = '';
-
-        // Crear estructura del dropdown
-        // Crear label
-        const label = document.createElement('label');
-        label.className = 'form-label mb-2';
-        label.textContent = 'Usar medidas habituales (opcional)';
-        label.setAttribute('for', 'tableros-dropdown');
-        container.appendChild(label);
-
-        // Crear dropdown wrapper
-        const dropdownWrapper = document.createElement('div');
-        dropdownWrapper.className = 'dropdown mb-3';
-
-        const dropdownButton = document.createElement('button');
-        dropdownButton.className = 'btn btn-outline-secondary dropdown-toggle w-100';
-        dropdownButton.type = 'button';
-        dropdownButton.dataset.action = 'secondary';
-        dropdownButton.id = 'tableros-dropdown';
-        dropdownButton.setAttribute('data-bs-toggle', 'dropdown');
-        dropdownButton.setAttribute('data-bs-auto-close', 'true');
-        dropdownButton.setAttribute('aria-expanded', 'false');
-        dropdownButton.textContent = 'Elegir medidas habituales';
-
-        const dropdownMenu = document.createElement('ul');
-        dropdownMenu.className = 'dropdown-menu w-100';
-        dropdownMenu.setAttribute('aria-labelledby', 'tableros-dropdown');
-
-        dropdownWrapper.appendChild(dropdownButton);
-        dropdownWrapper.appendChild(dropdownMenu);
-        container.appendChild(dropdownWrapper);
-        const ayuda = document.createElement('p');
-        ayuda.className = 'form-text';
-        ayuda.textContent = 'Puedes elegir una medida habitual o escribir tus propias medidas abajo. Si hay un material coincidente, también se seleccionará y se actualizará su precio.';
-        container.appendChild(ayuda);
-
-        // Inicializar Bootstrap Dropdown
-        setTimeout(function() {
-            if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
-                new bootstrap.Dropdown(dropdownButton);
-            } else if (typeof window.bootstrap !== 'undefined' && window.bootstrap.Dropdown) {
-                new window.bootstrap.Dropdown(dropdownButton);
-            }
-        }, 100);
-
-        // Crear opciones del dropdown para cada medida
-        Object.keys(medidasPredefinidas).forEach(key => {
-            if (key === 'custom') return; // Saltar custom
-
-            const medida = medidasPredefinidas[key];
-            const listItem = document.createElement('li');
-
-            const dropdownItem = document.createElement('a');
-            dropdownItem.className = 'dropdown-item';
-            dropdownItem.href = '#';
-            dropdownItem.dataset.medida = key;
-            dropdownItem.dataset.anchoCm = medida.ancho;
-            dropdownItem.dataset.altoCm = medida.alto;
-
-            // Actualizar texto inicial (en cm por defecto)
-            const unidad = unidadSelector ? unidadSelector.value : 'cm';
-            const simbolo = obtenerSimbolo(unidad);
-            const anchoConvertido = convertirDesdeCm(medida.ancho, unidad);
-            const altoConvertido = convertirDesdeCm(medida.alto, unidad);
-            dropdownItem.textContent = `${medida.nombre} (${anchoConvertido}×${altoConvertido} ${simbolo})`;
+        container.querySelectorAll('.dropdown-item[data-medida]').forEach(dropdownItem => {
+            const key = dropdownItem.dataset.medida;
+            const medida = {
+                ancho: Number(dropdownItem.dataset.anchoCm),
+                alto: Number(dropdownItem.dataset.altoCm),
+                nombre: dropdownItem.dataset.nombre,
+            };
+            medidasPredefinidas[key] = medida;
 
             dropdownItem.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -222,8 +146,6 @@
                 buscarYSeleccionarMaterial(medida.nombre, medida.ancho, medida.alto);
             });
 
-            listItem.appendChild(dropdownItem);
-            dropdownMenu.appendChild(listItem);
         });
 
         // Actualizar dropdown cuando cambia la unidad
@@ -314,22 +236,7 @@
 
     // Ejecutar cuando el DOM y Bootstrap estén listos
     function iniciar() {
-        // Verificar si Bootstrap está disponible
-        if (typeof bootstrap === 'undefined' && typeof window.bootstrap === 'undefined') {
-            // Esperar a que Bootstrap se cargue
-            setTimeout(iniciar, 100);
-            return;
-        }
-
-        // Verificar si el DOM está listo
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(inicializarDropdown, 50);
-            });
-        } else {
-            // DOM ya está listo, ejecutar después de un pequeño delay
-            setTimeout(inicializarDropdown, 50);
-        }
+        inicializarDropdown();
     }
 
     // Función para buscar y seleccionar material correspondiente

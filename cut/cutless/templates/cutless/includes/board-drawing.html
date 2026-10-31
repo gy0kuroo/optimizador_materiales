@@ -1,8 +1,8 @@
 {% load l10n %}
         {% if item.plano %}{% with plano=item.plano %}
         <svg class="board-drawing" viewBox="{{ plano.origen|unlocalize }} {{ plano.origen|unlocalize }} {{ plano.vista_ancho|unlocalize }} {{ plano.vista_alto|unlocalize }}" role="img" aria-label="Tablero horizontal {{ plano.cota_ancho }} por {{ plano.cota_alto }} {{ unidad_medida }}" xmlns="http://www.w3.org/2000/svg">
-          <defs><pattern id="scrap-{{ item.numero }}" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M-1 1L1-1M0 4L4 0M3 5L5 3" stroke="#263238" stroke-width=".25" opacity=".35"/></pattern></defs>
-          <rect width="{{ plano.ancho|unlocalize }}" height="{{ plano.alto|unlocalize }}" fill="#F4F3EE" stroke="#4E2D01" stroke-width="2" vector-effect="non-scaling-stroke"/>
+          <defs><pattern id="scrap-{{ item.numero }}" width="4" height="4" patternUnits="userSpaceOnUse"><path class="board-scrap-hatch" d="M-1 1L1-1M0 4L4 0M3 5L5 3" stroke="#263238" stroke-width=".25" opacity=".35"/></pattern></defs>
+          <rect class="board-sheet-background" width="{{ plano.ancho|unlocalize }}" height="{{ plano.alto|unlocalize }}" fill="#F4F3EE" stroke="#4E2D01" stroke-width="2" vector-effect="non-scaling-stroke"/>
           <g class="board-dimensions" font-size="{{ plano.texto_cota|unlocalize }}" text-anchor="middle">
             <path d="M0 {{ plano.cota|unlocalize }}H{{ plano.ancho|unlocalize }}M0 {{ plano.cota|unlocalize }}V0M{{ plano.ancho|unlocalize }} {{ plano.cota|unlocalize }}V0M{{ plano.cota|unlocalize }} 0V{{ plano.alto|unlocalize }}M{{ plano.cota|unlocalize }} 0H0M{{ plano.cota|unlocalize }} {{ plano.alto|unlocalize }}H0" fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke"/>
             <text x="{{ plano.centro_x|unlocalize }}" y="{{ plano.cota|unlocalize }}" dy="-.45em">{{ plano.cota_ancho|floatformat:"-6" }} {{ unidad_medida }}</text>
@@ -12,7 +12,7 @@
           <rect x="{{ resto.x|unlocalize }}" y="{{ resto.y|unlocalize }}" width="{{ resto.ancho|unlocalize }}" height="{{ resto.alto|unlocalize }}" fill="url(#scrap-{{ item.numero }})"><title>Sobrante · {{ resto.medida_ancho }} × {{ resto.medida_alto }} {{ unidad_medida }}</title></rect>
           {% if resto.mostrar_texto %}
           <defs><clipPath id="scrap-label-{{ item.numero }}-{{ forloop.counter }}"><rect x="{{ resto.x|unlocalize }}" y="{{ resto.y|unlocalize }}" width="{{ resto.ancho|unlocalize }}" height="{{ resto.alto|unlocalize }}"/></clipPath></defs>
-          <text pointer-events="none" clip-path="url(#scrap-label-{{ item.numero }}-{{ forloop.counter }})" x="{{ resto.cx|unlocalize }}" y="{{ resto.cy|unlocalize }}" font-size="{{ resto.texto|unlocalize }}" text-anchor="middle" fill="#1C1008"><tspan x="{{ resto.cx|unlocalize }}" dy="-.25em">Sobrante</tspan><tspan x="{{ resto.cx|unlocalize }}" dy="1.3em">{{ resto.medida_ancho|floatformat:"-6" }} × {{ resto.medida_alto|floatformat:"-6" }} {{ unidad_medida }}</tspan></text>
+          <text class="board-scrap-label" pointer-events="none" clip-path="url(#scrap-label-{{ item.numero }}-{{ forloop.counter }})" x="{{ resto.cx|unlocalize }}" y="{{ resto.cy|unlocalize }}" font-size="{{ resto.texto|unlocalize }}" text-anchor="middle" fill="#1C1008"><tspan x="{{ resto.cx|unlocalize }}" dy="-.25em">Sobrante</tspan><tspan x="{{ resto.cx|unlocalize }}" dy="1.3em">{{ resto.medida_ancho|floatformat:"-6" }} × {{ resto.medida_alto|floatformat:"-6" }} {{ unidad_medida }}</tspan></text>
           {% endif %}
           {% endfor %}
           {% for pieza in plano.piezas %}

@@ -3,8 +3,7 @@
    Reset · Tipografía · Layout global · Texturas industriales
    ============================================================= */
 
-/* ── Fuentes (Google Fonts — se importan aquí o en el <head>) ─ */
-@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Fuentes originales alojadas localmente; fonts.css se carga desde base.html. */
 
 /* ── Reset base ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

@@ -1,14 +1,14 @@
 {% extends 'cutless/base.html' %}
-{% load static l10n %}
+{% load static l10n initial_assets %}
 {% block body_class %}dashboard-page{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'cutless/css/index.css' %}?v=buttons-1">
-<link rel="stylesheet" href="{% static 'cutless/css/dashboard-refinement.css' %}?v=buttons-1">
+<link rel="stylesheet" href="{% static 'cutless/css/dashboard-refinement.css' %}?v=initial-assets-1">
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'cutless/js/dimension-feedback.js' %}?v=4" defer></script>
+<script src="{% static 'cutless/js/dimension-feedback.js' %}?v=5" defer></script>
 <script src="{% static 'cutless/js/piece-formset.js' %}?v=1"></script>
 <!-- Datos de materiales serializados de forma segura -->
 {{ materiales_data|json_script:"materiales-data" }}
@@ -17,13 +17,13 @@
     const materialData = JSON.parse(document.getElementById('materiales-data').textContent);
     window.materialData = materialData;
 </script>
-<script src="{% static 'cutless/js/medidas-pred.js' %}?v=buttons-1"></script>
+<script src="{% static 'cutless/js/medidas-pred.js' %}?v=initial-render-1"></script>
 {% endblock %}
 
 {% block content %}
   <header class="page-header fade-in" data-intro-title="Optimizador de Cortes" data-intro="Aquí puedes crear nuevas optimizaciones de corte ingresando las dimensiones del tablero y las piezas que necesitas.">
     <div class="page-header__icon">
-      <img src="{% static 'cutless/icons/sierra-mesa.png' %}" alt="" class="cl-icon cl-icon--page" onerror="this.style.display='none'">
+      {% inline_asset 'icons/sierra-mesa.png' 'cl-icon cl-icon--page' 56 %}
     </div>
     <div class="page-header__text">
       <h1 class="page-title">Plan de corte</h1>
@@ -55,25 +55,25 @@
     <div class="card mb-4 fade-in" data-intro-title="Dimensiones del Tablero" data-intro="Ingresa el ancho y alto del tablero de madera. Puedes elegir la unidad de medida que prefieras (cm, m, pulgadas o pies).">
       <div class="card-header card-header-step card-header-step-primary text-white">
         <h4 class="card-header-title">
-          <img src="{% static 'cutless/icons/tablero-outline.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
+          {% inline_asset 'icons/tablero-outline.svg' 'cl-icon cl-icon--title' 26 %}
           1. Configura el tablero
         </h4>
         <button type="button" class="btn btn-sm btn-ayuda-seccion ms-auto btn-text"
                 onclick="iniciarTutorialSeccion('tablero')"
-                title="Ayuda sobre dimensiones del tablero" aria-label="Cómo medir el tablero" data-action="text" data-icon="help">
+                title="Ayuda sobre dimensiones del tablero" aria-label="Cómo medir el tablero" data-action="text" data-icon="help">{% button_icon 'help' %}
 
           Ayuda
         </button>
       </div>
       <div class="card-body">
-        <!-- Dropdown de tableros predefinidos se creará aquí dinámicamente -->
-        <div id="medidas-pred-container"></div>
+        {% include 'cutless/includes/medidas-habituales.html' %}
         <div class="row mb-3">
           <div class="col-md-12">
             <div class="d-flex align-items-end gap-3">
               <div class="flex-grow-1">
                 {{ tablero_form.unidad_medida.label_tag }}
                 {{ tablero_form.unidad_medida }}
+                <small id="dimension-unit-example" class="form-text text-muted">{{ tablero_form.ejemplo_unidad }}</small>
                 <small class="form-text text-muted">Esta unidad se aplica al tablero y a las piezas.</small>
                 {% if tablero_form.unidad_medida.errors %}
                   <div class="text-danger">{{ tablero_form.unidad_medida.errors }}</div>
@@ -85,15 +85,15 @@
         <div class="row">
           <div class="col-md-6 mb-3">
             <label for="ancho_tablero" id="label_ancho" class="fw-bold">
-              <img src="{% static 'cutless/icons/ancho.svg' %}" alt="" class="cl-icon cl-icon--label" onerror="this.style.display='none'">
-              Ancho del tablero <span id="unidad_ancho">(cm)</span>
+              {% inline_asset 'icons/ancho.svg' 'cl-icon cl-icon--label' 18 %}
+              Ancho del tablero <span id="unidad_ancho">({{ tablero_form.unidad_medida.value|default:"cm" }})</span>
             </label>
             <input type="number"
                    name="ancho"
                    id="ancho_tablero"
                    aria-describedby="ancho_rango"
                    class="form-control"
-                   placeholder="Ej: 122"
+                   placeholder="{{ tablero_form.ancho.field.widget.attrs.placeholder }}"
                    step="any"
                    value="{{ tablero_form.ancho.value|default_if_none:''|unlocalize }}">
             <small class="form-text text-muted">Medida horizontal del tablero completo.</small>
@@ -104,15 +104,15 @@
           </div>
           <div class="col-md-6 mb-3">
             <label for="alto_tablero" id="label_alto" class="fw-bold">
-              <img src="{% static 'cutless/icons/alto.png' %}" alt="" class="cl-icon cl-icon--label" onerror="this.style.display='none'">
-              Alto del tablero <span id="unidad_alto">(cm)</span>
+              {% inline_asset 'icons/alto.png' 'cl-icon cl-icon--label' 18 %}
+              Alto del tablero <span id="unidad_alto">({{ tablero_form.unidad_medida.value|default:"cm" }})</span>
             </label>
             <input type="number"
                    name="alto"
                    id="alto_tablero"
                    aria-describedby="alto_rango"
                    class="form-control"
-                   placeholder="Ej: 244"
+                   placeholder="{{ tablero_form.alto.field.widget.attrs.placeholder }}"
                    step="any"
                    value="{{ tablero_form.alto.value|default_if_none:''|unlocalize }}">
             <small class="form-text text-muted">Medida vertical del tablero completo.</small>
@@ -132,7 +132,7 @@
                      class="form-check-input"
                      {% if tablero_form.permitir_rotacion.value %}checked{% endif %}>
               <label class="form-check-label" for="{{ tablero_form.permitir_rotacion.id_for_label }}">
-                <img src="{% static 'cutless/icons/rotacion.svg' %}" alt="" class="cl-icon cl-icon--label" onerror="this.style.display='none'">
+                {% inline_asset 'icons/rotacion.svg' 'cl-icon cl-icon--label' 18 %}
                 Permitir girar las piezas
               </label>
               <small class="form-text text-muted d-block">El cálculo puede girarlas 90°. Desactívalo si debes respetar la veta o el dibujo.</small>
@@ -140,7 +140,7 @@
           </div>
           <div class="col-md-6 mb-3">
             <label for="{{ tablero_form.margen_corte.id_for_label }}">
-              <img src="{% static 'cutless/icons/margen.png' %}" alt="" class="cl-icon cl-icon--label" onerror="this.style.display='none'">
+              {% inline_asset 'icons/margen.png' 'cl-icon cl-icon--label' 18 %}
               Ancho de corte de la sierra <span class="unidad-margen">(mm)</span>
             </label>
             <input type="number"
@@ -170,12 +170,12 @@
       <div class="card-header card-header-step card-header-step-success text-white">
 
         <h4 class="card-header-title">
-          <img src="{% static 'cutless/icons/pieza.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
+          {% inline_asset 'icons/pieza.svg' 'cl-icon cl-icon--title' 26 %}
           2. Añade las piezas
         </h4>
         <button type="button" class="btn btn-sm btn-ayuda-seccion ms-auto btn-text"
                 onclick="iniciarTutorialSeccion('piezas')"
-                title="Cómo añadir piezas" aria-label="Cómo añadir piezas" data-action="text" data-icon="help">
+                title="Cómo añadir piezas" aria-label="Cómo añadir piezas" data-action="text" data-icon="help">{% button_icon 'help' %}
 
           Ayuda
         </button>
@@ -189,10 +189,10 @@
           <div class="pieza-form border rounded p-3 mb-3 bg-light">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h5 class="mb-0">
-                <img src="{% static 'cutless/icons/pieza-outline.png' %}" alt="" class="cl-icon cl-icon--mini" onerror="this.style.display='none'">
+                {% inline_asset 'icons/pieza-outline.png' 'cl-icon cl-icon--mini' 20 %}
                 Tipo de pieza <span class="pieza-numero">{{ forloop.counter }}</span>
               </h5>
-              <button type="button" class="btn btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %} btn-outline-danger" data-action="delete" data-icon="trash">
+              <button type="button" class="btn btn-sm remove-pieza {% if forloop.counter <= 1 %}remove-pieza-hidden{% endif %} btn-outline-danger" data-action="delete" data-icon="trash">{% button_icon 'trash' %}
 
                 Eliminar
               </button>
@@ -205,13 +205,13 @@
                 <small class="form-text text-muted">{{ form.nombre.help_text }}</small>
               </div>
               <div class="col-md-2 mb-3">
-                <label for="{{ form.ancho.id_for_label }}" class="fw-bold">Ancho <span class="unidad-pieza">(cm)</span></label>
+                <label for="{{ form.ancho.id_for_label }}" class="fw-bold">Ancho <span class="unidad-pieza">({{ tablero_form.unidad_medida.value|default:"cm" }})</span></label>
                 {{ form.ancho }}
                 <small id="{{ form.ancho.html_name }}_rango" class="form-text text-muted dimension-range" data-dimension-kind="pieza">{{ form.ancho.help_text }}</small>
                 {% if form.ancho.errors %}<div class="text-danger">{{ form.ancho.errors }}</div>{% endif %}
               </div>
               <div class="col-md-2 mb-3">
-                <label for="{{ form.alto.id_for_label }}" class="fw-bold">Alto <span class="unidad-pieza">(cm)</span></label>
+                <label for="{{ form.alto.id_for_label }}" class="fw-bold">Alto <span class="unidad-pieza">({{ tablero_form.unidad_medida.value|default:"cm" }})</span></label>
                 {{ form.alto }}
                 <small id="{{ form.alto.html_name }}_rango" class="form-text text-muted dimension-range" data-dimension-kind="pieza">{{ form.alto.help_text }}</small>
                 {% if form.alto.errors %}<div class="text-danger">{{ form.alto.errors }}</div>{% endif %}
@@ -230,7 +230,7 @@
           {% endfor %}
         </div>
 
-        <button type="button" id="add-pieza" class="btn btn-secondary" data-action="secondary" data-icon="plus">
+        <button type="button" id="add-pieza" class="btn btn-secondary" data-action="secondary" data-icon="plus">{% button_icon 'plus' %}
 
           Añadir otro tipo de pieza
         </button>
@@ -242,10 +242,10 @@
     <div class="card mb-4 fade-in">
       <div class="card-header card-header-step card-header-step-info text-white d-flex justify-content-between align-items-center">
         <h4 class="mb-0 card-header-title">
-          <img src="{% static 'cutless/icons/costos.svg' %}" alt="" class="cl-icon cl-icon--title" onerror="this.style.display='none'">
+          {% inline_asset 'icons/costos.svg' 'cl-icon cl-icon--title' 26 %}
           Costos y datos del proyecto <span class="text-annotation">(opcional)</span>
         </h4>
-        <button id="btnCostosToggle" class="btn btn-sm btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#costosCollapse" aria-expanded="false" aria-controls="costosCollapse" data-action="secondary" data-icon="plus">
+        <button id="btnCostosToggle" class="btn btn-sm btn-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#costosCollapse" aria-expanded="false" aria-controls="costosCollapse" data-action="secondary" data-icon="plus">{% button_icon 'plus' %}
           Añadir costos y datos
         </button>
       </div>
@@ -261,7 +261,7 @@
                 <div class="text-danger">{{ tablero_form.material.errors }}</div>
               {% endif %}
               <div class="mt-2">
-                {% if user.perfil.menu_visible.materiales %}<a href="{% url 'cutless:lista_materiales' %}" class="btn btn-sm btn-secondary" target="_blank" data-action="secondary" title="Se abre en otra pestaña" data-icon="chevron-right">
+                {% if user.perfil.menu_visible.materiales %}<a href="{% url 'cutless:lista_materiales' %}" class="btn btn-sm btn-secondary" target="_blank" data-action="secondary" title="Se abre en otra pestaña" data-icon="chevron-right">{% button_icon 'chevron-right' %}
 
                   Gestionar materiales
                 </a>{% endif %}
@@ -320,7 +320,7 @@
           </div>
           <div class="alert alert-info mb-0 mt-3">
             <div class="d-flex align-items-start">
-              <img src="{% static 'cutless/icons/tip.svg' %}" alt="" class="cl-icon cl-icon--alert me-2" onerror="this.style.display='none'">
+              {% inline_asset 'icons/tip.svg' 'cl-icon cl-icon--alert me-2' 18 %}
               <div>
                 <strong>Tip:</strong> Selecciona un material de tu biblioteca para llenar automáticamente el precio. El costo total se calculará después de la optimización.
               </div>
@@ -331,12 +331,12 @@
     </div>    {% endif %}
     <!-- Botón de envío -->
     <div class="form-action-bar fade-in">
-      <button type="submit" class="btn btn-cta-primary btn-primary" data-action="primary" data-icon="layout">
+      <button type="submit" class="btn btn-cta-primary btn-primary" data-action="primary" data-icon="layout">{% button_icon 'layout' %}
 
         Generar plan de corte
       </button>
       <p class="form-action-hint">
-        <img src="{% static 'cutless/icons/info.svg' %}" alt="" class="cl-icon cl-icon--hint" onerror="this.style.display='none'">
+        {% inline_asset 'icons/info.svg' 'cl-icon cl-icon--hint' 18 %}
         Cada fila describe un tipo de pieza. Indica en Cantidad cuántas piezas iguales necesitas. Puedes añadir hasta 20 tipos.
       </p>
     </div>

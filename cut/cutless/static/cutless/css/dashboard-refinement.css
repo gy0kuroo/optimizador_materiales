@@ -38,3 +38,7 @@ body.dashboard-page { font-family: var(--cl-font-body); font-size: 1.125rem; lin
 .dashboard-page .card-body select.form-select:hover, .dashboard-page #tableros-dropdown:hover { background-color: var(--cl-bg-surface) !important; border-color: var(--cl-border-strong) !important; color: var(--cl-text-primary) !important; }
 .dashboard-page #tableros-dropdown { background-color: var(--cl-bg-card) !important; color: var(--cl-text-primary) !important; }
 .dashboard-page .card-body select.form-select:focus { outline: 3px solid var(--cl-blue-light) !important; outline-offset: 2px; }
+/* Iconos presentes en el HTML inicial, con el mismo espacio que sus imágenes. */
+svg.cl-icon { display:inline-block; vertical-align:middle; flex-shrink:0; }
+svg.cl-icon--title { width:26px; height:26px; margin-right:8px; }
+svg.cl-icon--label { width:18px; height:18px; margin-right:6px; }

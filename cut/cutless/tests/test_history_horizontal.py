@@ -8,6 +8,34 @@ from cutless.models import Optimizacion
 
 
 class HistorialHorizontalTests(TestCase):
+    def test_acciones_historial_incluyen_iconos_en_html_inicial(self):
+        from html.parser import HTMLParser
+        class Icons(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.names = []
+            def handle_starttag(self, tag, attrs):
+                attrs = dict(attrs)
+                if tag == 'svg' and 'button-icon' in attrs.get('class', ''):
+                    self.names.append(attrs.get('data-icon'))
+        response = self.client.get(reverse('cutless:historial'))
+        parser = Icons()
+        parser.feed(response.content.decode())
+        for name in ('star', 'check', 'chevron-right', 'trash', 'help', 'edit', 'copy'):
+            self.assertIn(name, parser.names)
+        self.assertEqual(parser.names.count('star'), 1)
+
+    def test_favoritos_mantiene_estado_y_permite_actualizarlo(self):
+        self.opt.favorito = True
+        self.opt.save(update_fields=['favorito'])
+        response = self.client.get(reverse('cutless:historial'))
+        self.assertContains(response, 'data-favorito="true"')
+        self.assertContains(response, 'aria-label="Quitar de favoritos"')
+        response = self.client.post(reverse('cutless:toggle_favorito', args=[self.opt.pk]) + '?ajax=true')
+        self.assertEqual(response.status_code, 200)
+        self.opt.refresh_from_db()
+        self.assertFalse(self.opt.favorito)
+
     def setUp(self):
         self.user = User.objects.create_user('historial_horizontal')
         self.user.perfil.preferencias_menu = {'_inicio_completado': True}

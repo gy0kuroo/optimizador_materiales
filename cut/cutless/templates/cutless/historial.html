@@ -1,5 +1,5 @@
 {% extends 'cutless/base.html' %}
-{% load static %}
+{% load static initial_assets %}
 
 {% block body_class %}review-page history-page{% endblock %}
 
@@ -18,10 +18,10 @@
     <div class="page-header__actions">
       <button type="button" class="btn btn-ayuda-seccion btn-text"
               onclick="iniciarTutorialSeccion('historial')"
-              title="Ayuda sobre el historial" data-action="text" data-icon="help">
+              title="Ayuda sobre el historial" data-action="text" data-icon="help">{% button_icon 'help' %}
         Cómo usar el historial
       </button>
-      <a href="{% url 'cutless:index' %}" class="btn btn-primary" data-action="primary" data-icon="chevron-right">Preparar otro corte</a>
+      <a href="{% url 'cutless:index' %}" class="btn btn-primary" data-action="primary" data-icon="chevron-right">{% button_icon 'chevron-right' %}Preparar otro corte</a>
     </div>
   </header>
 
@@ -73,12 +73,12 @@
           </div>
         </div>
         <div class="col-md-3 mb-3 d-flex align-items-end">
-          <button type="submit" class="btn w-100 btn-primary" data-action="primary" data-icon="search">Buscar</button>
+          <button type="submit" class="btn w-100 btn-primary" data-action="primary" data-icon="search">{% button_icon 'search' %}Buscar</button>
         </div>
       </div>
       {% if nombre_pieza or fecha_desde or fecha_hasta or solo_favoritos == 'true' %}
       <div class="mt-2">
-        <a href="{% url 'cutless:historial' %}?ordenar_por={{ ordenar_por }}" class="btn btn-limpiar-filtros btn-secondary" data-action="secondary" data-icon="close">
+        <a href="{% url 'cutless:historial' %}?ordenar_por={{ ordenar_por }}" class="btn btn-limpiar-filtros btn-secondary" data-action="secondary" data-icon="close">{% button_icon 'close' %}
           Quitar filtros
         </a>
         {% if nombre_pieza %}
@@ -110,10 +110,10 @@
       {% csrf_token %}
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-          <button type="button" class="btn btn-sm btn-secondary" id="select-todos-btn" data-action="secondary" data-icon="check">Seleccionar todos</button>
-          <button type="button" class="btn btn-sm btn-secondary" id="deselect-todos-btn" data-action="secondary" data-icon="close">Quitar selección</button>
+          <button type="button" class="btn btn-sm btn-secondary" id="select-todos-btn" data-action="secondary" data-icon="check">{% button_icon 'check' %}Seleccionar todos</button>
+          <button type="button" class="btn btn-sm btn-secondary" id="deselect-todos-btn" data-action="secondary" data-icon="close">{% button_icon 'close' %}Quitar selección</button>
         </div>
-        <button type="submit" class="btn btn-danger" id="btn-borrar-seleccion" disabled data-action="delete" data-icon="trash">
+        <button type="submit" class="btn btn-danger" id="btn-borrar-seleccion" disabled data-action="delete" data-icon="trash">{% button_icon 'trash' %}
           Eliminar seleccionadas
         </button>
       </div>
@@ -149,12 +149,13 @@
                   </label>
                 </div>
                 <button type="button"
-                        class="btn btn-sm p-0 border-0 bg-transparent favorito-btn favorito-btn-inline align-self-center btn-secondary"
+                        class="btn btn-sm p-0 border-0 bg-transparent favorito-btn favorito-btn-inline align-self-center btn-secondary btn-icon"
                         data-optimizacion-id="{{ optimizacion.id }}"
                         data-favorito-url="{% url 'cutless:toggle_favorito' optimizacion.id %}"
                         data-favorito="{{ optimizacion.favorito|yesno:'true,false' }}"
                         title="{% if optimizacion.favorito %}Quitar de favoritos{% else %}Marcar como favorito{% endif %}"
-                        data-action="secondary" data-icon="star">
+                        aria-label="{% if optimizacion.favorito %}Quitar de favoritos{% else %}Marcar como favorito{% endif %}"
+                        data-action="secondary" data-icon="star">{% button_icon 'star' %}
                   {% if optimizacion.favorito %}
                     <span class="favorito-icon favorito-icon-active">⭐</span>
                   {% else %}
@@ -189,17 +190,17 @@
               </details>
               {% endif %}
 
-              <a href="{% url 'cutless:resultado' optimizacion.id %}" class="btn w-100 mt-3 btn-secondary" data-action="secondary" data-icon="eye">Ver resultado</a>
+              <a href="{% url 'cutless:resultado' optimizacion.id %}" class="btn w-100 mt-3 btn-secondary" data-action="secondary" data-icon="eye">{% button_icon 'eye' %}Ver resultado</a>
               <div class="action-buttons mt-3 d-flex gap-2 align-items-center">
                 <!-- Botones principales: Editar y Duplicar -->
                 <a href="{% url 'cutless:editar_optimizacion' optimizacion.id %}"
                    class="btn btn-action btn-edit flex-fill btn-secondary"
-                   title="Editar esta optimización" data-action="secondary" data-icon="edit">
+                   title="Editar esta optimización" data-action="secondary" data-icon="edit">{% button_icon 'edit' %}
                    Editar
                 </a>
                 <a href="{% url 'cutless:duplicar_optimizacion' optimizacion.id %}?ordenar_por={{ ordenar_por }}{% if solo_favoritos == 'true' %}&solo_favoritos=true{% endif %}{% if nombre_pieza %}&nombre_pieza={{ nombre_pieza|urlencode }}{% endif %}"
                    class="btn btn-action btn-duplicar flex-fill btn-secondary"
-                   title="Duplicar esta optimización" data-action="secondary" data-icon="copy">
+                   title="Duplicar esta optimización" data-action="secondary" data-icon="copy">{% button_icon 'copy' %}
                   <span class="icon"></span> Duplicar
                 </a>
 
@@ -210,7 +211,7 @@
                           id="dropdownMenuButton{{ optimizacion.id }}"
                           data-bs-toggle="dropdown"
                           aria-expanded="false"
-                          title="Más opciones" data-action="secondary" data-icon="more">
+                          title="Más opciones" data-action="secondary" data-icon="more">{% button_icon 'more' %}
                     <span class="icon"></span> Más opciones
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ optimizacion.id }}">
@@ -317,7 +318,7 @@
           Aún no tienes optimizaciones guardadas. Crea tu primera optimización para comenzar.
         {% endif %}
       </p>
-      <a href="{% url 'cutless:index' %}" class="btn btn-primary" data-action="primary" data-icon="chevron-right">
+      <a href="{% url 'cutless:index' %}" class="btn btn-primary" data-action="primary" data-icon="chevron-right">{% button_icon 'chevron-right' %}
         Preparar un corte
       </a>
     </div>
@@ -328,19 +329,19 @@
       <div class="modal-dialog modal-fullscreen"><div class="modal-content">
         <div class="modal-header">
           <h2 class="modal-title" id="modalImagenLabel">Tableros de la optimización</h2>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-action="secondary" data-icon="chevron-left">Volver al historial</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-action="secondary" data-icon="chevron-left">{% button_icon 'chevron-left' %}Volver al historial</button>
         </div>
         <div class="board-toolbar" aria-label="Controles del visor">
           <div class="history-board-navigation button-pagination">
-            <button type="button" id="history-board-previous" class="btn btn-secondary btn-icon" data-action="secondary" aria-label="Tablero anterior" data-icon="chevron-left"></button>
+            <button type="button" id="history-board-previous" class="btn btn-secondary btn-icon" data-action="secondary" aria-label="Tablero anterior" data-icon="chevron-left">{% button_icon 'chevron-left' %}</button>
             <output id="history-board-position" aria-live="polite">Cargando…</output>
-            <button type="button" id="history-board-next" class="btn btn-secondary btn-icon" data-action="secondary" aria-label="Tablero siguiente" data-icon="chevron-right"></button>
+            <button type="button" id="history-board-next" class="btn btn-secondary btn-icon" data-action="secondary" aria-label="Tablero siguiente" data-icon="chevron-right">{% button_icon 'chevron-right' %}</button>
           </div>
           <div class="history-board-navigation" aria-label="Ampliación del tablero">
-            <button type="button" id="history-board-out" class="btn btn-secondary btn-icon" aria-label="Reducir tablero" data-action="secondary" data-icon="minus"></button>
+            <button type="button" id="history-board-out" class="btn btn-secondary btn-icon" aria-label="Reducir tablero" data-action="secondary" data-icon="minus">{% button_icon 'minus' %}</button>
             <output id="history-board-zoom">100%</output>
-            <button type="button" id="history-board-in" class="btn btn-secondary btn-icon" aria-label="Ampliar tablero" data-action="secondary" data-icon="plus"></button>
-            <button type="button" id="history-board-fit" class="btn btn-secondary" data-action="secondary" data-icon="expand">Ajustar tablero</button>
+            <button type="button" id="history-board-in" class="btn btn-secondary btn-icon" aria-label="Ampliar tablero" data-action="secondary" data-icon="plus">{% button_icon 'plus' %}</button>
+            <button type="button" id="history-board-fit" class="btn btn-secondary" data-action="secondary" data-icon="expand">{% button_icon 'expand' %}Ajustar tablero</button>
           </div>
         </div>
         <div class="modal-body history-landscape-body">

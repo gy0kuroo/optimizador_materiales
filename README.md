@@ -209,3 +209,11 @@ La base local y los archivos generados se excluyen del seguimiento de Git. Los c
 - [Preparación local de PostgreSQL y despliegue](docs/CAMBIOS_PREPARACION_POSTGRESQL.md)
 
 - [Medidas: límites y avisos por unidad](docs/CAMBIOS_MENSAJES_MEDIDAS.md)
+
+- [Fondo de tableros según el tema](docs/CAMBIOS_FONDO_TABLEROS_TEMA.md)
+
+- [Presentación inicial sin reconstrucción tardía](docs/CAMBIOS_PRESENTACION_INICIAL.md)
+
+- [Carga estable de tipografía](docs/CAMBIOS_CARGA_TIPOGRAFIA.md)
+
+- [Texto e iconos presentes desde el HTML inicial](docs/CAMBIOS_ICONOS_TEXTO_INICIAL.md)

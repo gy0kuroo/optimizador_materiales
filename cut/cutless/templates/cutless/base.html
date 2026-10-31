@@ -1,9 +1,32 @@
-{% load static %}
+{% load static initial_assets %}
 <!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="es" data-theme="{% if user.is_authenticated and user.perfil.tema_preferido == 'dark' %}dark{% else %}light{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      // Resolver el tema antes de los estilos y del primer pintado del contenido.
+      (() => {
+        let choice = "{% if user.is_authenticated %}{{ user.perfil.tema_preferido|default:'auto'|escapejs }}{% endif %}";
+        if (!choice) {
+          try { choice = localStorage.getItem('theme') || 'auto'; }
+          catch (_) { choice = 'auto'; }
+        }
+        if (!['light', 'dark', 'auto'].includes(choice)) choice = 'auto';
+        const resolved = choice === 'auto'
+          ? (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          : choice;
+        document.documentElement.setAttribute('data-theme', resolved);
+        document.documentElement.setAttribute('data-theme-choice', choice);
+        let fontSize = "{% if user.is_authenticated %}{{ user.perfil.tamanio_fuente|default:'normal'|escapejs }}{% endif %}";
+        if (!fontSize) {
+          try { fontSize = localStorage.getItem('fontSize') || 'normal'; }
+          catch (_) { fontSize = 'normal'; }
+        }
+        const sizes = {small: '15px', normal: '16px', large: '18px', xlarge: '20px'};
+        document.documentElement.style.fontSize = Object.hasOwn(sizes, fontSize) ? sizes[fontSize] : sizes.normal;
+      })();
+    </script>
     <title>{% block title %}CutLess{% endblock %}</title>
 
     <!-- Favicon -->
@@ -17,7 +40,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@7.2.0/minified/introjs.min.css">
 
     <!-- CSS Personalizado -->
-    <link rel="stylesheet" href="{% static 'cutless/css/main.css' %}">
+    <link rel="preload" href="{% static 'cutless/fonts/barlow-400-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'cutless/fonts/barlow-500-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'cutless/fonts/barlow-600-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'cutless/fonts/barlow-700-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'cutless/fonts/barlow-800-latin.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{% static 'cutless/css/fonts.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'cutless/css/main.css' %}?v=local-fonts-1">
     <link rel="stylesheet" href="{% static 'cutless/css/palette.css' %}">
     <link rel="stylesheet" href="{% static 'cutless/css/ui.css' %}?v=panels-1">
     <link rel="stylesheet" href="{% static 'cutless/css/accessibility.css' %}?v=panels-1">
@@ -30,7 +59,7 @@
     <link rel="stylesheet" href="{% static 'cutless/css/reforma-visual.css' %}?v=names-1">
     <link rel="stylesheet" href="{% static 'cutless/css/buttons.css' %}?v=review-2">
     <link rel="stylesheet" href="{% static 'cutless/css/loading.css' %}?v=5">
-    <link rel="stylesheet" href="{% static 'cutless/css/theme-colors.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'cutless/css/theme-colors.css' %}?v=4">
     <link rel="stylesheet" href="{% static 'cutless/css/mobile-navigation.css' %}?v=1">
 </head>
 <body data-button-icons="{% static 'cutless/button-icons.svg' %}?v=2" data-app-shell="{{ user.is_authenticated|yesno:'true,false' }}" class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
@@ -992,11 +1021,11 @@
     <aside id="reading-magnifier" class="reading-magnifier" aria-label="Herramienta de ampliación">
       <div id="magnifier-hint" class="reading-magnifier__hint" hidden>Mueve el cursor para ampliar. Pulsa Esc para cerrar.</div>
       <div id="magnifier-options" class="reading-magnifier__controls" hidden>
-        <button type="button" class="btn btn-secondary btn-icon" data-magnifier-step="-0.5" aria-label="Reducir ampliación" data-action="secondary" data-icon="minus"></button>
+        <button type="button" class="btn btn-secondary btn-icon" data-magnifier-step="-0.5" aria-label="Reducir ampliación" data-action="secondary" data-icon="minus">{% button_icon 'minus' %}</button>
         <output id="magnifier-level" class="reading-magnifier__level" aria-label="Nivel de ampliación">200%</output>
-        <button type="button" class="btn btn-secondary btn-icon" data-magnifier-step="0.5" aria-label="Aumentar ampliación" data-action="secondary" data-icon="plus"></button>
+        <button type="button" class="btn btn-secondary btn-icon" data-magnifier-step="0.5" aria-label="Aumentar ampliación" data-action="secondary" data-icon="plus">{% button_icon 'plus' %}</button>
       </div>
-      <button type="button" id="magnifier-toggle" class="btn btn-secondary" aria-pressed="false" aria-controls="magnifier-options magnifier-lens" data-action="secondary" data-icon="search">
+      <button type="button" id="magnifier-toggle" class="btn btn-secondary" aria-pressed="false" aria-controls="magnifier-options magnifier-lens" data-action="secondary" data-icon="search">{% button_icon 'search' %}
         Lupa
       </button>
       <span id="magnifier-status" class="visually-hidden" role="status"></span>

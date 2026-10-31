@@ -63,9 +63,7 @@
   const selector = document.getElementById('unidad_medida_selector');
   if (!selector) return;
   const form = selector.form;
-  const example = document.createElement('small');
-  example.className = 'form-text text-muted';
-  selector.insertAdjacentElement('afterend', example);
+  const example = document.getElementById('dimension-unit-example');
   const dimensions = () => form.querySelectorAll('#ancho_tablero, #alto_tablero, #margen_corte, input[name$="-ancho"], input[name$="-alto"], input[name$="-cantidad"]');
   function update(field, show = false) {
     const unit = selector.value || 'cm';
@@ -92,7 +90,7 @@
     }
     const unit = selector.value || 'cm';
     const factor = factors[unit] || 1;
-    example.textContent = `Escribe las medidas del tablero y de las piezas en ${unit}. Ejemplo: un tablero de 122 × 244 cm se ingresa como ${number(Math.round(122 / factor * 1e6) / 1e6)} × ${number(Math.round(244 / factor * 1e6) / 1e6)} ${unit}. El ancho de sierra siempre se ingresa en mm.`;
+    if (example) example.textContent = `Escribe las medidas del tablero y de las piezas en ${unit}. Ejemplo: un tablero de 122 × 244 cm se ingresa como ${number(Math.round(122 / factor * 1e6) / 1e6)} × ${number(Math.round(244 / factor * 1e6) / 1e6)} ${unit}. El ancho de sierra siempre se ingresa en mm.`;
   }
   form.addEventListener('input', event => {
     if ([...dimensions()].includes(event.target)) update(event.target);

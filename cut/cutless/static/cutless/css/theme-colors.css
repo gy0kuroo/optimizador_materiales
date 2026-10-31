@@ -110,12 +110,17 @@
 :is([data-theme="light"],[data-theme="dark"]) body .alert-danger { background:var(--danger-tint)!important; }
 :is([data-theme="light"],[data-theme="dark"]) body .alert-warning { background:var(--warning-tint)!important; }
 :is([data-theme="light"],[data-theme="dark"]) body .page-item.active .page-link { background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
+:is([data-theme="light"],[data-theme="dark"]) body .page-item.disabled .page-link,
+:is([data-theme="light"],[data-theme="dark"]) body .page-link.disabled {
+  background:var(--surface-subtle); color:var(--text-muted); border-color:var(--border);
+  box-shadow:none; pointer-events:none;
+}
 :is([data-theme="light"],[data-theme="dark"]) body .workflow-step__num { color:var(--accent)!important; border-color:var(--accent)!important; }
 :is([data-theme="light"],[data-theme="dark"]) body .workflow-step:is(.active,[aria-current="step"]) .workflow-step__num { background:var(--accent); color:var(--on-accent)!important; }
 /* Los iconos rasterizados heredados usan la tinta ámbar en superficies oscuras. */
 [data-theme="dark"] body :is(.card-header,.pieza-form h5) img.cl-icon { filter:brightness(0) saturate(100%) invert(70%) sepia(41%) saturate(807%) hue-rotate(350deg) brightness(94%) contrast(88%); }
 :is([data-theme="light"],[data-theme="dark"]) body .donut-track { stroke:var(--border); }
-/* No se alteran .donut-value (escala rojo-verde) ni los rellenos de .board-drawing. */
+/* Se conservan la escala rojo-verde de .donut-value y los colores de las piezas. */
 
 /* Avisos: superficie y texto semánticos, sin franja lateral heredada. */
 [data-theme] body .alert {
@@ -149,4 +154,14 @@
 }
 [data-theme] body .btn.btn-outline-danger:not(:disabled):not([aria-disabled="true"]):not(.disabled):active {
   background:var(--danger)!important; border-color:var(--danger)!important; color:var(--on-semantic)!important; filter:none!important;
+}
+
+/* Superficie y sobrantes del plano SVG: las piezas conservan sus colores. */
+[data-theme="dark"] .board-drawing .board-sheet-background { fill:var(--surface-subtle); stroke:var(--text-muted); }
+[data-theme="dark"] .board-drawing .board-scrap-hatch { stroke:var(--text-secondary); opacity:.45; }
+[data-theme="dark"] .board-drawing .board-scrap-label { fill:var(--text); }
+@media print {
+  [data-theme] .board-drawing .board-sheet-background { fill:#F4F3EE; stroke:#4E2D01; }
+  [data-theme] .board-drawing .board-scrap-hatch { stroke:#263238; opacity:.35; }
+  [data-theme] .board-drawing .board-scrap-label { fill:#1C1008; }
 }

@@ -28,6 +28,11 @@ class MedidasClarasMixin:
             field.widget.attrs['aria-describedby'] = f'{self.add_prefix(nombre)}_rango'
             field.help_text = self.ayuda_medidas()
             field.label = f'{nombre.capitalize()} del {self.objeto_medida} ({self.unidad_medidas})'
+            if self.objeto_medida == 'tablero':
+                from ..units import convertir_desde_cm
+                ejemplo = convertir_desde_cm(122 if nombre == 'ancho' else 244, self.unidad_medidas)
+                texto = format(ejemplo, '.6f').rstrip('0').rstrip('.').replace('.', ',')
+                field.widget.attrs['placeholder'] = f'Ej.: {texto}'
 
     def ayuda_medidas(self):
         from decimal import Decimal, ROUND_CEILING, ROUND_FLOOR
@@ -66,6 +71,33 @@ class TableroForm(MedidasClarasMixin, NombreOptimizacionForm):
         ('ft', 'Pies (ft)'),
     ]
     
+    @property
+    def medidas_habituales(self):
+        from ..units import convertir_desde_cm
+        unidad = self['unidad_medida'].value() or 'cm'
+        if unidad not in dict(self.UNIDADES_CHOICES):
+            unidad = 'cm'
+        catalogo = [
+            ('osb-122x244', 'OSB', 122, 244),
+            ('mdf-122x244', 'MDF', 122, 244),
+            ('mdf-183x244', 'MDF', 183, 244),
+            ('melamina-183x244', 'Melamina', 183, 244),
+            ('contrachapado', 'Contrachapado', 122, 244),
+            ('tablero-152x244', 'Tablero', 152, 244),
+        ]
+        return [dict(clave=clave, nombre=nombre, ancho_cm=ancho, alto_cm=alto,
+                     ancho=convertir_desde_cm(ancho, unidad), alto=convertir_desde_cm(alto, unidad), unidad=unidad,
+                     ancho_texto=format(convertir_desde_cm(ancho, unidad), '.6f').rstrip('0').rstrip('.').replace('.', ','),
+                     alto_texto=format(convertir_desde_cm(alto, unidad), '.6f').rstrip('0').rstrip('.').replace('.', ','))
+                for clave, nombre, ancho, alto in catalogo]
+
+    @property
+    def ejemplo_unidad(self):
+        medida = self.medidas_habituales[0]
+        return (f"Escribe las medidas del tablero y de las piezas en {medida['unidad']}. "
+                f"Ejemplo: un tablero de 122 × 244 cm se ingresa como {medida['ancho_texto']} × {medida['alto_texto']} {medida['unidad']}. "
+                'El ancho de sierra siempre se ingresa en mm.')
+
     unidad_medida = forms.ChoiceField(
         label="Unidad de medida",
         choices=UNIDADES_CHOICES,
