@@ -13,7 +13,51 @@ class NombreOptimizacionForm(forms.Form):
         return ' '.join(self.cleaned_data.get('nombre_optimizacion', '').split())
 
 
-class TableroForm(NombreOptimizacionForm):
+class MedidasClarasMixin:
+    minimo_cm = 10
+    maximo_cm = 300
+    objeto_medida = 'tablero'
+
+    def configurar_medidas(self, unidad=None):
+        self.unidad_medidas = unidad or (self.data.get('unidad_medida') if self.is_bound else self['unidad_medida'].value()) or 'cm'
+        if self.unidad_medidas not in ('cm', 'm', 'mm', 'in', 'ft'):
+            self.unidad_medidas = 'cm'
+        for nombre in ('ancho', 'alto'):
+            field = self.fields[nombre]
+            field.error_messages['invalid'] = f'Escribe un número válido para el {nombre} del {self.objeto_medida}, en {self.unidad_medidas}.'
+            field.widget.attrs['aria-describedby'] = f'{self.add_prefix(nombre)}_rango'
+            field.help_text = self.ayuda_medidas()
+            field.label = f'{nombre.capitalize()} del {self.objeto_medida} ({self.unidad_medidas})'
+
+    def ayuda_medidas(self):
+        from decimal import Decimal, ROUND_CEILING, ROUND_FLOOR
+        factor = Decimal({'cm': '1', 'm': '100', 'mm': '0.1', 'in': '2.54', 'ft': '30.48'}[self.unidad_medidas])
+        def limite(valor, redondeo):
+            numero = (Decimal(str(valor)) / factor).quantize(Decimal('0.000001'), rounding=redondeo)
+            return format(numero.normalize(), 'f').replace('.', ',')
+        minimo = limite(self.minimo_cm, ROUND_CEILING)
+        maximo = limite(self.maximo_cm, ROUND_FLOOR)
+        return f'Rango permitido: de {minimo} a {maximo} {self.unidad_medidas} por lado.'
+
+    def validar_medidas(self, cleaned_data, obligatorias=True):
+        from ..units import convertir_a_cm
+        for nombre in ('ancho', 'alto'):
+            if nombre in self.errors:
+                continue
+            valor = cleaned_data.get(nombre)
+            if valor is None:
+                if obligatorias:
+                    self.add_error(nombre, f'Escribe el {nombre} del {self.objeto_medida} en {self.unidad_medidas}.')
+                continue
+            cm = convertir_a_cm(valor, self.unidad_medidas)
+            if cm < self.minimo_cm - 1e-9 or cm > self.maximo_cm + 1e-9:
+                ingresado = format(valor, '.12g').replace('.', ',')
+                motivo = 'demasiado alto' if cm > self.maximo_cm else 'demasiado bajo'
+                self.add_error(nombre, f'El {nombre} del {self.objeto_medida} es {motivo}: ingresaste {ingresado} {self.unidad_medidas}. {self.ayuda_medidas()} Revisa el valor o la unidad seleccionada.')
+        return cleaned_data
+
+
+class TableroForm(MedidasClarasMixin, NombreOptimizacionForm):
     UNIDADES_CHOICES = [
         ('cm', 'Centímetros (cm)'),
         ('m', 'Metros (m)'),
@@ -37,8 +81,6 @@ class TableroForm(NombreOptimizacionForm):
     
     ancho = forms.FloatField(
         label="Ancho del tablero",
-        min_value=0.1,
-        max_value=1000,
         required=False,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
@@ -51,8 +93,6 @@ class TableroForm(NombreOptimizacionForm):
     
     alto = forms.FloatField(
         label="Alto del tablero",
-        min_value=0.1,
-        max_value=1000,
         required=False,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
@@ -78,13 +118,19 @@ class TableroForm(NombreOptimizacionForm):
         label="Margen de corte (kerf)",
         min_value=0,
         max_value=10,  # Máximo 10 mm
+        error_messages={
+            'min_value': 'El ancho de sierra no puede ser negativo. Rango permitido: de 0 a 10 mm; 0 significa sin separación.',
+            'max_value': 'El ancho de sierra supera el máximo permitido de 10 mm. Revisa el valor; este campo siempre se expresa en mm.',
+            'invalid': 'Escribe un número válido para el ancho de sierra, en mm.',
+        },
         initial=3,  # 3 mm es un valor típico
         required=False,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
             'placeholder': '3',
             'step': '0.1',
-            'id': 'margen_corte'
+            'id': 'margen_corte',
+            'aria-describedby': 'margen_corte_rango',
         }),
         help_text="Grosor de la hoja de sierra en milímetros (típicamente 2-4 mm)"
     )
@@ -309,51 +355,15 @@ class TableroForm(NombreOptimizacionForm):
             self.fields['cliente'].queryset = Cliente.objects.none()
             self.fields['proyecto'].queryset = Proyecto.objects.none()
     
-    def clean(self):
-        from ..units import convertir_a_cm
-        
-        cleaned_data = super().clean()
-        ancho = cleaned_data.get('ancho')
-        alto = cleaned_data.get('alto')
-        unidad = cleaned_data.get('unidad_medida', 'cm')
-        
-        # Validar que ambos campos estén presentes
-        if not ancho:
-            raise forms.ValidationError("El ancho del tablero es requerido.")
-        if not alto:
-            raise forms.ValidationError("El alto del tablero es requerido.")
-        
-        # Convertir a cm para validar rangos (mínimo 50cm, máximo 300cm)
-        ancho_cm = convertir_a_cm(ancho, unidad)
-        alto_cm = convertir_a_cm(alto, unidad)
-        
-        # Validar rangos en cm (equivalente a 10-300 cm) - Reducido el mínimo para permitir tableros más pequeños
-        if ancho_cm < 10 or ancho_cm > 300:
-            raise forms.ValidationError(f"El ancho debe estar entre {self._get_min_unidad(unidad)} y {self._get_max_unidad(unidad)} {unidad}.")
-        if alto_cm < 10 or alto_cm > 300:
-            raise forms.ValidationError(f"El alto debe estar entre {self._get_min_unidad(unidad)} y {self._get_max_unidad(unidad)} {unidad}.")
-        
-        # Validar margen de corte (siempre en mm, máximo 10 mm)
-        margen = cleaned_data.get('margen_corte')
-        if margen is not None:
-            if margen < 0:
-                raise forms.ValidationError("El margen de corte no puede ser negativo.")
-            if margen > 10:  # Máximo 10 mm
-                raise forms.ValidationError("El margen de corte no puede ser mayor a 10 mm.")
-        
-        return cleaned_data
-    
-    def _get_min_unidad(self, unidad):
-        """Retorna el valor mínimo en la unidad especificada (equivalente a 10cm)"""
-        from ..units import convertir_desde_cm
-        return round(convertir_desde_cm(10, unidad), 2)
-    
-    def _get_max_unidad(self, unidad):
-        """Retorna el valor máximo en la unidad especificada (equivalente a 300cm)"""
-        from ..units import convertir_desde_cm
-        return round(convertir_desde_cm(300, unidad), 2)
+        self.configurar_medidas()
 
-class PiezaForm(forms.Form):
+    def clean(self):
+        return self.validar_medidas(super().clean())
+
+class PiezaForm(MedidasClarasMixin, forms.Form):
+    minimo_cm = 0.1
+    objeto_medida = 'pieza'
+
     nombre = forms.CharField(
         label="Nombre de la pieza",
         max_length=50,
@@ -366,8 +376,6 @@ class PiezaForm(forms.Form):
     )
     ancho = forms.FloatField(
         label="Ancho (cm)",
-        min_value=0.1,
-        max_value=300,
         required=False,  # Hacerlo opcional
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
@@ -377,8 +385,6 @@ class PiezaForm(forms.Form):
     )
     alto = forms.FloatField(
         label="Alto (cm)",
-        min_value=0.1,
-        max_value=300,
         required=False,  # Hacerlo opcional
         widget=forms.NumberInput(attrs={
             'class': 'form-control',
@@ -390,6 +396,11 @@ class PiezaForm(forms.Form):
         label="Cantidad",
         min_value=1,
         max_value=100,
+        error_messages={
+            'min_value': 'La cantidad debe ser de al menos 1 pieza por tipo.',
+            'max_value': 'La cantidad máxima es de 100 piezas iguales por tipo. Reduce la cantidad antes de generar el plan.',
+            'invalid': 'Escribe una cantidad entera de 1 a 100 piezas por tipo.',
+        },
         initial=1,
         required=False,  # Hacerlo opcional
         widget=forms.NumberInput(attrs={
@@ -398,30 +409,18 @@ class PiezaForm(forms.Form):
         })
     )
 
+    def __init__(self, *args, **kwargs):
+        unidad = kwargs.pop('unidad_medida', None)
+        super().__init__(*args, **kwargs)
+        self.configurar_medidas(unidad or (self.data.get('unidad_medida') if self.is_bound else 'cm') or 'cm')
+        self.fields['cantidad'].widget.attrs['aria-describedby'] = f'{self.add_prefix("cantidad")}_rango'
+
     def clean(self):
         cleaned_data = super().clean()
-        ancho = cleaned_data.get('ancho')
-        alto = cleaned_data.get('alto')
-        cantidad = cleaned_data.get('cantidad')
-        nombre = cleaned_data.get('nombre', '').strip()
-        
-        # Si TODOS los campos están vacíos, el formulario es válido (formulario vacío)
-        todos_vacios = not ancho and not alto and not cantidad and not nombre
-        
-        if todos_vacios:
-            # Formulario completamente vacío - es válido, se ignorará
-            return cleaned_data
-        
-        # Si alguno está lleno, ancho y alto son requeridos
-        if not ancho:
-            raise forms.ValidationError("El ancho es requerido si ingresas una pieza.")
-        if not alto:
-            raise forms.ValidationError("El alto es requerido si ingresas una pieza.")
-        if not cantidad:
-            cleaned_data['cantidad'] = 1  # Valor por defecto
-        
-        if ancho and alto:
-            if ancho <= 0 or alto <= 0:
-                raise forms.ValidationError("Las dimensiones deben ser positivas.")
-        
+        activa = any(self.data.get(self.add_prefix(nombre)) not in (None, '')
+                     for nombre in ('nombre', 'ancho', 'alto', 'cantidad')) if self.is_bound else bool(cleaned_data)
+        if activa:
+            self.validar_medidas(cleaned_data)
+            if cleaned_data.get('cantidad') is None and 'cantidad' not in self.errors:
+                cleaned_data['cantidad'] = 1
         return cleaned_data

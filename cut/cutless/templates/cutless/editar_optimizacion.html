@@ -6,6 +6,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'cutless/js/dimension-feedback.js' %}?v=4" defer></script>
 <script src="{% static 'cutless/js/piece-formset.js' %}?v=1"></script>
 {{ materiales_data|json_script:"materiales-data" }}
 <script src="{% static 'cutless/js/medidas-pred.js' %}?v=buttons-1"></script>
@@ -59,6 +60,7 @@
             <label for="ancho_tablero" id="label_ancho">Ancho del tablero <span id="unidad_ancho">(cm)</span></label>
             {{ tablero_form.ancho }}
             <small class="form-text text-muted">{{ tablero_form.ancho.help_text }}</small>
+            <small id="ancho_rango" class="form-text text-muted dimension-range" data-dimension-kind="tablero">{{ tablero_form.ancho.help_text }}</small>
             {% if tablero_form.ancho.errors %}
               <div class="text-danger">{{ tablero_form.ancho.errors }}</div>
             {% endif %}
@@ -67,6 +69,7 @@
             <label for="alto_tablero" id="label_alto">Alto del tablero <span id="unidad_alto">(cm)</span></label>
             {{ tablero_form.alto }}
             <small class="form-text text-muted">{{ tablero_form.alto.help_text }}</small>
+            <small id="alto_rango" class="form-text text-muted dimension-range" data-dimension-kind="tablero">{{ tablero_form.alto.help_text }}</small>
             {% if tablero_form.alto.errors %}
               <div class="text-danger">{{ tablero_form.alto.errors }}</div>
             {% endif %}
@@ -87,6 +90,7 @@
             <label for="{{ tablero_form.margen_corte.id_for_label }}">{{ tablero_form.margen_corte.label }} <span class="unidad-margen">(mm)</span></label>
             {{ tablero_form.margen_corte }}
             <small class="form-text text-muted">{{ tablero_form.margen_corte.help_text }}</small>
+            <small id="margen_corte_rango" class="form-text text-muted dimension-range" data-dimension-kind="sierra">Rango permitido: de 0 a 10 mm. 0 significa sin separación.</small>
             {% if tablero_form.margen_corte.errors %}
               <div class="text-danger">{{ tablero_form.margen_corte.errors }}</div>
             {% endif %}
@@ -198,20 +202,25 @@
               <div class="col-md-2 mb-2">
                 <label for="{{ form.ancho.id_for_label }}">Ancho <span class="unidad-pieza">(cm)</span></label>
                 {{ form.ancho }}
+                <small id="{{ form.ancho.html_name }}_rango" class="form-text text-muted dimension-range" data-dimension-kind="pieza">{{ form.ancho.help_text }}</small>
+                {% if form.ancho.errors %}<div class="text-danger">{{ form.ancho.errors }}</div>{% endif %}
               </div>
               <div class="col-md-2 mb-2">
                 <label for="{{ form.alto.id_for_label }}">Alto <span class="unidad-pieza">(cm)</span></label>
                 {{ form.alto }}
+                <small id="{{ form.alto.html_name }}_rango" class="form-text text-muted dimension-range" data-dimension-kind="pieza">{{ form.alto.help_text }}</small>
+                {% if form.alto.errors %}<div class="text-danger">{{ form.alto.errors }}</div>{% endif %}
               </div>
               <div class="col-md-2 mb-2">
                 {{ form.cantidad.label_tag }}
                 {{ form.cantidad }}
+                <small id="{{ form.cantidad.html_name }}_rango" class="form-text text-muted dimension-range" data-dimension-kind="cantidad">De 1 a 100 piezas iguales por tipo. Usa un número entero.</small>
               </div>
             </div>
 
-            {% if form.errors %}
-              <div class="alert alert-danger mt-2">{{ form.errors }}</div>
-            {% endif %}
+            {% if form.nombre.errors %}<div class="text-danger">Nombre: {{ form.nombre.errors }}</div>{% endif %}
+            {% if form.cantidad.errors %}<div class="text-danger">Cantidad: {{ form.cantidad.errors }}</div>{% endif %}
+            {% if form.non_field_errors %}<div class="alert alert-danger mt-2">{{ form.non_field_errors }}</div>{% endif %}
           </div>
           {% endfor %}
         </div>
@@ -271,6 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const template = container.children[0].cloneNode(true);
+        template.querySelectorAll('.text-danger, .alert-danger').forEach(error => error.remove());
 
         // Limpiar valores
         template.querySelectorAll('input, select, textarea').forEach(input => {

@@ -8,6 +8,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'cutless/js/dimension-feedback.js' %}?v=4" defer></script>
 <script src="{% static 'cutless/js/piece-formset.js' %}?v=1"></script>
 <!-- Datos de materiales serializados de forma segura -->
 {{ materiales_data|json_script:"materiales-data" }}
@@ -90,11 +91,13 @@
             <input type="number"
                    name="ancho"
                    id="ancho_tablero"
+                   aria-describedby="ancho_rango"
                    class="form-control"
                    placeholder="Ej: 122"
                    step="any"
                    value="{{ tablero_form.ancho.value|default_if_none:''|unlocalize }}">
             <small class="form-text text-muted">Medida horizontal del tablero completo.</small>
+            <small id="ancho_rango" class="form-text text-muted dimension-range" data-dimension-kind="tablero">{{ tablero_form.ancho.help_text }}</small>
             {% if tablero_form.ancho.errors %}
               <div class="text-danger">{{ tablero_form.ancho.errors }}</div>
             {% endif %}
@@ -107,11 +110,13 @@
             <input type="number"
                    name="alto"
                    id="alto_tablero"
+                   aria-describedby="alto_rango"
                    class="form-control"
                    placeholder="Ej: 244"
                    step="any"
                    value="{{ tablero_form.alto.value|default_if_none:''|unlocalize }}">
             <small class="form-text text-muted">Medida vertical del tablero completo.</small>
+            <small id="alto_rango" class="form-text text-muted dimension-range" data-dimension-kind="tablero">{{ tablero_form.alto.help_text }}</small>
             {% if tablero_form.alto.errors %}
               <div class="text-danger">{{ tablero_form.alto.errors }}</div>
             {% endif %}
@@ -141,6 +146,7 @@
             <input type="number"
                    name="margen_corte"
                    id="margen_corte"
+                   aria-describedby="margen_corte_rango"
                    class="form-control"
                    placeholder="3"
                    step="0.1"
@@ -148,6 +154,7 @@
                    max="10"
                    value="{{ tablero_form.margen_corte.value|default_if_none:'3'|unlocalize }}">
             <small class="form-text text-muted">Ancho que consume la sierra en cada corte. Siempre en milímetros; 0 significa sin separación.</small>
+            <small id="margen_corte_rango" class="form-text text-muted dimension-range" data-dimension-kind="sierra">Rango permitido: de 0 a 10 mm. 0 significa sin separación.</small>
             {% if tablero_form.margen_corte.errors %}
               <div class="text-danger">{{ tablero_form.margen_corte.errors }}</div>
             {% endif %}
@@ -200,20 +207,25 @@
               <div class="col-md-2 mb-3">
                 <label for="{{ form.ancho.id_for_label }}" class="fw-bold">Ancho <span class="unidad-pieza">(cm)</span></label>
                 {{ form.ancho }}
+                <small id="{{ form.ancho.html_name }}_rango" class="form-text text-muted dimension-range" data-dimension-kind="pieza">{{ form.ancho.help_text }}</small>
+                {% if form.ancho.errors %}<div class="text-danger">{{ form.ancho.errors }}</div>{% endif %}
               </div>
               <div class="col-md-2 mb-3">
                 <label for="{{ form.alto.id_for_label }}" class="fw-bold">Alto <span class="unidad-pieza">(cm)</span></label>
                 {{ form.alto }}
+                <small id="{{ form.alto.html_name }}_rango" class="form-text text-muted dimension-range" data-dimension-kind="pieza">{{ form.alto.help_text }}</small>
+                {% if form.alto.errors %}<div class="text-danger">{{ form.alto.errors }}</div>{% endif %}
               </div>
               <div class="col-md-2 mb-3">
                 <label for="{{ form.cantidad.id_for_label }}" class="fw-bold">{{ form.cantidad.label }}</label>
                 {{ form.cantidad }}
+                <small id="{{ form.cantidad.html_name }}_rango" class="form-text text-muted dimension-range" data-dimension-kind="cantidad">De 1 a 100 piezas iguales por tipo. Usa un número entero.</small>
               </div>
             </div>
 
-            {% if form.errors %}
-              <div class="alert alert-danger mt-2">{{ form.errors }}</div>
-            {% endif %}
+            {% if form.nombre.errors %}<div class="text-danger">Nombre: {{ form.nombre.errors }}</div>{% endif %}
+            {% if form.cantidad.errors %}<div class="text-danger">Cantidad: {{ form.cantidad.errors }}</div>{% endif %}
+            {% if form.non_field_errors %}<div class="alert alert-danger mt-2">{{ form.non_field_errors }}</div>{% endif %}
           </div>
           {% endfor %}
         </div>
@@ -373,6 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const template = container.children[0].cloneNode(true);
+        template.querySelectorAll('.text-danger, .alert-danger').forEach(error => error.remove());
 
         // Limpiar valores
         template.querySelectorAll('input, select, textarea').forEach(input => {

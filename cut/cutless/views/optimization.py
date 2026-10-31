@@ -28,6 +28,18 @@ from ..utils import (
 from .common import _materiales_data_index
 
 
+def _avisar_errores_medidas(request, tablero_form, pieza_formset):
+    if tablero_form.errors:
+        detalles = [str(error) for errores in tablero_form.errors.values() for error in errores]
+        messages.error(request, 'No se pudo generar el plan. ' + ' '.join(detalles))
+    if pieza_formset.errors or pieza_formset.non_form_errors():
+        detalles = [str(error) for error in pieza_formset.non_form_errors()]
+        for numero, form in enumerate(pieza_formset.forms, 1):
+            for errores in form.errors.values():
+                detalles.extend(f'Pieza {numero}: {error}' for error in errores)
+        messages.error(request, 'Revisa las piezas. ' + ' '.join(detalles))
+
+
 def _ejecutar_con_aviso_error(request, funcion, *args, **kwargs):
     try:
         return funcion(*args, **kwargs)
@@ -238,10 +250,7 @@ def editar_optimizacion(request, pk):
 
             return render(request, "cutless/resultado.html", contexto)
         else:
-            if not tablero_form.is_valid():
-                messages.error(request, "Revisa los datos del trabajo y del tablero.")
-            if not pieza_formset.is_valid():
-                messages.error(request, "❌ Error en los datos de las piezas.")
+            _avisar_errores_medidas(request, tablero_form, pieza_formset)
     else:
         # Cargar datos existentes en el formulario
         unidad_opt = getattr(optimizacion, 'unidad_medida', 'cm') or 'cm'
@@ -284,7 +293,7 @@ def editar_optimizacion(request, pk):
         # Crear formset con datos iniciales
         # El formset ya tiene extra=1, así que solo pasamos las piezas existentes
         # El formset automáticamente agregará 1 formulario vacío adicional
-        pieza_formset = PiezaFormSet(initial=piezas_data)
+        pieza_formset = PiezaFormSet(initial=piezas_data, form_kwargs={'unidad_medida': tablero_form['unidad_medida'].value() or 'cm'})
         
     return render(request, "cutless/editar_optimizacion.html", {
         "tablero_form": tablero_form,
@@ -507,10 +516,7 @@ def index(request):
             return render(request, "cutless/resultado.html", contexto)
         else:
             # Mostrar errores de validación
-            if not tablero_form.is_valid():
-                messages.error(request, "Revisa los datos del trabajo y del tablero.")
-            if not pieza_formset.is_valid():
-                messages.error(request, "❌ Error en los datos de las piezas.")
+            _avisar_errores_medidas(request, tablero_form, pieza_formset)
             
             # Preparar datos de materiales para JavaScript (necesario cuando hay errores)
             materiales_data = {}
@@ -569,7 +575,7 @@ def index(request):
         # Crear formulario con valores iniciales
         # CORREGIDO: Siempre pasar initial_data, incluso si está vacío, para que el formulario pueda aplicar valores predeterminados
         tablero_form = TableroForm(initial=initial_data, user=request.user)
-        pieza_formset = PiezaFormSet()
+        pieza_formset = PiezaFormSet(form_kwargs={'unidad_medida': tablero_form['unidad_medida'].value() or 'cm'})
         
         # Preparar datos de materiales para JavaScript
         materiales_data = {}
@@ -836,7 +842,7 @@ def duplicar_optimizacion(request, pk):
         'proyecto': optimizacion.proyecto_id,
     }, user=request.user)
     
-    pieza_formset = PiezaFormSet(initial=piezas_data)
+    pieza_formset = PiezaFormSet(initial=piezas_data, form_kwargs={'unidad_medida': tablero_form['unidad_medida'].value() or 'cm'})
     
     # Usar el número de visualización calculado (igual que se muestra en historial)
     # Esto asegura que el mensaje muestre el mismo número que se ve en la pantalla

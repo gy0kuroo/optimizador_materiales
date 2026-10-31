@@ -207,3 +207,5 @@ La base local y los archivos generados se excluyen del seguimiento de Git. Los c
 - [Historial y exportaciones bajo demanda](docs/CAMBIOS_EXPORTACIONES_BAJO_DEMANDA.md)
 
 - [Preparación local de PostgreSQL y despliegue](docs/CAMBIOS_PREPARACION_POSTGRESQL.md)
+
+- [Medidas: límites y avisos por unidad](docs/CAMBIOS_MENSAJES_MEDIDAS.md)
