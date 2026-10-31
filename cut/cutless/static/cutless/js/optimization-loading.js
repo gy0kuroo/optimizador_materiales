@@ -2,6 +2,8 @@
 (() => {
   'use strict';
   let active = null;
+  // La página de destino consume esta marca antes de pintar el resultado.
+  try { sessionStorage.removeItem('cutless-result-transition'); } catch (_) {}
   function hide() {
     if (!active) return;
     clearTimeout(active.timer);
@@ -31,6 +33,7 @@
     form.setAttribute('aria-busy', 'true');
     document.body.classList.add('optimization-loading-active');
     document.body.append(overlay);
+    try { sessionStorage.setItem('cutless-result-transition', String(Date.now())); } catch (_) {}
     active = {overlay, form, targets, timer:null};
     active.timer = setTimeout(() => {
       if (active?.overlay === overlay) overlay.querySelector('[data-optimization-loading-status]').textContent =

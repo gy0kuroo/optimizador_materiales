@@ -4,6 +4,16 @@
 {% block body_class %}review-page result-page{% endblock %}
 
 {% block extra_css %}
+<script>
+// Solo anima la llegada desde un envío de optimización, sin retrasar la respuesta.
+try {
+  const pending = Number(sessionStorage.getItem('cutless-result-transition'));
+  sessionStorage.removeItem('cutless-result-transition');
+  if (pending && Date.now() - pending >= 0 && Date.now() - pending < 120000) {
+    document.documentElement.classList.add('optimization-result-enter');
+  }
+} catch (_) {}
+</script>
 <link rel="stylesheet" href="{% static 'cutless/css/resultado.css' %}?v=2">
 <link rel="stylesheet" href="{% static 'cutless/css/history-result-refinement.css' %}?v=buttons-1">
 <link rel="stylesheet" href="{% static 'cutless/css/board-landscape.css' %}?v=3">

@@ -25,3 +25,11 @@ Durante una optimización nueva los datos del plan llegan juntos al terminar el 
 
 ## Revisión en producción
 Generar el mismo caso desde Inicio, comprobar el contador de cien piezas y que aparezca el resultado al terminar. Probar también un formulario inválido: debe mostrar la corrección sin bloquearse con un skeleton. El tiempo real depende del servidor y la carga; no se fuerza una duración mínima para que el usuario vea la animación.
+
+## Transición al resultado
+- Entrada suave del skeleton (180 ms) y sustitución escalonada de los bloques del resultado (hasta 610 ms en total), sin retrasar el POST ni agregar una duración mínima de carga.
+- La transición del resultado utiliza una marca temporal de sessionStorage que se consume una sola vez; no se activa por abrir resultados desde el historial. Si el almacenamiento no está disponible, la navegación funciona sin esa animación.
+- Respeta la preferencia de movimiento reducido. No altera cálculos, datos ni exportaciones.
+
+### Presentación por bloques
+El resultado recién generado presenta aprovechamiento total, dibujo, resumen, piezas y detalles técnicos con separaciones de unos 90 ms. En móvil, piezas precede al resumen para seguir el orden vertical. Cada tarjeta conserva su tamaño real y muestra un placeholder con onda mientras aparece su contenido; no hay resultados provisionales ni peticiones adicionales. Solo se anima el primer tablero inicial. Movimiento reducido e impresión muestran el contenido directamente.

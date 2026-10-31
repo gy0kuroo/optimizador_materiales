@@ -18,3 +18,42 @@ body.optimization-loading-active { overflow:hidden; }
 @media(min-width:1200px) { body[data-app-shell="true"] .optimization-loading { left:var(--cl-shell-width); } }
 @media(max-width:850px) { .optimization-loading-layout { grid-template-columns:1fr; } }
 @media print { .optimization-loading { display:none; } }
+
+/* El resultado ya existe: los bloques sustituyen visualmente los placeholders. */
+.optimization-loading { animation:optimization-loading-enter 180ms ease-out both; }
+@keyframes optimization-loading-enter { from { opacity:0; } to { opacity:1; } }
+.optimization-result-enter .result-page :is(.total-utilization, .board-page:first-child .cut-drawing-card, .board-page:first-child .cut-pieces, .board-page:first-child .cut-sidebar > .card) {
+  position:relative;
+  --result-delay:60ms;
+}
+.optimization-result-enter .result-page .board-page:first-child .cut-drawing-card { --result-delay:140ms; }
+.optimization-result-enter .result-page .board-page:first-child .cut-sidebar > .card:first-child { --result-delay:230ms; }
+.optimization-result-enter .result-page .board-page:first-child .cut-pieces { --result-delay:320ms; }
+.optimization-result-enter .result-page .board-page:first-child .cut-sidebar > .card:last-child { --result-delay:410ms; }
+.optimization-result-enter .result-page :is(.total-utilization, .board-page:first-child .cut-drawing-card, .board-page:first-child .cut-pieces, .board-page:first-child .cut-sidebar > .card) > * {
+  animation:optimization-block-enter 200ms ease-out var(--result-delay) both;
+}
+.optimization-result-enter .result-page :is(.total-utilization, .board-page:first-child .cut-drawing-card, .board-page:first-child .cut-pieces, .board-page:first-child .cut-sidebar > .card)::after {
+  content:"";
+  position:absolute;
+  inset:16px;
+  border-radius:8px;
+  pointer-events:none;
+  background:linear-gradient(100deg, var(--cl-bg-base) 20%, var(--cl-border) 48%, var(--cl-bg-base) 76%);
+  background-size:220% 100%;
+  animation:optimization-placeholder-wave 800ms linear infinite, optimization-placeholder-exit 200ms ease-out var(--result-delay) forwards;
+}
+@keyframes optimization-block-enter { from { opacity:0; visibility:hidden; transform:translateY(5px); } to { opacity:1; visibility:visible; transform:none; } }
+@keyframes optimization-placeholder-exit { to { opacity:0; visibility:hidden; } }
+@keyframes optimization-placeholder-wave { from { background-position:100% 0; } to { background-position:-100% 0; } }
+@media(max-width:850px) {
+  .optimization-result-enter .result-page .board-page:first-child .cut-pieces { --result-delay:230ms; }
+  .optimization-result-enter .result-page .board-page:first-child .cut-sidebar > .card:first-child { --result-delay:320ms; }
+}
+/* Interactuar con una tarjeta nunca debe esperar a su presentación visual. */
+.optimization-result-enter .result-page .card:focus-within > * { animation:none; }
+.optimization-result-enter .result-page .card:focus-within::after { display:none; }
+@media(prefers-reduced-motion:reduce), print {
+  .optimization-loading, .optimization-result-enter .result-page .card > * { animation:none !important; }
+  .optimization-result-enter .result-page .card::after { display:none; }
+}
