@@ -1,5 +1,4 @@
 from django import forms
-from django.db.models import Q
 
 from ..models import Presupuesto, Optimizacion, Cliente, Proyecto
 

@@ -1,5 +1,5 @@
 ﻿from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
@@ -14,7 +14,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import never_cache
-from .forms import AccesoForm, RegistroForm, PerfilForm, UsuarioEdicionForm, PermisosUsuarioForm, CambiarPasswordForm
+from .forms import AccesoForm, RegistroForm, UsuarioEdicionForm, PermisosUsuarioForm, CambiarPasswordForm
 from .models import PerfilUsuario
 
 @require_POST

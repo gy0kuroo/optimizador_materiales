@@ -9,7 +9,6 @@ from .optimization import (
     persistir_resultado_optimizacion,
     obtener_resultado_optimizacion,
     preparar_contexto_resultado,
-    pdf_path_para_template,
     respuesta_png_tablero,
     respuesta_pdf_optimizacion,
 )
@@ -25,7 +24,6 @@ __all__ = [
     'persistir_resultado_optimizacion',
     'obtener_resultado_optimizacion',
     'preparar_contexto_resultado',
-    'pdf_path_para_template',
     'respuesta_png_tablero',
     'respuesta_pdf_optimizacion',
 ]

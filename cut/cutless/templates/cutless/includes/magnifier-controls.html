@@ -1,0 +1,16 @@
+{% load static initial_assets %}
+    <aside id="reading-magnifier" class="reading-magnifier" aria-label="Herramienta de ampliación">
+      <div id="magnifier-hint" class="reading-magnifier__hint" hidden>Mueve el cursor para ampliar. Pulsa Esc para cerrar.</div>
+      <div id="magnifier-options" class="reading-magnifier__controls" hidden>
+        <button type="button" class="btn btn-secondary btn-icon" data-magnifier-step="-0.5" aria-label="Reducir ampliación" data-action="secondary" data-icon="minus">{% button_icon 'minus' %}</button>
+        <output id="magnifier-level" class="reading-magnifier__level" aria-label="Nivel de ampliación">200%</output>
+        <button type="button" class="btn btn-secondary btn-icon" data-magnifier-step="0.5" aria-label="Aumentar ampliación" data-action="secondary" data-icon="plus">{% button_icon 'plus' %}</button>
+      </div>
+      <button type="button" id="magnifier-toggle" class="btn btn-secondary" aria-pressed="false" aria-controls="magnifier-options magnifier-lens" data-action="secondary" data-icon="search">{% button_icon 'search' %}
+        Lupa
+      </button>
+      <span id="magnifier-status" class="visually-hidden" role="status"></span>
+    </aside>
+    <div id="magnifier-lens" class="reading-magnifier__lens" aria-hidden="true" hidden></div>
+    <script src="{% static 'cutless/js/mobile-navigation.js' %}?v=1"></script>
+    <script src="{% static 'cutless/js/magnifier.js' %}?v=desktop-only-3-dialog-scope-1-review-3" defer></script>

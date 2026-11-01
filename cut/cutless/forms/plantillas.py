@@ -2,7 +2,7 @@ import math
 
 from django import forms
 
-from ..models import Plantilla, Material
+from ..models import Plantilla
 from ..units import convertir_a_cm, convertir_desde_cm
 
 class PlantillaForm(forms.ModelForm):

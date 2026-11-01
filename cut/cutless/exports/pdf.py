@@ -5,14 +5,12 @@ import os
 from uuid import uuid4
 from decimal import Decimal
 
-from PIL import Image
 from reportlab.lib.pagesizes import A4, letter
 from reportlab.lib.units import cm
 from reportlab.pdfgen import canvas
 
 from django.conf import settings
 
-from ..models import Optimizacion
 from ..packing import normalizar_info_desperdicio
 from ..render import _info_desperdicio_desde_optimizacion
 from ..units import convertir_a_cm, convertir_desde_cm, obtener_factor_area_desde_cm2, obtener_simbolo_area, obtener_simbolo_unidad

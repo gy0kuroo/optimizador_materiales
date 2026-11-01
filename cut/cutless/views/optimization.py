@@ -205,7 +205,6 @@ def editar_optimizacion(request, pk):
             if warn_omitidas:
                 messages.warning(request, warn_omitidas)
             
-            imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
             
             # Obtener número de tableros
             num_tableros = len(imagenes_base64)
@@ -454,8 +453,6 @@ def index(request):
             if warn_omitidas:
                 messages.warning(request, warn_omitidas)
             
-            # Usar la primera imagen para vista previa
-            imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
             
             # Obtener número de tableros
             num_tableros = len(imagenes_base64)
@@ -586,192 +583,24 @@ def index(request):
         "materiales_data": materiales_data
     })
 
-def resultado_view(request, pk=None):
-    """
-    Vista para mostrar el resultado de una optimización.
-    Si pk está presente, muestra una optimización existente.
-    Si es POST, procesa una nueva optimización.
-    """
-    # Si hay un pk, mostrar optimización existente
-    if pk:
-        optimizacion = get_object_or_404(Optimizacion, pk=pk, usuario=request.user)
-        numero_lista = calcular_numero_lista(request.user, optimizacion.id)
-        imagenes_base64, _, info_desperdicio = obtener_resultado_optimizacion(
-            optimizacion,
-            numero_lista=numero_lista,
-            persistir_si_falta=True,
-            generar_imagenes=False,
-        )
-        contexto = preparar_contexto_resultado(
-            optimizacion,
-            imagenes_base64,
-            info_desperdicio,
-        )
-        contexto['numero_lista'] = optimizacion.pk
-        return render(request, "cutless/resultado.html", contexto)
-    
-    if request.method == "POST":
-        nombre_form = NombreOptimizacionForm(request.POST)
-        if not nombre_form.is_valid():
-            messages.error(request, 'Revisa el nombre del trabajo: admite hasta 100 caracteres.')
-            return redirect('cutless:index')
-        piezas_texto = request.POST.get("piezas") or ""
+def resultado_view(request, pk):
+    """Muestra el resultado guardado del propietario; la creación se procesa en Inicio."""
+    optimizacion = get_object_or_404(Optimizacion, pk=pk, usuario=request.user)
+    numero_lista = calcular_numero_lista(request.user, optimizacion.id)
+    imagenes_base64, _, info_desperdicio = obtener_resultado_optimizacion(
+        optimizacion,
+        numero_lista=numero_lista,
+        persistir_si_falta=True,
+        generar_imagenes=False,
+    )
+    contexto = preparar_contexto_resultado(
+        optimizacion,
+        imagenes_base64,
+        info_desperdicio,
+    )
+    contexto['numero_lista'] = optimizacion.pk
+    return render(request, "cutless/resultado.html", contexto)
 
-        unidad_resultado = request.POST.get('unidad_medida', 'cm')
-        if not unidad_resultado:
-            unidad_resultado = 'cm'
-
-        permitir_rotacion = request.POST.get('permitir_rotacion', 'true').lower() == 'true'
-
-        ancho_usuario = float(request.POST.get("ancho_tablero"))
-        alto_usuario = float(request.POST.get("alto_tablero"))
-        ancho_cm = convertir_a_cm(ancho_usuario, unidad_resultado)
-        alto_cm = convertir_a_cm(alto_usuario, unidad_resultado)
-
-        piezas = []
-        piezas_con_nombre = []
-        for linea in piezas_texto.strip().splitlines():
-            partes = linea.split(",")
-            if len(partes) == 4:  # Con nombre
-                nombre, w, h, c = partes
-                wf, hf = float(w), float(h)
-                cn = int(c)
-                nombre = nombre.strip()
-                w_cm = convertir_a_cm(wf, unidad_resultado)
-                h_cm = convertir_a_cm(hf, unidad_resultado)
-                if not pieza_cabe_en_tablero(w_cm, h_cm, ancho_cm, alto_cm, permitir_rotacion):
-                    simbolo = obtener_simbolo_unidad(unidad_resultado)
-                    sug = ''
-                    if not permitir_rotacion and pieza_cabe_en_tablero(w_cm, h_cm, ancho_cm, alto_cm, True):
-                        sug = (
-                            ' Prueba activar «Rotación automática»: con rotación sí cabe como una sola pieza.'
-                        )
-                    messages.error(
-                        request,
-                        f"❌ La pieza «{nombre}» ({wf}×{hf} {simbolo}) NO CABE en el tablero "
-                        f"({ancho_usuario}×{alto_usuario} {simbolo}).{sug}"
-                    )
-                    return redirect('cutless:index')
-                piezas.append((w_cm, h_cm, cn))
-                piezas_con_nombre.append({
-                    'nombre': nombre,
-                    'ancho': wf,
-                    'alto': hf,
-                    'cantidad': cn
-                })
-            else:  # Sin nombre
-                w, h, c = partes
-                wf, hf = float(w), float(h)
-                cn = int(c)
-                lbl = f"Pieza {len(piezas_con_nombre) + 1}"
-                w_cm = convertir_a_cm(wf, unidad_resultado)
-                h_cm = convertir_a_cm(hf, unidad_resultado)
-                if not pieza_cabe_en_tablero(w_cm, h_cm, ancho_cm, alto_cm, permitir_rotacion):
-                    simbolo = obtener_simbolo_unidad(unidad_resultado)
-                    messages.error(
-                        request,
-                        f"❌ La pieza {lbl} ({wf}×{hf} {simbolo}) NO CABE en el tablero "
-                        f"({ancho_usuario}×{alto_usuario} {simbolo})."
-                    )
-                    return redirect('cutless:index')
-                piezas.append((w_cm, h_cm, cn))
-                piezas_con_nombre.append({
-                    'nombre': lbl,
-                    'ancho': wf,
-                    'alto': hf,
-                    'cantidad': cn
-                })
-
-        # Obtener parámetros de rotación y margen de corte (valores por defecto para compatibilidad)
-        margen_corte_str = request.POST.get('margen_corte', '') or '3'
-        margen_corte_mm = float(margen_corte_str)  # Siempre en mm, default 3
-        margen_corte_cm = margen_corte_mm / 10.0  # Convertir de mm a cm
-        
-        # Obtener datos de costos (si existen)
-        material_id = request.POST.get('material')
-        material_seleccionado = None
-        if material_id:
-            # Intentar obtener material del usuario primero, luego predefinido
-            material_seleccionado = Material.objects.filter(
-                pk=material_id
-            ).filter(
-                Q(usuario=request.user) | Q(es_predefinido=True)
-            ).first()
-        
-        precio_tablero = request.POST.get('precio_tablero')
-        if precio_tablero:
-            precio_tablero = Decimal(precio_tablero)
-        elif material_seleccionado and material_seleccionado.precio:
-            precio_tablero = material_seleccionado.precio
-        else:
-            precio_tablero = None
-        
-        mano_obra = request.POST.get('mano_obra')
-        if mano_obra:
-            mano_obra = Decimal(mano_obra)
-        else:
-            mano_obra = Decimal('0.00')
-        
-        # Extraer nombres de piezas para colores consistentes
-        nombres_piezas = [p['nombre'] for p in piezas_con_nombre]
-        
-        # Generar TODAS las imágenes con info de desperdicio (piezas y tablero en cm)
-        imagenes_base64, aprovechamiento, info_desperdicio = _ejecutar_con_aviso_error(request, generar_grafico,
-            piezas, ancho_cm, alto_cm, unidad_resultado,
-            permitir_rotacion=permitir_rotacion,
-            margen_corte=margen_corte_cm,
-            nombres_piezas=nombres_piezas
-        )
-
-        ncol = info_desperdicio.get('num_piezas_colocadas') or 0
-        nsol = info_desperdicio.get('num_piezas_solicitadas') or 0
-        if nsol > 0 and ncol == 0:
-            warn = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad_resultado)
-            _avisar_sin_piezas(request, warn or 'No se pudo colocar ninguna pieza en el tablero.')
-            return redirect('cutless:index')
-
-        warn_omitidas = mensaje_advertencia_piezas_no_colocadas(info_desperdicio, unidad_resultado)
-        if warn_omitidas:
-            messages.warning(request, warn_omitidas)
-
-        imagen_principal = imagenes_base64[0] if imagenes_base64 else ""
-        
-        num_tableros = len(imagenes_base64)
-
-        optimizacion = Optimizacion(
-            usuario=request.user,
-            nombre=nombre_form.cleaned_data['nombre_optimizacion'],
-            ancho_tablero=ancho_cm,
-            alto_tablero=alto_cm,
-            unidad_medida=unidad_resultado,
-            piezas=piezas_texto,
-            aprovechamiento_total=aprovechamiento,
-            permitir_rotacion=permitir_rotacion,
-            margen_corte=margen_corte_cm,
-            material=material_seleccionado,
-            precio_tablero=precio_tablero,
-            mano_obra=mano_obra,
-            num_tableros=num_tableros
-        )
-
-        numero_lista = optimizacion.pk
-        _ejecutar_con_aviso_error(request, persistir_resultado_optimizacion,
-            optimizacion,
-            imagenes_base64,
-            info_desperdicio,
-            aprovechamiento,
-            numero_lista=numero_lista,
-        )
-
-        enviar_notificacion(
-            request,
-            'optimizacion_completada',
-            'Optimización Completada',
-            f'Tu optimización {optimizacion.codigo} ha sido completada exitosamente con un aprovechamiento del {aprovechamiento:.2f}%.',
-            {'optimizacion_id': optimizacion.id, 'aprovechamiento': aprovechamiento}
-        )
-
-        return redirect('cutless:resultado', pk=optimizacion.pk)
 
 def duplicar_optimizacion(request, pk):
     """

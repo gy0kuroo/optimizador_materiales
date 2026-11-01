@@ -1,0 +1,27 @@
+    <!-- Modal de Bienvenida -->
+    <div class="modal fade modal-cutless-dialog" id="modalBienvenida" tabindex="-1" aria-labelledby="modalBienvenidaLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalBienvenidaLabel">¡Bienvenido a CutLess!</h5>
+                </div>
+                <div class="modal-body">
+                    <p class="lead">¡Hola, <strong>{{ user.username }}</strong>! </p>
+                    <p>CutLess es un sistema diseñado para ayudarte a optimizar el corte de madera y reducir el desperdicio de material.</p>
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">¿Primera vez aquí?</h6>
+                        <p class="mb-0">Te recomendamos seguir el tutorial interactivo para conocer todas las funcionalidades del sistema.</p>
+                    </div>
+                    <p class="mb-0"><small class="text-muted">Puedes acceder al tutorial en cualquier momento desde el botón "Ayuda" en el menú superior.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="marcarTutorialCompletado(); bootstrap.Modal.getInstance(document.getElementById('modalBienvenida')).hide();" data-action="secondary" data-icon="close">
+                        Omitir
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="iniciarTutorial();" data-action="primary" data-icon="chevron-right">
+                        Iniciar Tutorial
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>

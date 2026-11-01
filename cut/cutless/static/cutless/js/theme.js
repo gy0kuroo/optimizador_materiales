@@ -45,12 +45,6 @@
             return savedTheme;
         }
 
-        const body = document.body;
-        const perfilTheme = body.getAttribute('data-perfil-theme');
-        if (perfilTheme) {
-            return perfilTheme;
-        }
-
         return 'auto';
     }
 

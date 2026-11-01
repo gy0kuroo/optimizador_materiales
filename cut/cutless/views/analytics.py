@@ -9,11 +9,9 @@ from django.utils import timezone
 
 from ..models import Optimizacion
 from ..utils import (
-    convertir_a_cm,
     convertir_desde_cm,
     generar_excel_historial_costos,
     generar_excel_resumen_desperdicio,
-    generar_grafico,
     generar_grafico_aprovechamiento,
     generar_grafico_desperdicio,
     generar_pdf_resumen_desperdicio,

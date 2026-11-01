@@ -1,5 +1,4 @@
 from django import forms
-from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, PasswordChangeForm
 from django.contrib.auth.password_validation import get_default_password_validators, MinimumLengthValidator, NumericPasswordValidator

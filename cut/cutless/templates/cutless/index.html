@@ -9,7 +9,8 @@
 
 {% block extra_js %}
 <script src="{% static 'cutless/js/dimension-feedback.js' %}?v=5" defer></script>
-<script src="{% static 'cutless/js/piece-formset.js' %}?v=1"></script>
+<script src="{% static 'cutless/js/units.js' %}?v=1"></script>
+<script src="{% static 'cutless/js/piece-formset.js' %}?v=2"></script>
 <!-- Datos de materiales serializados de forma segura -->
 {{ materiales_data|json_script:"materiales-data" }}
 <script>
@@ -345,80 +346,11 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('pieza-container');
-    const addButton = document.getElementById('add-pieza');
-    const totalFormsInput = document.querySelector('input[name$="-TOTAL_FORMS"]');
-
-    let formCount = parseInt(totalFormsInput.value);
-
-    // Función para actualizar números de piezas
-    function actualizarNumeros() {
-        // Actualizar también for/ID/nombres: evita enfocar la primera fila
-        // y evita índices repetidos tras eliminar una fila intermedia.
-        formCount = window.CutlessPieceForms.reindex(container);
-        totalFormsInput.value = formCount;
-        document.querySelectorAll('.pieza-numero').forEach((elem, index) => {
-            elem.textContent = index + 1;
-        });
-
-        // Mostrar/ocultar botones de eliminar
-        const removeBtns = document.querySelectorAll('.remove-pieza');
-        const totalPiezas = document.querySelectorAll('.pieza-form').length;
-        removeBtns.forEach((btn, index) => {
-            if (totalPiezas > 1) {
-                btn.classList.remove('remove-pieza-hidden');
-            } else {
-                btn.classList.add('remove-pieza-hidden');
-            }
-        });
-    }
-
-    // Agregar nueva pieza
-    addButton.addEventListener('click', async function() {
-        if (formCount >= 20) {
-            if (window.cutlessAlerta) {
-                await window.cutlessAlerta({ titulo: 'Límite de tipos de pieza', mensaje: 'Puedes añadir hasta 20 tipos de pieza.' });
-            } else {
-                alert('Puedes añadir hasta 20 tipos de pieza.');
-            }
-            return;
-        }
-
-        const template = container.children[0].cloneNode(true);
-        template.querySelectorAll('.text-danger, .alert-danger').forEach(error => error.remove());
-
-        // Limpiar valores
-        template.querySelectorAll('input, select, textarea').forEach(input => {
-            const name = input.name.replace(/-\d+-/, `-${formCount}-`);
-            const id = input.id.replace(/-\d+-/, `-${formCount}-`);
-            input.name = name;
-            input.id = id;
-
-            if (input.type !== 'hidden') {
-                input.value = '';
-                if (input.name.includes('cantidad')) {
-                    input.value = '1';
-                }
-            }
-        });
-
-        container.appendChild(template);
-        formCount++;
-        totalFormsInput.value = formCount;
-        actualizarNumeros();
-    });
-
-    // Eliminar pieza
-    container.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-pieza') || e.target.closest('.remove-pieza')) {
-            if (document.querySelectorAll('.pieza-form').length > 1) {
-                e.target.closest('.pieza-form').remove();
-                formCount--;
-                totalFormsInput.value = formCount;
-                actualizarNumeros();
-            }
-        }
-    });
+    window.CutlessPieceForms.init(
+        document.getElementById('pieza-container'),
+        document.getElementById('add-pieza'),
+        document.querySelector('input[name$="-TOTAL_FORMS"]')
+    );
 
     // Toggle de colapso para Costos (Opcional)
     const btnCostosToggle = document.getElementById('btnCostosToggle');
@@ -436,90 +368,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    actualizarNumeros();
 });
 
-// Función para redondear a un número de decimales (igual que en medidas-pred.js)
-function redondear(valor, decimales) {
-    return Math.round(valor * Math.pow(10, decimales)) / Math.pow(10, decimales);
-}
-
-// Función para convertir de cm a la unidad seleccionada (igual que en medidas-pred.js)
-function convertirDesdeCm(valorCm, unidad) {
-    const conversiones = {
-        'cm': 1.0,
-        'm': 0.01,
-        'mm': 10.0,
-        'in': 1/2.54,
-        'ft': 1/30.48
-    };
-    // Conservar seis decimales como en medidas-pred.js
-    return redondear(valorCm * (conversiones[unidad] || 1.0), 6);
-}
-
-// Función para obtener el símbolo de la unidad
-function obtenerSimboloUnidad(unidad) {
-    const simbolos = {
-        'cm': 'cm',
-        'm': 'm',
-        'mm': 'mm',
-        'in': 'in',
-        'ft': 'ft'
-    };
-    return simbolos[unidad] || 'cm';
-}
-
-// Función para actualizar las opciones del selector de material
-function actualizarOpcionesMaterial() {
-    const unidadSelector = document.getElementById('unidad_medida_selector');
-    const materialSelect = document.getElementById('material_select');
-
-    if (!unidadSelector || !materialSelect || !window.materialData) return;
-
-    const unidad = unidadSelector.value;
-    const simbolo = obtenerSimboloUnidad(unidad);
-
-    // Actualizar cada opción del selector
-    Array.from(materialSelect.options).forEach(option => {
-        if (option.value && window.materialData[option.value]) {
-            const material = window.materialData[option.value];
-            if (material.ancho && material.alto) {
-                const anchoConvertido = convertirDesdeCm(material.ancho, unidad);
-                const altoConvertido = convertirDesdeCm(material.alto, unidad);
-                // Formatear los números: si es entero, mostrarlo sin decimales; si no, con máximo 6 decimales
-                const anchoFormateado = anchoConvertido % 1 === 0 ? anchoConvertido.toString() : anchoConvertido.toFixed(6).replace(/\.?0+$/, '');
-                const altoFormateado = altoConvertido % 1 === 0 ? altoConvertido.toString() : altoConvertido.toFixed(6).replace(/\.?0+$/, '');
-                option.textContent = `${material.nombre} (${anchoFormateado}×${altoFormateado} ${simbolo})`;
-            }
-        }
-    });
-}
-
-// Función para actualizar labels según la unidad seleccionada
+// Cada pantalla conserva su política de selección de materiales.
 function actualizarLabelsUnidad() {
-    const selector = document.getElementById('unidad_medida_selector');
-    const unidad = selector.value;
-    const unidadSpan = document.getElementById('unidad_ancho');
-    const unidadAltoSpan = document.getElementById('unidad_alto');
-    const unidadesPiezas = document.querySelectorAll('.unidad-pieza');
-
-    const simbolo = obtenerSimboloUnidad(unidad);
-    unidadSpan.textContent = `(${simbolo})`;
-    unidadAltoSpan.textContent = `(${simbolo})`;
-
-    // Actualizar unidades de piezas también
-    unidadesPiezas.forEach(span => {
-        span.textContent = `(${simbolo})`;
-    });
-
-    // Actualizar unidad del margen de corte - siempre muestra (mm)
-    const unidadMargen = document.querySelector('.unidad-margen');
-    if (unidadMargen) {
-        unidadMargen.textContent = `(mm)`;
-    }
-
-    // Actualizar opciones del selector de material
-    actualizarOpcionesMaterial();
+    window.CutlessUnits.updateLabels({materialOptions:true});
 }
 
 // Ejecutar al cargar la página
@@ -537,7 +390,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Actualizar unidades cuando se agregan nuevas piezas
     const addButton = document.getElementById('add-pieza');
     if (addButton) {
-        const originalAddHandler = addButton.onclick;
         addButton.addEventListener('click', function() {
             setTimeout(actualizarLabelsUnidad, 100);
         });
@@ -592,8 +444,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         const unidadActual = unidadMedidaSelector ? unidadMedidaSelector.value : 'cm';
 
                         // Convertir dimensiones del material (que están en cm) a la unidad actual
-                        const anchoConvertido = convertirDesdeCm(material.ancho, unidadActual);
-                        const altoConvertido = convertirDesdeCm(material.alto, unidadActual);
+                        const anchoConvertido = window.CutlessUnits.fromCm(material.ancho, unidadActual);
+                        const altoConvertido = window.CutlessUnits.fromCm(material.alto, unidadActual);
 
                         // Actualizar campos de ancho y alto
                         if (anchoTableroInput) {

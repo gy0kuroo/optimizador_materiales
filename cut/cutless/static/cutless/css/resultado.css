@@ -1,13 +1,8 @@
 /* Estilos específicos para la página Resultado */
-
-.result-page .board-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, .85fr); gap: 24px; }
 .result-page .board-open { display: block; width: 100%; padding: 20px; background: var(--cl-bg-surface); border: 1px solid var(--cl-border); border-radius: 10px; color: var(--cl-text-primary); }
 .result-page .board-open > span { display: block; margin-top: 16px; font: 600 1.125rem/1.5 var(--cl-font-body); text-transform: none; letter-spacing: normal; }
 .result-page .board-open:hover { border-color: var(--cl-blue); }
 .result-page .board-open > .board-drawing { width: 100%; height: 420px; display: block; object-fit: contain; }
-.result-page .board-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0 0 24px; }
-.result-page .board-metrics dt { font-size: 1rem; font-weight: 500; color: var(--cl-text-secondary); }
-.result-page .board-metrics dd { margin: 4px 0 0; font-size: 1.25rem; font-weight: 600; color: var(--cl-text-primary); }
 .result-page .board-data h6 { font: 700 1.125rem/1.5 var(--cl-font-body); text-transform: none; letter-spacing: normal; }
 .result-page .board-pieces { font-size: 1.125rem; }
 .result-page .board-pieces td span:not(.board-color) { display: block; color: var(--cl-text-secondary); }
@@ -19,23 +14,18 @@
 .result-page .board-toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; padding: 12px 24px; border-bottom: 1px solid var(--cl-border); }
 .result-page .board-navigation, .result-page .board-zoom { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .result-page .board-zoom output { min-width: 64px; text-align: center; font-weight: 600; }
-.result-page .board-viewer-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 400px); gap: 24px; padding: 16px 24px; min-height: 0; overflow: hidden; }
+body.result-page .board-viewer-body { display:grid; gap:24px; padding:16px 24px; min-height:0; overflow:hidden; background:var(--cl-bg-card); }
 .result-page .board-canvas-section { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-.result-page #board-viewport { flex: 1; min-height: 0; padding: 16px; overflow: auto; background: #FFFFFF; border: 1px solid var(--cl-border); border-radius: 10px; }
+.result-page #board-viewport { min-height: 0; padding: 16px; overflow: auto; border: 1px solid var(--cl-border); border-radius: 10px; }
 .result-page #board-canvas { margin: 0 auto; }
 .result-page #board-canvas > .board-drawing { display: block; width: 100%; height: 100%; max-width: none; object-fit: contain; }
 .result-page #board-viewer-data { overflow: auto; min-height: 0; }
 .result-page .board-open:focus-visible, .result-page #board-viewport:focus-visible { outline: 3px solid var(--cl-blue); outline-offset: 3px; }
 @media (max-width: 900px) {
-  .result-page .board-layout { grid-template-columns: 1fr; }
-  .result-page .board-viewer-body { display: block; overflow: auto; padding: 12px; }
-  .result-page #board-viewport { flex: none; height: 55dvh; }
   .result-page .board-toolbar, .result-page .board-viewer .modal-header { padding: 12px; }
-  .result-page #board-viewer-data { overflow: visible; margin-top: 20px; }
 }
 @media (max-width: 480px) {
   .result-page .board-open > .board-drawing { height: 320px; }
-  .result-page .board-metrics { grid-template-columns: 1fr; gap: 12px; }
 }
 
 .progress-utilization {
@@ -134,6 +124,12 @@
 .result-page .result-costs-total dt { color:var(--cl-text-primary); font-weight:600; }
 .result-page .result-costs-budget { margin-top:12px; }
 .result-page .result-costs-budget .btn { width:100%; }
-body.result-page nav.result-actions { display:flex; justify-content:flex-end; margin-top:24px; padding:16px 0; border:0; clear:both; }
+body.result-page nav.result-actions { display:flex; flex-wrap:wrap; gap:12px; justify-content:flex-end; margin-top:24px; padding:16px 0; border:0; clear:both; }
 .result-page .result-actions-buttons { display:flex; flex-wrap:wrap; gap:12px; }
 @media(max-width:767px) { .result-page .result-actions-buttons { width:100%; flex-direction:column; } }
+
+/* Resumen plegable y acciones: una sola definición del componente. */
+.result-details { margin:24px 0; border:1px solid var(--cl-border); border-radius:12px; background:var(--cl-bg-card); }
+.result-details > summary { padding:18px 24px; font-weight:600; cursor:pointer; font-size:1.0625rem; }
+.result-details .card { border:0 !important; }
+@media(max-width:767px) { .result-page .result-actions .btn { width:100%; } }

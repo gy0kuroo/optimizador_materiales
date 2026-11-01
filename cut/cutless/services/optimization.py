@@ -1,9 +1,7 @@
 import base64
 import io
 import logging
-import os
 
-from django.conf import settings
 from django.http import FileResponse
 from django.db import transaction
 from django.utils import timezone
@@ -19,42 +17,6 @@ from ..units import convertir_desde_cm, obtener_factor_area_desde_cm2, obtener_s
 
 
 logger = logging.getLogger(__name__)
-
-
-def _media_root():
-    return os.fspath(settings.MEDIA_ROOT)
-
-
-def _normalizar_ruta_absoluta(ruta):
-    """Convierte rutas relativas (p. ej. pdfs/archivo.pdf) en ruta absoluta bajo MEDIA_ROOT."""
-    if not ruta:
-        return None
-    ruta = os.fspath(ruta)
-    if os.path.isabs(ruta):
-        return ruta
-    ruta = ruta.replace('\\', '/').lstrip('/')
-    if ruta.startswith('pdfs/'):
-        return os.path.join(_media_root(), ruta.replace('/', os.sep))
-    return os.path.join(_media_root(), ruta.replace('/', os.sep))
-
-
-def _ruta_pdf_en_disco(optimizacion):
-    """Devuelve la ruta absoluta del PDF si el archivo existe, o None."""
-    candidatos = []
-
-    if optimizacion.pdf:
-        candidatos.append(optimizacion.pdf.name)
-        try:
-            candidatos.append(optimizacion.pdf.path)
-        except (ValueError, NotImplementedError):
-            pass
-
-    for candidato in candidatos:
-        ruta = _normalizar_ruta_absoluta(candidato)
-        if ruta and os.path.isfile(ruta):
-            return ruta
-
-    return None
 
 
 def _eliminar_archivos(archivos):
@@ -366,13 +328,6 @@ def preparar_contexto_resultado(optimizacion, imagenes_base64, info_desperdicio,
         'precio_tablero': precio_tablero,
         'mano_obra': mano_obra,
     }
-
-
-def pdf_path_para_template(optimizacion):
-    """Ruta relativa al MEDIA_ROOT para enlaces /media/..."""
-    if _ruta_pdf_en_disco(optimizacion):
-        return optimizacion.pdf.name if optimizacion.pdf else None
-    return None
 
 
 def respuesta_pdf_optimizacion(optimizacion, numero_lista=None):

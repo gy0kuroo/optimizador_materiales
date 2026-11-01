@@ -7,7 +7,8 @@
 
 {% block extra_js %}
 <script src="{% static 'cutless/js/dimension-feedback.js' %}?v=5" defer></script>
-<script src="{% static 'cutless/js/piece-formset.js' %}?v=1"></script>
+<script src="{% static 'cutless/js/units.js' %}?v=1"></script>
+<script src="{% static 'cutless/js/piece-formset.js' %}?v=2"></script>
 {{ materiales_data|json_script:"materiales-data" }}
 <script src="{% static 'cutless/js/medidas-pred.js' %}?v=presets-2"></script>
 {% endblock %}
@@ -241,113 +242,17 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('pieza-container');
-    const addButton = document.getElementById('add-pieza');
-    const totalFormsInput = document.querySelector('input[name$="-TOTAL_FORMS"]');
+    window.CutlessPieceForms.init(
+        document.getElementById('pieza-container'),
+        document.getElementById('add-pieza'),
+        document.querySelector('input[name$="-TOTAL_FORMS"]')
+    );
 
-    let formCount = parseInt(totalFormsInput.value);
-
-    // Función para actualizar números de piezas
-    function actualizarNumeros() {
-        // Actualizar también for/ID/nombres: evita enfocar la primera fila
-        // y evita índices repetidos tras eliminar una fila intermedia.
-        formCount = window.CutlessPieceForms.reindex(container);
-        totalFormsInput.value = formCount;
-        document.querySelectorAll('.pieza-numero').forEach((elem, index) => {
-            elem.textContent = index + 1;
-        });
-
-        // Mostrar/ocultar botones de eliminar
-        const removeBtns = document.querySelectorAll('.remove-pieza');
-        const totalPiezas = document.querySelectorAll('.pieza-form').length;
-        removeBtns.forEach((btn, index) => {
-            if (totalPiezas > 1) {
-                btn.classList.remove('remove-pieza-hidden');
-            } else {
-                btn.classList.add('remove-pieza-hidden');
-            }
-        });
-    }
-
-    // Agregar nueva pieza
-    addButton.addEventListener('click', async function() {
-        if (formCount >= 20) {
-            if (window.cutlessAlerta) {
-                await window.cutlessAlerta({ titulo: 'Límite de piezas', mensaje: 'Máximo 20 piezas permitidas.' });
-            } else {
-                alert('Máximo 20 piezas permitidas');
-            }
-            return;
-        }
-
-        const template = container.children[0].cloneNode(true);
-        template.querySelectorAll('.text-danger, .alert-danger').forEach(error => error.remove());
-
-        // Limpiar valores
-        template.querySelectorAll('input, select, textarea').forEach(input => {
-            const name = input.name.replace(/-\d+-/, `-${formCount}-`);
-            const id = input.id.replace(/-\d+-/, `-${formCount}-`);
-            input.name = name;
-            input.id = id;
-
-            if (input.type !== 'hidden') {
-                input.value = '';
-                if (input.name.includes('cantidad')) {
-                    input.value = '1';
-                }
-            }
-        });
-
-        container.appendChild(template);
-        formCount++;
-        totalFormsInput.value = formCount;
-        actualizarNumeros();
-    });
-
-    // Eliminar pieza
-    container.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-pieza') || e.target.closest('.remove-pieza')) {
-            if (document.querySelectorAll('.pieza-form').length > 1) {
-                e.target.closest('.pieza-form').remove();
-                formCount--;
-                totalFormsInput.value = formCount;
-                actualizarNumeros();
-            }
-        }
-    });
-
-    actualizarNumeros();
 });
 
-// Función para actualizar labels según la unidad seleccionada
+// Cada pantalla conserva su política de selección de materiales.
 function actualizarLabelsUnidad() {
-    const selector = document.getElementById('unidad_medida_selector');
-    const unidad = selector.value;
-    const unidadSpan = document.getElementById('unidad_ancho');
-    const unidadAltoSpan = document.getElementById('unidad_alto');
-    const unidadesPiezas = document.querySelectorAll('.unidad-pieza');
-
-    const simbolos = {
-        'cm': 'cm',
-        'm': 'm',
-        'in': 'in',
-        'ft': 'ft'
-    };
-
-    const simbolo = simbolos[unidad] || 'cm';
-    unidadSpan.textContent = `(${simbolo})`;
-    unidadAltoSpan.textContent = `(${simbolo})`;
-
-    // Actualizar unidades de piezas también
-    unidadesPiezas.forEach(span => {
-        span.textContent = `(${simbolo})`;
-    });
-
-    // Actualizar unidad del margen de corte - siempre muestra (mm)
-    const unidadMargen = document.querySelector('.unidad-margen');
-    if (unidadMargen) {
-        unidadMargen.textContent = `(mm)`;
-    }
+    window.CutlessUnits.updateLabels();
 }
 
 // Ejecutar al cargar la página
@@ -361,7 +266,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Actualizar unidades cuando se agregan nuevas piezas
     const addButton = document.getElementById('add-pieza');
     if (addButton) {
-        const originalAddHandler = addButton.onclick;
         addButton.addEventListener('click', function() {
             setTimeout(actualizarLabelsUnidad, 100);
         });

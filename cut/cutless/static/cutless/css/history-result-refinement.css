@@ -28,9 +28,6 @@ body.review-page { font-size: 1.125rem; line-height: 1.65; }
 .history-page .results-count, .history-page .results-count strong { color: var(--cl-text-primary); }
 .history-page .piezas-summary { color: var(--cl-text-primary); font-size: 1rem; text-decoration: underline; text-underline-offset: 3px; }
 .history-page .card-empty-state { padding: 32px; }
-.result-page .metric-card { background: var(--cl-bg-card); color: var(--cl-text-primary); border-top: 3px solid var(--cl-olive); }
-.result-page .metric-value { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 600; color: var(--cl-text-primary); margin: 0; }
-.result-page .metric-value small { font-size: 1rem; }
 .result-page .card-header { background: var(--cl-bg-surface); color: var(--cl-text-primary); border-bottom: 1px solid var(--cl-border); padding: 16px 24px; flex-wrap: wrap; gap: 12px; }
 .result-page .table { --bs-table-bg: var(--cl-bg-card); --bs-table-color: var(--cl-text-primary); --bs-table-striped-bg: var(--cl-bg-surface); --bs-table-striped-color: var(--cl-text-primary); --bs-table-hover-bg: var(--cl-bg-surface); --bs-table-hover-color: var(--cl-text-primary); --bs-table-border-color: var(--cl-border); }
 .result-page .table-dark { --bs-table-bg: var(--cl-walnut); --bs-table-color: var(--cl-ash-white); }
@@ -39,11 +36,10 @@ body.review-page { font-size: 1.125rem; line-height: 1.65; }
 .result-page .progress-bar.bg-success { background-color: var(--cl-success) !important; }
 .result-page .progress-bar.bg-warning { background-color: var(--cl-warning) !important; }
 .result-page .progress-bar.bg-danger { background-color: var(--cl-danger) !important; }
-.result-page .result-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
 .review-page .dropdown-menu { background: var(--cl-bg-card); border-color: var(--cl-border); }
 .review-page .dropdown-menu .dropdown-item { color: var(--cl-text-primary); }
 .review-page .dropdown-menu .dropdown-item:hover { background: var(--cl-bg-surface); }
-@media (max-width: 767px) { .review-page .page-header { flex-wrap: wrap; } .review-page .page-header__actions { margin-left: 0; } .result-page .result-actions .btn { width: 100%; } }
+@media (max-width: 767px) { .review-page .page-header { flex-wrap: wrap; } .review-page .page-header__actions { margin-left: 0; } }
 
 /* Cifra informativa: el color del texto siempre corresponde a su fondo,
    en ambos temas; no heredar el blanco de las insignias de Bootstrap. */
@@ -69,7 +65,7 @@ body.review-page { font-size: 1.125rem; line-height: 1.65; }
 .history-board-navigation output { min-width: 64px; text-align: center; font-weight: 600; }
 .history-board-viewer .modal-body { display: flex; flex-direction: column; min-height: 0; overflow: hidden; padding: 16px 24px; }
 .history-board-viewer .modal-body > p { font-size: 1rem; color: var(--cl-text-secondary); }
-#history-board-viewport { flex: 1; min-height: 0; overflow: auto; padding: 16px; border: 1px solid var(--cl-border); border-radius: 10px; background: #FFFFFF; }
+#history-board-viewport { min-height: 0; overflow: auto; padding: 16px; border: 1px solid var(--cl-border); border-radius: 10px; }
 #history-board-canvas { margin: 0 auto; }
 #history-board-image { display: block; width: 100%; height: 100%; max-width: none; object-fit: contain; }
 #history-board-image[hidden] { display: none; }
