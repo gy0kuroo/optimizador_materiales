@@ -41,5 +41,6 @@
       <div><dt>Permite girar piezas</dt><dd>{{ optimizacion.permitir_rotacion|yesno:'Sí,No' }}</dd></div>
       <div><dt>Fecha de generación</dt><dd>{{ optimizacion.fecha|date:'d/m/Y H:i' }}</dd></div>
     </dl></section>
+    {% if mostrar_costos %}{% include 'cutless/includes/result-costs.html' %}{% endif %}
   </aside>
 </div>

@@ -14,7 +14,7 @@
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) { finish(); return; }
     try {
       const mobile = matchMedia('(max-width:1100px)').matches;
-      const groups = ['notice', 'header', 'total', 'navigation', 'drawing', 'pieces', 'fold', 'costs', 'actions'];
+      const groups = ['notice', 'header', 'total', 'navigation', 'drawing', 'pieces', 'costs', 'fold', 'actions'];
       document.querySelectorAll('.result-page [data-result-stage]').forEach(node => {
         const page = node.closest('.board-page');
         if (page && page !== document.querySelector('.board-page')) return;

@@ -20,3 +20,10 @@
 - Sin cambios en fórmulas, algoritmo, dependencias o migraciones. No se utilizaron Supabase ni datos reales para las pruebas.
 
 Para verificar después de desplegar, generar un corte nuevo y comprobar que la URL final termina en `/resultado/<id>/`. Recargar esa URL debe conservar el mismo código e historial.
+
+## Ajuste posterior de disposición
+- Costos pasa a la columna analítica, justo debajo de Detalles técnicos. Se muestra como lista de etiquetas y valores, con el total separado y Crear presupuesto como acción secundaria.
+- Son importes del plan completo: se conservan las cantidades de tableros y los valores. Al cambiar de tablero se presenta la misma información de costos; no se calcula un costo por tablero nuevo.
+- Se elimina el título y la explicación junto a Preparar otro corte y Ver historial. Queda una fila exclusiva de botones alineada a la derecha, apilada en móvil.
+- El skeleton traslada también los costos a la columna derecha; el revelado los muestra antes del resumen plegable. La vista del historial conserva su contenido existente.
+- Seis pruebas Django dirigidas al resultado, condiciones de costos y recarga, más catorce pruebas JavaScript aprobadas. Sin cambios en cálculos, guardado o exportaciones.

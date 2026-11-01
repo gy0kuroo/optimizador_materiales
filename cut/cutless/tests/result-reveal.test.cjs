@@ -24,7 +24,7 @@ test('secuencia superior a inferior en escritorio, agrupando dibujo y resumen',(
   assert.ok(delay('header')<delay('total') && delay('total')<delay('navigation'));
   assert.equal(delay('drawing'),delay('summary'));
   assert.equal(delay('pieces'),delay('technical'));
-  assert.ok(delay('technical')<delay('fold') && delay('fold')<delay('costs') && delay('costs')<delay('actions'));
+  assert.ok(delay('technical')<delay('costs') && delay('costs')<delay('fold') && delay('fold')<delay('actions'));
   assert.ok(delay('actions')+270<=1000);
   assert.ok(s.classes.has('optimization-result-ready'));
   s.timers[0].fn();

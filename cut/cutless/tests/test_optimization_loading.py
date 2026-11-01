@@ -46,4 +46,10 @@ class OptimizationLoadingTests(TestCase):
                     self.assertIn(f'data-result-placeholder="{stage}"', html)
                 self.assertEqual('data-result-stage="costs"' in html, bool(price or labor or total))
                 self.assertIn('result-reveal.js', html)
+                if price or labor or total:
+                    self.assertLess(html.index('data-result-stage="technical"'), html.index('data-result-stage="costs"'))
+                    self.assertLess(html.index('data-result-stage="costs"'), html.index('data-result-stage="fold"'))
+                    self.assertIn('result-costs-title-1', html)
+                self.assertNotIn('Prepara otro corte o consulta tus trabajos guardados.', html)
+
                 self.assertNotIn('<details class="result-details" data-result-stage="fold" open', html)
