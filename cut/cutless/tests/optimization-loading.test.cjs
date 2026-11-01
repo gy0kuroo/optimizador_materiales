@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-function setup() {
+function setup(costValues) {
   const attrs = {}, listeners = {}, events = {}, timers = new Map(), microtasks = [];
   const classes = new Set();
   let count = 0, appended = 0, removed = 0;
@@ -17,7 +17,10 @@ function setup() {
   };
   const background = [{inert:false}, {inert:true}];
   const nodes = {count:{textContent:''}, status:{textContent:''}, title:{focus(){}}};
-  const overlay = {querySelector(selector) {return selector.includes('count') ? nodes.count : selector.includes('status') ? nodes.status : nodes.title;}, remove(){removed++;}};
+  const costFields = ['price','labor','material','total'].map(kind=>({dataset:{loadingCost:kind},hidden:false}));
+  const costs = {hidden:true};
+  if (costValues) form.querySelector = selector => ({value:costValues[selector.match(/name="([^"]+)/)?.[1]] ?? ''});
+  const overlay = {querySelectorAll:()=>costFields, querySelector(selector) {return selector.includes('data-loading-costs') ? costs : selector.includes('count') ? nodes.count : selector.includes('status') ? nodes.status : nodes.title;}, remove(){removed++;}};
   const document = {
     getElementById: () => ({content:{firstElementChild:{cloneNode:()=>overlay}}}),
     querySelectorAll: selector => selector === '.app-main, .navbar-custom' ? background : selector.includes('form[data-loading-optimization]') ? [form] : [],
@@ -29,7 +32,7 @@ function setup() {
     setTimeout:(fn,ms)=>{const id=++count;timers.set(id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id)};
   for (const name of ['optimization-loading.js','confirmaciones.js']) vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../static/cutless/js',name),'utf8'),context);
   events.DOMContentLoaded();
-  return {form,window,nodes,background,attrs,timers,events,listeners,microtasks,classes,get appended(){return appended;},get removed(){return removed;}};
+  return {costs,costFields,form,window,nodes,background,attrs,timers,events,listeners,microtasks,classes,get appended(){return appended;},get removed(){return removed;}};
 }
 
 test('100 piezas en 20 tipos se muestran sin porcentaje inventado',()=>{
@@ -60,4 +63,15 @@ test('un envío válido muestra el skeleton y bloquea un segundo envío',()=>{
   const s=setup();s.listeners.submit({defaultPrevented:false});s.microtasks.forEach(fn=>fn());
   assert.equal(s.appended,1);let blocked=false;
   s.listeners.submit({preventDefault(){blocked=true;}});assert.equal(blocked,true);
+});
+
+for (const [label, values, visible] of [
+  ['sin costos', {}, []],
+  ['solo mano de obra', {mano_obra:'500'}, ['labor']],
+  ['precio cero y mano de obra', {precio_tablero:'0',mano_obra:'500'}, ['labor','total']],
+  ['precio y material', {precio_tablero:'1000',material:'1'}, ['price','material','total']],
+]) test(`costos condicionales: ${label}`,()=>{
+  const s=setup(values);s.window.mostrarSkeletonOptimizacion(s.form);
+  assert.equal(s.costs.hidden,visible.length===0);
+  assert.deepEqual(s.costFields.filter(n=>!n.hidden).map(n=>n.dataset.loadingCost),visible);
 });

@@ -16,44 +16,63 @@
 .optimization-loading-note { color:var(--cl-text-secondary); margin:24px 0 0; }
 body.optimization-loading-active { overflow:hidden; }
 @media(min-width:1200px) { body[data-app-shell="true"] .optimization-loading { left:var(--cl-shell-width); } }
-@media(max-width:850px) { .optimization-loading-layout { grid-template-columns:1fr; } }
+@media(max-width:1100px) { .optimization-loading-layout { grid-template-columns:1fr; } }
 @media print { .optimization-loading { display:none; } }
 
-/* El resultado ya existe: los bloques sustituyen visualmente los placeholders. */
+
 .optimization-loading { animation:optimization-loading-enter 180ms ease-out both; }
+.optimization-loading-buttons { display:flex; flex-wrap:wrap; gap:10px; margin:18px 0; }
+.optimization-loading-button { display:inline-block; width:150px; height:44px; border-radius:10px; }
+.optimization-loading-dimensions { display:flex; justify-content:center; margin:16px; }
+.optimization-loading-dimensions > span { width:110px; }
+.optimization-loading-caption { text-align:center; margin:12px 0 0; }
+.optimization-loading-pair { display:flex; align-items:center; justify-content:space-between; gap:20px; margin:16px 0; }
+.optimization-loading-pair > .board-skeleton { width:40%; margin:0; }
+.optimization-loading-fold { padding:18px 0; margin:20px 0; }
+.optimization-loading [data-loading-block="costs"] { margin:24px 0; }
+.optimization-loading [hidden], .result-stage-placeholder [hidden] { display:none !important; }
+/* Las tarjetas reales reservan su altura; el placeholder no modifica el flujo. */
+.optimization-result-enter .result-page [data-result-stage] { position:relative; }
+.optimization-result-enter .result-page [data-result-stage] > :not(.result-stage-placeholder) { visibility:hidden; }
+.optimization-result-enter .result-page .board-page:not(:first-child) [data-result-stage] > * { visibility:visible; }
+.result-stage-placeholder { display:none; position:absolute; inset:0; overflow:hidden; padding:20px; background:var(--cl-bg-card); border-radius:inherit; pointer-events:none; }
+.result-stage-placeholder h2 { font-size:1.15rem; margin:0 0 18px; }
+.result-stage-placeholder .optimization-loading-total { border:0; padding:0; margin:0; }
+.result-stage-placeholder .board-skeleton-drawing { height:65%; min-height:160px; }
+.result-stage-placeholder .board-skeleton-plan { height:100%; }
+.optimization-result-ready .result-page [data-result-stage] > :not(.result-stage-placeholder) { animation:optimization-block-enter 270ms ease-out var(--result-delay,0ms) both; }
+.optimization-result-ready .result-stage-placeholder { animation:optimization-placeholder-exit 270ms ease-out var(--result-delay,0ms) forwards; }
+/* No se anima el contenido de un plegable cerrado ni los tableros siguientes. */
+.optimization-result-ready .result-page details[data-result-stage] > :not(summary):not(.result-stage-placeholder),
+.optimization-result-ready .result-page .board-page:not(:first-child) [data-result-stage] > * { animation:none; }
+.optimization-result-enter .result-page [data-result-stage]:focus-within > * { animation:none; visibility:visible; }
+.optimization-result-enter .result-page [data-result-stage]:focus-within > .result-stage-placeholder { display:none; }
 @keyframes optimization-loading-enter { from { opacity:0; } to { opacity:1; } }
-.optimization-result-enter .result-page :is(.total-utilization, .board-page:first-child .cut-drawing-card, .board-page:first-child .cut-pieces, .board-page:first-child .cut-sidebar > .card) {
-  position:relative;
-  --result-delay:60ms;
-}
-.optimization-result-enter .result-page .board-page:first-child .cut-drawing-card { --result-delay:140ms; }
-.optimization-result-enter .result-page .board-page:first-child .cut-sidebar > .card:first-child { --result-delay:230ms; }
-.optimization-result-enter .result-page .board-page:first-child .cut-pieces { --result-delay:320ms; }
-.optimization-result-enter .result-page .board-page:first-child .cut-sidebar > .card:last-child { --result-delay:410ms; }
-.optimization-result-enter .result-page :is(.total-utilization, .board-page:first-child .cut-drawing-card, .board-page:first-child .cut-pieces, .board-page:first-child .cut-sidebar > .card) > * {
-  animation:optimization-block-enter 200ms ease-out var(--result-delay) both;
-}
-.optimization-result-enter .result-page :is(.total-utilization, .board-page:first-child .cut-drawing-card, .board-page:first-child .cut-pieces, .board-page:first-child .cut-sidebar > .card)::after {
-  content:"";
-  position:absolute;
-  inset:16px;
-  border-radius:8px;
-  pointer-events:none;
-  background:linear-gradient(100deg, var(--cl-bg-base) 20%, var(--cl-border) 48%, var(--cl-bg-base) 76%);
-  background-size:220% 100%;
-  animation:optimization-placeholder-wave 800ms linear infinite, optimization-placeholder-exit 200ms ease-out var(--result-delay) forwards;
-}
-@keyframes optimization-block-enter { from { opacity:0; visibility:hidden; transform:translateY(5px); } to { opacity:1; visibility:visible; transform:none; } }
+@keyframes optimization-block-enter { from { opacity:0; visibility:hidden; transform:translateY(4px); } to { opacity:1; visibility:visible; transform:none; } }
 @keyframes optimization-placeholder-exit { to { opacity:0; visibility:hidden; } }
-@keyframes optimization-placeholder-wave { from { background-position:100% 0; } to { background-position:-100% 0; } }
-@media(max-width:850px) {
-  .optimization-result-enter .result-page .board-page:first-child .cut-pieces { --result-delay:230ms; }
-  .optimization-result-enter .result-page .board-page:first-child .cut-sidebar > .card:first-child { --result-delay:320ms; }
-}
-/* Interactuar con una tarjeta nunca debe esperar a su presentación visual. */
-.optimization-result-enter .result-page .card:focus-within > * { animation:none; }
-.optimization-result-enter .result-page .card:focus-within::after { display:none; }
 @media(prefers-reduced-motion:reduce), print {
-  .optimization-loading, .optimization-result-enter .result-page .card > * { animation:none !important; }
-  .optimization-result-enter .result-page .card::after { display:none; }
+  .optimization-loading, .optimization-result-enter .result-page [data-result-stage] > * { animation:none !important; visibility:visible !important; }
+  .result-stage-placeholder { display:none; }
 }
+
+/* Placeholders renderizados por Django: no hay un fotograma vacío antes del JS. */
+.optimization-result-enter .result-page [data-result-stage] > .result-stage-placeholder { display:block; }
+.optimization-result-enter .result-page .board-page:not(:first-child) .result-stage-placeholder { display:none; }
+.optimization-result-enter .result-page [data-result-stage]:focus-within > .result-stage-placeholder { display:none; }
+@media(prefers-reduced-motion:reduce), print { .optimization-result-enter .result-page .result-stage-placeholder { display:none; } }
+
+/* El título fijo del plegable permanece visible incluso estando cerrado. */
+.optimization-result-enter .result-page details[data-result-stage] > summary { visibility:visible; animation:none; }
+
+.optimization-loading-buttons .optimization-loading-button { width:120px; }
+.result-stage-placeholder .optimization-loading-buttons { gap:6px; margin:10px 0; }
+.result-stage-placeholder .optimization-loading-buttons .optimization-loading-button { width:100px; height:38px; }
+.result-stage-placeholder .page-header { margin:0; gap:8px; }
+[data-result-stage="header"] > .result-stage-placeholder, [data-result-stage="navigation"] > .result-stage-placeholder { padding:0; background:var(--cl-bg-base); }
+[data-cost-price=""] [data-loading-cost="price"], [data-cost-labor=""] [data-loading-cost="labor"], [data-cost-material=""] [data-loading-cost="material"], [data-cost-total=""] [data-loading-cost="total"] { display:none; }
+
+.optimization-loading-cost-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:18px 24px; }
+.optimization-loading-cost-grid .optimization-loading-pair { display:block; margin:0; }
+.optimization-loading-cost-grid .board-skeleton { display:block; width:80%; margin-top:10px; }
+@media(max-width:767px) { .optimization-loading-cost-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:400px) { .optimization-loading-cost-grid { grid-template-columns:1fr; } }

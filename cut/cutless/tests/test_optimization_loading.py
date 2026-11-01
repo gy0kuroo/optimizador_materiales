@@ -25,3 +25,25 @@ class OptimizationLoadingTests(TestCase):
         self.assertContains(response, 'data-loading-optimization')
         self.assertContains(response, 'cutless-optimization-loading-template')
         self.assertContains(response, 'optimization-loading.css')
+
+    def test_result_covers_all_sections_and_conditional_costs(self):
+        from django.template.loader import render_to_string
+        from django.test import RequestFactory
+        from decimal import Decimal
+        opt = Optimizacion.objects.create(usuario=self.user, ancho_tablero=122, alto_tablero=244, piezas='P,25,25,5')
+        request = RequestFactory().get('/')
+        request.user = self.user
+        request.session = {}
+        base = {'optimizacion': opt, 'num_tableros': 1, 'unidad_medida': 'cm',
+                'tableros_con_imagenes': [{'numero': 1, 'info': {'porcentaje_uso': 50}}],
+                'info_desperdicio': {'info_tableros': [], 'num_piezas_colocadas': 5}}
+        for price, labor, total in [(None, 0, None), (None, 500, None), (Decimal('1000'), 500, Decimal('1500'))]:
+            with self.subTest(price=price, labor=labor):
+                html = render_to_string('cutless/resultado.html', {**base, 'precio_tablero': price,
+                    'mano_obra': labor, 'costo_total': total}, request=request)
+                for stage in ['header', 'total', 'navigation', 'drawing', 'summary', 'pieces', 'technical', 'fold', 'actions']:
+                    self.assertIn(f'data-result-stage="{stage}"', html)
+                    self.assertIn(f'data-result-placeholder="{stage}"', html)
+                self.assertEqual('data-result-stage="costs"' in html, bool(price or labor or total))
+                self.assertIn('result-reveal.js', html)
+                self.assertNotIn('<details class="result-details" data-result-stage="fold" open', html)

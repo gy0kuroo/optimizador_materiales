@@ -28,7 +28,7 @@ class IndexOptimizacionTests(TestCase):
             'form-0-alto': 40,
             'form-0-cantidad': 1,
         }
-        response = self.client.post(reverse('cutless:index'), data)
+        response = self.client.post(reverse('cutless:index'), data, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'cutless/resultado.html')
         self.assertContains(response, 'aprovechamiento')

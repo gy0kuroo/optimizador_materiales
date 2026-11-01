@@ -121,3 +121,18 @@
 .card.bg-warning h5 {
     color: inherit !important;
 }
+
+/* Costos secundarios y cierre de navegación con espacio propio. */
+.result-page .result-costs { margin:24px 0 0; overflow:hidden; }
+.result-page .result-costs .card-header { font-size:1.15rem; margin:0; }
+.result-page .result-costs-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:18px 24px; margin:0; }
+.result-page .result-costs-grid dt { font-size:1rem; font-weight:400; color:var(--cl-text-secondary); }
+.result-page .result-costs-grid dd { margin:6px 0 0; font-size:1.15rem; font-weight:600; overflow-wrap:anywhere; }
+.result-page .result-costs-total dd { color:var(--cl-text-primary); }
+.result-page .result-costs-budget { margin-top:20px; }
+.result-page .result-actions { display:flex; justify-content:space-between; align-items:center; gap:20px; margin-top:32px; padding:24px 0; border-top:1px solid var(--cl-border); clear:both; }
+.result-page .result-actions h2 { font-size:1.2rem; margin:0 0 6px; }
+.result-page .result-actions p { margin:0; color:var(--cl-text-secondary); }
+.result-page .result-actions-buttons { display:flex; flex-wrap:wrap; gap:12px; }
+@media(max-width:767px) { .result-page .result-actions { align-items:stretch; flex-direction:column; } .result-page .result-actions-buttons { flex-direction:column; } .result-page .result-costs-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:400px) { .result-page .result-costs-grid { grid-template-columns:1fr; } }

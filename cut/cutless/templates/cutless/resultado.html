@@ -11,16 +11,17 @@ try {
   sessionStorage.removeItem('cutless-result-transition');
   if (pending && Date.now() - pending >= 0 && Date.now() - pending < 120000) {
     document.documentElement.classList.add('optimization-result-enter');
+    window.cutlessRevealFallback = setTimeout(() => document.documentElement.classList.remove('optimization-result-enter'), 2500);
   }
 } catch (_) {}
 </script>
-<link rel="stylesheet" href="{% static 'cutless/css/resultado.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'cutless/css/resultado.css' %}?v=3">
 <link rel="stylesheet" href="{% static 'cutless/css/history-result-refinement.css' %}?v=buttons-1">
 <link rel="stylesheet" href="{% static 'cutless/css/board-landscape.css' %}?v=3">
 {% endblock %}
 
 {% block content %}
-  <header class="page-header fade-in">
+  <header class="page-header fade-in" data-result-stage="header"><div class="result-stage-placeholder" aria-hidden="true">{% include 'cutless/includes/optimization-loading-block.html' with zone='header' %}</div>
     <div class="page-header__text">
       <h1 class="page-title">Resultado del plan de corte</h1>
       <p class="text-muted mb-0">{{ optimizacion.etiqueta }}</p>
@@ -47,14 +48,14 @@ try {
     </div>
   </header>
 
-  <section class="card total-utilization" aria-label="Aprovechamiento total de la optimización">
+  <section data-result-stage="total" class="card total-utilization" aria-label="Aprovechamiento total de la optimización"><div class="result-stage-placeholder" aria-hidden="true">{% include 'cutless/includes/optimization-loading-block.html' with zone='total' %}</div>
     <div class="cut-utilization" data-utilization="{{ optimizacion.aprovechamiento_total|unlocalize }}">
       <svg viewBox="0 0 42 42" role="img" aria-label="Aprovechamiento total {{ optimizacion.aprovechamiento_total|floatformat:2 }} por ciento"><circle class="donut-track" cx="21" cy="21" r="15.9155" fill="none" stroke-width="4"/><circle class="donut-value" cx="21" cy="21" r="15.9155" fill="none" stroke-width="4" stroke-dasharray="{{ optimizacion.aprovechamiento_total|unlocalize }} 100" transform="rotate(-90 21 21)"/></svg>
       <div><h2>Aprovechamiento total</h2><strong>{{ optimizacion.aprovechamiento_total|floatformat:2 }} %</strong><p>Considera {{ num_tableros }} tablero{{ num_tableros|pluralize }} del plan completo.</p></div>
     </div>
   </section>
   <section data-board-deck aria-label="Planos de corte">
-    <div class="board-deck-controls" hidden>
+    <div class="board-deck-controls" data-result-stage="navigation" hidden><div class="result-stage-placeholder" aria-hidden="true">{% include 'cutless/includes/optimization-loading-block.html' with zone='navigation' %}</div>
       <div class="board-deck-heading"><h2>Distribución de las piezas</h2><p>Recorre los tableros sin perder de vista sus medidas.</p></div>
       <div class="board-deck-navigation button-pagination">
         <button type="button" class="btn btn-secondary btn-icon" id="deck-previous" aria-label="Ver tablero anterior" data-action="secondary" data-icon="chevron-left"></button>
@@ -75,7 +76,7 @@ try {
 
 </section>
 
-<details class="result-details"><summary>Ver resumen de todos los tableros</summary>
+<details class="result-details" data-result-stage="fold"><summary>Ver resumen de todos los tableros</summary><div class="result-stage-placeholder" aria-hidden="true">{% include 'cutless/includes/optimization-loading-block.html' with zone='fold' %}</div>
   <div class="card fade-in">
   <div class="table-responsive">
   <table class="table table-striped table-hover mb-0">
@@ -129,99 +130,30 @@ try {
   </div>
 
 </details>
-  <!-- Sección de Costos -->
   {% if costo_total or precio_tablero or mano_obra %}
-  <div class="row mt-4 fade-in">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header card-header-section">
-          <h5 class="mb-0"> Costos del corte</h5>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            {% if optimizacion.material %}
-            <div class="col-md-6 mb-3">
-              <div class="d-flex align-items-center">
-                <span class="me-2" style="font-size: 1.2rem;"></span>
-                <div>
-                  <strong>Material:</strong><br>
-                  <span class="text-muted">{{ optimizacion.material.nombre }}</span>
-                </div>
-              </div>
-            </div>
-            {% endif %}
-            {% if precio_tablero %}
-            <div class="col-md-6 mb-3">
-              <div class="d-flex align-items-center">
-                <span class="me-2" style="font-size: 1.2rem;"></span>
-                <div>
-                  <strong>Precio por tablero:</strong><br>
-                  <span class="text-muted">${{ precio_tablero|floatformat:0 }}</span>
-                </div>
-              </div>
-            </div>
-            {% endif %}
-            {% if precio_tablero %}
-            <div class="col-md-6 mb-3">
-              <div class="d-flex align-items-center">
-                <span class="me-2" style="font-size: 1.2rem;"></span>
-                <div>
-                  <strong>Costo de material <span class="text-annotation">({{ num_tableros }} tableros)</span>:</strong><br>
-                  <span class="text-muted">${{ costo_material|floatformat:0|default:"0" }}</span>
-                </div>
-              </div>
-            </div>
-            {% endif %}
-            {% if mano_obra %}
-            <div class="col-md-6 mb-3">
-              <div class="d-flex align-items-center">
-                <span class="me-2" style="font-size: 1.2rem;"></span>
-                <div>
-                  <strong>Mano de obra:</strong><br>
-                  <span class="text-muted">${{ mano_obra|floatformat:0 }}</span>
-                </div>
-              </div>
-            </div>
-            {% endif %}
-            {% if costo_total %}
-            <div class="col-md-12 mt-3 pt-3 border-top">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h4 class="text-success mb-0">
-                    <strong> Costo Total:</strong>
-                  </h4>
-                </div>
-                <div>
-                  <h3 class="text-success mb-0" style="font-weight: 700;">
-                    ${{ costo_total|floatformat:0 }}
-                  </h3>
-                </div>
-              </div>
-            </div>
-            {% endif %}
-            {% if costo_total %}
-            <div class="mt-4 text-center">
-              {% if user.perfil.menu_visible.presupuestos %}<a href="{% url 'cutless:crear_presupuesto' %}?optimizacion={{ optimizacion.pk }}" class="btn btn-primary" data-action="primary" data-icon="plus">
-                 Crear presupuesto
-              </a>{% endif %}
-            </div>
-            {% endif %}
-          </div>
-        </div>
-      </div>
+  <section class="card result-costs" data-result-stage="costs" data-cost-price="{% if precio_tablero %}true{% endif %}" data-cost-labor="{% if mano_obra %}true{% endif %}" data-cost-material="{% if optimizacion.material %}true{% endif %}" data-cost-total="{% if costo_total %}true{% endif %}" aria-labelledby="result-costs-title">
+    <div class="result-stage-placeholder" aria-hidden="true">{% include 'cutless/includes/optimization-loading-block.html' with zone='costs' %}</div>
+    <h2 class="card-header" id="result-costs-title">Costos del corte</h2>
+    <div class="card-body">
+      <dl class="result-costs-grid">
+        {% if optimizacion.material %}<div><dt>Material</dt><dd>{{ optimizacion.material.nombre }}</dd></div>{% endif %}
+        {% if precio_tablero %}<div><dt>Precio por tablero</dt><dd>${{ precio_tablero|floatformat:0 }}</dd></div><div><dt>Costo de material <span class="text-annotation">({{ num_tableros }} tablero{{ num_tableros|pluralize }})</span></dt><dd>${{ costo_material|floatformat:0|default:"0" }}</dd></div>{% endif %}
+        {% if mano_obra %}<div><dt>Mano de obra</dt><dd>${{ mano_obra|floatformat:0 }}</dd></div>{% endif %}
+        {% if costo_total %}<div class="result-costs-total"><dt>Costo total</dt><dd>${{ costo_total|floatformat:0 }}</dd></div>{% endif %}
+      </dl>
+      {% if costo_total and user.perfil.menu_visible.presupuestos %}<div class="result-costs-budget"><a href="{% url 'cutless:crear_presupuesto' %}?optimizacion={{ optimizacion.pk }}" class="btn btn-secondary" data-action="secondary" data-icon="plus">Crear presupuesto</a></div>{% endif %}
     </div>
-  </div>
+  </section>
   {% endif %}
 
-  <h2 class="visually-hidden">Continuar trabajando</h2>
-  <div class="result-actions fade-in">
-    <a href="{% url 'cutless:index' %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-right">
-      Preparar otro corte
-    </a>
-    <a href="{% url 'cutless:historial' %}" class="btn btn-secondary" data-action="secondary" data-icon="eye">
-      Ver historial
-    </a>
-  </div>
+  <nav class="result-actions" data-result-stage="actions" aria-label="Continuar trabajando">
+    <div class="result-stage-placeholder" aria-hidden="true">{% include 'cutless/includes/optimization-loading-block.html' with zone='actions' %}</div>
+    <div><h2>Continuar trabajando</h2><p>Prepara otro corte o consulta tus trabajos guardados.</p></div>
+    <div class="result-actions-buttons">
+      <a href="{% url 'cutless:index' %}" class="btn btn-primary" data-action="primary" data-icon="plus">Preparar otro corte</a>
+      <a href="{% url 'cutless:historial' %}" class="btn btn-secondary" data-action="secondary" data-icon="eye">Ver historial</a>
+    </div>
+  </nav>
 
 <!-- Visor de tableros: datos legibles independientes del dibujo. -->
 <div class="modal board-viewer" id="modalTablero" tabindex="-1" aria-labelledby="modalTableroLabel" aria-hidden="true" data-result-id="{{ optimizacion.pk }}" data-result-code="{{ optimizacion.codigo }}">
@@ -238,4 +170,4 @@ try {
   </div></div>
 </div>
 {% endblock %}
-{% block extra_js %}<script src="{% static 'cutless/js/utilization.js' %}?v=1"></script><script src="{% static 'cutless/js/board-deck.js' %}?v=utilization-1"></script><script src="{% static 'cutless/js/board-viewer.js' %}?v=utilization-1"></script>{% endblock %}
+{% block extra_js %}<script src="{% static 'cutless/js/result-reveal.js' %}?v=1"></script><script src="{% static 'cutless/js/utilization.js' %}?v=1"></script><script src="{% static 'cutless/js/board-deck.js' %}?v=utilization-1"></script><script src="{% static 'cutless/js/board-viewer.js' %}?v=utilization-1"></script>{% endblock %}

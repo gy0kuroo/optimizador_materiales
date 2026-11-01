@@ -232,15 +232,18 @@ def persistir_resultado_optimizacion(optimizacion, imagenes_base64, info_desperd
     return optimizacion
 
 
-def obtener_resultado_optimizacion(optimizacion, numero_lista=None, persistir_si_falta=True):
+def obtener_resultado_optimizacion(optimizacion, numero_lista=None, persistir_si_falta=True, generar_imagenes=True):
     """
     Devuelve (imagenes_base64, aprovechamiento, info_desperdicio en cm²).
     Renderiza las coordenadas guardadas sin recalcular ni escribir archivos.
     Solo calcula cuando el registro aún no tiene un resultado persistido.
+    generar_imagenes=False omite PNG cuando la web puede dibujar el SVG guardado.
     """
     if optimizacion.resultado_generado and optimizacion.tableros.exists():
         info = _info_desperdicio_desde_modelo(optimizacion)
         if all(tb.get('vista_web') for tb in info['info_tableros']):
+            if not generar_imagenes:
+                return [None] * len(info['info_tableros']), optimizacion.aprovechamiento_total, info
             from ..exports.board_png import generar_png_tablero
             imagenes = []
             for tb in info['info_tableros']:

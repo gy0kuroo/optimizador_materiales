@@ -28,6 +28,18 @@
     });
     overlay.querySelector('[data-optimization-loading-count]').textContent =
       `${total} ${total === 1 ? 'pieza solicitada' : 'piezas solicitadas'} · ${types} ${types === 1 ? 'tipo' : 'tipos'}`;
+    // El servidor muestra costos si hay precio o mano de obra positivos.
+    const value = name => Number(form.querySelector?.(`[name="${name}"]`)?.value || 0);
+    const price = value('precio_tablero') > 0, labor = value('mano_obra') > 0;
+    const hasPrice = (form.querySelector?.('[name="precio_tablero"]')?.value ?? '') !== '';
+    const costs = overlay.querySelector('[data-loading-costs]');
+    if (costs && form.querySelector) {
+      costs.hidden = !(price || labor);
+      overlay.querySelectorAll('[data-loading-cost]').forEach(node => {
+        const kind = node.dataset.loadingCost;
+        node.hidden = kind === 'price' ? !price : kind === 'labor' ? !labor : kind === 'total' ? !(hasPrice && (price || labor)) : !value('material');
+      });
+    }
     const targets = Array.from(document.querySelectorAll('.app-main, .navbar-custom')).map(node => [node, Boolean(node.inert)]);
     targets.forEach(([node]) => { node.inert = true; });
     form.setAttribute('aria-busy', 'true');
@@ -36,8 +48,11 @@
     try { sessionStorage.setItem('cutless-result-transition', String(Date.now())); } catch (_) {}
     active = {overlay, form, targets, timer:null};
     active.timer = setTimeout(() => {
-      if (active?.overlay === overlay) overlay.querySelector('[data-optimization-loading-status]').textContent =
-        'El cálculo está tardando más de lo habitual. Sigue en espera de la respuesta; no vuelvas a enviar el formulario.';
+      if (active?.overlay === overlay) {
+        const status = overlay.querySelector('[data-optimization-loading-status]');
+        status.textContent = 'El cálculo está tardando más de lo habitual. Sigue en espera de la respuesta; no vuelvas a enviar el formulario.';
+        status.classList?.remove('visually-hidden');
+      }
     }, 20000);
     overlay.querySelector('#optimization-loading-title').focus({preventScroll:true});
     return overlay;

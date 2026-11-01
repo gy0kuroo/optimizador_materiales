@@ -92,7 +92,7 @@ class PrecisionEdicionTests(TestCase):
                     'form-TOTAL_FORMS': 1, 'form-INITIAL_FORMS': 0,
                     'form-0-nombre': 'Puerta', 'form-0-ancho': w,
                     'form-0-alto': h, 'form-0-cantidad': 2,
-                })
+                }, follow=True)
                 self.assertEqual(response.status_code, 200)
                 self.assertTemplateUsed(response, 'cutless/resultado.html')
                 opt.refresh_from_db()

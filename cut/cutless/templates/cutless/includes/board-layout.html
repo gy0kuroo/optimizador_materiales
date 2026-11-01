@@ -1,14 +1,14 @@
 {% load l10n %}
 <div class="cut-layout">
   <div class="cut-main">
-    <section class="card cut-drawing-card">
+    <section class="card cut-drawing-card" data-result-stage="drawing"><div class="result-stage-placeholder" aria-hidden="true">{% include 'cutless/includes/optimization-loading-block.html' with zone='drawing' %}</div>
       <div class="card-header"><h2>Distribución del tablero</h2><a href="{% url 'cutless:descargar_png_tablero' optimizacion.id item.numero %}" class="btn btn-secondary" data-carga-texto="Generando imagen..." data-action="secondary" data-icon="image">Descargar PNG</a></div>
       <button type="button" class="board-open" data-open-board="{{ item.numero }}" aria-label="Abrir visor del tablero {{ item.numero }}">
         {% include 'cutless/includes/board-drawing.html' %}
         <span>Abrir visor del tablero</span>
       </button>
     </section>
-    <section class="card cut-pieces">
+    <section class="card cut-pieces" data-result-stage="pieces"><div class="result-stage-placeholder" aria-hidden="true">{% include 'cutless/includes/optimization-loading-block.html' with zone='pieces' %}</div>
       <h2 class="card-header">Detalle de piezas</h2>
       {% if item.catalogo %}
       <div class="table-responsive"><table class="table board-pieces mb-0"><thead><tr><th scope="col">#</th><th scope="col">Nombre de la pieza</th><th scope="col">Medidas ({{ unidad_medida }})</th><th scope="col">Cantidad</th><th scope="col">Área (m²)</th><th scope="col">Referencia</th></tr></thead><tbody>
@@ -22,7 +22,7 @@
     </section>
   </div>
   <aside class="board-data cut-sidebar" aria-label="Información del tablero {{ item.numero }}">
-    <section class="card"><h2 class="card-header">Resumen del corte</h2><div class="card-body">
+    <section class="card" data-result-stage="summary"><div class="result-stage-placeholder" aria-hidden="true">{% include 'cutless/includes/optimization-loading-block.html' with zone='summary' %}</div><h2 class="card-header">Resumen del corte</h2><div class="card-body">
       <div class="cut-utilization" data-utilization="{{ item.info.porcentaje_uso|unlocalize }}"><svg viewBox="0 0 42 42" role="img" aria-label="Aprovechamiento {{ item.info.porcentaje_uso|floatformat:2 }} por ciento"><circle class="donut-track" cx="21" cy="21" r="15.9155" fill="none" stroke-width="4"/><circle class="donut-value" cx="21" cy="21" r="15.9155" fill="none" stroke-width="4" stroke-dasharray="{{ item.info.porcentaje_uso|unlocalize }} 100" transform="rotate(-90 21 21)"/></svg><div><span>Aprovechamiento del tablero</span><strong>{{ item.info.porcentaje_uso|floatformat:2 }} %</strong><p>{% if item.info.porcentaje_uso >= 85 %}Se aprovecha la mayor parte del tablero.{% elif item.info.porcentaje_uso >= 60 %}Queda espacio sin utilizar en el tablero.{% else %}Una parte importante queda sin utilizar.{% endif %}</p></div></div>
       <dl class="cut-key-data">
         <div><dt><span aria-hidden="true">◷</span> Desperdicio</dt><dd>{{ item.desperdicio_porcentaje|floatformat:2 }} %<small>{{ item.info.desperdicio|floatformat:2 }} {{ simbolo_area }}</small></dd></div>
@@ -34,7 +34,7 @@
       </dl>
       <p class="board-note">En este tablero: {{ item.info.num_piezas }} piezas. Área utilizada total: {{ info_desperdicio.area_usada_total|floatformat:2 }} {{ simbolo_area }}. Desperdicio total: {{ info_desperdicio.desperdicio_total|floatformat:2 }} {{ simbolo_area }}.</p>
     </div></section>
-    <section class="card"><h2 class="card-header">Detalles técnicos</h2><dl class="cut-technical card-body">
+    <section class="card" data-result-stage="technical"><div class="result-stage-placeholder" aria-hidden="true">{% include 'cutless/includes/optimization-loading-block.html' with zone='technical' %}</div><h2 class="card-header">Detalles técnicos</h2><dl class="cut-technical card-body">
       <div><dt>Tamaño del tablero</dt><dd>{{ ancho_tablero_mostrar }} × {{ alto_tablero_mostrar }} {{ unidad_medida }}</dd></div>
       <div><dt>Unidad de medida</dt><dd>{{ unidad_medida }}</dd></div>
       <div><dt>Ancho de sierra</dt><dd>{{ margen_mm|floatformat:2 }} mm</dd></div>

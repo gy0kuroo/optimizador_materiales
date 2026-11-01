@@ -24,7 +24,7 @@ class NombresOptimizacionesTests(TestCase):
 
     def test_crear_con_nombre_o_sin_nombre(self):
         for nombre in ['  Mueble   de cocina  ', '']:
-            response = self.client.post(reverse('cutless:index'),dict(self.data,nombre_optimizacion=nombre))
+            response = self.client.post(reverse('cutless:index'),dict(self.data,nombre_optimizacion=nombre), follow=True)
             self.assertEqual(response.status_code,200)
             opt = Optimizacion.objects.order_by('-pk').first()
             self.assertEqual(opt.nombre,' '.join(nombre.split()))
@@ -88,7 +88,7 @@ class NombresOptimizacionesTests(TestCase):
 
     def test_editar_conserva_codigo_y_actualiza_nombre(self):
         response=self.client.post(reverse('cutless:editar_optimizacion',args=[self.opt.pk]),
-            dict(self.data,nombre_optimizacion='Cocina renovada'))
+            dict(self.data,nombre_optimizacion='Cocina renovada'), follow=True)
         self.assertEqual(response.status_code,200)
         code=self.opt.codigo;self.opt.refresh_from_db()
         self.assertEqual(self.opt.nombre,'Cocina renovada');self.assertEqual(self.opt.codigo,code)

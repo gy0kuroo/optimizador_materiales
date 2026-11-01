@@ -1,21 +1,16 @@
-<template id="cutless-optimization-loading-template">
-  <section id="optimization-loading-overlay" class="optimization-loading" role="dialog" aria-modal="true" aria-labelledby="optimization-loading-title">
-    <header class="optimization-loading-header">
-      <div><p class="optimization-loading-eyebrow">Preparando tu plan de corte</p><h1 id="optimization-loading-title" tabindex="-1">Calculando la distribución de las piezas</h1></div>
-      <p class="optimization-loading-count" data-optimization-loading-count></p>
-    </header>
-    <p class="optimization-loading-status" role="status" aria-live="polite" data-optimization-loading-status>Estamos procesando tus medidas. El resultado aparecerá cuando termine el cálculo.</p>
-    <div class="optimization-loading-total" aria-hidden="true"><span class="board-skeleton board-skeleton-donut"></span><div><span class="board-skeleton board-skeleton-line"></span><span class="board-skeleton board-skeleton-line board-skeleton-short"></span></div></div>
-    <div class="optimization-loading-layout" aria-hidden="true">
-      <div class="optimization-loading-main">
-        <section class="optimization-loading-card"><h2>Distribución del tablero</h2><div class="board-skeleton board-skeleton-drawing"><div class="board-skeleton-plan"><i></i><i></i><i></i><i></i><i></i><i></i></div></div></section>
-        <section class="optimization-loading-card"><h2>Detalle de piezas</h2><span class="board-skeleton board-skeleton-line"></span><span class="board-skeleton board-skeleton-line"></span><span class="board-skeleton board-skeleton-line board-skeleton-short"></span></section>
-      </div>
-      <aside class="optimization-loading-aside">
-        <section class="optimization-loading-card"><h2>Resumen del corte</h2><div class="board-skeleton-summary"><span class="board-skeleton board-skeleton-donut"></span><div><span class="board-skeleton board-skeleton-line"></span><span class="board-skeleton board-skeleton-line board-skeleton-short"></span></div></div><div class="board-skeleton-grid"><span class="board-skeleton"></span><span class="board-skeleton"></span><span class="board-skeleton"></span><span class="board-skeleton"></span></div></section>
-        <section class="optimization-loading-card"><h2>Detalles técnicos</h2><span class="board-skeleton board-skeleton-line"></span><span class="board-skeleton board-skeleton-line"></span><span class="board-skeleton board-skeleton-line board-skeleton-short"></span></section>
-      </aside>
-    </div>
-    <p class="optimization-loading-note">Los espacios animados representan información pendiente, no un resultado provisional.</p>
-  </section>
-</template>
+<template id="cutless-optimization-loading-template"><section id="optimization-loading-overlay" class="optimization-loading" role="dialog" aria-modal="true" aria-labelledby="optimization-loading-title">
+<h2 id="optimization-loading-title" class="visually-hidden" tabindex="-1">Preparando el resultado del plan de corte</h2>
+<p class="optimization-loading-status visually-hidden" role="status" aria-live="polite" data-optimization-loading-status>Estamos procesando tus medidas. El resultado aparecerá cuando termine el cálculo.</p>
+<div aria-hidden="true">
+<section class="optimization-loading-card" data-loading-block="notice" >{% include 'cutless/includes/optimization-loading-block.html' with zone='notice' %}</section>{% include 'cutless/includes/optimization-loading-block.html' with zone='header' waiting=True %}{% include 'cutless/includes/optimization-loading-block.html' with zone='total' %}{% include 'cutless/includes/optimization-loading-block.html' with zone='navigation' %}<div class="optimization-loading-layout"><div class="optimization-loading-main"><section class="optimization-loading-card" data-loading-block="drawing" >{% include 'cutless/includes/optimization-loading-block.html' with zone='drawing' %}</section><section class="optimization-loading-card" data-loading-block="pieces" >{% include 'cutless/includes/optimization-loading-block.html' with zone='pieces' %}</section></div><aside class="optimization-loading-aside"><section class="optimization-loading-card" data-loading-block="summary" >{% include 'cutless/includes/optimization-loading-block.html' with zone='summary' %}</section><section class="optimization-loading-card" data-loading-block="technical" >{% include 'cutless/includes/optimization-loading-block.html' with zone='technical' %}</section></aside></div>{% include 'cutless/includes/optimization-loading-block.html' with zone='fold' %}<section class="optimization-loading-card" data-loading-block="costs" data-loading-costs hidden>{% include 'cutless/includes/optimization-loading-block.html' with zone='costs' %}</section>{% include 'cutless/includes/optimization-loading-block.html' with zone='actions' %}</div></section></template>
+<template data-result-placeholder="notice">{% include 'cutless/includes/optimization-loading-block.html' with zone='notice' %}</template>
+<template data-result-placeholder="header">{% include 'cutless/includes/optimization-loading-block.html' with zone='header' %}</template>
+<template data-result-placeholder="total">{% include 'cutless/includes/optimization-loading-block.html' with zone='total' %}</template>
+<template data-result-placeholder="navigation">{% include 'cutless/includes/optimization-loading-block.html' with zone='navigation' %}</template>
+<template data-result-placeholder="drawing">{% include 'cutless/includes/optimization-loading-block.html' with zone='drawing' %}</template>
+<template data-result-placeholder="summary">{% include 'cutless/includes/optimization-loading-block.html' with zone='summary' %}</template>
+<template data-result-placeholder="pieces">{% include 'cutless/includes/optimization-loading-block.html' with zone='pieces' %}</template>
+<template data-result-placeholder="technical">{% include 'cutless/includes/optimization-loading-block.html' with zone='technical' %}</template>
+<template data-result-placeholder="fold">{% include 'cutless/includes/optimization-loading-block.html' with zone='fold' %}</template>
+<template data-result-placeholder="costs">{% include 'cutless/includes/optimization-loading-block.html' with zone='costs' %}</template>
+<template data-result-placeholder="actions">{% include 'cutless/includes/optimization-loading-block.html' with zone='actions' %}</template>

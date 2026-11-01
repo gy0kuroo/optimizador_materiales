@@ -60,7 +60,7 @@
     <link rel="stylesheet" href="{% static 'cutless/css/buttons.css' %}?v=review-2">
     <link rel="stylesheet" href="{% static 'cutless/css/loading.css' %}?v=5">
     <link rel="stylesheet" href="{% static 'cutless/css/board-loading.css' %}?v=1">
-    <link rel="stylesheet" href="{% static 'cutless/css/optimization-loading.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'cutless/css/optimization-loading.css' %}?v=5">
     <link rel="stylesheet" href="{% static 'cutless/css/theme-colors.css' %}?v=4">
     <link rel="stylesheet" href="{% static 'cutless/css/mobile-navigation.css' %}?v=1">
     <link rel="stylesheet" href="{% static 'cutless/css/sidebar-navigation.css' %}?v=1">
@@ -140,7 +140,7 @@
         {% block flash_messages %}
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{% if message.tags == "error" %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                <div data-result-stage="notice" class="alert alert-{% if message.tags == "error" %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
                     {{ message }}
                     <button type="button" class="btn btn-icon btn-text" data-bs-dismiss="alert" aria-label="Close" data-action="text" data-icon="close"></button>
                 </div>
@@ -219,7 +219,7 @@
 
     <!-- JavaScript Personalizado -->
     <script src="{% static 'cutless/js/theme.js' %}?v=3"></script>
-    <script src="{% static 'cutless/js/optimization-loading.js' %}?v=2"></script>
+    <script src="{% static 'cutless/js/optimization-loading.js' %}?v=3"></script>
     <script src="{% static 'cutless/js/confirmaciones.js' %}?v=optimization-skeleton-1"></script>
     {% if user.is_authenticated %}
     <script src="{% static 'cutless/js/session-timeout.js' %}?v=review-2"></script>

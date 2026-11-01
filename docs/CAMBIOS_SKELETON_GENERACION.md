@@ -26,10 +26,35 @@ Durante una optimización nueva los datos del plan llegan juntos al terminar el 
 ## Revisión en producción
 Generar el mismo caso desde Inicio, comprobar el contador de cien piezas y que aparezca el resultado al terminar. Probar también un formulario inválido: debe mostrar la corrección sin bloquearse con un skeleton. El tiempo real depende del servidor y la carga; no se fuerza una duración mínima para que el usuario vea la animación.
 
-## Transición al resultado
-- Entrada suave del skeleton (180 ms) y sustitución escalonada de los bloques del resultado (hasta 610 ms en total), sin retrasar el POST ni agregar una duración mínima de carga.
-- La transición del resultado utiliza una marca temporal de sessionStorage que se consume una sola vez; no se activa por abrir resultados desde el historial. Si el almacenamiento no está disponible, la navegación funciona sin esa animación.
-- Respeta la preferencia de movimiento reducido. No altera cálculos, datos ni exportaciones.
+## Skeleton completo y transición al resultado
 
-### Presentación por bloques
-El resultado recién generado presenta aprovechamiento total, dibujo, resumen, piezas y detalles técnicos con separaciones de unos 90 ms. En móvil, piezas precede al resumen para seguir el orden vertical. Cada tarjeta conserva su tamaño real y muestra un placeholder con onda mientras aparece su contenido; no hay resultados provisionales ni peticiones adicionales. Solo se anima el primer tablero inicial. Movimiento reducido e impresión muestran el contenido directamente.
+Inventario revisado en `resultado.html`, `board-layout.html` y los avisos de `base.html`:
+
+| Zona | Representación durante la espera |
+| --- | --- |
+| Aviso de confirmación | Barra placeholder, sin afirmar éxito antes de recibir respuesta |
+| Encabezado | Título fijo, código pendiente y cinco botones placeholder |
+| Aprovechamiento total | Dona, título y dos líneas pendientes |
+| Distribución de las piezas | Título, subtítulo y navegación pendiente |
+| Dibujo | Título, descarga PNG pendiente, cota y bloques de piezas, enlace inferior |
+| Resumen del corte | Dona, seis celdas y nota pendiente |
+| Detalle de piezas | Seis columnas, filas de ejemplo y nota pendiente |
+| Detalles técnicos | Cinco etiquetas fijas y valores pendientes |
+| Resumen de todos los tableros | Barra cerrada con título y flecha; no se dibuja su tabla interior |
+| Costos | Solo si precio o mano de obra lo requieren; material, precio, mano de obra, total y presupuesto según condiciones |
+| Acciones finales | Dos botones pendientes |
+
+- Un parcial compartido mantiene la misma representación durante el POST y sobre las tarjetas reales del resultado. Los overlays iniciales se renderizan desde Django para evitar un fotograma vacío antes de ejecutar JavaScript.
+- Revelado de arriba hacia abajo: aviso/encabezado, aprovechamiento, navegación, dibujo/resumen, piezas/detalles, plegable, costos y acciones. Intervalos de 85 ms y transiciones de 270 ms: menos de un segundo. En pantallas apiladas se presentan las piezas antes del resumen.
+- La respuesta conserva las dimensiones reales de cada tarjeta; los placeholders son capas sin participación en el flujo. Antes de recibir los datos no se conocen las filas ni las dimensiones exactas de todas las tarjetas, por lo que el skeleton del POST usa tamaños aproximados.
+- Solo se anima el primer tablero al llegar desde un envío. Abrir desde historial, navegar entre tableros, exportar e imprimir mantienen su comportamiento.
+- No cambia cálculos, persistencia ni solicitudes. Respeta movimiento reducido; foco, errores de presentación y navegación restauran la visibilidad. Existe un fallback de 2,5 s si no termina de inicializarse el script.
+- Los costos siguen las condiciones reales: mano de obra sin precio puede mostrar su bloque sin mostrar total; precio cero con mano de obra puede tener total. El código OPT y número de tableros permanecen pendientes hasta recibir la respuesta.
+
+### Verificación de esta ampliación
+- 247 pruebas Django aprobadas sobre base de pruebas aislada.
+- 14 pruebas JavaScript: espera y duplicados, condiciones de costos, orden escritorio/móvil, duración, limpieza y movimiento reducido.
+- Revisión de navegador sobre datos sintéticos, sin Supabase ni datos de usuarios. Sin nuevas dependencias ni migraciones.
+
+## Ajuste de costos y recarga
+Los placeholders de costos adoptan la cuadrícula compacta del resultado y las acciones finales incluyen su propio encabezado. El envío termina en una redirección al resultado guardado, manteniendo la marca de transición entre páginas. Detalles y pruebas en `CAMBIOS_RESULTADO_RECARGA_Y_COSTOS.md`.

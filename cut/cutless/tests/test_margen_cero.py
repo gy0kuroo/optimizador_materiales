@@ -49,7 +49,7 @@ class MargenCeroTests(TestCase):
         )
 
     def test_crear_con_cero_usa_un_tablero(self):
-        response = self.client.post(reverse('cutless:index'), self.data)
+        response = self.client.post(reverse('cutless:index'), self.data, follow=True)
         self.assertEqual(response.status_code, 200)
         opt = Optimizacion.objects.get(usuario=self.usuario)
         self.assertEqual(opt.margen_corte, 0)
@@ -59,7 +59,7 @@ class MargenCeroTests(TestCase):
 
     def test_editar_con_cero_usa_un_tablero(self):
         opt = self.crear_optimizacion(0.3)
-        response = self.client.post(reverse('cutless:editar_optimizacion', args=[opt.pk]), self.data)
+        response = self.client.post(reverse('cutless:editar_optimizacion', args=[opt.pk]), self.data, follow=True)
         self.assertEqual(response.status_code, 200)
         opt.refresh_from_db()
         self.assertEqual(opt.margen_corte, 0)
@@ -69,7 +69,7 @@ class MargenCeroTests(TestCase):
     def test_crear_con_campo_vacio_o_positivo_conserva_margen(self):
         for valor, esperado in [('', 0.3), (3, 0.3), (1, 0.1)]:
             with self.subTest(valor=valor):
-                response = self.client.post(reverse('cutless:index'), dict(self.data, margen_corte=valor))
+                response = self.client.post(reverse('cutless:index'), dict(self.data, margen_corte=valor), follow=True)
                 self.assertEqual(response.status_code, 200)
                 opt = Optimizacion.objects.filter(usuario=self.usuario).latest('pk')
                 self.assertAlmostEqual(opt.margen_corte, esperado)
@@ -77,7 +77,7 @@ class MargenCeroTests(TestCase):
 
     def test_editar_con_campo_vacio_conserva_default(self):
         opt = self.crear_optimizacion()
-        response = self.client.post(reverse('cutless:editar_optimizacion', args=[opt.pk]), dict(self.data, margen_corte=''))
+        response = self.client.post(reverse('cutless:editar_optimizacion', args=[opt.pk]), dict(self.data, margen_corte=''), follow=True)
         self.assertEqual(response.status_code, 200)
         opt.refresh_from_db()
         self.assertEqual(opt.margen_corte, 0.3)

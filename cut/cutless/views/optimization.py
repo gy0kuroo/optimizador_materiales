@@ -242,14 +242,8 @@ def editar_optimizacion(request, pk):
 
             messages.success(request, f"✅ Optimización actualizada exitosamente. Aprovechamiento: {aprovechamiento:.2f}%")
 
-            contexto = preparar_contexto_resultado(
-                optimizacion,
-                imagenes_base64,
-                info_desperdicio,
-            )
-            contexto['numero_lista'] = optimizacion.pk
-
-            return render(request, "cutless/resultado.html", contexto)
+            # POST/Redirect/GET: recargar consulta el resultado, no repite el cálculo.
+            return redirect('cutless:resultado', pk=optimizacion.pk)
         else:
             _avisar_errores_medidas(request, tablero_form, pieza_formset)
     else:
@@ -500,13 +494,6 @@ def index(request):
                 medida_habitual=tablero_form.cleaned_data.get('medida_habitual', ''),
             )
 
-            contexto = preparar_contexto_resultado(
-                optimizacion,
-                imagenes_base64,
-                info_desperdicio,
-            )
-            contexto['numero_lista'] = optimizacion.pk
-            
             # Enviar notificación de optimización completada (cuando se crea desde index)
             enviar_notificacion(
                 request,
@@ -516,7 +503,7 @@ def index(request):
                 {'optimizacion_id': optimizacion.id, 'aprovechamiento': aprovechamiento}
             )
             
-            return render(request, "cutless/resultado.html", contexto)
+            return redirect('cutless:resultado', pk=optimizacion.pk)
         else:
             # Mostrar errores de validación
             _avisar_errores_medidas(request, tablero_form, pieza_formset)
@@ -613,6 +600,7 @@ def resultado_view(request, pk=None):
             optimizacion,
             numero_lista=numero_lista,
             persistir_si_falta=True,
+            generar_imagenes=False,
         )
         contexto = preparar_contexto_resultado(
             optimizacion,
@@ -783,13 +771,7 @@ def resultado_view(request, pk=None):
             {'optimizacion_id': optimizacion.id, 'aprovechamiento': aprovechamiento}
         )
 
-        contexto = preparar_contexto_resultado(
-            optimizacion,
-            imagenes_base64,
-            info_desperdicio,
-        )
-        contexto['numero_lista'] = optimizacion.pk
-        return render(request, "cutless/resultado.html", contexto)
+        return redirect('cutless:resultado', pk=optimizacion.pk)
 
 def duplicar_optimizacion(request, pk):
     """
