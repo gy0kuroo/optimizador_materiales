@@ -219,6 +219,14 @@ class AdminDashboardPresentacionTests(TestCase):
         self.assertContains(response, 'admin-create-role')
 
 
+class PasswordVisibilityAssetTests(TestCase):
+    def test_control_de_visibilidad_se_carga_en_formularios_de_acceso(self):
+        for route in ('usuarios:login', 'usuarios:registro'):
+            with self.subTest(route=route):
+                response = self.client.get(reverse(route))
+                self.assertContains(response, 'cutless/js/password-visibility.js')
+
+
 class EliminarUsuarioTests(TestCase):
     def setUp(self):
         self.admin = User.objects.create_user('admin_test')

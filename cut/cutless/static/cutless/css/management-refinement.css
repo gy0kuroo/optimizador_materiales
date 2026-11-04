@@ -111,6 +111,8 @@ body.admin-users-page .admin-create-grid { display: grid; grid-template-columns:
 body.admin-users-page .admin-create-field { min-width: 0; }
 body.admin-users-page .admin-create-field > label { display: block; margin: 0 0 7px; color: var(--cl-text-primary); font-size: 14px; font-weight: 600; }
 body.admin-users-page .admin-create-field > input, body.admin-users-page .admin-create-field > select { display: block; width: 100%; min-width: 0; height: 44px; min-height: 44px; margin: 0; padding: 9px 12px; border: 1px solid var(--cl-border); border-radius: 8px; background: var(--cl-bg-card); color: var(--cl-text-primary); font: 400 14px/1.5 var(--cl-font-body); }
+body.admin-users-page .admin-create-field > .password-visibility-field { width: 100%; min-width: 0; }
+body.admin-users-page .admin-create-field > .password-visibility-field > input { height: 44px !important; min-height: 44px !important; margin: 0; border: 1px solid var(--cl-border); border-radius: 8px; background: var(--cl-bg-card); color: var(--cl-text-primary); font: 400 14px/1.5 var(--cl-font-body); }
 body.admin-users-page .admin-create-field > input:focus, body.admin-users-page .admin-create-field > select:focus { border-color: var(--accent) !important; outline: 3px solid var(--accent-ring) !important; outline-offset: 2px; }
 body.admin-users-page .admin-create-field > input[aria-invalid="true"], body.admin-users-page .admin-create-field > select[aria-invalid="true"] { border-color: var(--danger-text) !important; }
 body.admin-users-page .admin-field-help { margin-top: 5px; color: var(--cl-text-secondary); font-size: 13px; line-height: 1.45; }
