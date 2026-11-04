@@ -143,6 +143,82 @@ class PersonalizarMenuTests(TestCase):
         self.assertRedirects(self.client.get(reverse('cutless:estadisticas')), reverse('cutless:index'))
 
 
+class AdminDashboardBusquedaTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user('admin_busqueda')
+        self.admin.perfil.rol = 'admin'
+        self.admin.perfil.save()
+        self.usuario_a = User.objects.create_user('maria_soto', email='maria@example.com')
+        self.usuario_b = User.objects.create_user('lucas_rojas', email='lucas@example.com')
+        self.client.force_login(self.admin)
+
+    def test_dashboard_filtra_por_username_y_email(self):
+        response = self.client.get(reverse('usuarios:admin_dashboard'), {'busqueda': 'maria'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'maria_soto')
+        self.assertContains(response, 'maria@example.com')
+        self.assertNotContains(response, 'lucas_rojas')
+
+
+class AdminDashboardPaginacionTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user('admin_paginacion')
+        self.admin.perfil.rol = 'admin'
+        self.admin.perfil.save()
+        for numero in range(11):
+            User.objects.create_user(f'usuario_paginado_{numero:02d}')
+        self.client.force_login(self.admin)
+
+    def test_dashboard_muestra_diez_usuarios_y_pagina_siguiente(self):
+        response = self.client.get(reverse('usuarios:admin_dashboard'))
+
+        self.assertEqual(len(response.context['usuarios']), 10)
+        self.assertTrue(response.context['is_paginated'])
+        self.assertContains(response, 'aria-label="Paginación de usuarios"')
+
+    def test_paginacion_conserva_el_filtro_de_busqueda(self):
+        response = self.client.get(
+            reverse('usuarios:admin_dashboard'),
+            {'busqueda': 'usuario_paginado', 'page': 2},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['usuarios']), 1)
+        self.assertContains(response, 'usuario_paginado_10')
+        self.assertContains(response, 'busqueda=usuario_paginado')
+
+
+class AdminDashboardPresentacionTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user('admin_presentacion')
+        self.admin.perfil.rol = 'admin'
+        self.admin.perfil.save()
+        User.objects.create_user('carpintero')
+        self.client.force_login(self.admin)
+
+    def test_tabla_agrupa_identidad_y_etiqueta_acciones_por_usuario(self):
+        response = self.client.get(reverse('usuarios:admin_dashboard'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<th scope="col">Estado</th>', html=True)
+        self.assertContains(response, 'aria-label="Eliminar a carpintero"')
+        self.assertContains(response, 'aria-label="Rol de carpintero"')
+        self.assertContains(response, 'Sin email')
+        self.assertContains(response, 'Tu cuenta')
+        self.assertContains(response, 'Sin acciones')
+        self.assertNotContains(response, '<th scope="col">Email</th>', html=True)
+
+    def test_creacion_conserva_ayudas_y_reglas_dinamicas_del_formulario(self):
+        response = self.client.get(reverse('usuarios:admin_dashboard'))
+
+        self.assertContains(response, 'id="id_username"')
+        self.assertContains(response, 'id="id_email"')
+        self.assertContains(response, 'id="id_password1"')
+        self.assertContains(response, 'id="id_password2"')
+        self.assertContains(response, 'class="admin-password-rules"')
+        self.assertContains(response, 'admin-create-role')
+
+
 class EliminarUsuarioTests(TestCase):
     def setUp(self):
         self.admin = User.objects.create_user('admin_test')

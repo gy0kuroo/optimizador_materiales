@@ -43,6 +43,21 @@ class PermisosVistaTests(TestCase):
         response = self.client.get(reverse('cutless:estadisticas'))
         self.assertEqual(response.status_code, 200)
 
+    def test_admin_puede_usar_flujo_normal_de_optimizacion(self):
+        self.perfil.rol = 'admin'
+        self.perfil.save()
+        self.client.login(username='operario', password='test12345')
+        response_index = self.client.get(reverse('cutless:index'))
+        response_historial = self.client.get(reverse('cutless:historial'))
+        self.assertEqual(response_index.status_code, 200)
+        self.assertEqual(response_historial.status_code, 200)
+
+    def test_usuario_normal_no_accede_a_dashboard_admin(self):
+        self.client.login(username='operario', password='test12345')
+        response = self.client.get(reverse('usuarios:admin_dashboard'))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login/', response.url)
+
     def test_index_siempre_accesible_autenticado(self):
         self.client.login(username='operario', password='test12345')
         response = self.client.get(reverse('cutless:index'))

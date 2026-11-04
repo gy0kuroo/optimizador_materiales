@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
+from django.core.paginator import Paginator
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -55,7 +56,22 @@ def es_admin(usuario):
 @login_required
 @user_passes_test(es_admin)
 def admin_dashboard(request):
-    usuarios = User.objects.all().order_by('username')
+    usuarios = User.objects.select_related('perfil').all().order_by('username')
+    busqueda = request.GET.get('busqueda', '').strip()
+
+    if busqueda:
+        usuarios = usuarios.filter(
+            username__icontains=busqueda
+        ) | usuarios.filter(
+            email__icontains=busqueda
+        ) | usuarios.filter(
+            perfil__rol__icontains=busqueda
+        )
+        usuarios = usuarios.distinct().order_by('username')
+
+    total_usuarios = usuarios.count()
+    paginator = Paginator(usuarios, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
 
     if request.method == 'POST' and 'crear_usuario' in request.POST:
         form = RegistroForm(request.POST)
@@ -78,8 +94,12 @@ def admin_dashboard(request):
         form = RegistroForm()
 
     return render(request, 'usuarios/admin_dashboard.html', {
-        'usuarios': usuarios,
-        'form': form
+        'usuarios': page_obj.object_list,
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
+        'form': form,
+        'busqueda': busqueda,
+        'total_usuarios': total_usuarios,
     })
 
 

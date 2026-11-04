@@ -7,6 +7,36 @@ from django.shortcuts import render, redirect
 from ..models import Material
 
 
+PERMISOS_ADMIN_EXPLICITOS = {
+    'puede_crear_materiales',
+    'puede_crear_clientes',
+    'puede_crear_proyectos',
+    'puede_crear_presupuestos',
+    'puede_crear_plantillas',
+    'puede_ver_estadisticas',
+    'puede_ver_historial_costos',
+    'puede_comparar_optimizaciones',
+}
+
+
+def usuario_tiene_permiso(usuario, permiso_nombre):
+    """Evalúa permisos funcionales sin aplicar un bypass global por rol."""
+    if not getattr(usuario, 'is_authenticated', False):
+        return False
+
+    if getattr(usuario, 'is_superuser', False):
+        return True
+
+    perfil = getattr(usuario, 'perfil', None)
+    if perfil is None:
+        return False
+
+    if getattr(perfil, 'rol', None) == 'admin' and permiso_nombre in PERMISOS_ADMIN_EXPLICITOS:
+        return True
+
+    return bool(getattr(perfil, permiso_nombre, False))
+
+
 def handler404(request, exception):
     """Maneja errores 404 con una página personalizada"""
     return render(request, 'cutless/404.html', status=404)
@@ -28,10 +58,7 @@ def requiere_permiso(permiso_nombre):
             except AttributeError:
                 return redirect('usuarios:login')
 
-            if getattr(perfil, 'rol', None) == 'admin':
-                return view_func(request, *args, **kwargs)
-
-            if not getattr(perfil, permiso_nombre, False):
+            if not usuario_tiene_permiso(request.user, permiso_nombre):
                 messages.error(request, "❌ No tienes permiso para acceder a esta funcionalidad.")
                 return redirect('cutless:index')
 

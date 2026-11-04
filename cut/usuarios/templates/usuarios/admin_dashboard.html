@@ -1,81 +1,262 @@
 {% extends 'cutless/base.html' %}
-{% block body_class %}admin-page{% endblock %}
+{% load static %}
 
-{% block title %}Admin Dashboard{% endblock %}
+{% block body_class %}management-page admin-users-page{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=admin-users-visual-4">
+{% endblock %}
+
+{% block title %}Administración de usuarios{% endblock %}
 
 {% block content %}
-  <header class="page-header fade-in">
+  <header class="page-header fade-in admin-users-header">
     <div class="page-header__text">
       <h1 class="page-title">Administración de usuarios</h1>
       <p class="page-lead">Crea cuentas y gestiona permisos del sistema.</p>
     </div>
+    <div class="page-header__actions">
+      <button type="button" id="admin-create-user-trigger" class="btn btn-primary" data-action="primary" data-icon="plus" aria-controls="admin-create-user-card">
+        Crear usuario
+      </button>
+    </div>
   </header>
 
-
-<div class="card mb-4">
-  <div class="card-body">
-    <h5 class="card-title">Crear usuario</h5>
-    <form method="post" novalidate>
-      {% csrf_token %}
-      {% include 'cutless/includes/form-fields.html' %}
-      <div class="mb-3">
-        <label for="id_rol" class="form-label">Rol</label>
-        <select id="id_rol" name="rol" class="form-select">
-          <option value="usuario">Usuario</option>
-          <option value="admin">Administrador</option>
-        </select>
+  <section class="search-filters filters-panel fade-in admin-search-panel" aria-labelledby="admin-search-title">
+    <form method="GET" action="{% url 'usuarios:admin_dashboard' %}" class="admin-search-form">
+      <h2 id="admin-search-title" class="admin-section-title">Buscar usuarios</h2>
+      <div class="admin-search-row">
+        <div class="admin-search-field">
+          <label for="adminUserSearch">Buscar por usuario, email o rol</label>
+          <input id="adminUserSearch" type="text" class="form-control" name="busqueda" placeholder="Nombre, email o rol..." value="{{ busqueda }}">
+        </div>
+        <button type="submit" class="btn btn-primary admin-search-button" data-action="primary" data-icon="search">Buscar</button>
+        {% if busqueda %}
+          <a href="{% url 'usuarios:admin_dashboard' %}" class="btn btn-secondary admin-clear-search" data-action="secondary" data-icon="close">Quitar filtro</a>
+        {% endif %}
       </div>
-      <button type="submit" class="btn btn-success" name="crear_usuario" data-action="success" data-icon="check">Crear usuario</button>
     </form>
-  </div>
-</div>
+  </section>
 
-<div class="table-responsive">
-  <table class="admin-user-table table table-striped table-hover">
-    <thead>
-      <tr>
-        <th>Usuario</th>
-        <th>Email</th>
-        <th>Rol</th>
-        <th>Staff</th>
-        <th>Activo</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for u in usuarios %}
-      <tr>
-        <td>{{ u.username }}</td>
-        <td>{{ u.email }}</td>
-        <td>{{ u.perfil.rol|default:'usuario' }}</td>
-        <td>{{ u.is_staff|yesno:'Sí,No' }}</td>
-        <td>{{ u.is_active|yesno:'Sí,No' }}</td>
-        <td><div class="action-group">
-          {% if u != request.user %}
-            <a href="{% url 'usuarios:editar_usuario' u.pk %}" class="btn btn-sm me-1 admin-action-btn btn-secondary" data-action="secondary" data-icon="edit">Editar</a>
-            <form method="post" action="{% url 'usuarios:actualizar_rol' u.pk %}" class="d-inline">
+  <div class="admin-results-summary" aria-live="polite">
+    {% if busqueda %}
+      {% if total_usuarios == 1 %}1 resultado{% else %}{{ total_usuarios }} resultados{% endif %} para «{{ busqueda }}»
+    {% else %}
+      {{ total_usuarios }} usuario{{ total_usuarios|pluralize }}
+    {% endif %}
+  </div>
+
+  {% if usuarios %}
+  <div class="table-responsive fade-in admin-users-table-wrap">
+    <table class="admin-user-table table">
+      <colgroup>
+        <col class="admin-col-user">
+        <col class="admin-col-role">
+        <col class="admin-col-state">
+        <col class="admin-col-actions">
+      </colgroup>
+      <thead>
+        <tr>
+          <th scope="col">Usuario</th>
+          <th scope="col">Rol</th>
+          <th scope="col">Estado</th>
+          <th scope="col" class="admin-actions-heading">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in usuarios %}
+        {% with current_role=u.perfil.rol|default:'usuario' %}
+        <tr{% if u == request.user %} class="admin-user-row--current"{% endif %}>
+          <td class="admin-user-identity">
+            <div class="admin-user-summary">
+              <span class="admin-user-avatar" aria-hidden="true">{{ u.username|slice:':1'|upper }}</span>
+              <div class="admin-user-copy">
+                <div class="admin-user-name-line">
+                  <span class="admin-user-name">{{ u.username }}</span>
+                  {% if u == request.user %}<span class="admin-badge admin-badge--current">Tu cuenta</span>{% endif %}
+                </div>
+                {% if u.email %}
+                  <span class="admin-user-email">{{ u.email }}</span>
+                {% else %}
+                  <span class="admin-user-email admin-user-email--empty">Sin email</span>
+                {% endif %}
+              </div>
+            </div>
+          </td>
+          <td class="admin-user-role">
+            <span class="admin-mobile-label">Rol</span>
+            <form method="post" action="{% url 'usuarios:actualizar_rol' u.pk %}" class="admin-role-form" data-admin-role-form data-saved-role="{{ current_role }}" data-user-name="{{ u.username }}">
               {% csrf_token %}
-              <select name="rol" class="form-select form-select-sm d-inline w-auto me-1 rol-select-inline">
-                <option value="usuario" {% if u.perfil.rol == 'usuario' %}selected{% endif %}>Usuario</option>
-                <option value="admin" {% if u.perfil.rol == 'admin' %}selected{% endif %}>Admin</option>
+              <select name="rol" class="form-select admin-role-select" aria-label="Rol de {{ u.username }}"{% if u == request.user %} disabled{% endif %}>
+                <option value="usuario" {% if current_role == 'usuario' %}selected{% endif %}>Usuario</option>
+                <option value="admin" {% if current_role == 'admin' %}selected{% endif %}>Admin</option>
               </select>
-              <button type="submit" class="btn btn-sm admin-action-btn btn-success" data-action="success" data-icon="check">Actualizar rol</button>
+              {% if u != request.user %}
+                <button type="submit" class="btn btn-success admin-role-save" data-action="success" data-icon="check" aria-label="Actualizar rol de {{ u.username }}" hidden disabled>Actualizar rol</button>
+              {% endif %}
             </form>
-            <form method="post" action="{% url 'usuarios:eliminar_usuario' u.pk %}" class="d-inline action-delete-holder" data-cutless-mensaje="¿Eliminar al usuario «{{ u.username }}»? Esta acción no se puede deshacer." data-confirm-delete="true">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-sm admin-action-btn btn-danger" data-action="delete" data-icon="trash">Eliminar</button>
-            </form>
-          {% else %}
-            <span class="text-muted">Tu cuenta</span>
+          </td>
+          <td class="admin-user-state">
+            <span class="admin-mobile-label">Estado</span>
+            <div class="admin-state-badges">
+              {% if u.is_staff %}
+                <span class="admin-badge admin-badge--staff">Staff</span>
+              {% else %}
+                <span class="admin-state-dash" aria-label="Sin permisos de staff">—</span>
+              {% endif %}
+              {% if u.is_active %}
+                <span class="admin-badge admin-badge--active">Activo</span>
+              {% else %}
+                <span class="admin-badge admin-badge--inactive">Inactivo</span>
+              {% endif %}
+            </div>
+          </td>
+          <td class="admin-user-actions-cell">
+            <div class="admin-user-actions">
+              {% if u != request.user %}
+                <a href="{% url 'usuarios:editar_usuario' u.pk %}" class="btn btn-sm btn-secondary admin-action-btn" data-action="secondary" data-icon="edit" aria-label="Editar a {{ u.username }}">Editar</a>
+                <form method="post" action="{% url 'usuarios:eliminar_usuario' u.pk %}" class="admin-delete-form action-delete-holder" data-cutless-mensaje="¿Eliminar al usuario «{{ u.username }}»? Esta acción no se puede deshacer." data-confirm-delete="true">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-danger admin-action-btn admin-delete-button" data-action="delete" data-icon="trash" aria-label="Eliminar a {{ u.username }}">Eliminar</button>
+                </form>
+              {% else %}
+                <span class="admin-no-actions">Sin acciones</span>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endwith %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card fade-in text-center card-empty-state admin-empty-state">
+    <h4 class="mb-3">
+      {% if busqueda %}
+        No se encontraron usuarios
+      {% else %}
+        No hay usuarios registrados
+      {% endif %}
+    </h4>
+    <p class="mb-0">
+      {% if busqueda %}
+        No coincidieron resultados para «{{ busqueda }}».
+      {% else %}
+        Aún no hay cuentas creadas en la plataforma.
+      {% endif %}
+    </p>
+  </div>
+  {% endif %}
+
+  {% if is_paginated %}
+  <nav class="admin-pagination" aria-label="Paginación de usuarios">
+    {% if page_obj.has_previous %}
+      <a class="btn btn-secondary" href="?page={{ page_obj.previous_page_number }}{% if busqueda %}&amp;busqueda={{ busqueda|urlencode }}{% endif %}" aria-label="Página anterior">&lsaquo; Anterior</a>
+    {% else %}
+      <span class="btn btn-secondary disabled" aria-disabled="true">&lsaquo; Anterior</span>
+    {% endif %}
+    <span class="admin-pagination__status">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a class="btn btn-secondary" href="?page={{ page_obj.next_page_number }}{% if busqueda %}&amp;busqueda={{ busqueda|urlencode }}{% endif %}" aria-label="Página siguiente">Siguiente &rsaquo;</a>
+    {% else %}
+      <span class="btn btn-secondary disabled" aria-disabled="true">Siguiente &rsaquo;</span>
+    {% endif %}
+  </nav>
+  {% endif %}
+
+  <section id="admin-create-user-card" class="card admin-create-card" aria-labelledby="admin-create-title">
+    <div class="card-body">
+      <h2 id="admin-create-title" class="admin-section-title">Crear usuario</h2>
+      <form method="post" novalidate class="admin-create-form" data-admin-create-form>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="admin-field-errors admin-form-errors" role="alert">
+            <span class="admin-error-icon" aria-hidden="true">!</span>
+            <span>{{ form.non_field_errors }}</span>
+          </div>
+        {% endif %}
+        <div class="admin-create-grid">
+          <div class="admin-create-field">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+            {% if form.username.errors %}
+              <div class="admin-field-errors" id="id_username_errors" role="alert">
+                <span class="admin-error-icon" aria-hidden="true">!</span>
+                <span>{% for error in form.username.errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
+              </div>
+            {% endif %}
+            {% if form.username.help_text %}<div class="admin-field-help" id="id_username_help">{{ form.username.help_text|safe }}</div>{% endif %}
+          </div>
+          <div class="admin-create-field">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {% if form.email.errors %}
+              <div class="admin-field-errors" id="id_email_errors" role="alert">
+                <span class="admin-error-icon" aria-hidden="true">!</span>
+                <span>{% for error in form.email.errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
+              </div>
+            {% endif %}
+            {% if form.email.help_text %}<div class="admin-field-help" id="id_email_help">{{ form.email.help_text|safe }}</div>{% endif %}
+          </div>
+          <div class="admin-create-field">
+            {{ form.password1.label_tag }}
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+              <div class="admin-field-errors" id="id_password1_errors" role="alert">
+                <span class="admin-error-icon" aria-hidden="true">!</span>
+                <span>{% for error in form.password1.errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
+              </div>
+            {% endif %}
+          </div>
+          <div class="admin-create-field">
+            {{ form.password2.label_tag }}
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+              <div class="admin-field-errors" id="id_password2_errors" role="alert">
+                <span class="admin-error-icon" aria-hidden="true">!</span>
+                <span>{% for error in form.password2.errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
+              </div>
+            {% endif %}
+            {% if form.password2.help_text %}<div class="admin-field-help" id="id_password2_help">{{ form.password2.help_text|safe }}</div>{% endif %}
+          </div>
+          {% if form.password1.help_text %}
+            <div class="admin-password-rules" id="id_password1_help">{{ form.password1.help_text|safe }}</div>
           {% endif %}
-        </div></td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="6">No hay usuarios registrados.</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+          <div class="admin-create-field admin-create-role">
+            <label for="id_rol" class="form-label">Rol</label>
+            <select id="id_rol" name="rol" class="form-select" aria-label="Rol para el nuevo usuario">
+              <option value="usuario">Usuario</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+        </div>
+        <div class="admin-create-actions">
+          <button type="submit" class="btn btn-success admin-create-submit" name="crear_usuario" data-action="success" data-icon="check">Crear usuario</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <script>
+    (() => {
+      document.getElementById('admin-create-user-trigger')?.addEventListener('click', () => {
+        document.getElementById('admin-create-user-card')?.scrollIntoView({behavior: 'smooth', block: 'start'});
+        document.getElementById('id_username')?.focus({preventScroll: true});
+      });
+
+      document.querySelectorAll('[data-admin-role-form]').forEach(form => {
+        const select = form.querySelector('select[name="rol"]');
+        const button = form.querySelector('button[type="submit"]');
+        if (!select || !button) return;
+        const savedRole = form.dataset.savedRole;
+        const updateButton = () => {
+          const changed = select.value !== savedRole;
+          button.hidden = !changed;
+          button.disabled = !changed;
+        };
+        select.addEventListener('change', updateButton);
+      });
+    })();
+  </script>
 {% endblock %}

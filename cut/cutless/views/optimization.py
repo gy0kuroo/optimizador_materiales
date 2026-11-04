@@ -298,9 +298,8 @@ def editar_optimizacion(request, pk):
     })
 
 def index(request):
-    # Si el usuario es admin, redirigir directo al dashboard de administración
-    if request.user.is_superuser or (hasattr(request.user, 'perfil') and request.user.perfil.rol == 'admin'):
-        return redirect('usuarios:admin_dashboard')
+    # El administrador debe conservar el flujo normal de CutLess y entrar a Administración
+    # a través del dashboard explícito, no como redirección forzada del flujo principal.
 
     # Limpiar mensajes antiguos al cargar el formulario por primera vez
     if request.method == "GET":
