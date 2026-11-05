@@ -1,12 +1,13 @@
 {% extends 'cutless/base.html' %}
-{% load static %}
+{% load static initial_assets %}
 
 {% block title %}Iniciar sesión · CutLess{% endblock %}
 {% block body_class %}login-page{% endblock %}
 {% block navigation %}{% endblock %}
 {% block extra_css %}
+<script>document.documentElement.classList.add('auth-feedback-pending');</script>
 <link rel="stylesheet" href="{% static 'usuarios/css/login-redesign.css' %}?v=buttons-1">
-<link rel="stylesheet" href="{% static 'usuarios/css/auth-feedback.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'usuarios/css/auth-feedback.css' %}?v=2">
 {% endblock %}
 {% block flash_messages %}{% endblock %}
 {% block show_auth_buttons %}{% endblock %}
@@ -36,10 +37,10 @@
       {% else %}<div class="login-errors auth-summary" role="alert" tabindex="-1" data-auth-summary hidden></div>{% endif %}
       {% for field in form %}{% include 'usuarios/includes/auth-field.html' with registration=False %}{% endfor %}
       <a class="login-recovery" href="{% url 'usuarios:recuperar_password' %}">¿Olvidaste tu contraseña?</a>
-      <button type="submit" class="btn login-submit btn-primary" data-action="primary" data-icon="chevron-right">Iniciar sesión</button>
+      <button type="submit" class="btn login-submit btn-primary" data-action="primary" data-icon="chevron-right">{% button_icon 'chevron-right' %}Iniciar sesión</button>
     </form>
     <p class="login-register">¿Primera vez aquí? <a href="{% url 'usuarios:registro' %}">Crear una cuenta</a></p>
   </section>
 </div>
 {% endblock %}
-{% block extra_js %}<script src="{% static 'usuarios/js/auth-history.js' %}?v=1"></script><script src="{% static 'usuarios/js/auth-feedback.js' %}?v=1"></script>{% endblock %}
+{% block extra_js %}<script src="{% static 'usuarios/js/auth-history.js' %}?v=1"></script><script src="{% static 'usuarios/js/auth-feedback.js' %}?v=3"></script>{% endblock %}

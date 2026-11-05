@@ -8,7 +8,9 @@
   const password = form.elements.namedItem('password1');
   const confirmation = form.elements.namedItem('password2');
   const minimum = Number(form.dataset.minPassword || 0);
+  let submitAttempted = inputs.some(input => input.getAttribute('aria-invalid') === 'true');
   form.classList.add('auth-feedback-ready');
+  document.documentElement.classList.remove('auth-feedback-pending');
 
   function localError(input) {
     if (!input.value) return 'Completa este campo para continuar.';
@@ -54,14 +56,18 @@
   }
   for (const input of inputs) {
     if (input.getAttribute('aria-invalid') === 'true') input.closest('[data-auth-field]').dataset.touched = 'true';
-    input.addEventListener('blur', () => { check(input); guide(); });
+    input.addEventListener('blur', () => {
+      if (submitAttempted || input.closest('[data-auth-field]').dataset.touched) check(input);
+      guide();
+    });
     input.addEventListener('input', () => {
-      if (input.closest('[data-auth-field]').dataset.touched) check(input);
+      if (submitAttempted || input.closest('[data-auth-field]').dataset.touched) check(input);
       if (input === password && confirmation.closest('[data-auth-field]').dataset.touched) check(confirmation);
       guide();
     });
   }
   form.addEventListener('submit', event => {
+    submitAttempted = true;
     const valid = inputs.map(check).every(Boolean);
     guide();
     if (!valid) {

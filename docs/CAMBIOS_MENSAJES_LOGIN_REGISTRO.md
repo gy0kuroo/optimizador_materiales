@@ -10,7 +10,7 @@ La ayuda se revela al enfocar cada campo. La contraseña incluye una guía que c
 
 Las comprobaciones locales no verifican disponibilidad del usuario, contraseñas comunes ni similitud con los datos de cuenta. Se explica que estas verificaciones se realizan en el servidor; no se presenta una contraseña como definitivamente válida por cumplir la guía local.
 
-Los errores locales se muestran al salir del campo o enviar el formulario. Mientras se corrige un campo ya revisado, el mensaje se actualiza sin repetir el mismo anuncio a cada pulsación. Un envío local inválido enfoca el resumen para facilitar su localización. Los campos nuevos no aparecen marcados como erróneos al abrir la página.
+Los errores locales aparecen al intentar enviar el formulario. Antes del primer intento, salir de un campo vacío no lo marca como erróneo. Después del intento, los mensajes se actualizan al escribir o salir de un campo ya revisado, sin repetir el mismo anuncio a cada pulsación. Un envío local inválido enfoca el resumen para facilitar su localización. Los campos nuevos no aparecen marcados como erróneos al abrir la página.
 
 Si el servidor rechaza el registro, se conservan usuario y correo y se dejan vacías las contraseñas, como ya hacía Django. Sin JavaScript, las ayudas permanecen visibles y el servidor valida el formulario completo.
 
@@ -27,6 +27,15 @@ Tras crear una cuenta aparece «Tu cuenta está lista. Ahora inicia sesión» de
 - `auth-feedback.js` presenta la ayuda y las comprobaciones locales, sin peticiones adicionales para consultar usuarios. Los mensajes se construyen con `textContent`.
 - `auth-feedback.css` usa los tokens de la paleta existente. Las transiciones breves se desactivan cuando se prefiere movimiento reducido. No se introducen popups, medidores de seguridad arbitrarios ni cambios de tipografía.
 - La plantilla base incorpora un bloque de mensajes que el login puede reubicar. Los avisos del resto de las pantallas mantienen su ubicación.
+
+## Ajustes de carga y visibilidad — 05/11/2026
+
+- Los campos de contraseña tienen un botón accesible para mostrar u ocultar el valor sin modificarlo ni cambiar el envío del formulario.
+- En login y registro el control del ojo y el SVG de la flecha de iniciar sesión se renderizan desde el HTML inicial. El script compartido reutiliza el botón existente en esas páginas, evitando insertar controles duplicados después del primer pintado.
+- En login y registro se oculta la ayuda mientras se inicializa `auth-feedback.js`; una vez listo, la ayuda vuelve a mostrarse al enfocar el campo. Esto evita que «Escribe la contraseña de tu cuenta» aparezca brevemente al hacer una recarga completa.
+- La validación interactiva no marca errores por blur antes de intentar enviar. Tras el primer envío fallido, se mantienen los mensajes por campo y se limpian al corregir los datos. Los errores de servidor siguen activos desde la respuesta.
+
+La corrección se verificó con recarga completa en navegador: un ojo, una flecha, ayuda oculta al inicio y visible al enfocar; se probaron el envío vacío y la corrección posterior. Pasaron 47 pruebas de usuarios, autenticación, permisos y navegación.
 
 ## Verificación
 

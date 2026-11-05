@@ -1,6 +1,14 @@
+{% load initial_assets %}
 <div class="login-field" data-auth-field>
   <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-  {{ field }}
+  {% if field.field.widget.input_type == 'password' %}
+    <span class="password-visibility-field">
+      {{ field }}
+      <button type="button" class="btn btn-icon btn-text password-visibility-toggle" data-password-visibility-toggle data-show-label="Mostrar contraseña" data-hide-label="Ocultar contraseña" data-action="text" data-icon="eye" aria-label="Mostrar contraseña" aria-controls="{{ field.id_for_label }}" aria-pressed="false" title="Mostrar contraseña">{% button_icon 'eye' %}</button>
+    </span>
+  {% else %}
+    {{ field }}
+  {% endif %}
   <div id="{{ field.id_for_label }}_errors" class="login-field-errors auth-field-errors" aria-live="polite" data-field-errors {% if not field.errors %}hidden{% endif %}>
     {% for error in field.errors %}<p><span aria-hidden="true">!</span> {{ error }}</p>{% endfor %}
   </div>

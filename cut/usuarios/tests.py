@@ -226,6 +226,13 @@ class PasswordVisibilityAssetTests(TestCase):
                 response = self.client.get(reverse(route))
                 self.assertContains(response, 'cutless/js/password-visibility.js')
 
+    def test_login_entrega_controles_visuales_en_el_html_inicial(self):
+        response = self.client.get(reverse('usuarios:login'))
+
+        self.assertContains(response, 'auth-feedback-pending')
+        self.assertContains(response, 'data-password-visibility-toggle')
+        self.assertContains(response, 'data-icon="eye"')
+        self.assertContains(response, 'data-icon="chevron-right"')
 
 class EliminarUsuarioTests(TestCase):
     def setUp(self):

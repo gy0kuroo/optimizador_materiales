@@ -5,6 +5,19 @@
 
   function addVisibilityControl(input) {
     if (input.dataset.passwordVisibilityReady === 'true') return;
+    const existingButton = input.closest('.password-visibility-field')?.querySelector(':scope > .password-visibility-toggle');
+    if (existingButton) {
+      existingButton.addEventListener('click', () => {
+        const visible = input.type === 'password';
+        input.type = visible ? 'text' : 'password';
+        const label = visible ? existingButton.dataset.hideLabel : existingButton.dataset.showLabel;
+        existingButton.setAttribute('aria-label', label);
+        existingButton.setAttribute('aria-pressed', String(visible));
+        existingButton.title = label;
+      });
+      input.dataset.passwordVisibilityReady = 'true';
+      return;
+    }
 
     if (!input.id) {
       do {

@@ -8,6 +8,7 @@
 .auth-field-errors span { display:inline-flex; align-items:center; justify-content:center; border:1px solid currentColor; border-radius:50%; width:1.2em; height:1.2em; font-weight:700; }
 .login-page .app-main input[aria-invalid="true"]:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]) { border-color:var(--danger-text)!important; }
 .auth-field-help { font-size:1rem; line-height:1.5; }
+html.auth-feedback-pending body.login-page .auth-field-help { display:none!important; }
 .login-panel [hidden] { display:none!important; }
 /* Sin JS, toda la ayuda sigue disponible. Con JS se revela al enfocar o revisar. */
 .auth-feedback-ready .auth-field-help { display:none; }
