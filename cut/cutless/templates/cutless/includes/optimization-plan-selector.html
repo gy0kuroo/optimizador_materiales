@@ -1,0 +1,42 @@
+<section class="budget-plan-selector{% if selector_variant %} budget-plan-selector--{{ selector_variant }}{% endif %}" data-selector-variant="{{ selector_variant|default:'budget' }}" data-page-size="6" aria-labelledby="budget-plans-title">
+  <h2 id="budget-plans-title" class="h5">{% if selector_title %}{{ selector_title }}{% else %}Optimizaciones *{% endif %}</h2>
+  <p class="text-muted">{% if selector_help %}{{ selector_help }}{% else %}Marca los planes que incluirás. Puedes cambiar de página o buscar sin perder lo seleccionado ni los datos del presupuesto.{% endif %}</p>
+  <div class="budget-selector-tools" hidden>
+    <div class="budget-selector-search">
+      <label for="budget-plan-search" class="form-label">Buscar optimización</label>
+      <div class="budget-selector-search__controls">
+        <input type="search" id="budget-plan-search" class="form-control" placeholder="{% if selector_variant == 'project' %}Nombre, OPT-0040 o pieza{% else %}Nombre, OPT-0128 o pieza{% endif %}" autocomplete="off" aria-controls="budget-plan-table-body">
+        {% if selector_variant == 'project' %}<button type="button" class="btn btn-text btn-sm budget-selector-clear" data-budget-clear hidden data-action="text" data-icon="close">Quitar búsqueda</button>{% endif %}
+      </div>
+    </div>
+    <p id="budget-selection-count" role="status" aria-live="polite"></p>
+    <nav aria-label="Páginas de optimizaciones" class="budget-selector-pages">
+      <button type="button" class="btn btn-secondary" data-budget-page="previous" data-action="secondary" data-icon="chevron-left" disabled>Anterior</button>
+      <span id="budget-page-label" role="status" aria-live="polite"></span>
+      <button type="button" class="btn btn-secondary" data-budget-page="next" data-action="secondary" data-icon="chevron-right" disabled>Siguiente</button>
+    </nav>
+    {% if selector_variant == 'project' %}<p class="budget-selector-loading" data-budget-loading role="status" aria-live="polite" hidden><span class="budget-selector-spinner" aria-hidden="true"></span>Actualizando optimizaciones...</p>{% endif %}
+  </div>
+  <div class="table-responsive budget-plan-table" data-budget-table-wrap>
+    <table class="table table-hover">
+      <thead><tr><th>Elegir</th><th>Optimización y fecha</th><th>Tablero</th><th>Aprovechamiento</th><th>Tableros</th><th>Consultar</th></tr></thead>
+      <tbody id="budget-plan-table-body">
+      {% for item in optimizaciones_info %}
+        <tr data-budget-plan data-search="{{ item.optimizacion.etiqueta }} {{ item.optimizacion.piezas }}">
+          <td data-label="Elegir"><input type="checkbox" name="optimizaciones" value="{{ item.optimizacion.pk }}" id="opt_{{ item.optimizacion.pk }}" class="budget-plan-checkbox"{% if item.seleccionada %} checked{% endif %} aria-label="{% if selector_variant == 'project' %}Elegir{% else %}Seleccionar{% endif %} {{ item.optimizacion.etiqueta }}"></td>
+          <td data-label="Optimización y fecha"><div class="budget-plan-identity"><label for="opt_{{ item.optimizacion.pk }}" class="budget-plan-name" title="{{ item.optimizacion.etiqueta }}">{{ item.optimizacion.etiqueta }}</label><small class="budget-plan-date">{% if item.optimizacion.fecha %}{{ item.optimizacion.fecha|date:'d/m/Y H:i' }}{% else %}—{% endif %}</small></div></td>
+          <td data-label="Tablero"><span class="budget-mobile-label">Tablero</span>{% if item.optimizacion.ancho_tablero != None and item.optimizacion.alto_tablero != None %}{{ item.optimizacion.ancho_tablero|floatformat:1 }} × {{ item.optimizacion.alto_tablero|floatformat:1 }} cm{% else %}<span class="budget-plan-missing">—</span>{% endif %}</td>
+          <td data-label="Aprovechamiento"><span class="budget-mobile-label">Aprovechamiento</span>{% if item.optimizacion.aprovechamiento_total != None %}{{ item.optimizacion.aprovechamiento_total|floatformat:1 }} %{% else %}<span class="budget-plan-missing">—</span>{% endif %}</td>
+          <td data-label="Tableros"><span class="budget-mobile-label">Tableros</span>{% if item.optimizacion.num_tableros != None %}{{ item.optimizacion.num_tableros }}{% else %}<span class="budget-plan-missing">—</span>{% endif %}</td>
+          <td data-label="Consultar"><a href="{% url 'cutless:resultado' item.optimizacion.pk %}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" data-action="secondary" data-icon="eye" aria-label="Ver resultado de {{ item.optimizacion.etiqueta }}">Ver resultado</a></td>
+        </tr>
+      {% empty %}
+        <tr class="budget-plan-empty-row"><td colspan="6"><div class="budget-plan-empty-state">{% if selector_empty_message %}{{ selector_empty_message }}{% else %}No tienes optimizaciones disponibles.{% endif %}</div></td></tr>
+      {% endfor %}
+        <tr id="budget-no-matches" hidden><td colspan="6"><div class="budget-plan-empty-state">{% if selector_variant == 'project' %}Sin resultados. Quita la búsqueda para volver a ver las optimizaciones disponibles.{% else %}No hay coincidencias. Prueba otro nombre o identificador; tu selección se conserva.{% endif %}</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <noscript><style>.budget-plan-table [data-budget-plan][hidden] { display:table-row!important; }</style><p>Activa JavaScript para usar búsqueda y páginas. Puedes seleccionar y guardar en la lista completa.</p></noscript>
+  {% if form.optimizaciones.errors %}<div class="text-danger mt-2" role="alert">{{ form.optimizaciones.errors }}</div>{% endif %}
+</section>

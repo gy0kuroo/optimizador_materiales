@@ -57,6 +57,51 @@ class RevisionHerramientasTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('fecha_fin', form.errors)
 
+    def test_project_create_reuses_plan_selector_and_saves_all_selected_ids(self):
+        opts = [Optimizacion.objects.create(usuario=self.user, nombre=f'Plan {n}',
+                ancho_tablero=122, alto_tablero=244, piezas=f'Pieza {n},20,30,1', num_tableros=1)
+                for n in range(10)]
+        url = reverse('cutless:crear_proyecto')
+        response = self.client.get(url)
+        self.assertContains(response, 'budget-plan-selector--project')
+        self.assertContains(response, 'Optimizaciones (Opcional)')
+
+        seleccionadas = {opts[0].pk, opts[9].pk}
+        response = self.client.post(url, {
+            'nombre': 'Proyecto paginado',
+            'estado': 'planificacion',
+            'optimizaciones': list(seleccionadas),
+        })
+
+        self.assertEqual(response.status_code, 302)
+        proyecto = Proyecto.objects.get(nombre='Proyecto paginado')
+        self.assertEqual(set(proyecto.optimizacion_set.values_list('pk', flat=True)), seleccionadas)
+
+    def test_project_edit_reuses_selector_and_marks_existing_plans(self):
+        proyecto = Proyecto.objects.create(usuario=self.user, nombre='Proyecto existente')
+        opt = Optimizacion.objects.create(usuario=self.user, proyecto=proyecto,
+            nombre='Plan asociado', ancho_tablero=122, alto_tablero=244,
+            piezas='Puerta,20,30,1', num_tableros=1)
+
+        response = self.client.get(reverse('cutless:editar_proyecto', args=[proyecto.pk]))
+
+        self.assertContains(response, 'budget-plan-selector--project')
+        self.assertTrue(next(item for item in response.context['optimizaciones_info']
+                             if item['optimizacion'].pk == opt.pk)['seleccionada'])
+
+        posteriores = [Optimizacion.objects.create(usuario=self.user, nombre=f'Plan disponible {n}',
+            ancho_tablero=122, alto_tablero=244, piezas=f'Pieza {n},20,30,1', num_tableros=1)
+            for n in range(8)]
+        seleccionadas = {opt.pk, posteriores[-1].pk}
+        response = self.client.post(reverse('cutless:editar_proyecto', args=[proyecto.pk]), {
+            'nombre': proyecto.nombre,
+            'estado': 'planificacion',
+            'optimizaciones': list(seleccionadas),
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(set(proyecto.optimizacion_set.values_list('pk', flat=True)), seleccionadas)
+
     def test_project_does_not_move_another_projects_plan(self):
         original = Proyecto.objects.create(usuario=self.user, nombre='Original')
         target = Proyecto.objects.create(usuario=self.user, nombre='Destino')

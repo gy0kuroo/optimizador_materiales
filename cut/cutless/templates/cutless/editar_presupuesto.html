@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=buttons-1">
-<link rel="stylesheet" href="{% static 'cutless/css/budget-selection.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'cutless/css/budget-selection.css' %}?v=3">
 {% endblock %}
 
 {% block content %}
@@ -72,7 +72,7 @@
 
         <div class="row mb-3">
           <div class="col-md-12">
-            {% include 'cutless/includes/budget-plan-selector.html' %}
+            {% include 'cutless/includes/optimization-plan-selector.html' %}
           </div>
         </div>
 
@@ -156,5 +156,5 @@
 
 
 {% block extra_js %}
-<script src="{% static 'cutless/js/budget-selection.js' %}?v=1" defer></script>
+<script src="{% static 'cutless/js/budget-selection.js' %}?v=2" defer></script>
 {% endblock %}

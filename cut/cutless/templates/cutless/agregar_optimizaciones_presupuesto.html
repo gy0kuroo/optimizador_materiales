@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'cutless/css/management-refinement.css' %}?v=buttons-1">
-<link rel="stylesheet" href="{% static 'cutless/css/budget-selection.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'cutless/css/budget-selection.css' %}?v=3">
 {% endblock %}
 
 {% block content %}
@@ -48,7 +48,7 @@
           <a href="{% url 'cutless:detalle_presupuesto' presupuesto.pk %}" class="btn btn-secondary" data-action="secondary" data-icon="chevron-left">Cancelar</a>
           <button type="submit" class="btn btn-success" data-action="success" data-icon="check">Agregar al presupuesto</button>
         </div>
-        {% include 'cutless/includes/budget-plan-selector.html' %}
+        {% include 'cutless/includes/optimization-plan-selector.html' %}
       </form>
     </div>
   </div>
@@ -60,5 +60,5 @@
 
 {% endblock %}
 {% block extra_js %}
-<script src="{% static 'cutless/js/budget-selection.js' %}?v=1" defer></script>
+<script src="{% static 'cutless/js/budget-selection.js' %}?v=2" defer></script>
 {% endblock %}
