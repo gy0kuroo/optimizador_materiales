@@ -7,17 +7,33 @@
     <script>
       // Resolver el tema antes de los estilos y del primer pintado del contenido.
       (() => {
-        let choice = "{% if user.is_authenticated %}{{ user.perfil.tema_preferido|default:'auto'|escapejs }}{% endif %}";
-        if (!choice) {
-          try { choice = localStorage.getItem('theme') || 'auto'; }
-          catch (_) { choice = 'auto'; }
+        const profileTheme = "{% if user.is_authenticated %}{{ user.perfil.tema_preferido|default:'auto'|escapejs }}{% endif %}";
+        const root = document.documentElement;
+        const user = "{% if user.is_authenticated %}{{ user.pk|escapejs }}{% endif %}";
+        function applyInitialTheme(restored = false) {
+          let choice = profileTheme;
+          if (choice && user) {
+            const key = `cutless:tema:${user}`;
+            root.setAttribute('data-theme-session-key', key);
+            root.setAttribute('data-theme-profile', choice);
+            try {
+              const [profile, manual] = (sessionStorage.getItem(key) || '').split(':');
+              if (profile === choice && (manual === 'light' || manual === 'dark')) choice = manual;
+              else if (profile && !restored) sessionStorage.removeItem(key);
+            } catch (_) { /* El perfil sigue disponible. */ }
+          } else if (!choice) {
+            try { choice = localStorage.getItem('theme') || 'auto'; }
+            catch (_) { choice = 'auto'; }
+          }
+          if (!['light', 'dark', 'auto'].includes(choice)) choice = 'auto';
+          const resolved = choice === 'auto'
+            ? (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            : choice;
+          root.setAttribute('data-theme', resolved);
+          root.setAttribute('data-theme-choice', choice);
         }
-        if (!['light', 'dark', 'auto'].includes(choice)) choice = 'auto';
-        const resolved = choice === 'auto'
-          ? (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-          : choice;
-        document.documentElement.setAttribute('data-theme', resolved);
-        document.documentElement.setAttribute('data-theme-choice', choice);
+        applyInitialTheme();
+        if (user) window.addEventListener('pageshow', event => { if (event.persisted) applyInitialTheme(true); });
         let fontSize = "{% if user.is_authenticated %}{{ user.perfil.tamanio_fuente|default:'normal'|escapejs }}{% endif %}";
         if (!fontSize) {
           try { fontSize = localStorage.getItem('fontSize') || 'normal'; }
@@ -56,18 +72,18 @@
     <link rel="stylesheet" href="{% static 'cutless/css/help-redesign.css' %}?v=tutorial-3">
     <link rel="stylesheet" href="{% static 'cutless/css/action-semantics.css' %}?v=management-actions-2">
     <link rel="stylesheet" href="{% static 'cutless/css/magnifier.css' %}?v=6">
-    <link rel="stylesheet" href="{% static 'cutless/css/reforma-visual.css' %}?v=cleanup-2">
+    <link rel="stylesheet" href="{% static 'cutless/css/reforma-visual.css' %}?v=ux08">
     <link rel="stylesheet" href="{% static 'cutless/css/buttons.css' %}?v=review-3">
     <link rel="stylesheet" href="{% static 'cutless/css/loading.css' %}?v=ux04-loader-1">
     <link rel="stylesheet" href="{% static 'cutless/css/board-loading.css' %}?v=1">
     <link rel="stylesheet" href="{% static 'cutless/css/optimization-loading.css' %}?v=6">
     <link rel="stylesheet" href="{% static 'cutless/css/theme-colors.css' %}?v=4">
     <link rel="stylesheet" href="{% static 'cutless/css/mobile-navigation.css' %}?v=1">
-    <link rel="stylesheet" href="{% static 'cutless/css/sidebar-navigation.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'cutless/css/sidebar-navigation.css' %}?v=ux08">
     <link rel="stylesheet" href="{% static 'cutless/css/mobile-tables.css' %}">
     <link rel="stylesheet" href="{% static 'cutless/css/alertas.css' %}">
 </head>
-<body data-button-icons="{% static 'cutless/button-icons.svg' %}?v=2" data-app-shell="{{ user.is_authenticated|yesno:'true,false' }}" class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-perfil-theme="{% if user.perfil.tema_preferido != 'auto' %}{{ user.perfil.tema_preferido }}{% else %}auto{% endif %}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
+<body data-button-icons="{% static 'cutless/button-icons.svg' %}?v=ux08" data-app-shell="{{ user.is_authenticated|yesno:'true,false' }}" class="{% block body_class %}{% endblock %}" {% if user.is_authenticated and user.perfil %}data-session-timeout="{{ user.perfil.get_timeout_segundos_str }}" data-font-size="{{ user.perfil.tamanio_fuente }}" data-perfil-unidad="{{ user.perfil.unidad_medida_predeterminada }}" data-perfil-rotacion="{{ user.perfil.rotacion_automatica_predeterminada|yesno:'1,0' }}"{% endif %}>
     {% categorias_disponibles user as modulos_alertas %}
     {% block navigation %}
     {% navigation_state as nav_state %}
@@ -79,6 +95,10 @@
                     {% include 'cutless/includes/brand.html' %}
                 </a>
                 <div class="app-header-actions">
+                    {% if user.is_authenticated %}
+                    <button type="button" id="theme-toggle" class="btn btn-secondary btn-icon app-theme-toggle"
+                            data-action="secondary" aria-label="Cambiar tema" hidden></button>
+                    {% endif %}
                     {% if modulos_alertas %}{% include 'cutless/includes/campana_alertas.html' %}{% endif %}
                     <button class="navbar-toggler navbar-toggler-custom btn btn-secondary btn-icon" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                             aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir navegación" data-action="secondary" data-icon="menu">
@@ -185,7 +205,7 @@
     </script>
 
     <!-- JavaScript Personalizado -->
-    <script src="{% static 'cutless/js/theme.js' %}?v=3"></script>
+    <script src="{% static 'cutless/js/theme.js' %}?v=ux08"></script>
     <script src="{% static 'cutless/js/optimization-loading.js' %}?v=3"></script>
     <script src="{% static 'cutless/js/confirmaciones.js' %}?v=descargas-1"></script>
     <script src="{% static 'cutless/js/descargas.js' %}?v=ux05-ios-1" defer></script>

@@ -68,6 +68,14 @@ class PresentacionInicialTests(TestCase):
         self.user.perfil.save()
         self.assertContains(self.client.get(reverse('cutless:index')), '<html lang="es" data-theme="light">')
 
+    def test_encabezado_autenticado_con_tema_y_cuenta_antes_de_ayuda(self):
+        response = self.client.get(reverse('cutless:index'))
+        self.assertContains(response, 'id="theme-toggle"', count=1)
+        self.assertContains(response, reverse('usuarios:perfil'))
+        self.assertLess(response.content.index(b'id="nav-cuenta"'), response.content.index(b'id="btn-tutorial"'))
+        self.client.logout()
+        self.assertNotContains(self.client.get(reverse('usuarios:login')), 'id="theme-toggle"')
+
     def test_ejemplos_iniciales_coinciden_con_la_unidad_sin_cambio_de_puntuacion(self):
         from cutless.forms import TableroForm
         for unit, ancho, alto in [('cm', '122', '244'), ('m', '1,22', '2,44'), ('mm', '1220', '2440')]:

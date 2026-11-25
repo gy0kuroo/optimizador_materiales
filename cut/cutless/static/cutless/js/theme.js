@@ -1,191 +1,94 @@
-// Gestión del modo oscuro/claro
-(function() {
-    // Función para detectar el tema del sistema
-    function getSystemTheme() {
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark';
-        }
-        return 'light';
+// Gestiona los cambios de tema y preferencias después del primer pintado.
+(() => {
+    const root = document.documentElement;
+    const systemTheme = window.matchMedia?.('(prefers-color-scheme: dark)');
+    const sessionKey = root.getAttribute('data-theme-session-key');
+    const toggle = document.getElementById('theme-toggle');
+
+    function readLocal(key) {
+        try { return localStorage.getItem(key); } catch (_) { return null; }
     }
 
-    // Función para resolver tema con 'auto'
-    function resolveTheme(theme) {
-        if (!theme || theme === 'auto') {
-            return getSystemTheme();
-        }
-        return theme === 'dark' ? 'dark' : 'light';
+    function writeLocal(key, value) {
+        try { localStorage.setItem(key, value); } catch (_) { /* Preferencia en esta página. */ }
     }
 
-    // Función para establecer el tema (almacena la elección original)
-    function setTheme(theme) {
-        const resolved = resolveTheme(theme);
-        document.documentElement.setAttribute('data-theme', resolved);
-        document.documentElement.setAttribute('data-theme-choice', theme);
-
-        localStorage.setItem('theme', theme);
-        localStorage.setItem('tema_preferido', theme);
-
-        const toggleBtn = document.getElementById('theme-toggle');
-        if (toggleBtn) {
-            toggleBtn.textContent = resolved === 'dark' ? '☀️' : '🌙';
-        }
-
-        const themeSelect = document.querySelector('select[name="tema_preferido"]');
-        if (themeSelect) {
-            themeSelect.value = theme;
-        }
+    function updateToggle() {
+        if (!toggle) return;
+        const dark = root.getAttribute('data-theme') === 'dark';
+        toggle.setAttribute('data-icon', dark ? 'sun' : 'moon');
+        const label = dark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+        toggle.setAttribute('aria-label', label);
+        toggle.title = label;
     }
 
-    // En una cuenta autenticada prevalece su perfil, incluso si eligió Automático.
-    function getTheme() {
-        const profileTheme = document.body.getAttribute('data-perfil-theme');
-        if (profileTheme) return profileTheme;
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            return savedTheme;
-        }
-
-        return 'auto';
+    function setTheme(choice) {
+        const resolved = choice === 'auto' ? (systemTheme?.matches ? 'dark' : 'light') : choice;
+        root.setAttribute('data-theme', resolved);
+        root.setAttribute('data-theme-choice', choice);
+        updateToggle();
     }
 
-    // Función genérica para preferencias
-    function setPreference(key, value) {
-        if (!key) {
-            return;
+    function toggleTheme() {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        if (sessionKey) {
+            try {
+                sessionStorage.setItem(sessionKey, `${root.getAttribute('data-theme-profile')}:${next}`);
+            } catch (_) { /* El cambio sigue funcionando en esta página. */ }
         }
-
-        localStorage.setItem(key, value);
-        document.body.setAttribute('data-pref-' + key, value);
-
-        if (key === 'tema_preferido') {
-            setTheme(value);
-        } else if (key === 'tamanio_fuente') {
-            setFontSize(value);
-        }
+        setTheme(next);
     }
 
-    function getPreference(key, fallback) {
-        const saved = localStorage.getItem(key);
-        if (saved != null && saved !== '') {
-            return saved;
-        }
-
-        const body = document.body;
-        if (body) {
-            const dataValue = body.getAttribute('data-perfil-' + key);
-            if (dataValue != null && dataValue !== '') {
-                return dataValue;
-            }
-        }
-
-        return fallback;
+    function clearTemporaryTheme() {
+        if (!sessionKey) return;
+        try { sessionStorage.removeItem(sessionKey); } catch (_) { /* Sin almacenamiento. */ }
     }
 
-    // Función para establecer tamaño de fuentes
     function setFontSize(fontSize) {
         const sizes = {small: '15px', normal: '16px', large: '18px', xlarge: '20px'};
         fontSize = Object.hasOwn(sizes, fontSize) ? fontSize : 'normal';
-        document.documentElement.style.fontSize = sizes[fontSize];
+        root.style.fontSize = sizes[fontSize];
         document.body.setAttribute('data-font-size', fontSize);
-        localStorage.setItem('fontSize', fontSize);
+        writeLocal('fontSize', fontSize);
     }
 
-    // Obtener tamaño de fuente
-    function getFontSize() {
-        const profileSize = document.body.getAttribute('data-font-size');
-        if (profileSize) return profileSize;
-        const savedFontSize = localStorage.getItem('fontSize');
-        if (savedFontSize) {
-            return savedFontSize;
-        }
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = root.getAttribute('data-theme-profile') || root.getAttribute('data-theme-choice');
+        writeLocal('theme', savedTheme);
+        // El formulario conserva el valor del perfil o del POST cuando Django devuelve errores.
+        const themeSelect = document.querySelector('[data-pref-key="tema_preferido"]');
+        themeSelect?.addEventListener('change', () => {
+            clearTemporaryTheme();
+            setTheme(themeSelect.value);
+        });
+        themeSelect?.form?.addEventListener('formdata', clearTemporaryTheme);
 
-        const body = document.body;
-        const perfilFontSize = body.getAttribute('data-font-size');
-
-        if (perfilFontSize) {
-            return perfilFontSize;
-        }
-
-        return 'normal';
-    }
-
-    // Inicializar preferencias al cargar la página
-    document.addEventListener('DOMContentLoaded', function() {
-        // Tema y fontSize (comportamiento base existente)
-        const theme = getTheme();
-        setTheme(theme);
-
-        const fontSize = getFontSize();
+        const fontSize = document.body.getAttribute('data-font-size') || readLocal('fontSize') || 'normal';
         setFontSize(fontSize);
+        const fontSizeSelect = document.querySelector('select[name="tamanio_fuente"]');
 
-        // Botón toggle de tema
-        const toggleBtn = document.getElementById('theme-toggle');
-        if (toggleBtn) {
-            const currentResolvedTheme = resolveTheme(theme);
-            toggleBtn.textContent = currentResolvedTheme === 'dark' ? '☀️' : '🌙';
-            toggleBtn.addEventListener('click', function() {
-                const nextTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-                setPreference('tema_preferido', nextTheme);
-            });
-        }
-
-        // Sincronizar cambios automáticos para controles en la página marcados con data-pref-key
-        const prefInputs = document.querySelectorAll('[data-pref-key]');
-
-        prefInputs.forEach(function(input) {
-            const prefKey = input.getAttribute('data-pref-key');
-            const prefsValue = getPreference(prefKey, '');
-
-            if (prefsValue !== null && prefsValue !== '') {
-                input.value = prefsValue;
-            }
-
-            input.addEventListener('change', function() {
-                setPreference(prefKey, this.value);
-
-                // Si el cambio es de tema o font, aplicar al inmediato
-                if (prefKey === 'tema_preferido') {
-                    setTheme(this.value);
-                } else if (prefKey === 'tamanio_fuente') {
-                    setFontSize(this.value);
-                }
+        document.querySelectorAll('[data-pref-key]').forEach(input => {
+            const key = input.getAttribute('data-pref-key');
+            if (key === 'tema_preferido') return;
+            const saved = readLocal(key) || document.body.getAttribute(`data-perfil-${key}`);
+            if (saved) input.value = saved;
+            input.addEventListener('change', () => {
+                writeLocal(key, input.value);
+                document.body.setAttribute(`data-pref-${key}`, input.value);
+                if (key === 'tamanio_fuente') setFontSize(input.value);
             });
         });
+        if (fontSizeSelect && !fontSizeSelect.value) fontSizeSelect.value = fontSize;
 
-        // Asegurar que el select de tema también refleje la preferencia
-        const themeSelect = document.querySelector('select[name="tema_preferido"]');
-        if (themeSelect) {
-            themeSelect.value = getPreference('tema_preferido', theme);
-        }
-
-        // Asegurar que el select de tamaño de fuente refleje la preferencia
-        const fontSizeSelect = document.querySelector('select[name="tamanio_fuente"]');
-        if (fontSizeSelect) {
-            fontSizeSelect.value = getPreference('tamanio_fuente', fontSize);
+        if (toggle) {
+            updateToggle();
+            toggle.addEventListener('click', toggleTheme);
+            toggle.hidden = false;
         }
     });
 
-    // Función para alternar tema
-    window.toggleTheme = function() {
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        setTheme(newTheme);
-        
-        const toggleBtn = document.getElementById('theme-toggle');
-        if (toggleBtn) {
-            toggleBtn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-        }
-    };
-
-    // Escuchar cambios en la preferencia del sistema
-    if (window.matchMedia) {
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-            if (getTheme() === 'auto') {
-                setTheme('auto');
-            }
-        });
-    }
+    systemTheme?.addEventListener('change', () => {
+        if (root.getAttribute('data-theme-choice') === 'auto') setTheme('auto');
+    });
+    window.addEventListener('pageshow', updateToggle);
 })();
-
-
-

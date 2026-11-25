@@ -1,16 +1,5 @@
 {% load static %}
 <script src="{% static 'cutless/js/tutorial.js' %}?v=2"></script>
-    <script>
-        // Aplicar tema del perfil si está configurado
-        (function() {
-            const perfilTheme = document.body.getAttribute('data-perfil-theme');
-            if (perfilTheme && perfilTheme !== 'auto') {
-                document.documentElement.setAttribute('data-theme', perfilTheme);
-                localStorage.setItem('theme', perfilTheme);
-            }
-        })();
-    </script>
-
     <!-- Sistema de Tutorial/Ayuda -->
     <script>
         // Detectar si es usuario nuevo
@@ -51,7 +40,7 @@
                 {
                     title: '¡Bienvenido a CutLess!',
                     intro: 'Este tutorial te guiará paso a paso para usar el sistema de optimización de cortes.',
-                    element: document.querySelector('h1, h2')
+                    element: document.querySelector('.app-main h1, .app-main h2')
                 },
                 {
                     title: 'Dimensiones del Tablero',
